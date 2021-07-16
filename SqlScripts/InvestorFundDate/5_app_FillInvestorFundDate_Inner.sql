@@ -1,7 +1,7 @@
 -- расчёт и сохранение по инвестору и пифу
 USE [CacheDB]
 GO
-CREATE PROCEDURE [dbo].[app_FillInvestorFundDate_Inner]
+CREATE OR ALTER PROCEDURE [dbo].[app_FillInvestorFundDate_Inner]
 (
 	@Investor int = 16541, @FundId Int = 17578
 )
@@ -56,6 +56,37 @@ AS BEGIN
 	-- не пересчитывать пиф, если закрыт более полугода назад
 	If @CacheMAXDate <  DateAdd(DAY, -10, @LastEndDate) and @SumAmount = 0.000 return;
 
+
+
+	-- Обновление имени Пифа
+	WITH CTE
+	AS
+	(
+		SELECT *
+		FROM [dbo].[FundNames]
+		WHERE [Id] = @FundId
+	)
+	MERGE
+		CTE as t
+	USING
+	(
+		select
+			[ID], [NAME]
+		FROM [BAL_DATA_STD].[dbo].[OD_VALUES] AS D
+		WHERE [ID] = @FundId
+	) AS s
+	on t.Id = s.Id
+	when not matched
+		then insert (
+			[ID], [NAME]
+		)
+		values (
+			s.[ID],
+			s.[NAME]
+		)
+	when matched
+	then update set
+		[NAME] = s.[NAME];
 
 
 
