@@ -1,5 +1,5 @@
 
--- сквозной просмотр
+-- СЃРєРІРѕР·РЅРѕР№ РїСЂРѕСЃРјРѕС‚СЂ
 SELECT *
 FROM
 (
@@ -27,7 +27,7 @@ order by RowNumber
 
 
 
--- сравнение запросов по инвестору целиком
+-- СЃСЂР°РІРЅРµРЅРёРµ Р·Р°РїСЂРѕСЃРѕРІ РїРѕ РёРЅРІРµСЃС‚РѕСЂСѓ С†РµР»РёРєРѕРј
 SELECT TOP (1) AssetsValue
 FROM
 (
@@ -67,7 +67,7 @@ order by [Date] desc
 
 
 
--- сравнение запросов по инвестору и договору
+-- СЃСЂР°РІРЅРµРЅРёРµ Р·Р°РїСЂРѕСЃРѕРІ РїРѕ РёРЅРІРµСЃС‚РѕСЂСѓ Рё РґРѕРіРѕРІРѕСЂСѓ
 SELECT TOP (1) AssetsValue
 FROM
 (
@@ -99,3 +99,5 @@ from [CacheDB].[dbo].[InvestorContractDateAssets] nolock
 WHERE Investor_Id = 16541 and Contract_Id = 32266170
 and [Date] <= '2021-06-22'
 order by [Date] desc
+
+-- Р§С‚Рѕ-С‚Рѕ
