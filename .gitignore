@@ -1,0 +1,11 @@
+ReportsProcatt/obj/Container
+ReportsProcatt/obj/Debug
+ReportsProcatt/obj/Release
+ReportsProcatt/bin/Release
+ReportsProcatt/bin/Debug
+ReportsProcatt/.vs
+.vs
+ReportsProcatt/.vs/ReportsProcatt
+ReportsProcatt/.vs/ReportsProcatt/config
+ReportsProcatt/.vs/ReportsProcatt/DesignTimeBuild
+*.suo

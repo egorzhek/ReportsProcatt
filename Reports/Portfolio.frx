@@ -1,0 +1,186 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Report ScriptLanguage="CSharp" TextQuality="Regular" ReportInfo.Name="Simple List" ReportInfo.Author="Fast Reports Inc" ReportInfo.Description="Демонстрация простого листа" ReportInfo.Created="01/17/2008 03:05:57" ReportInfo.Modified="07/13/2021 11:16:55" ReportInfo.CreatorVersion="2021.3.0.0">
+  <ScriptText>using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Windows.Forms;
+using System.Drawing;
+using System.Data;
+using FastReport;
+using FastReport.Data;
+using FastReport.Dialog;
+using FastReport.Barcode;
+using FastReport.Table;
+using FastReport.Utils;
+
+namespace FastReport
+{
+  public class ReportScript
+  {
+    private void Text31_BeforePrint(object sender, EventArgs e)
+    {
+      string colorhex = &quot;#&quot; + Report.GetColumnValue(&quot;Seconddata.Color&quot;);
+      Color col = ColorTranslator.FromHtml(colorhex);
+      Text31.TextColor = col;
+    }
+  }
+}
+</ScriptText>
+  <Dictionary>
+    <TableDataSource Name="Employees" ReferenceName="Employees" DataType="System.Int32" Enabled="true">
+      <Column Name="ActiveName" DataType="System.String"/>
+      <Column Name="ActiveValue" DataType="System.Currency"/>
+    </TableDataSource>
+    <TableDataSource Name="Seconddata" ReferenceName="Seconddata" DataType="System.Int32" Enabled="true">
+      <Column Name="ActiveName" DataType="System.String"/>
+      <Column Name="ActiveValue" DataType="System.Decimal"/>
+      <Column Name="Color" DataType="System.String"/>
+    </TableDataSource>
+    <TableDataSource Name="Thirddata" ReferenceName="Thirddata" DataType="System.Int32" Enabled="true">
+      <Column Name="InvestorName" DataType="System.String"/>
+      <Column Name="BeginActive" DataType="System.String"/>
+      <Column Name="BeginActiveVal" DataType="System.Currency"/>
+      <Column Name="ProfitPeriod" DataType="System.String"/>
+      <Column Name="ProfitPeriodVal" DataType="System.Currency"/>
+      <Column Name="ProfitProcent" DataType="System.Decimal"/>
+    </TableDataSource>
+  </Dictionary>
+  <ReportPage Name="Page1" Watermark.Font="Arial, 60pt">
+    <ReportTitleBand Name="ReportTitle1" Width="718.2" Height="179.55" CanGrow="true">
+      <TextObject Name="Text11" Left="9.45" Top="9.45" Width="529.2" Height="28.35" Text="[Thirddata.InvestorName]" VertAlign="Center" Font="Tahoma, 13pt, style=Bold"/>
+      <TextObject Name="Text18" Left="9.45" Top="47.25" Width="217.35" Height="28.35" Text="[Thirddata.BeginActive]" VertAlign="Center" Font="Tahoma, 11pt, style=Bold"/>
+      <TextObject Name="Text19" Left="9.45" Top="75.6" Width="170.1" Height="28.35" Text="[Thirddata.BeginActiveVal]" Format="Currency" Format.UseLocale="false" Format.DecimalDigits="2" Format.DecimalSeparator="," Format.GroupSeparator=" " Format.CurrencySymbol="₽" Format.PositivePattern="3" Format.NegativePattern="8" VertAlign="Center" Font="Tahoma, 10pt"/>
+      <TextObject Name="Text20" Left="264.6" Top="47.25" Width="415.8" Height="28.35" Text="[Thirddata.ProfitPeriod]" VertAlign="Center" Font="Tahoma, 11pt, style=Bold"/>
+      <TextObject Name="Text21" Left="264.6" Top="75.6" Width="132.3" Height="28.35" Text="[Thirddata.ProfitPeriodVal]" Format="Currency" Format.UseLocale="false" Format.DecimalDigits="2" Format.DecimalSeparator="," Format.GroupSeparator=" " Format.CurrencySymbol="₽" Format.PositivePattern="3" Format.NegativePattern="8" VertAlign="Center" Font="Tahoma, 10pt"/>
+      <TextObject Name="Text22" Left="434.7" Top="75.6" Width="103.95" Height="28.35" Text="[Thirddata.ProfitProcent] %" VertAlign="Center" Font="Tahoma, 10pt, style=Bold" TextFill.Color="Green"/>
+    </ReportTitleBand>
+    <DataBand Name="Data1" Top="183.55" Width="718.2" Height="415.8" CanGrow="true">
+      <SubreportObject Name="Subreport1" Left="9.45" Top="47.25" Width="359.1" Height="37.8" ReportPage="Page2" PrintOnParent="true"/>
+      <TextObject Name="Text14" Left="9.45" Top="9.45" Width="359.1" Height="28.35" Text="Активы за период 29.07.2020 - 03.06.2021" VertAlign="Center" Font="Tahoma, 10pt, style=Bold"/>
+    </DataBand>
+    <DataBand Name="Data2" Top="603.35" Width="718.2" Height="387.45" CanGrow="true">
+      <SubreportObject Name="Subreport2" Left="9.45" Top="47.25" Width="321.3" Height="37.8" ReportPage="Page3" PrintOnParent="true"/>
+      <TextObject Name="Text15" Left="9.45" Top="18.9" Width="321.3" Height="28.35" Text="Аналитика Все портфели на 03.06.2021" VertAlign="Center" Font="Tahoma, 10pt, style=Bold"/>
+      <PictureObject Name="Picture1" Left="340.2" Top="9.45" Width="359.1" Height="292.95"/>
+    </DataBand>
+    <DataBand Name="Data5" Top="994.8" Width="718.2" Height="255.15" CanGrow="true">
+      <TextObject Name="Text23" Width="718.2" Height="28.35" Fill.Color="LightGray" Text="Все активы" VertAlign="Center" Font="Arial, 12pt, style=Bold"/>
+      <ContainerObject Name="Container1" Top="28.35" Width="718.2" Height="75.6" Border.Lines="All">
+        <TextObject Name="Text24" Left="37.8" Top="28.35" Width="66.15" Height="18.9" Text="ПИФы" VertAlign="Center" Font="Arial, 12pt, style=Bold"/>
+        <TextObject Name="Text25" Left="189" Top="9.45" Width="170.1" Height="18.9" Text="Активы на 03.06.2021" Font="Arial, 10pt"/>
+        <TextObject Name="Text26" Left="387.45" Top="9.45" Width="321.3" Height="18.9" Text="Результат за 29.07.2020 - 03.06.2021" Font="Arial, 10pt"/>
+        <TextObject Name="Text27" Left="189" Top="37.8" Width="170.1" Height="18.9" Text="3000" Font="Arial, 10pt"/>
+        <TextObject Name="Text28" Left="387.45" Top="37.8" Width="151.2" Height="18.9" Text="244.48" Font="Arial, 10pt"/>
+        <TextObject Name="Text29" Left="548.1" Top="37.8" Width="103.95" Height="18.9" Text="( 16.04 %)" Font="Arial, 10pt"/>
+      </ContainerObject>
+      <SubreportObject Name="Subreport3" Left="189" Top="105.84" Width="529.2" Height="37.8" ReportPage="Page4" PrintOnParent="true"/>
+    </DataBand>
+    <DataBand Name="Data7" Top="1253.95" Width="718.2" Height="236.25" CanGrow="true">
+      <ContainerObject Name="Container1" Top="9.45" Width="718.2" Height="75.6" Border.Lines="All">
+        <TextObject Name="Text24" Left="9.45" Top="9.45" Width="170.1" Height="56.7" Text="Доверительное управление" HorzAlign="Center" VertAlign="Center" Font="Arial, 12pt, style=Bold"/>
+        <TextObject Name="Text25" Left="189" Top="9.45" Width="170.1" Height="18.9" Text="Активы на 03.06.2021" Font="Arial, 10pt"/>
+        <TextObject Name="Text26" Left="387.45" Top="9.45" Width="321.3" Height="18.9" Text="Результат за 29.07.2020 - 03.06.2021" Font="Arial, 10pt"/>
+        <TextObject Name="Text27" Left="189" Top="37.8" Width="170.1" Height="18.9" Text="3000" Font="Arial, 10pt"/>
+        <TextObject Name="Text28" Left="387.45" Top="37.8" Width="151.2" Height="18.9" Text="244.48" Font="Arial, 10pt"/>
+        <TextObject Name="Text29" Left="548.1" Top="37.8" Width="103.95" Height="18.9" Text="( 16.04 %)" Font="Arial, 10pt"/>
+      </ContainerObject>
+      <SubreportObject Name="Subreport4" Left="189" Top="86.94" Width="529.2" Height="37.8" ReportPage="Page5" PrintOnParent="true"/>
+    </DataBand>
+    <DataBand Name="Data8" Top="1564.35" Width="718.2" Height="37.8" CanGrow="true" DataSource="Seconddata">
+      <TableObject Name="Table103" Width="716.31" Height="37.8">
+        <TableColumn Name="Column108" Width="83.16"/>
+        <TableColumn Name="Column109" Width="86.94"/>
+        <TableColumn Name="Column117" Width="94.5"/>
+        <TableColumn Name="Column121" Width="75.6"/>
+        <TableColumn Name="Column125" Width="75.6"/>
+        <TableColumn Name="Column129" Width="94.5"/>
+        <TableColumn Name="Column133" Width="86.94"/>
+        <TableColumn Name="Column137" Width="119.07"/>
+        <TableRow Name="Row6" Height="37.8">
+          <TableCell Name="Cell110" Border.Lines="All" Text="[Seconddata.ActiveName]" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt"/>
+          <TableCell Name="Cell111" Border.Lines="All" Text="[Seconddata.ActiveName]" VertAlign="Center" Font="Arial, 10pt"/>
+          <TableCell Name="Cell118" Border.Lines="All" Text="[Seconddata.ActiveName]" VertAlign="Center" Font="Arial, 10pt"/>
+          <TableCell Name="Cell122" Border.Lines="All" Text="[Seconddata.ActiveName]" VertAlign="Center" Font="Arial, 10pt"/>
+          <TableCell Name="Cell126" Border.Lines="All" Text="[Seconddata.ActiveName]" VertAlign="Center" Font="Arial, 10pt"/>
+          <TableCell Name="Cell130" Border.Lines="All" Text="[Seconddata.ActiveName]" VertAlign="Center" Font="Arial, 10pt"/>
+          <TableCell Name="Cell134" Border.Lines="All" Text="[Seconddata.ActiveName]" VertAlign="Center" Font="Arial, 10pt"/>
+          <TableCell Name="Cell138" Border.Lines="All" Text="[Seconddata.ActiveName]" VertAlign="Center" Font="Arial, 10pt"/>
+        </TableRow>
+      </TableObject>
+      <DataHeaderBand Name="DataHeader100" Top="1494.2" Width="718.2" Height="66.15">
+        <TableObject Name="Table110" Top="28.35" Width="716.31" Height="37.8">
+          <TableColumn Name="Column111" Width="83.16"/>
+          <TableColumn Name="Column112" Width="86.94"/>
+          <TableColumn Name="Column115" Width="94.5"/>
+          <TableColumn Name="Column119" Width="75.6"/>
+          <TableColumn Name="Column123" Width="75.6"/>
+          <TableColumn Name="Column127" Width="94.5"/>
+          <TableColumn Name="Column131" Width="86.94"/>
+          <TableColumn Name="Column135" Width="119.07"/>
+          <TableRow Name="Row5" Height="37.8">
+            <TableCell Name="Cell113" Border.Lines="All" Fill.Color="WhiteSmoke" Text="Дата" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+            <TableCell Name="Cell114" Border.Lines="All" Fill.Color="WhiteSmoke" Text="Тип операции" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+            <TableCell Name="Cell116" Border.Lines="All" Fill.Color="WhiteSmoke" Text="Инструмент" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+            <TableCell Name="Cell120" Border.Lines="All" Fill.Color="WhiteSmoke" Text="Цена" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+            <TableCell Name="Cell124" Border.Lines="All" Fill.Color="WhiteSmoke" Text="Кол-во" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+            <TableCell Name="Cell128" Border.Lines="All" Fill.Color="WhiteSmoke" Text="Сумма сделки" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+            <TableCell Name="Cell132" Border.Lines="All" Fill.Color="WhiteSmoke" Text="Комиссия" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+            <TableCell Name="Cell136" Border.Lines="All" Fill.Color="WhiteSmoke" Text="Статус операции" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+          </TableRow>
+        </TableObject>
+        <TextObject Name="Text30" Width="718.2" Height="28.35" Fill.Color="LightGray" Text="История операций" VertAlign="Center" Font="Arial, 12pt, style=Bold"/>
+      </DataHeaderBand>
+    </DataBand>
+    <PageFooterBand Name="PageFooter1" Top="1606.15" Width="718.2" Height="28.35" Fill.Color="WhiteSmoke" CanGrow="true">
+      <TextObject Name="Text10" Left="614.25" Width="94.5" Height="28.35" Text="Страница [Page]" HorzAlign="Right" VertAlign="Center" Font="Tahoma, 8pt"/>
+    </PageFooterBand>
+  </ReportPage>
+  <ReportPage Name="Page2" Watermark.Font="Arial, 60pt">
+    <DataBand Name="Data3" Width="718.2" Height="18.9" DataSource="Employees">
+      <TextObject Name="Text12" Left="47.25" Width="170.1" Height="18.9" Text="[Employees.ActiveName]" Font="Arial, 10pt"/>
+      <TextObject Name="Text13" Left="255.15" Width="170.1" Height="18.9" Text="[Employees.ActiveValue]" Format="Currency" Format.UseLocale="false" Format.DecimalDigits="2" Format.DecimalSeparator="," Format.GroupSeparator=" " Format.CurrencySymbol="₽" Format.PositivePattern="3" Format.NegativePattern="8" Font="Arial, 10pt"/>
+    </DataBand>
+  </ReportPage>
+  <ReportPage Name="Page3" Watermark.Font="Arial, 60pt">
+    <DataBand Name="Data4" Width="718.2" Height="22.68" DataSource="Seconddata">
+      <TextObject Name="Text16" Left="47.25" Width="170.1" Height="18.9" Text="[Seconddata.ActiveName]" VertAlign="Bottom" Font="Arial, 10pt"/>
+      <TextObject Name="Text17" Left="255.15" Width="170.1" Height="18.9" Text="[Seconddata.ActiveValue]%" Format="Number" Format.UseLocale="true" Format.DecimalDigits="1" VertAlign="Bottom" Font="Arial, 10pt"/>
+      <TextObject Name="Text31" Left="22.68" Width="18.9" Height="18.9" BeforePrintEvent="Text31_BeforePrint" Text="●" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt"/>
+    </DataBand>
+  </ReportPage>
+  <ReportPage Name="Page4" PaperWidth="170" Watermark.Font="Arial, 60pt">
+    <DataBand Name="Data6" Width="567" Height="34.02" DataSource="Seconddata">
+      <TableObject Name="Table1" Width="529.44" Height="34.02">
+        <TableColumn Name="Column1" Width="199.45"/>
+        <TableColumn Name="Column2" Width="329.99"/>
+        <TableRow Name="Row1" Height="34.02">
+          <TableCell Name="Cell1" Border.Lines="All" Text="[Seconddata.ActiveName]" Padding="5, 1, 2, 1" VertAlign="Center" Font="Arial, 10pt"/>
+          <TableCell Name="Cell2" Border.Lines="Right, Top, Bottom" Text="[Seconddata.ActiveValue]%" Padding="5, 1, 2, 1" VertAlign="Center" Font="Arial, 10pt">
+            <Highlight>
+              <Condition Expression="[Seconddata.ActiveValue] &gt; 0" TextFill.Color="ForestGreen" Font="Arial, 10pt"/>
+              <Condition Expression="[Seconddata.ActiveValue] &lt; 0" Font="Arial, 10pt"/>
+            </Highlight>
+          </TableCell>
+        </TableRow>
+      </TableObject>
+    </DataBand>
+  </ReportPage>
+  <ReportPage Name="Page5" PaperWidth="170" Watermark.Font="Arial, 60pt">
+    <DataBand Name="Data8" Width="567" Height="34.02" DataSource="Seconddata">
+      <TableObject Name="Table2" Width="529.44" Height="34.02">
+        <TableColumn Name="Column21" Width="199.45"/>
+        <TableColumn Name="Column22" Width="329.99"/>
+        <TableRow Name="Row21" Height="34.02">
+          <TableCell Name="Cell21" Border.Lines="All" Text="[Seconddata.ActiveName]" Padding="5, 1, 2, 1" VertAlign="Center" Font="Arial, 10pt"/>
+          <TableCell Name="Cell22" Border.Lines="Right, Top, Bottom" Text="[Seconddata.ActiveValue]%" Padding="5, 1, 2, 1" VertAlign="Center" Font="Arial, 10pt">
+            <Highlight>
+              <Condition Expression="[Seconddata.ActiveValue] &gt; 0" TextFill.Color="ForestGreen" Font="Arial, 10pt"/>
+              <Condition Expression="[Seconddata.ActiveValue] &lt; 0" Font="Arial, 10pt"/>
+            </Highlight>
+          </TableCell>
+        </TableRow>
+      </TableObject>
+    </DataBand>
+  </ReportPage>
+</Report>

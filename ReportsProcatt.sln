@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31424.327
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReportsProcatt", "ReportsProcatt\ReportsProcatt.csproj", "{EA785F20-D6B8-465C-8D89-C4CF73E205F5}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EA785F20-D6B8-465C-8D89-C4CF73E205F5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EA785F20-D6B8-465C-8D89-C4CF73E205F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EA785F20-D6B8-465C-8D89-C4CF73E205F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EA785F20-D6B8-465C-8D89-C4CF73E205F5}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {741F6C18-EA47-4FB4-A8A3-1C03A68BE66D}
+	EndGlobalSection
+EndGlobal
