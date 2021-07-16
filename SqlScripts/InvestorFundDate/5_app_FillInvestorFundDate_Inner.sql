@@ -70,10 +70,11 @@ AS BEGIN
 		CTE as t
 	USING
 	(
-		select
-			[ID], [NAME]
-		FROM [BAL_DATA_STD].[dbo].[OD_VALUES] AS D
-		WHERE [ID] = @FundId
+		SELECT TOP 1
+			[ID] = S.[id], [NAME] = F.[NAME]
+		FROM [BAL_DATA_STD].[dbo].OD_SHARES AS S WITH(NOLOCK)
+		INNER JOIN [BAL_DATA_STD].[dbo].OD_FACES AS F WITH(NOLOCK) ON S.ISSUER = F.SELF_ID AND F.LAST_FLAG =1 AND F.E_DATE >= @CurrentDate
+		WHERE S.id = @FundId
 	) AS s
 	on t.Id = s.Id
 	when not matched
