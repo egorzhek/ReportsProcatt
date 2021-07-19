@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Report ScriptLanguage="CSharp" TextQuality="Regular" ReportInfo.Name="Simple List" ReportInfo.Author="Fast Reports Inc" ReportInfo.Description="Демонстрация простого листа" ReportInfo.Created="01/17/2008 03:05:57" ReportInfo.Modified="07/16/2021 18:17:07" ReportInfo.CreatorVersion="2021.3.0.0">
+<Report ScriptLanguage="CSharp" DoublePass="true" TextQuality="Regular" ReportInfo.Name="Simple List" ReportInfo.Author="Fast Reports Inc" ReportInfo.Description="Демонстрация простого листа" ReportInfo.Created="01/17/2008 03:05:57" ReportInfo.Modified="07/19/2021 13:34:26" ReportInfo.CreatorVersion="2021.3.0.0">
   <Dictionary>
     <TableDataSource Name="First" ReferenceName="First" DataType="System.Int32" Enabled="true">
       <Column Name="ActiveDateToName" DataType="System.String"/>
@@ -13,34 +13,41 @@
       <Column Name="ActiveValue" DataType="System.Decimal"/>
       <Column Name="Color" DataType="System.String"/>
     </TableDataSource>
+    <TableDataSource Name="Third" ReferenceName="Third" DataType="System.Int32" Enabled="true">
+      <Column Name="W_Date" DataType="System.String"/>
+      <Column Name="Order_NUM" DataType="System.String"/>
+    </TableDataSource>
   </Dictionary>
   <ReportPage Name="Page1" Watermark.Font="Arial, 60pt">
-    <ReportTitleBand Name="ReportTitle1" Width="718.2" Height="66.15" CanGrow="true">
-      <TextObject Name="Text14" Left="9.45" Width="198.45" Height="28.35" Text="[First.ActiveDateToName]" VertAlign="Center" Font="Tahoma, 10pt, style=Bold"/>
-      <TextObject Name="Text31" Left="9.45" Top="28.35" Width="198.45" Height="28.35" Text="[First.ActiveDateToValue]" VertAlign="Center" Font="Tahoma, 12pt, style=Bold"/>
-      <TextObject Name="Text32" Left="217.35" Width="340.2" Height="28.35" Text="[First.ProfitName]" VertAlign="Center" Font="Tahoma, 10pt, style=Bold"/>
-      <TextObject Name="Text33" Left="217.35" Top="28.35" Width="189" Height="28.35" Text="[First.ProfitValue]" VertAlign="Center" Font="Tahoma, 12pt, style=Bold"/>
-      <TextObject Name="Text34" Left="434.7" Top="28.35" Width="122.85" Height="28.35" Text="[First.ProfitProcentValue] %" VertAlign="Center" Font="Tahoma, 12pt, style=Bold">
+    <ReportTitleBand Name="ReportTitle1" Width="718.2" Height="132.3" CanGrow="true">
+      <TextObject Name="Text14" Left="9.45" Top="75.6" Width="198.45" Height="28.35" Text="[First.ActiveDateToName]" VertAlign="Center" Font="Tahoma, 10pt, style=Bold"/>
+      <TextObject Name="Text31" Left="9.45" Top="103.95" Width="198.45" Height="28.35" Text="[First.ActiveDateToValue]" VertAlign="Center" Font="Tahoma, 12pt, style=Bold"/>
+      <TextObject Name="Text32" Left="217.35" Top="75.6" Width="340.2" Height="28.35" Text="[First.ProfitName]" VertAlign="Center" Font="Tahoma, 10pt, style=Bold"/>
+      <TextObject Name="Text33" Left="217.35" Top="103.95" Width="189" Height="28.35" Text="[First.ProfitValue]" VertAlign="Center" Font="Tahoma, 12pt, style=Bold"/>
+      <TextObject Name="Text34" Left="434.7" Top="103.95" Width="122.85" Height="28.35" Text="[First.ProfitProcentValue] %" VertAlign="Center" Font="Tahoma, 12pt, style=Bold">
         <Highlight>
           <Condition Expression="[First.ProfitProcentValue] &gt; 0" TextFill.Color="ForestGreen" Font="Arial, 10pt"/>
           <Condition Expression="[First.ProfitProcentValue] &lt; 0" Font="Arial, 10pt"/>
         </Highlight>
       </TextObject>
+      <PictureObject Name="Picture2" Left="567" Width="151.2" Height="47.25" ImageFormat="Gif" Image="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"/>
+      <TextObject Name="Text43" Left="9.45" Top="37.8" Width="548.1" Height="28.35" Text="[First.FundName]" VertAlign="Center" Font="Tahoma, 14pt, style=Bold"/>
+      <TextObject Name="Text44" Left="9.45" Width="548.1" Height="28.35" Text="[First.InvestorName]" VertAlign="Center" Font="Tahoma, 14pt, style=Bold"/>
     </ReportTitleBand>
-    <DataBand Name="Data8" Top="70.15" Width="718.2" Height="321.3" CanGrow="true">
+    <DataBand Name="Data8" Top="136.3" Width="718.2" Height="321.3" CanGrow="true">
       <SubreportObject Name="Subreport1" Top="94.5" Width="349.65" Height="37.8" ReportPage="Page2" PrintOnParent="true"/>
       <PictureObject Name="Picture1" Left="359.1" Width="349.65" Height="311.85"/>
     </DataBand>
-    <DataBand Name="Data9" Top="395.45" Width="718.2" Height="150.75" CanGrow="true">
+    <DataBand Name="Data9" Top="461.6" Width="718.2" Height="150.75" CanGrow="true">
       <TextObject Name="Text36" Left="18.9" Top="47.25" Width="189" Height="15.12" Text="Номер лицевого счёта" HorzAlign="Center" VertAlign="Center" Font="Tahoma, 8pt, style=Bold" TextFill.Color="DarkGray"/>
       <TextObject Name="Text37" Left="226.8" Top="47.25" Width="189" Height="15.12" Text="Количество паёв" HorzAlign="Center" VertAlign="Center" Font="Tahoma, 8pt, style=Bold" TextFill.Color="DarkGray"/>
       <TextObject Name="Text38" Left="18.9" Top="94.5" Width="189" Height="15.12" Text="Дата открытия счёта" HorzAlign="Center" VertAlign="Center" Font="Tahoma, 8pt, style=Bold" TextFill.Color="DarkGray"/>
-      <TextObject Name="Text39" Left="18.9" Top="66.15" Width="189" Height="15.12" Text="1111" HorzAlign="Center" VertAlign="Center" Font="Tahoma, 8pt, style=Bold"/>
-      <TextObject Name="Text40" Left="226.8" Top="66.15" Width="189" Height="15.12" Text="1111" HorzAlign="Center" VertAlign="Center" Font="Tahoma, 8pt, style=Bold"/>
-      <TextObject Name="Text41" Left="18.9" Top="113.4" Width="189" Height="15.12" Text="1111" HorzAlign="Center" VertAlign="Center" Font="Tahoma, 8pt, style=Bold"/>
+      <TextObject Name="Text39" Left="18.9" Top="66.15" Width="189" Height="15.12" Text="[First.LS_NUM]" HorzAlign="Center" VertAlign="Center" Font="Tahoma, 8pt, style=Bold"/>
+      <TextObject Name="Text40" Left="226.8" Top="66.15" Width="189" Height="15.12" Text="[First.EndSumAmount]" HorzAlign="Center" VertAlign="Center" Font="Tahoma, 8pt, style=Bold"/>
+      <TextObject Name="Text41" Left="18.9" Top="113.4" Width="189" Height="15.12" Text="[First.OpenDate]" HorzAlign="Center" VertAlign="Center" Font="Tahoma, 8pt, style=Bold"/>
       <TextObject Name="Text42" Width="718.2" Height="26.46" Fill.Color="LightGray" Text="Детали" VertAlign="Center" Font="Arial, 12pt, style=Bold"/>
     </DataBand>
-    <DataBand Name="Data10" Top="620.35" Width="718.2" Height="37.8" CanGrow="true" DataSource="Second">
+    <DataBand Name="Data10" Top="686.5" Width="718.2" Height="37.8" CanGrow="true" DataSource="Third">
       <TableObject Name="Table103" Width="716.31" Height="37.8">
         <TableColumn Name="Column108" Width="83.16"/>
         <TableColumn Name="Column109" Width="86.94"/>
@@ -51,17 +58,17 @@
         <TableColumn Name="Column133" Width="86.94"/>
         <TableColumn Name="Column137" Width="119.07"/>
         <TableRow Name="Row6" Height="37.8">
-          <TableCell Name="Cell110" Border.Lines="All" Text="[Second.ActiveName]" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt"/>
-          <TableCell Name="Cell111" Border.Lines="All" Text="[Second.ActiveName]" VertAlign="Center" Font="Arial, 10pt"/>
-          <TableCell Name="Cell118" Border.Lines="All" Text="[Second.ActiveName]" VertAlign="Center" Font="Arial, 10pt"/>
-          <TableCell Name="Cell122" Border.Lines="All" Text="[Second.ActiveName]" VertAlign="Center" Font="Arial, 10pt"/>
-          <TableCell Name="Cell126" Border.Lines="All" Text="[Second.ActiveName]" VertAlign="Center" Font="Arial, 10pt"/>
-          <TableCell Name="Cell130" Border.Lines="All" Text="[Second.ActiveName]" VertAlign="Center" Font="Arial, 10pt"/>
-          <TableCell Name="Cell134" Border.Lines="All" Text="[Second.ActiveName]" VertAlign="Center" Font="Arial, 10pt"/>
-          <TableCell Name="Cell138" Border.Lines="All" Text="[Second.ActiveName]" VertAlign="Center" Font="Arial, 10pt"/>
+          <TableCell Name="Cell110" Border.Lines="All" Text="[Third.W_Date]" HorzAlign="Center" VertAlign="Center" Font="Arial, 8pt"/>
+          <TableCell Name="Cell111" Border.Lines="All" Text="[Third.OperName]" VertAlign="Center" Font="Arial, 8pt"/>
+          <TableCell Name="Cell118" Border.Lines="All" VertAlign="Center" Font="Arial, 8pt"/>
+          <TableCell Name="Cell122" Border.Lines="All" Text="[Third.RATE_RUR]" HorzAlign="Center" VertAlign="Center" Font="Arial, 8pt"/>
+          <TableCell Name="Cell126" Border.Lines="All" Text="[Third.Amount]" HorzAlign="Center" VertAlign="Center" Font="Arial, 8pt"/>
+          <TableCell Name="Cell130" Border.Lines="All" Text="[Third.VALUE_RUR]" HorzAlign="Center" VertAlign="Center" Font="Arial, 8pt"/>
+          <TableCell Name="Cell134" Border.Lines="All" Text="[Third.Fee_RUR]" HorzAlign="Center" VertAlign="Center" Font="Arial, 8pt"/>
+          <TableCell Name="Cell138" Border.Lines="All" VertAlign="Center" Font="Arial, 8pt"/>
         </TableRow>
       </TableObject>
-      <DataHeaderBand Name="DataHeader100" Top="550.2" Width="718.2" Height="66.15">
+      <DataHeaderBand Name="DataHeader100" Top="616.35" Width="718.2" Height="66.15">
         <TableObject Name="Table110" Top="28.35" Width="716.31" Height="37.8">
           <TableColumn Name="Column111" Width="83.16"/>
           <TableColumn Name="Column112" Width="86.94"/>
@@ -85,18 +92,8 @@
         <TextObject Name="Text30" Width="718.2" Height="28.35" Fill.Color="LightGray" Text="История операций" VertAlign="Center" Font="Arial, 12pt, style=Bold"/>
       </DataHeaderBand>
     </DataBand>
-    <DataBand Name="Data8" Top="662.15" Width="718.2" Height="321.3" CanGrow="true">
-      <SubreportObject Name="Subreport2" Top="113.4" Width="349.65" Height="37.8" ReportPage="Page3" PrintOnParent="true"/>
-      <PictureObject Name="Picture2" Left="368.55" Top="56.7" Width="292.95" Height="245.7"/>
-      <TextObject Name="Text43" Top="18.9" Width="718.2" Height="28.35" Fill.Color="LightGray" Text="Активы" VertAlign="Center" Font="Arial, 12pt, style=Bold"/>
-    </DataBand>
-    <DataBand Name="Data9" Top="987.45" Width="718.2" Height="321.3" CanGrow="true">
-      <SubreportObject Name="Subreport3" Top="113.4" Width="349.65" Height="37.8" ReportPage="Page4" PrintOnParent="true"/>
-      <PictureObject Name="Picture3" Left="368.55" Top="56.7" Width="292.95" Height="245.7"/>
-      <TextObject Name="Text303" Top="18.9" Width="718.2" Height="28.35" Fill.Color="LightGray" Text="Иструменты" VertAlign="Center" Font="Arial, 12pt, style=Bold"/>
-    </DataBand>
-    <PageFooterBand Name="PageFooter1" Top="1312.75" Width="718.2" Height="28.35" Fill.Color="WhiteSmoke" CanGrow="true">
-      <TextObject Name="Text10" Left="614.25" Width="94.5" Height="28.35" Text="Страница [Page]" HorzAlign="Right" VertAlign="Center" Font="Tahoma, 8pt"/>
+    <PageFooterBand Name="PageFooter1" Top="728.3" Width="718.2" Height="28.35" Fill.Color="WhiteSmoke" CanGrow="true">
+      <TextObject Name="Text10" Left="481.95" Width="226.8" Height="28.35" Text="Страница [Page] из [TotalPages]" HorzAlign="Right" VertAlign="Center" Font="Tahoma, 8pt"/>
     </PageFooterBand>
   </ReportPage>
   <ReportPage Name="Page2" Watermark.Font="Arial, 60pt">
@@ -107,30 +104,6 @@
         <TableRow Name="Row6" Height="37.8">
           <TableCell Name="Cell110" Border.Lines="All" Text="[Second.ActiveName]" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt"/>
           <TableCell Name="Cell111" Border.Lines="All" Text="[Second.ActiveValue]" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt"/>
-        </TableRow>
-      </TableObject>
-    </DataBand>
-  </ReportPage>
-  <ReportPage Name="Page3" Watermark.Font="Arial, 60pt">
-    <DataBand Name="Data4" Width="718.2" Height="37.8" DataSource="Second">
-      <TableObject Name="Table203" Width="340.2" Height="37.8">
-        <TableColumn Name="Column208" Width="168.21"/>
-        <TableColumn Name="Column209" Width="171.99"/>
-        <TableRow Name="Row67" Height="37.8">
-          <TableCell Name="Cell210" Border.Lines="All" Text="[Second.ActiveName]" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt"/>
-          <TableCell Name="Cell211" Border.Lines="All" Text="[Second.ActiveValue]" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt"/>
-        </TableRow>
-      </TableObject>
-    </DataBand>
-  </ReportPage>
-  <ReportPage Name="Page4" Watermark.Font="Arial, 60pt">
-    <DataBand Name="Data5" Width="718.2" Height="37.8" DataSource="Second">
-      <TableObject Name="Table303" Width="340.2" Height="37.8">
-        <TableColumn Name="Column308" Width="168.21"/>
-        <TableColumn Name="Column309" Width="171.99"/>
-        <TableRow Name="Row168" Height="37.8">
-          <TableCell Name="Cell310" Border.Lines="All" Text="[Second.ActiveName]" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt"/>
-          <TableCell Name="Cell311" Border.Lines="All" Text="[Second.ActiveValue]" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt"/>
         </TableRow>
       </TableObject>
     </DataBand>

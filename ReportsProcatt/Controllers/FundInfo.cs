@@ -34,6 +34,7 @@ namespace ReportsProcatt.Controllers
 
         [HttpGet]
         public IActionResult Get(
+            [FromQuery] string InvestorId,
             [FromQuery] string FundId,
             [FromQuery] string DateFrom,
             [FromQuery] string DateTo
@@ -55,17 +56,42 @@ namespace ReportsProcatt.Controllers
 
 
                     connection.Open();
-
+                    /*
                     string queryString1 =
-"declare @ActionOn Nvarchar(50) = 'Активы на '; " +
-"select [ActiveDateToName] = @ActionOn + @DateTo, [ActiveDateToValue] = 85000.45," +
- "[ProfitName] = 'Доход за период " + DateFrom + " - " + DateTo + "'," +
- "[ProfitValue] = 85000.45, ProfitProcentValue = 23.34";
+"declare @ToDateStr Nvarchar(50) = @DateToSharp; " +
+"declare @FromDateStr Nvarchar(50) = @DateFromSharp; " +
+"select [ActiveDateToName] = 'Активы на ' + @ToDateStr, [ActiveDateToValue] = 85000.45," +
+ "[ProfitName] = 'Доход за период ' + @FromDateStr + ' - ' + @ToDateStr," +
+ "[ProfitValue] = 85000.45, [ProfitProcentValue] = 23.34";
+                    */
+                    string queryString1 = System.IO.File.ReadAllText(Path.Combine(ReportPath, "FundInfo.sql"));
 
 
                     SqlCommand command1 = new SqlCommand(queryString1, connection);
                     command1.CommandType = CommandType.Text;
-                    command1.Parameters.AddWithValue("@DateTo", DateTo);
+
+                    if (DateTo == null)
+                    {
+                        command1.Parameters.AddWithValue("@DateToSharp", DBNull.Value);
+                    }
+                    else
+                    {
+                        command1.Parameters.AddWithValue("@DateToSharp", DateTo);
+                    }
+
+                    if (DateFrom == null)
+                    {
+                        command1.Parameters.AddWithValue("@DateFromSharp", DBNull.Value);
+                    }
+                    else
+                    {
+                        command1.Parameters.AddWithValue("@DateFromSharp", DateFrom);
+                    }
+
+
+                    command1.Parameters.AddWithValue("@InvestorIdSharp", InvestorId);
+                    command1.Parameters.AddWithValue("@FundIdSharp", FundId);
+
                     //command1.Parameters.Add("@DateTo", SqlDbType.NVarChar);
                     //command1.Parameters["@DateTo"].Value = DateTo;
 
@@ -77,42 +103,15 @@ namespace ReportsProcatt.Controllers
                             sda.Fill(vDataSet);
 
                             vDataSet.Tables[0].TableName = "First";
-
                             report.RegisterData(vDataSet.Tables[0], "First");
+
+                            vDataSet.Tables[1].TableName = "Second";
+                            report.RegisterData(vDataSet.Tables[1], "Second");
+
+                            vDataSet.Tables[2].TableName = "Third";
+                            report.RegisterData(vDataSet.Tables[2], "Third");
                         }
                     }
-
-
-
-
-                    string queryString2 = @"
-select
-    [ActiveName] = 'Активы на " + DateFrom + @"', [ActiveValue] = 85000.45
-union all
-select 'Пополнения', 85000.45
-union all
-select 'Выводы', 2120.11";
-
-
-                    SqlCommand command2 = new SqlCommand(queryString2, connection);
-                    //command.Parameters.AddWithValue("@pricePoint", paramValue);
-
-                    using (SqlDataAdapter sda = new SqlDataAdapter(command2))
-                    {
-                        using (DataSet vDataSet = new DataSet())
-                        {
-                            // это датасет из БД
-                            sda.Fill(vDataSet);
-
-                            vDataSet.Tables[0].TableName = "Second";
-
-                            report.RegisterData(vDataSet.Tables[0], "Second");
-                        }
-                    }
-
-
-
-
                 }
 
                 report.Prepare();
