@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Report ScriptLanguage="CSharp" DoublePass="true" TextQuality="Regular" ReportInfo.Name="Simple List" ReportInfo.Author="Fast Reports Inc" ReportInfo.Description="Демонстрация простого листа" ReportInfo.Created="01/17/2008 03:05:57" ReportInfo.Modified="07/19/2021 16:41:53" ReportInfo.CreatorVersion="2021.3.0.0">
+<Report ScriptLanguage="CSharp" DoublePass="true" TextQuality="Regular" ReportInfo.Name="Simple List" ReportInfo.Author="Fast Reports Inc" ReportInfo.Description="Демонстрация простого листа" ReportInfo.Created="01/17/2008 03:05:57" ReportInfo.Modified="07/19/2021 17:01:35" ReportInfo.CreatorVersion="2021.3.0.0">
   <Dictionary>
     <TableDataSource Name="First" ReferenceName="First" DataType="System.Int32" Enabled="true">
       <Column Name="ActiveDateToName" DataType="System.String"/>
@@ -21,9 +21,9 @@
   <ReportPage Name="Page1" Watermark.Font="Arial, 60pt">
     <ReportTitleBand Name="ReportTitle1" Width="718.2" Height="132.3" CanGrow="true">
       <TextObject Name="Text14" Left="9.45" Top="75.6" Width="198.45" Height="28.35" Text="[First.ActiveDateToName]" VertAlign="Center" Font="Tahoma, 10pt, style=Bold"/>
-      <TextObject Name="Text31" Left="9.45" Top="103.95" Width="198.45" Height="28.35" Text="[First.ActiveDateToValue]" VertAlign="Center" Font="Tahoma, 12pt, style=Bold"/>
+      <TextObject Name="Text31" Left="9.45" Top="103.95" Width="198.45" Height="28.35" Text="[First.ActiveDateToValue] ₽" VertAlign="Center" Font="Tahoma, 12pt, style=Bold"/>
       <TextObject Name="Text32" Left="217.35" Top="75.6" Width="340.2" Height="28.35" Text="[First.ProfitName]" VertAlign="Center" Font="Tahoma, 10pt, style=Bold"/>
-      <TextObject Name="Text33" Left="217.35" Top="103.95" Width="189" Height="28.35" Text="[First.ProfitValue]" VertAlign="Center" Font="Tahoma, 12pt, style=Bold"/>
+      <TextObject Name="Text33" Left="217.35" Top="103.95" Width="189" Height="28.35" Text="[First.ProfitValue] ₽" VertAlign="Center" Font="Tahoma, 12pt, style=Bold"/>
       <TextObject Name="Text34" Left="434.7" Top="103.95" Width="122.85" Height="28.35" Text="[First.ProfitProcentValue] %" VertAlign="Center" Font="Tahoma, 12pt, style=Bold">
         <Highlight>
           <Condition Expression="[First.ProfitProcentValue] &gt; 0" TextFill.Color="ForestGreen" Font="Arial, 10pt"/>
@@ -61,10 +61,10 @@
           <TableCell Name="Cell110" Border.Lines="All" Text="[Third.W_Date]" HorzAlign="Center" VertAlign="Center" Font="Arial, 8pt"/>
           <TableCell Name="Cell111" Border.Lines="All" Text="[Third.OperName]" VertAlign="Center" Font="Arial, 8pt"/>
           <TableCell Name="Cell118" Border.Lines="All" VertAlign="Center" Font="Arial, 8pt"/>
-          <TableCell Name="Cell122" Border.Lines="All" Text="[Third.RATE_RUR]" HorzAlign="Center" VertAlign="Center" Font="Arial, 8pt"/>
-          <TableCell Name="Cell126" Border.Lines="All" Text="[Third.Amount]" HorzAlign="Center" VertAlign="Center" Font="Arial, 8pt"/>
-          <TableCell Name="Cell130" Border.Lines="All" Text="[Third.VALUE_RUR]" HorzAlign="Center" VertAlign="Center" Font="Arial, 8pt"/>
-          <TableCell Name="Cell134" Border.Lines="All" Text="[Third.Fee_RUR]" HorzAlign="Center" VertAlign="Center" Font="Arial, 8pt"/>
+          <TableCell Name="Cell122" Border.Lines="All" Text="[Third.RATE_RUR] ₽" HorzAlign="Center" VertAlign="Center" Font="Arial, 7pt"/>
+          <TableCell Name="Cell126" Border.Lines="All" Text="[Third.Amount]" HorzAlign="Center" VertAlign="Center" Font="Arial, 7pt"/>
+          <TableCell Name="Cell130" Border.Lines="All" Text="[Third.VALUE_RUR] ₽" HorzAlign="Center" VertAlign="Center" Font="Arial, 7pt"/>
+          <TableCell Name="Cell134" Border.Lines="All" Text="[Third.Fee_RUR] ₽" HorzAlign="Center" VertAlign="Center" Font="Arial, 7pt"/>
           <TableCell Name="Cell138" Border.Lines="All" VertAlign="Center" Font="Arial, 8pt"/>
         </TableRow>
       </TableObject>
@@ -103,7 +103,7 @@
         <TableColumn Name="Column109" Width="122.85"/>
         <TableRow Name="Row6" Height="26.46">
           <TableCell Name="Cell110" Border.Lines="All" Text="[Second.ActiveName]" HorzAlign="Center" VertAlign="Center" Font="Arial, 8pt"/>
-          <TableCell Name="Cell111" Border.Lines="All" Text="[Second.ActiveValue]" HorzAlign="Center" VertAlign="Center" Font="Arial, 8pt"/>
+          <TableCell Name="Cell111" Border.Lines="All" Text="[Second.ActiveValue] ₽" HorzAlign="Center" VertAlign="Center" Font="Arial, 8pt"/>
         </TableRow>
       </TableObject>
     </DataBand>
