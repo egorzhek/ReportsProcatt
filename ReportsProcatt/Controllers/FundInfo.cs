@@ -18,6 +18,7 @@ using Microsoft.AspNetCore.Hosting;
 using System.Xml;
 
 using Newtonsoft.Json.Linq;
+using System.Globalization;
 
 
 namespace ReportsProcatt.Controllers
@@ -50,20 +51,15 @@ namespace ReportsProcatt.Controllers
                 Report report = new Report();
                 report.Load(Path.Combine(ReportPath, "FundInfo.frx"));
 
+                System.Drawing.Bitmap image1;
+
                 using (SqlConnection connection =
                 new SqlConnection(connectionString))
                 {
 
 
                     connection.Open();
-                    /*
-                    string queryString1 =
-"declare @ToDateStr Nvarchar(50) = @DateToSharp; " +
-"declare @FromDateStr Nvarchar(50) = @DateFromSharp; " +
-"select [ActiveDateToName] = 'Активы на ' + @ToDateStr, [ActiveDateToValue] = 85000.45," +
- "[ProfitName] = 'Доход за период ' + @FromDateStr + ' - ' + @ToDateStr," +
- "[ProfitValue] = 85000.45, [ProfitProcentValue] = 23.34";
-                    */
+
                     string queryString1 = System.IO.File.ReadAllText(Path.Combine(ReportPath, "FundInfo.sql"));
 
 
@@ -110,9 +106,42 @@ namespace ReportsProcatt.Controllers
 
                             vDataSet.Tables[2].TableName = "Third";
                             report.RegisterData(vDataSet.Tables[2], "Third");
+
+
+
+
+
+                            // формирование графика
+                            int pointCount = vDataSet.Tables[3].Rows.Count;
+
+                            double[] values = new double[pointCount];
+                            DateTime[] dates = new DateTime[pointCount];
+
+                            for (var ii = 0; ii < values.Length; ii++)
+                            {
+                                values[ii] = Convert.ToDouble(vDataSet.Tables[3].Rows[ii]["RATE"]);
+                                dates[ii] = Convert.ToDateTime(vDataSet.Tables[3].Rows[ii]["Date"]);
+                            }
+
+                            double[] xs = dates.Select(x => x.ToOADate()).ToArray();
+
+                            var plt = new ScottPlot.Plot(600, 400);
+                            plt.AddScatter(xs, values);
+
+                            plt.YAxis.TickLabelNotation(offset: false, multiplier: false);
+                            plt.YAxis.TickLabelFormat(".", false);
+                            
+                            plt.XAxis.DateTimeFormat(true);
+                            plt.XAxis.SetCulture(CultureInfo.GetCultureInfo("ru-RU"));
+
+                            plt.Title("График стоимости");
+                            image1 = plt.Render();
                         }
                     }
                 }
+
+                var graph = report.FindObject("Picture1") as PictureObject;
+                graph.Image = image1;
 
                 report.Prepare();
 

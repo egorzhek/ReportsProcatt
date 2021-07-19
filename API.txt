@@ -1,4 +1,8 @@
 Первое API. Инвестор, Дата От, Дата До
 http://localhost:49183/Portfolio?Investor_Id=2149652&DateFrom=25.01.2020&DateTo=28.06.2021
 
-Хотя данные мы ещё не подтянули.
+Отчёт по ПИФу
+https://localhost:49183/FundInfo?InvestorId=16541&FundId=17578
+https://localhost:49183/FundInfo?InvestorId=16541&FundId=17578&DateFrom=01.01.2016
+https://localhost:49183/FundInfo?InvestorId=16541&FundId=17578&DateTo=20.12.2018
+https://localhost:49183/FundInfo?InvestorId=16541&FundId=17578&DateFrom=19.09.2003&DateTo=20.12.2018

@@ -237,6 +237,11 @@ set @AllMinus_RUR = @AmountDayMinus_RUR;
     ) AS B
     LEFT JOIN [CacheDB].[dbo].[WalkTypes] AS C WITH(NOLOCK) ON B.WALK = C.WALK AND B.[TYPE] = C.[TYPE]
     ORDER BY B.[W_Date];
+
+    select
+        [Date], [RATE]
+    from #ResInv
+    order by [Date];
     
 BEGIN TRY
     DROP TABLE #ResInv

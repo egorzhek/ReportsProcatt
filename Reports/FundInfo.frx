@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Report ScriptLanguage="CSharp" DoublePass="true" TextQuality="Regular" ReportInfo.Name="Simple List" ReportInfo.Author="Fast Reports Inc" ReportInfo.Description="Демонстрация простого листа" ReportInfo.Created="01/17/2008 03:05:57" ReportInfo.Modified="07/19/2021 13:34:26" ReportInfo.CreatorVersion="2021.3.0.0">
+<Report ScriptLanguage="CSharp" DoublePass="true" TextQuality="Regular" ReportInfo.Name="Simple List" ReportInfo.Author="Fast Reports Inc" ReportInfo.Description="Демонстрация простого листа" ReportInfo.Created="01/17/2008 03:05:57" ReportInfo.Modified="07/19/2021 16:41:53" ReportInfo.CreatorVersion="2021.3.0.0">
   <Dictionary>
     <TableDataSource Name="First" ReferenceName="First" DataType="System.Int32" Enabled="true">
       <Column Name="ActiveDateToName" DataType="System.String"/>
@@ -35,8 +35,8 @@
       <TextObject Name="Text44" Left="9.45" Width="548.1" Height="28.35" Text="[First.InvestorName]" VertAlign="Center" Font="Tahoma, 14pt, style=Bold"/>
     </ReportTitleBand>
     <DataBand Name="Data8" Top="136.3" Width="718.2" Height="321.3" CanGrow="true">
-      <SubreportObject Name="Subreport1" Top="94.5" Width="349.65" Height="37.8" ReportPage="Page2" PrintOnParent="true"/>
-      <PictureObject Name="Picture1" Left="359.1" Width="349.65" Height="311.85"/>
+      <SubreportObject Name="Subreport1" Top="94.5" Width="264.6" Height="37.8" ReportPage="Page2" PrintOnParent="true"/>
+      <PictureObject Name="Picture1" Left="264.6" Width="444.15" Height="311.85"/>
     </DataBand>
     <DataBand Name="Data9" Top="461.6" Width="718.2" Height="150.75" CanGrow="true">
       <TextObject Name="Text36" Left="18.9" Top="47.25" Width="189" Height="15.12" Text="Номер лицевого счёта" HorzAlign="Center" VertAlign="Center" Font="Tahoma, 8pt, style=Bold" TextFill.Color="DarkGray"/>
@@ -97,13 +97,13 @@
     </PageFooterBand>
   </ReportPage>
   <ReportPage Name="Page2" Watermark.Font="Arial, 60pt">
-    <DataBand Name="Data3" Width="718.2" Height="37.8" DataSource="Second">
-      <TableObject Name="Table103" Width="340.2" Height="37.8">
-        <TableColumn Name="Column108" Width="168.21"/>
-        <TableColumn Name="Column109" Width="171.99"/>
-        <TableRow Name="Row6" Height="37.8">
-          <TableCell Name="Cell110" Border.Lines="All" Text="[Second.ActiveName]" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt"/>
-          <TableCell Name="Cell111" Border.Lines="All" Text="[Second.ActiveValue]" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt"/>
+    <DataBand Name="Data3" Width="718.2" Height="26.46" DataSource="Second">
+      <TableObject Name="Table103" Width="264.6" Height="26.46">
+        <TableColumn Name="Column108" Width="141.75"/>
+        <TableColumn Name="Column109" Width="122.85"/>
+        <TableRow Name="Row6" Height="26.46">
+          <TableCell Name="Cell110" Border.Lines="All" Text="[Second.ActiveName]" HorzAlign="Center" VertAlign="Center" Font="Arial, 8pt"/>
+          <TableCell Name="Cell111" Border.Lines="All" Text="[Second.ActiveValue]" HorzAlign="Center" VertAlign="Center" Font="Arial, 8pt"/>
         </TableRow>
       </TableObject>
     </DataBand>
