@@ -56,9 +56,17 @@ where [Date] <= '2020-06-20'
 order by RowNumber desc
 
 select top 1 AssetsValue
-from [CacheDB].[dbo].[InvestorDateAssets] nolock
-where Investor_Id = 16541
-and [Date] <= '2020-06-20'
+FROM
+(
+	select [Date], AssetsValue
+	from [CacheDB].[dbo].[InvestorDateAssets] nolock
+	where Investor_Id = 16541
+	UNION
+	select [Date], AssetsValue
+	from [CacheDB].[dbo].[InvestorDateAssetsLast] nolock
+	where Investor_Id = 16541
+) as D
+WHERE [Date] <= '2020-06-20'
 order by [Date] desc
 
 
@@ -95,9 +103,17 @@ where [Date] <= '2021-06-22'
 order by RowNumber desc
 
 select top 1 AssetsValue
-from [CacheDB].[dbo].[InvestorContractDateAssets] nolock
-WHERE Investor_Id = 16541 and Contract_Id = 32266170
-and [Date] <= '2021-06-22'
+FROM
+(
+	select [Date], AssetsValue
+	from [CacheDB].[dbo].[InvestorContractDateAssets] nolock
+	WHERE Investor_Id = 16541 and Contract_Id = 32266170
+	UNION
+	select [Date], AssetsValue
+	from [CacheDB].[dbo].[InvestorContractDateAssetsLast] nolock
+	WHERE Investor_Id = 16541 and Contract_Id = 32266170
+) AS D
+WHERE [Date] <= '2021-06-22'
 order by [Date] desc
 
 -- Что-то
