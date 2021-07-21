@@ -6,3 +6,10 @@ https://localhost:49183/FundInfo?InvestorId=16541&FundId=17578
 https://localhost:49183/FundInfo?InvestorId=16541&FundId=17578&DateFrom=01.01.2016
 https://localhost:49183/FundInfo?InvestorId=16541&FundId=17578&DateTo=20.12.2018
 https://localhost:49183/FundInfo?InvestorId=16541&FundId=17578&DateFrom=19.09.2003&DateTo=20.12.2018
+
+
+Информация по Стратегии ДУ
+https://localhost:49183/TrustManagement?ContractId=16541
+https://localhost:49183/TrustManagement?ContractId=16541&DateFrom=19.09.2003
+https://localhost:49183/TrustManagement?ContractId=16541&DateTo=20.12.2018
+https://localhost:49183/TrustManagement?ContractId=16541&DateFrom=19.09.2003&DateTo=20.12.2018
