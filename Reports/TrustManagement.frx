@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Report ScriptLanguage="CSharp" DoublePass="true" TextQuality="Regular" ReportInfo.Name="Simple List" ReportInfo.Author="Fast Reports Inc" ReportInfo.Description="Демонстрация простого листа" ReportInfo.Created="01/17/2008 03:05:57" ReportInfo.Modified="07/21/2021 18:09:05" ReportInfo.CreatorVersion="2021.3.0.0">
+<Report ScriptLanguage="CSharp" DoublePass="true" TextQuality="Regular" ReportInfo.Name="Simple List" ReportInfo.Author="Fast Reports Inc" ReportInfo.Description="Демонстрация простого листа" ReportInfo.Created="01/17/2008 03:05:57" ReportInfo.Modified="07/22/2021 11:36:31" ReportInfo.CreatorVersion="2021.3.0.0">
   <ScriptText>using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -64,6 +64,34 @@ namespace FastReport
       <Column Name="Fee" DataType="System.Decimal"/>
       <Column Name="Status" DataType="System.String"/>
     </TableDataSource>
+    <TableDataSource Name="tree1" ReferenceName="tree1" DataType="System.Int32" Enabled="true">
+      <Column Name="ValutaId" DataType="System.Int32"/>
+      <Column Name="ValutaName" DataType="System.String"/>
+    </TableDataSource>
+    <TableDataSource Name="tree2" ReferenceName="tree2" DataType="System.Int32" Enabled="true">
+      <Column Name="TypeId" DataType="System.Int32"/>
+      <Column Name="ValutaId" DataType="System.Int32"/>
+      <Column Name="TypeName" DataType="System.String"/>
+    </TableDataSource>
+    <TableDataSource Name="tree3" ReferenceName="tree3" DataType="System.Int32" Enabled="true">
+      <Column Name="ChildId" DataType="System.Int32"/>
+      <Column Name="TypeId" DataType="System.Int32"/>
+      <Column Name="ChildName" DataType="System.String"/>
+      <Column Name="PriceName" DataType="System.String"/>
+      <Column Name="Ammount" DataType="System.String"/>
+      <Column Name="Detail" DataType="System.String"/>
+    </TableDataSource>
+    <TableDataSource Name="tree4" ReferenceName="tree4" DataType="System.Int32" Enabled="true">
+      <Column Name="Child2Id" DataType="System.Int32"/>
+      <Column Name="ChildId" DataType="System.Int32"/>
+      <Column Name="Child2Name" DataType="System.String"/>
+      <Column Name="PriceName" DataType="System.String"/>
+      <Column Name="Ammount" DataType="System.String"/>
+      <Column Name="Detail" DataType="System.String"/>
+    </TableDataSource>
+    <Relation Name="Relationtree2" ReferenceName="Relationtree2" ParentDataSource="tree1" ChildDataSource="tree2" ParentColumns="ValutaId" ChildColumns="ValutaId" Enabled="true"/>
+    <Relation Name="Relationtree3" ReferenceName="Relationtree3" ParentDataSource="tree2" ChildDataSource="tree3" ParentColumns="TypeId" ChildColumns="TypeId" Enabled="true"/>
+    <Relation Name="Relationtree4" ReferenceName="Relationtree4" ParentDataSource="tree3" ChildDataSource="tree4" ParentColumns="ChildId" ChildColumns="ChildId" Enabled="true"/>
   </Dictionary>
   <ReportPage Name="Page1" Watermark.Font="Arial, 60pt">
     <ReportTitleBand Name="ReportTitle1" Width="718.2" Height="132.3" CanGrow="true">
@@ -140,10 +168,10 @@ namespace FastReport
         <TableColumn Name="Column3108" Width="75.6"/>
         <TableColumn Name="Column3109" Width="68.04"/>
         <TableColumn Name="Column3117" Width="83.16"/>
-        <TableColumn Name="Column3121" Width="75.6"/>
+        <TableColumn Name="Column3121" Width="86.94"/>
         <TableColumn Name="Column3125" Width="56.7"/>
         <TableColumn Name="Column3129" Width="75.6"/>
-        <TableColumn Name="Column3133" Width="94.5"/>
+        <TableColumn Name="Column3133" Width="83.16"/>
         <TableColumn Name="Column3137" Width="94.5"/>
         <TableColumn Name="Column3138" Width="94.5"/>
         <TableRow Name="Row3006" Height="37.8">
@@ -163,10 +191,10 @@ namespace FastReport
           <TableColumn Name="Column3111" Width="75.6"/>
           <TableColumn Name="Column3112" Width="68.04"/>
           <TableColumn Name="Column3115" Width="83.16"/>
-          <TableColumn Name="Column3119" Width="75.6"/>
+          <TableColumn Name="Column3119" Width="86.94"/>
           <TableColumn Name="Column3123" Width="56.7"/>
           <TableColumn Name="Column3127" Width="75.6"/>
-          <TableColumn Name="Column3131" Width="94.5"/>
+          <TableColumn Name="Column3131" Width="83.16"/>
           <TableColumn Name="Column3135" Width="94.5"/>
           <TableColumn Name="Column3136" Width="94.5"/>
           <TableRow Name="Row3005" Height="37.8">
@@ -184,7 +212,26 @@ namespace FastReport
         <TextObject Name="Text3030" Width="718.2" Height="28.35" Fill.Color="LightGray" Text="История операций" VertAlign="Center" Font="Arial, 12pt, style=Bold"/>
       </DataHeaderBand>
     </DataBand>
-    <PageFooterBand Name="PageFooter1" Top="1165.55" Width="718.2" Height="28.35" Fill.Color="WhiteSmoke" CanGrow="true">
+    <DataBand Name="Data4000" Top="1165.55" Width="718.2" Height="28.35"/>
+    <DataBand Name="Data4001" Top="1197.9" Width="718.2" Height="18.9" Fill.Color="WhiteSmoke" DataSource="tree1">
+      <TextObject Name="Text4001" Width="179.55" Height="18.9" Text="[tree1.ValutaName]" Font="Tahoma, 12pt"/>
+      <DataBand Name="Data4002" Top="1220.8" Width="718.2" Height="18.9" Fill.Color="WhiteSmoke" EvenStyle="EvenRows" DataSource="tree2">
+        <TextObject Name="Text4005" Left="37.8" Width="425.25" Height="18.9" Text="[tree2.TypeName]" VertAlign="Center" Font="Tahoma, 8pt"/>
+        <DataBand Name="Data4004" Top="1243.7" Width="718.2" Height="37.8" Fill.Color="WhiteSmoke" EvenStyle="EvenRows" DataSource="tree3" PrintIfDetailEmpty="true">
+          <TextObject Name="Text4006" Left="56.7" Width="510.3" Height="18.9" Text="[tree3.ChildName]" VertAlign="Center" Font="Tahoma, 8pt"/>
+          <TextObject Name="Text4007" Left="576.45" Width="113.4" Height="18.9" Text="[tree3.PriceName]" VertAlign="Center" Font="Tahoma, 10pt, style=Bold"/>
+          <TextObject Name="Text4008" Left="56.7" Top="18.9" Width="113.4" Height="18.9" Text="[tree3.Ammount]" VertAlign="Center" Font="Tahoma, 8pt"/>
+          <TextObject Name="Text4009" Left="576.45" Top="18.9" Width="113.4" Height="18.9" Text="[tree3.Detail]" VertAlign="Center" Font="Tahoma, 8pt"/>
+          <DataBand Name="Data4014" Top="1285.5" Width="718.2" Height="37.8" Fill.Color="WhiteSmoke" EvenStyle="EvenRows" DataSource="tree4">
+            <TextObject Name="Text4016" Left="75.6" Width="491.4" Height="18.9" Text="[tree4.Child2Name]" VertAlign="Center" Font="Tahoma, 8pt"/>
+            <TextObject Name="Text4017" Left="585.9" Width="113.4" Height="18.9" Text="[tree4.PriceName]" VertAlign="Center" Font="Tahoma, 10pt, style=Bold"/>
+            <TextObject Name="Text4018" Left="75.6" Top="18.9" Width="113.4" Height="18.9" Text="[tree4.Ammount]" VertAlign="Center" Font="Tahoma, 8pt"/>
+            <TextObject Name="Text4019" Left="585.9" Top="18.9" Width="113.4" Height="18.9" Text="[tree4.Detail]" VertAlign="Center" Font="Tahoma, 8pt"/>
+          </DataBand>
+        </DataBand>
+      </DataBand>
+    </DataBand>
+    <PageFooterBand Name="PageFooter1" Top="1327.3" Width="718.2" Height="28.35" Fill.Color="WhiteSmoke" CanGrow="true">
       <TextObject Name="Text10" Left="481.95" Width="226.8" Height="28.35" Text="Страница [Page] из [TotalPages]" HorzAlign="Right" VertAlign="Center" Font="Tahoma, 8pt"/>
     </PageFooterBand>
   </ReportPage>

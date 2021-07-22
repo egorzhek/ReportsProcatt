@@ -114,6 +114,17 @@ namespace ReportsProcatt.Controllers
                             report.RegisterData(vDataSet.Tables[6], "Sixth");
 
 
+                            vDataSet.Tables[7].TableName = "tree1";
+                            report.RegisterData(vDataSet.Tables[7], "tree1");
+
+                            vDataSet.Tables[8].TableName = "tree2";
+                            report.RegisterData(vDataSet.Tables[8], "tree2");
+
+                            vDataSet.Tables[9].TableName = "tree3";
+                            report.RegisterData(vDataSet.Tables[9], "tree3");
+
+                            vDataSet.Tables[10].TableName = "tree4";
+                            report.RegisterData(vDataSet.Tables[10], "tree4");
 
 
                             // формирование графика
