@@ -1,0 +1,76 @@
+USE [CacheDB]
+GO
+CREATE TABLE [dbo].[Assets_Contracts]
+(
+	[InvestorId] [int] NOT NULL,
+	[ContractId] [int] NOT NULL,
+	[Date] [date] NOT NULL,
+
+	[USDRATE] [numeric](38, 10) NULL,
+	[EURORATE] [numeric](38, 10) NULL,
+
+	[VALUE_RUR] [numeric](38, 10) NULL,
+	[VALUE_USD] [numeric](38, 10) NULL,
+	[VALUE_EURO] [numeric](38, 10) NULL,
+
+	[INPUT_VALUE_RUR] [numeric](38, 10) NULL,
+	[INPUT_VALUE_USD] [numeric](38, 10) NULL,
+	[INPUT_VALUE_EURO] [numeric](38, 10) NULL,
+
+	[OUTPUT_VALUE_RUR] [numeric](38, 10) NULL,
+	[OUTPUT_VALUE_USD] [numeric](38, 10) NULL,
+	[OUTPUT_VALUE_EURO] [numeric](38, 10) NULL,
+
+	[INPUT_DIVIDENTS_RUR] [numeric](38, 10) NULL,
+	[INPUT_DIVIDENTS_USD] [numeric](38, 10) NULL,
+	[INPUT_DIVIDENTS_EURO] [numeric](38, 10) NULL,
+
+	[INPUT_COUPONS_RUR] [numeric](38, 10) NULL,
+	[INPUT_COUPONS_USD] [numeric](38, 10) NULL,
+	[INPUT_COUPONS_EURO] [numeric](38, 10) NULL,
+
+CONSTRAINT [PK_Assets_Contracts] PRIMARY KEY CLUSTERED
+(
+	[InvestorId] ASC,
+	[ContractId] ASC,
+	[Date] ASC
+)ON YEAR_Partition_Scheme ([Date])
+)
+GO
+CREATE TABLE [dbo].[Assets_ContractsLast]
+(
+	[InvestorId] [int] NOT NULL,
+	[ContractId] [int] NOT NULL,
+	[Date] [date] NOT NULL,
+
+	[USDRATE] [numeric](38, 10) NULL,
+	[EURORATE] [numeric](38, 10) NULL,
+
+	[VALUE_RUR] [numeric](38, 10) NULL,
+	[VALUE_USD] [numeric](38, 10) NULL,
+	[VALUE_EURO] [numeric](38, 10) NULL,
+
+	[INPUT_VALUE_RUR] [numeric](38, 10) NULL,
+	[INPUT_VALUE_USD] [numeric](38, 10) NULL,
+	[INPUT_VALUE_EURO] [numeric](38, 10) NULL,
+
+	[OUTPUT_VALUE_RUR] [numeric](38, 10) NULL,
+	[OUTPUT_VALUE_USD] [numeric](38, 10) NULL,
+	[OUTPUT_VALUE_EURO] [numeric](38, 10) NULL,
+
+	[INPUT_DIVIDENTS_RUR] [numeric](38, 10) NULL,
+	[INPUT_DIVIDENTS_USD] [numeric](38, 10) NULL,
+	[INPUT_DIVIDENTS_EURO] [numeric](38, 10) NULL,
+
+	[INPUT_COUPONS_RUR] [numeric](38, 10) NULL,
+	[INPUT_COUPONS_USD] [numeric](38, 10) NULL,
+	[INPUT_COUPONS_EURO] [numeric](38, 10) NULL,
+
+CONSTRAINT [PK_Assets_ContractsLast] PRIMARY KEY CLUSTERED 
+(
+	[InvestorId] ASC,
+	[ContractId] ASC,
+	[Date] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
