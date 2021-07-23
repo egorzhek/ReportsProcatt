@@ -1,5 +1,78 @@
 USE [CacheDB]
 GO
+CREATE OR ALTER PROCEDURE [dbo].[app_Refresh_Assets_Info]
+(
+	@ContractId Int
+)
+AS BEGIN
+	DECLARE @InvestorId Int, @NUM Nvarchar(100), @DATE_OPEN date, @DATE_CLOSE date;
+
+	SELECT TOP (1)
+		@InvestorId = c.INVESTOR,	-- ID инвестора
+		--ContractId = c.DOC, -- идентификатор договора
+		@NUM = dc.NUM, -- номер договора
+		@DATE_OPEN = dc.D_DATE,	-- дата договора
+		@DATE_CLOSE = c.E_DATE -- дата окончания договора
+	FROM [BAL_DATA_STD].[dbo].D_B_CONTRACTS C WITH(NOLOCK)
+	LEFT JOIN [BAL_DATA_STD].[dbo].OD_DOCS DC WITH(NOLOCK) ON DC.ID = C.DOC
+	LEFT JOIN [BAL_DATA_STD].[dbo].OD_FACES FI WITH(NOLOCK) ON FI.SELF_ID = C.INVESTOR and FI.E_DATE > getdate() and FI.LAST_FLAG = 1 -- разыменовываем инвестора
+	LEFT JOIN [BAL_DATA_STD].[dbo].OD_FACE_ACCS A WITH(NOLOCK) ON A.ID = C.ACCOUNT
+	LEFT JOIN [BAL_DATA_STD].[dbo].OD_FACES FA WITH(NOLOCK) ON FA.SELF_ID = a.BANK and FA.E_DATE > getdate() and FA.LAST_FLAG = 1  -- разымновываем банк, в котором открыт счет для расчета с клиентом
+	LEFT JOIN [BAL_DATA_STD].[dbo].OD_FACE_ACCS BA ON BA.ID = C.B_ACC
+	LEFT JOIN [BAL_DATA_STD].[dbo].OD_FACES FB WITH(NOLOCK) ON FB.SELF_ID = ba.BANK and FB.E_DATE > getdate() and FB.LAST_FLAG = 1  -- разымновываем банк, в котором открыт счет для расчета с клиентом
+	LEFT JOIN [BAL_DATA_STD].[dbo].OD_FACE_ACCS DA ON DA.ID = C.D_ACC
+	LEFT JOIN [BAL_DATA_STD].[dbo].OD_FACES FD WITH(NOLOCK) ON FD.SELF_ID = da.BANK and FD.E_DATE > getdate() and FD.LAST_FLAG = 1  -- разымновываем банк, в котором открыт счет ДЕПО
+	WHERE 
+	c.I_TYPE = 1 -- нас интересуют только учредители ДУ
+	and C.DOC = @ContractId
+
+
+	IF @InvestorId IS NOT NULL
+	AND @NUM IS NOT NULL
+	AND @DATE_OPEN IS NOT NULL
+	BEGIN
+		WITH CTE
+		AS
+		(
+		    SELECT *
+		    FROM [CacheDB].[dbo].[Assets_Info]
+		    WHERE InvestorId = @InvestorId and ContractId = @ContractId
+		) 
+		MERGE
+		    CTE as t
+		USING
+		(
+		    select
+		        [InvestorId] = @InvestorId,
+		        [ContractId] = @ContractId,
+		        [DATE_OPEN] = @DATE_OPEN,
+				[NUM] = @NUM,
+				[DATE_CLOSE] = @DATE_CLOSE
+		) AS s
+		on t.InvestorId = s.InvestorId and t.ContractId = s.ContractId
+		when not matched
+		    then insert (
+		        [InvestorId],
+				[ContractId],
+				[DATE_OPEN],
+				[NUM],
+				[DATE_CLOSE]
+		    )
+		    values (
+		        s.[InvestorId],
+				s.[ContractId],
+				s.[DATE_OPEN],
+				s.[NUM],
+				s.[DATE_CLOSE]
+		    )
+		when matched
+		then update set
+		    [DATE_OPEN] = s.[DATE_OPEN],
+			[NUM] = s.[NUM],
+			[DATE_CLOSE] = s.[DATE_CLOSE];
+	END
+END
+GO
 CREATE OR ALTER PROCEDURE [dbo].[app_Fill_Assets_Contract_Inner]
 (
     @ContractId int -- = 18699821
@@ -33,6 +106,9 @@ AS BEGIN
         @InvestorId = C.INVESTOR
     FROM [BAL_DATA_STD].[dbo].[D_B_CONTRACTS] AS C
     WHERE C.DOC = @ContractId;
+
+	-- обновление информации по договору
+	EXEC [dbo].[app_Refresh_Assets_Info] @ContractId = @ContractId;
 
     if @InvestorId is null return;
 
