@@ -30,3 +30,20 @@ FROM
     FROM [CacheDB].[dbo].[Assets_ContractsLast] nolock
     WHERE [InvestorId] = 13325616 AND [ContractId] = 29297588 AND [Date] = '2021-04-16'
 ) AS A
+
+
+
+
+
+
+
+
+-- запрос к данным по договору
+SELECT *
+FROM [CacheDB].[dbo].[Assets_Contracts] nolock
+WHERE InvestorId = 13338758 and	ContractId = 13338775
+UNION
+SELECT *
+FROM [CacheDB].[dbo].[Assets_ContractsLast] nolock
+WHERE InvestorId = 13338758 and	ContractId = 13338775
+order by [Date]
