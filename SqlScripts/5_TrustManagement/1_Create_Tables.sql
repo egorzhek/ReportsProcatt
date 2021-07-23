@@ -89,3 +89,41 @@ CONSTRAINT [PK_Assets_Info] PRIMARY KEY CLUSTERED
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
+CREATE TABLE [dbo].[Assets_Contracts_History]
+(
+	[InvestorId] [int] NOT NULL,
+	[ContractId] [int] NOT NULL,
+	[PaymentDateTime] [datetime] NOT NULL,
+	[Type] [int] NOT NULL,
+	[CurrencyId] [int] NOT NULL,
+	[AmountPayments] [numeric](38, 10) NULL,
+	[ShareName] NVarchar(300),
+CONSTRAINT [PK_Assets_Contracts_History] PRIMARY KEY CLUSTERED
+(
+	[InvestorId] ASC,
+	[ContractId] ASC,
+	[ShareName] ASC,
+	[CurrencyId] ASC,
+	[PaymentDateTime] ASC
+)ON YEAR_Partition_Scheme_Time ([PaymentDateTime])
+)
+GO
+CREATE TABLE [dbo].[Assets_Contracts_History_Last]
+(
+	[InvestorId] [int] NOT NULL,
+	[ContractId] [int] NOT NULL,
+	[PaymentDateTime] [datetime] NOT NULL,
+	[Type] [int] NOT NULL,
+	[CurrencyId] [int] NOT NULL,
+	[AmountPayments] [numeric](38, 10) NULL,
+	[ShareName] NVarchar(300),
+CONSTRAINT [PK_Assets_Contracts_History_Last] PRIMARY KEY CLUSTERED
+(
+	[InvestorId] ASC,
+	[ContractId] ASC,
+	[ShareName] ASC,
+	[CurrencyId] ASC,
+	[PaymentDateTime] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO

@@ -75,12 +75,16 @@ END
 GO
 CREATE OR ALTER PROCEDURE [dbo].[app_Fill_Assets_Contract_Inner]
 (
-    @ContractId int -- = 18699821
+    @ContractId int = 541873
 )
 AS BEGIN
     SET NOCOUNT ON;
 	DECLARE @Date Date, @Value decimal(38,10), @IsDateAssets Bit, @USDRATE decimal(38,10), @EURORATE decimal(38,10);
     DECLARE @OldDate Date, @SumValue decimal(38,10), @SumDayValue decimal(38,10);
+
+	DECLARE @CurrentDate Date = getdate();
+	DECLARE @LastEndDate Date = DateAdd(DAY, -180, @CurrentDate);
+	DECLARE @LastBeginDate DateTime;
 
 	DECLARE
 		@INPUT_VALUE_USD decimal(38,10),
@@ -95,9 +99,6 @@ AS BEGIN
 		@INPUT_COUPONS_EURO decimal(38,10);
 
 	DECLARE @USDRATE_Last decimal(38,10), @EURORATE_Last decimal(38,10);
-
-    DECLARE @CurrentDate Date = GetDate();
-    DECLARE @LastEndDate Date = DateAdd(DAY, -180, @CurrentDate);
 
     DECLARE @MinDate Date, @MaxDate Date;
     DECLARE @InvestorId Int;
@@ -120,6 +121,12 @@ AS BEGIN
 
 	BEGIN TRY
         DROP TABLE #TempContract2;
+    END TRY
+    BEGIN CATCH
+    END CATCH;
+
+	BEGIN TRY
+        DROP TABLE #TempContract22;
     END TRY
     BEGIN CATCH
     END CATCH;
@@ -240,19 +247,24 @@ AS BEGIN
 	set @EndDate = DATEADD(DAY, 1, @EndDate); -- + 1 день
 
 	SELECT
-		PaymentDate, Type, CurrencyId, AmountPayments = sum(AmountPayments)
-	INTO #TempContract2
+		PaymentDate, Type, CurrencyId, AmountPayments,
+		[ShareName],
+		[PaymentDateTime]
+	INTO #TempContract22
 	FROM
 	(
 		SELECT
-			PaymentDate = cast(PaymentDate as Date), Type, CurrencyId, AmountPayments
+			PaymentDate = cast(PaymentDate as Date), Type, CurrencyId, AmountPayments,
+			[ShareName],
+			[PaymentDateTime] = PaymentDate
 		FROM
 		(
 			SELECT
 				[PaymentDate] = T.WIRDATE,
 				[Type] = 1, -- Купоны
 				[CurrencyId] = VV.Id,
-				[AmountPayments] = SUM( T.VALUE_ )
+				[AmountPayments] = SUM( T.VALUE_ ),
+				[ShareName] = V.[NAME]
 			FROM [BAL_DATA_STD].[dbo].OD_BALANCES AS B WITH(NOLOCK)
 			LEFT JOIN [BAL_DATA_STD].[dbo].OD_RESTS AS R WITH(NOLOCK) ON R.BAL_ACC = B.ID and R.REG_3 = @ContractId
 			LEFT JOIN [BAL_DATA_STD].[dbo].OD_SHARES AS S WITH(NOLOCK) ON S.ID = R.REG_2 and S.CLASS = 2
@@ -265,14 +277,17 @@ AS BEGIN
 		) AS D
 		UNION ALL
 		select
-			PaymentDate = cast(PaymentDate as Date), Type, CurrencyId, AmountPayments
+			PaymentDate = cast(PaymentDate as Date), Type, CurrencyId, AmountPayments,
+			[ShareName],
+			[PaymentDateTime] = PaymentDate
 		FROM
 		(
 			SELECT 
 				[PaymentDate] = T.WIRDATE,
 				[Type] = 2,  -- Дивиденды
 				[CurrencyId] = VV.ID,
-				[AmountPayments] = SUM( T.VALUE_ )
+				[AmountPayments] = SUM( T.VALUE_ ),
+				[ShareName] = V.[NAME]
 			FROM [BAL_DATA_STD].[dbo].OD_BALANCES AS B WITH(NOLOCK)
 			LEFT JOIN [BAL_DATA_STD].[dbo].OD_RESTS AS R WITH(NOLOCK) ON R.BAL_ACC = B.ID AND R.REG_3 = @ContractId
 			LEFT JOIN [BAL_DATA_STD].[dbo].OD_SHARES AS S WITH(NOLOCK) ON S.ID = R.REG_2 AND S.CLASS in (1,7,10)
@@ -282,7 +297,150 @@ AS BEGIN
 			WHERE B.ACC_PLAN = 95 AND B.SYS_NAME = 'ПИФ-ДИВ' AND T.IS_PLAN = 'F' 
 			GROUP BY S.ISSUER, S.ID, V.NAME, T.WIRDATE, VV.SYSNAME, VV.ID
 		) AS F
-	) AS GG
+	) AS GG;
+	--GROUP BY PaymentDate, Type, CurrencyId;
+
+
+
+
+
+
+
+	SET @LastBeginDate = NULL-- взять максимальную дату из постоянного кэша и вычесть ещё пару дней на всякий случай (merge простит)
+
+	SELECT
+		@LastBeginDate = max([PaymentDateTime])
+	FROM [dbo].[Assets_Contracts_History]
+	WHERE InvestorId = @InvestorId and ContractId = @ContractId
+
+	IF @LastBeginDate is null
+	BEGIN
+		set @LastBeginDate = '1901-01-03'
+	END
+	
+	SET @LastBeginDate = DATEADD(DAY, -10, @LastBeginDate);
+
+
+
+
+
+	WITH CTE
+    AS
+    (
+        SELECT *
+        FROM [dbo].[Assets_Contracts_History]
+        WHERE InvestorId = @InvestorId and ContractId = @ContractId
+    ) 
+    MERGE
+        CTE as t
+    USING
+    (
+        select
+			InvestorId = @InvestorId,
+			ContractId = @ContractId,
+			PaymentDateTime,
+			Type,
+			CurrencyId,
+			AmountPayments,
+			ShareName
+		from #TempContract22
+		WHERE [PaymentDateTime] >= @LastBeginDate and [PaymentDateTime] <= @LastEndDate -- заливка постоянного кэша в диапазоне дат
+    ) AS s
+    on t.InvestorId = s.InvestorId and t.ContractId = s.ContractId
+		and t.[PaymentDateTime] = s.[PaymentDateTime]
+		and t.[ShareName] = s.[ShareName]
+		and t.[CurrencyId] = s.[CurrencyId]
+    when not matched
+        then insert (
+            [InvestorId],
+			[ContractId],
+			[PaymentDateTime],
+			[Type],
+			[CurrencyId],
+			[AmountPayments],
+			[ShareName]
+        )
+        values (
+            s.[InvestorId],
+			s.[ContractId],
+			s.[PaymentDateTime],
+			s.[Type],
+			s.[CurrencyId],
+			s.[AmountPayments],
+			s.[ShareName]
+        )
+    when matched
+    then update set
+        [Type] = s.[Type],
+		[AmountPayments] = s.[AmountPayments];
+
+
+
+
+	WITH CTE
+    AS
+    (
+        SELECT *
+        FROM [dbo].[Assets_Contracts_History_Last]
+        WHERE InvestorId = @InvestorId and ContractId = @ContractId
+    ) 
+    MERGE
+        CTE as t
+    USING
+    (
+        select
+			InvestorId = @InvestorId,
+			ContractId = @ContractId,
+			PaymentDateTime,
+			Type,
+			CurrencyId,
+			AmountPayments,
+			ShareName
+		from #TempContract22
+		WHERE [PaymentDateTime] > @LastEndDate -- заливка временного кеша за последние полгода
+    ) AS s
+    on t.InvestorId = s.InvestorId and t.ContractId = s.ContractId
+		and t.[PaymentDateTime] = s.[PaymentDateTime]
+		and t.[ShareName] = s.[ShareName]
+		and t.[CurrencyId] = s.[CurrencyId]
+    when not matched
+        then insert (
+            [InvestorId],
+			[ContractId],
+			[PaymentDateTime],
+			[Type],
+			[CurrencyId],
+			[AmountPayments],
+			[ShareName]
+        )
+        values (
+            s.[InvestorId],
+			s.[ContractId],
+			s.[PaymentDateTime],
+			s.[Type],
+			s.[CurrencyId],
+			s.[AmountPayments],
+			s.[ShareName]
+        )
+    when matched
+    then update set
+        [Type] = s.[Type],
+		[AmountPayments] = s.[AmountPayments];
+
+	
+
+
+
+
+
+
+
+
+
+	SELECT
+		PaymentDate, Type, CurrencyId, AmountPayments = sum(AmountPayments)
+	INTO #TempContract2
+	FROM #TempContract22
 	GROUP BY PaymentDate, Type, CurrencyId;
 
 	SELECT
@@ -985,6 +1143,12 @@ AS BEGIN
 
 	BEGIN TRY
         DROP TABLE #TempContract2;
+    END TRY
+    BEGIN CATCH
+    END CATCH;
+
+	BEGIN TRY
+        DROP TABLE #TempContract22;
     END TRY
     BEGIN CATCH
     END CATCH;
