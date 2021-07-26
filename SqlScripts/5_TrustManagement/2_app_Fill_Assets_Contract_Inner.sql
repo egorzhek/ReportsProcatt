@@ -131,6 +131,23 @@ AS BEGIN
     BEGIN CATCH
     END CATCH;
 
+	CREATE TABLE #TempContract22
+	(
+		WIRING int,
+		TYPE_ smallint,
+		Type int,
+		CurrencyId int,
+		AmountPayments decimal(38,10),
+		ShareName NVarchar(300),
+		PaymentDate date,
+		PaymentDateTime datetime,
+		[USDRATE] decimal(38,10),
+		[EURORATE] decimal(38,10),
+		[AmountPayments_RUR] decimal(38,10),
+		[AmountPayments_USD] decimal(38,10),
+		[AmountPayments_EURO] decimal(38,10)
+	)
+
 	BEGIN TRY
         DROP TABLE #TempContract3
     END TRY
@@ -246,13 +263,26 @@ AS BEGIN
 
 	set @EndDate = DATEADD(DAY, 1, @EndDate); -- + 1 день
 
+	insert into #TempContract22
+	(
+		PaymentDate,
+		Type,
+		CurrencyId,
+		AmountPayments,
+		ShareName,
+		PaymentDateTime,
+		WIRING,
+		TYPE_
+	)
 	SELECT
-		PaymentDate, Type, CurrencyId, AmountPayments,
+		PaymentDate,
+		Type,
+		CurrencyId,
+		AmountPayments,
 		[ShareName],
 		[PaymentDateTime],
 		[WIRING],
 		[TYPE_]
-	INTO #TempContract22
 	FROM
 	(
 		SELECT
@@ -310,9 +340,64 @@ AS BEGIN
 	--GROUP BY PaymentDate, Type, CurrencyId;
 
 
+	-- вытягиваем курсы валют
+	UPDATE B SET
+		[USDRATE]  = VB.RATE,
+		[EURORATE] = VE.RATE
+	FROM #TempContract22 AS B
+	--  в долларах
+	OUTER APPLY
+	(
+		SELECT TOP 1
+			RT.[RATE]
+		FROM [BAL_DATA_STD].[dbo].[OD_VALUES_RATES] AS RT
+		WHERE RT.[VALUE_ID] = 2 -- доллары
+		AND RT.[E_DATE] >= B.[PaymentDateTime] and RT.[OFICDATE] < B.[PaymentDateTime]
+		ORDER BY
+			case when DATEPART(YEAR,RT.[E_DATE]) = 9999 then 1 else 0 end ASC,
+			RT.[E_DATE] DESC,
+			RT.[OFICDATE] DESC
+	) AS VB
+	--  в евро
+	OUTER APPLY
+	(
+		SELECT TOP 1
+			RT.[RATE]
+		FROM [BAL_DATA_STD].[dbo].[OD_VALUES_RATES] AS RT
+		WHERE RT.[VALUE_ID] = 5 -- евро
+		AND RT.[E_DATE] >= B.[PaymentDateTime] and RT.[OFICDATE] < B.[PaymentDateTime]
+		ORDER BY
+			case when DATEPART(YEAR,RT.[E_DATE]) = 9999 then 1 else 0 end ASC,
+			RT.[E_DATE] DESC,
+			RT.[OFICDATE] DESC
+	) AS VE;
 
-
-
+	UPDATE A Set
+		AmountPayments_RUR = case
+				when CurrencyId = 1 then AmountPayments
+				when CurrencyId = 2 then AmountPayments * USDRATE
+				when CurrencyId = 5 then AmountPayments * EURORATE
+				else 0
+			end,
+		AmountPayments_USD = case
+				when CurrencyId = 1 and USDRATE <> 0 then AmountPayments * (1/USDRATE)
+				when CurrencyId = 2 then AmountPayments
+				when CurrencyId = 5 and USDRATE <> 0 then AmountPayments * (1/USDRATE) * EURORATE
+				else 0
+			end,
+		AmountPayments_EURO = case
+				when CurrencyId = 1 and EURORATE <> 0 then AmountPayments * (1/EURORATE)
+				when CurrencyId = 2 and EURORATE <> 0 then AmountPayments * (1/EURORATE) * USDRATE
+				when CurrencyId = 5 then AmountPayments
+				else 0
+			end
+	FROM #TempContract22 AS A;
+	
+	update a set
+		AmountPayments_RUR = [dbo].f_Round(AmountPayments_RUR, 2),
+		AmountPayments_USD = [dbo].f_Round(AmountPayments_USD, 2),
+		AmountPayments_EURO = [dbo].f_Round(AmountPayments_EURO, 2)
+	from #TempContract22 as a;
 
 
 	SET @LastBeginDate = NULL-- взять максимальную дату из постоянного кэша и вычесть ещё пару дней на всякий случай (merge простит)
@@ -355,7 +440,12 @@ AS BEGIN
 			Type,
 			CurrencyId,
 			AmountPayments,
-			ShareName
+			ShareName,
+			[USDRATE],
+			[EURORATE],
+			[AmountPayments_RUR],
+			[AmountPayments_USD],
+			[AmountPayments_EURO]
 		from #TempContract22
 		WHERE [PaymentDateTime] >= @LastBeginDate and [PaymentDateTime] <= @LastEndDate -- заливка постоянного кэша в диапазоне дат
     ) AS s
@@ -371,7 +461,12 @@ AS BEGIN
 			[Type],
 			[CurrencyId],
 			[AmountPayments],
-			[ShareName]
+			[ShareName],
+			[USDRATE],
+			[EURORATE],
+			[AmountPayments_RUR],
+			[AmountPayments_USD],
+			[AmountPayments_EURO]
         )
         values (
             s.[InvestorId],
@@ -382,7 +477,12 @@ AS BEGIN
 			s.[Type],
 			s.[CurrencyId],
 			s.[AmountPayments],
-			s.[ShareName]
+			s.[ShareName],
+			s.[USDRATE],
+			s.[EURORATE],
+			s.[AmountPayments_RUR],
+			s.[AmountPayments_USD],
+			s.[AmountPayments_EURO]
         )
     when matched
     then update set
@@ -390,7 +490,12 @@ AS BEGIN
         [Type] = s.[Type],
 		[CurrencyId] = s.[CurrencyId],
 		[AmountPayments] = s.[AmountPayments],
-		[ShareName] = s.[ShareName];
+		[ShareName] = s.[ShareName],
+		[USDRATE] = s.[USDRATE],
+		[EURORATE] = s.[EURORATE],
+		[AmountPayments_RUR] = s.[AmountPayments_RUR],
+		[AmountPayments_USD] = s.[AmountPayments_USD],
+		[AmountPayments_EURO] = s.[AmountPayments_EURO];
 
 
 
@@ -415,7 +520,12 @@ AS BEGIN
 			Type,
 			CurrencyId,
 			AmountPayments,
-			ShareName
+			ShareName,
+			[USDRATE],
+			[EURORATE],
+			[AmountPayments_RUR],
+			[AmountPayments_USD],
+			[AmountPayments_EURO]
 		from #TempContract22
 		WHERE [PaymentDateTime] > @LastEndDate -- заливка временного кеша за последние полгода
     ) AS s
@@ -431,7 +541,12 @@ AS BEGIN
 			[Type],
 			[CurrencyId],
 			[AmountPayments],
-			[ShareName]
+			[ShareName],
+			[USDRATE],
+			[EURORATE],
+			[AmountPayments_RUR],
+			[AmountPayments_USD],
+			[AmountPayments_EURO]
         )
         values (
             s.[InvestorId],
@@ -442,7 +557,12 @@ AS BEGIN
 			s.[Type],
 			s.[CurrencyId],
 			s.[AmountPayments],
-			s.[ShareName]
+			s.[ShareName],
+			s.[USDRATE],
+			s.[EURORATE],
+			s.[AmountPayments_RUR],
+			s.[AmountPayments_USD],
+			s.[AmountPayments_EURO]
         )
     when matched
     then update set
@@ -450,7 +570,12 @@ AS BEGIN
         [Type] = s.[Type],
 		[CurrencyId] = s.[CurrencyId],
 		[AmountPayments] = s.[AmountPayments],
-		[ShareName] = s.[ShareName];
+		[ShareName] = s.[ShareName],
+		[USDRATE] = s.[USDRATE],
+		[EURORATE] = s.[EURORATE],
+		[AmountPayments_RUR] = s.[AmountPayments_RUR],
+		[AmountPayments_USD] = s.[AmountPayments_USD],
+		[AmountPayments_EURO] = s.[AmountPayments_EURO];
 
 	
 

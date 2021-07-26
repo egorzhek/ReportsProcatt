@@ -100,6 +100,11 @@ CREATE TABLE [dbo].[DIVIDENDS_AND_COUPONS_History]
 	[CurrencyId] [int] NOT NULL,
 	[AmountPayments] [numeric](38, 10) NULL,
 	[ShareName] NVarchar(300),
+	[USDRATE] [numeric](38, 10) NULL,
+	[EURORATE] [numeric](38, 10) NULL,
+	[AmountPayments_RUR] [numeric](38, 10) NULL,
+	[AmountPayments_USD] [numeric](38, 10) NULL,
+	[AmountPayments_EURO] [numeric](38, 10) NULL,
 CONSTRAINT [PK_DIVIDENDS_AND_COUPONS_History] PRIMARY KEY CLUSTERED
 (
 	[InvestorId] ASC,
@@ -121,6 +126,11 @@ CREATE TABLE [dbo].[DIVIDENDS_AND_COUPONS_History_Last]
 	[CurrencyId] [int] NOT NULL,
 	[AmountPayments] [numeric](38, 10) NULL,
 	[ShareName] NVarchar(300),
+	[USDRATE] [numeric](38, 10) NULL,
+	[EURORATE] [numeric](38, 10) NULL,
+	[AmountPayments_RUR] [numeric](38, 10) NULL,
+	[AmountPayments_USD] [numeric](38, 10) NULL,
+	[AmountPayments_EURO] [numeric](38, 10) NULL,
 CONSTRAINT [PK_DIVIDENDS_AND_COUPONS_History_Last] PRIMARY KEY CLUSTERED
 (
 	[InvestorId] ASC,
