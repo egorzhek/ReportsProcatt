@@ -75,7 +75,7 @@ END
 GO
 CREATE OR ALTER PROCEDURE [dbo].[app_Fill_Assets_Contract_Inner]
 (
-    @ContractId int = 541873
+    @ContractId int -- = 541873
 )
 AS BEGIN
     SET NOCOUNT ON;
@@ -249,22 +249,27 @@ AS BEGIN
 	SELECT
 		PaymentDate, Type, CurrencyId, AmountPayments,
 		[ShareName],
-		[PaymentDateTime]
+		[PaymentDateTime],
+		[WIRING],
+		[TYPE_]
 	INTO #TempContract22
 	FROM
 	(
 		SELECT
 			PaymentDate = cast(PaymentDate as Date), Type, CurrencyId, AmountPayments,
 			[ShareName],
-			[PaymentDateTime] = PaymentDate
+			[PaymentDateTime] = PaymentDate,
+			[WIRING], [TYPE_]
 		FROM
 		(
 			SELECT
 				[PaymentDate] = T.WIRDATE,
 				[Type] = 1, -- Купоны
 				[CurrencyId] = VV.Id,
-				[AmountPayments] = SUM( T.VALUE_ ),
-				[ShareName] = V.[NAME]
+				[AmountPayments] = T.VALUE_,
+				[ShareName] = V.[NAME],
+				[WIRING] = T.[WIRING],
+				[TYPE_] = T.[TYPE_]
 			FROM [BAL_DATA_STD].[dbo].OD_BALANCES AS B WITH(NOLOCK)
 			LEFT JOIN [BAL_DATA_STD].[dbo].OD_RESTS AS R WITH(NOLOCK) ON R.BAL_ACC = B.ID and R.REG_3 = @ContractId
 			LEFT JOIN [BAL_DATA_STD].[dbo].OD_SHARES AS S WITH(NOLOCK) ON S.ID = R.REG_2 and S.CLASS = 2
@@ -273,21 +278,25 @@ AS BEGIN
 			LEFT JOIN [BAL_DATA_STD].[dbo].OD_VALUES AS VV on R.VALUE_ID = VV.ID
 			CROSS APPLY (SELECT TOP(1) PERCENT_, SUMMA FROM [BAL_DATA_STD].[dbo].OD_COUPONS AS C WHERE C.SHARE = S.ID AND C.E_DATE <= T.WIRDATE order by E_DATE desc ) CC
 			WHERE B.ACC_PLAN = 95 AND B.SYS_NAME = 'ПИФ-ДИВ' AND T.IS_PLAN = 'F'
-			GROUP BY S.ISSUER, S.ID, V.NAME, T.WIRDATE, CC.PERCENT_, VV.SYSNAME, VV.ID
+			GROUP BY
+				T.[WIRDATE], VV.[Id], T.[VALUE_], V.[NAME], T.[WIRING], T.[TYPE_]
 		) AS D
 		UNION ALL
 		select
 			PaymentDate = cast(PaymentDate as Date), Type, CurrencyId, AmountPayments,
 			[ShareName],
-			[PaymentDateTime] = PaymentDate
+			[PaymentDateTime] = PaymentDate,
+			[WIRING], [TYPE_]
 		FROM
 		(
 			SELECT 
-				[PaymentDate] = T.WIRDATE,
+				[PaymentDate] = T.[WIRDATE],
 				[Type] = 2,  -- Дивиденды
-				[CurrencyId] = VV.ID,
-				[AmountPayments] = SUM( T.VALUE_ ),
-				[ShareName] = V.[NAME]
+				[CurrencyId] = VV.[ID],
+				[AmountPayments] = T.VALUE_,
+				[ShareName] = V.[NAME],
+				[WIRING] = T.[WIRING],
+				[TYPE_] = T.[TYPE_]
 			FROM [BAL_DATA_STD].[dbo].OD_BALANCES AS B WITH(NOLOCK)
 			LEFT JOIN [BAL_DATA_STD].[dbo].OD_RESTS AS R WITH(NOLOCK) ON R.BAL_ACC = B.ID AND R.REG_3 = @ContractId
 			LEFT JOIN [BAL_DATA_STD].[dbo].OD_SHARES AS S WITH(NOLOCK) ON S.ID = R.REG_2 AND S.CLASS in (1,7,10)
@@ -295,7 +304,7 @@ AS BEGIN
 			LEFT JOIN [BAL_DATA_STD].[dbo].OD_TURNS AS T WITH(NOLOCK) ON T.REST = R.ID AND T.WIRDATE >= @StartDate AND T.WIRDATE < @EndDate AND S.ID IS NOT NULL AND T.TYPE_=-1
 			LEFT JOIN [BAL_DATA_STD].[dbo].OD_VALUES AS VV WITH(NOLOCK) ON VV.id = R.VALUE_ID
 			WHERE B.ACC_PLAN = 95 AND B.SYS_NAME = 'ПИФ-ДИВ' AND T.IS_PLAN = 'F' 
-			GROUP BY S.ISSUER, S.ID, V.NAME, T.WIRDATE, VV.SYSNAME, VV.ID
+			GROUP BY T.[WIRDATE], VV.[ID], T.[VALUE_], V.[NAME], T.[WIRING], T.[TYPE_]
 		) AS F
 	) AS GG;
 	--GROUP BY PaymentDate, Type, CurrencyId;
@@ -338,6 +347,8 @@ AS BEGIN
         select
 			InvestorId = @InvestorId,
 			ContractId = @ContractId,
+			[WIRING],
+			[TYPE_],
 			PaymentDateTime,
 			Type,
 			CurrencyId,
@@ -347,13 +358,13 @@ AS BEGIN
 		WHERE [PaymentDateTime] >= @LastBeginDate and [PaymentDateTime] <= @LastEndDate -- заливка постоянного кэша в диапазоне дат
     ) AS s
     on t.InvestorId = s.InvestorId and t.ContractId = s.ContractId
-		and t.[PaymentDateTime] = s.[PaymentDateTime]
-		and t.[ShareName] = s.[ShareName]
-		and t.[CurrencyId] = s.[CurrencyId]
+	AND t.[WIRING] = s.[WIRING] and t.[TYPE_] = s.[TYPE_]
     when not matched
         then insert (
             [InvestorId],
 			[ContractId],
+			[WIRING],
+			[TYPE_],
 			[PaymentDateTime],
 			[Type],
 			[CurrencyId],
@@ -363,6 +374,8 @@ AS BEGIN
         values (
             s.[InvestorId],
 			s.[ContractId],
+			s.[WIRING],
+			s.[TYPE_],
 			s.[PaymentDateTime],
 			s.[Type],
 			s.[CurrencyId],
@@ -371,8 +384,11 @@ AS BEGIN
         )
     when matched
     then update set
+		[PaymentDateTime] = s.[PaymentDateTime],
         [Type] = s.[Type],
-		[AmountPayments] = s.[AmountPayments];
+		[CurrencyId] = s.[CurrencyId],
+		[AmountPayments] = s.[AmountPayments],
+		[ShareName] = s.[ShareName];
 
 
 
@@ -391,6 +407,8 @@ AS BEGIN
         select
 			InvestorId = @InvestorId,
 			ContractId = @ContractId,
+			[WIRING],
+			[TYPE_],
 			PaymentDateTime,
 			Type,
 			CurrencyId,
@@ -400,13 +418,13 @@ AS BEGIN
 		WHERE [PaymentDateTime] > @LastEndDate -- заливка временного кеша за последние полгода
     ) AS s
     on t.InvestorId = s.InvestorId and t.ContractId = s.ContractId
-		and t.[PaymentDateTime] = s.[PaymentDateTime]
-		and t.[ShareName] = s.[ShareName]
-		and t.[CurrencyId] = s.[CurrencyId]
+	AND t.[WIRING] = s.[WIRING] and t.[TYPE_] = s.[TYPE_]
     when not matched
         then insert (
             [InvestorId],
 			[ContractId],
+			[WIRING],
+			[TYPE_],
 			[PaymentDateTime],
 			[Type],
 			[CurrencyId],
@@ -416,6 +434,8 @@ AS BEGIN
         values (
             s.[InvestorId],
 			s.[ContractId],
+			s.[WIRING],
+			s.[TYPE_],
 			s.[PaymentDateTime],
 			s.[Type],
 			s.[CurrencyId],
@@ -424,8 +444,11 @@ AS BEGIN
         )
     when matched
     then update set
+        [PaymentDateTime] = s.[PaymentDateTime],
         [Type] = s.[Type],
-		[AmountPayments] = s.[AmountPayments];
+		[CurrencyId] = s.[CurrencyId],
+		[AmountPayments] = s.[AmountPayments],
+		[ShareName] = s.[ShareName];
 
 	
 
