@@ -89,7 +89,7 @@ CONSTRAINT [PK_Assets_Info] PRIMARY KEY CLUSTERED
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-CREATE TABLE [dbo].[Assets_Contracts_History]
+CREATE TABLE [dbo].[DIVIDENDS_AND_COUPONS_History]
 (
 	[InvestorId] [int] NOT NULL,
 	[ContractId] [int] NOT NULL,
@@ -100,7 +100,7 @@ CREATE TABLE [dbo].[Assets_Contracts_History]
 	[CurrencyId] [int] NOT NULL,
 	[AmountPayments] [numeric](38, 10) NULL,
 	[ShareName] NVarchar(300),
-CONSTRAINT [PK_Assets_Contracts_History] PRIMARY KEY CLUSTERED
+CONSTRAINT [PK_DIVIDENDS_AND_COUPONS_History] PRIMARY KEY CLUSTERED
 (
 	[InvestorId] ASC,
 	[ContractId] ASC,
@@ -110,7 +110,7 @@ CONSTRAINT [PK_Assets_Contracts_History] PRIMARY KEY CLUSTERED
 )ON YEAR_Partition_Scheme_Time ([PaymentDateTime])
 )
 GO
-CREATE TABLE [dbo].[Assets_Contracts_History_Last]
+CREATE TABLE [dbo].[DIVIDENDS_AND_COUPONS_History_Last]
 (
 	[InvestorId] [int] NOT NULL,
 	[ContractId] [int] NOT NULL,
@@ -121,7 +121,7 @@ CREATE TABLE [dbo].[Assets_Contracts_History_Last]
 	[CurrencyId] [int] NOT NULL,
 	[AmountPayments] [numeric](38, 10) NULL,
 	[ShareName] NVarchar(300),
-CONSTRAINT [PK_Assets_Contracts_History_Last] PRIMARY KEY CLUSTERED
+CONSTRAINT [PK_DIVIDENDS_AND_COUPONS_History_Last] PRIMARY KEY CLUSTERED
 (
 	[InvestorId] ASC,
 	[ContractId] ASC,

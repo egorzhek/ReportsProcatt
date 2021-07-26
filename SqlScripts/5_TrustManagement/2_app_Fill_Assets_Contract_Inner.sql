@@ -75,7 +75,7 @@ END
 GO
 CREATE OR ALTER PROCEDURE [dbo].[app_Fill_Assets_Contract_Inner]
 (
-    @ContractId int -- = 541873
+    @ContractId int --= 541873
 )
 AS BEGIN
     SET NOCOUNT ON;
@@ -319,7 +319,7 @@ AS BEGIN
 
 	SELECT
 		@LastBeginDate = max([PaymentDateTime])
-	FROM [dbo].[Assets_Contracts_History]
+	FROM [dbo].[DIVIDENDS_AND_COUPONS_History]
 	WHERE InvestorId = @InvestorId and ContractId = @ContractId
 
 	IF @LastBeginDate is null
@@ -329,15 +329,17 @@ AS BEGIN
 	
 	SET @LastBeginDate = DATEADD(DAY, -10, @LastBeginDate);
 
-
-
+	-- чистка за полгода
+	DELETE
+    FROM [dbo].[DIVIDENDS_AND_COUPONS_History_Last]
+    WHERE InvestorId = @InvestorId and ContractId = @ContractId;
 
 
 	WITH CTE
     AS
     (
         SELECT *
-        FROM [dbo].[Assets_Contracts_History]
+        FROM [dbo].[DIVIDENDS_AND_COUPONS_History]
         WHERE InvestorId = @InvestorId and ContractId = @ContractId
     ) 
     MERGE
@@ -397,7 +399,7 @@ AS BEGIN
     AS
     (
         SELECT *
-        FROM [dbo].[Assets_Contracts_History_Last]
+        FROM [dbo].[DIVIDENDS_AND_COUPONS_History_Last]
         WHERE InvestorId = @InvestorId and ContractId = @ContractId
     ) 
     MERGE
@@ -595,10 +597,10 @@ AS BEGIN
 							group by PaymentDate
 						) as D ON A.[Date] = D.PaymentDate;
 
-						SET @INPUT_VALUE_USD = CASE WHEN @SumDayValue > 0 THEN [dbo].f_Round(@SumDayValue * @USDRATE, 2) ELSE 0 END;
-						SET @INPUT_VALUE_EURO = CASE WHEN @SumDayValue > 0 THEN [dbo].f_Round(@SumDayValue * @EURORATE, 2) ELSE 0 END;
-						SET @OUTPUT_VALUE_USD = CASE WHEN @SumDayValue < 0 THEN [dbo].f_Round(@SumDayValue * @USDRATE, 2) ELSE 0 END;
-						SET @OUTPUT_VALUE_EURO = CASE WHEN @SumDayValue < 0 THEN [dbo].f_Round(@SumDayValue * @EURORATE, 2) ELSE 0 END;
+						SET @INPUT_VALUE_USD = CASE WHEN @SumDayValue > 0 THEN [dbo].f_Round(@SumDayValue * (1/NULLIF(@USDRATE,0)), 2) ELSE 0 END;
+						SET @INPUT_VALUE_EURO = CASE WHEN @SumDayValue > 0 THEN [dbo].f_Round(@SumDayValue * (1/NULLIF(@EURORATE,0)), 2) ELSE 0 END;
+						SET @OUTPUT_VALUE_USD = CASE WHEN @SumDayValue < 0 THEN [dbo].f_Round(@SumDayValue * (1/NULLIF(@USDRATE,0)), 2) ELSE 0 END;
+						SET @OUTPUT_VALUE_EURO = CASE WHEN @SumDayValue < 0 THEN [dbo].f_Round(@SumDayValue * (1/NULLIF(@EURORATE,0)), 2) ELSE 0 END;
 
                         WITH CTE
                         AS
@@ -618,8 +620,8 @@ AS BEGIN
                                 [VALUE_RUR] = @SumValue,
 								[USDRATE] = @USDRATE,
 								[EURORATE] = @EURORATE,
-								[VALUE_USD] = [dbo].f_Round(@SumValue * @USDRATE, 2),
-								[VALUE_EURO] = [dbo].f_Round(@SumValue * @EURORATE, 2),
+								[VALUE_USD] = [dbo].f_Round(@SumValue * (1/NULLIF(@USDRATE,0)), 2),
+								[VALUE_EURO] = [dbo].f_Round(@SumValue * (1/NULLIF(@EURORATE,0)), 2),
 								[INPUT_VALUE_RUR] =  CASE WHEN @SumDayValue > 0 THEN @SumDayValue ELSE 0 END,
 								[OUTPUT_VALUE_RUR] = CASE WHEN @SumDayValue < 0 THEN @SumDayValue ELSE 0 END,
 								[INPUT_VALUE_USD]  = @INPUT_VALUE_USD,
@@ -739,10 +741,10 @@ AS BEGIN
 						group by PaymentDate
 					) as D ON A.[Date] = D.PaymentDate;
 
-					SET @INPUT_VALUE_USD = CASE WHEN @SumDayValue > 0 THEN [dbo].f_Round(@SumDayValue * @USDRATE, 2) ELSE 0 END;
-					SET @INPUT_VALUE_EURO = CASE WHEN @SumDayValue > 0 THEN [dbo].f_Round(@SumDayValue * @EURORATE, 2) ELSE 0 END;
-					SET @OUTPUT_VALUE_USD = CASE WHEN @SumDayValue < 0 THEN [dbo].f_Round(@SumDayValue * @USDRATE, 2) ELSE 0 END;
-					SET @OUTPUT_VALUE_EURO = CASE WHEN @SumDayValue < 0 THEN [dbo].f_Round(@SumDayValue * @EURORATE, 2) ELSE 0 END;
+					SET @INPUT_VALUE_USD = CASE WHEN @SumDayValue > 0 THEN [dbo].f_Round(@SumDayValue * (1/NULLIF(@USDRATE,0)), 2) ELSE 0 END;
+					SET @INPUT_VALUE_EURO = CASE WHEN @SumDayValue > 0 THEN [dbo].f_Round(@SumDayValue * (1/NULLIF(@EURORATE,0)), 2) ELSE 0 END;
+					SET @OUTPUT_VALUE_USD = CASE WHEN @SumDayValue < 0 THEN [dbo].f_Round(@SumDayValue * (1/NULLIF(@USDRATE,0)), 2) ELSE 0 END;
+					SET @OUTPUT_VALUE_EURO = CASE WHEN @SumDayValue < 0 THEN [dbo].f_Round(@SumDayValue * (1/NULLIF(@EURORATE,0)), 2) ELSE 0 END;
 
                     WITH CTE
                     AS
@@ -762,8 +764,8 @@ AS BEGIN
                             [VALUE_RUR] = @SumValue,
 							[USDRATE] = @USDRATE,
 							[EURORATE] = @EURORATE,
-							[VALUE_USD] = [dbo].f_Round(@SumValue * @USDRATE, 2),
-							[VALUE_EURO] = [dbo].f_Round(@SumValue * @EURORATE, 2),
+							[VALUE_USD] = [dbo].f_Round(@SumValue * (1/NULLIF(@USDRATE,0)), 2),
+							[VALUE_EURO] = [dbo].f_Round(@SumValue * (1/NULLIF(@EURORATE,0)), 2),
 							[INPUT_VALUE_RUR] =  CASE WHEN @SumDayValue > 0 THEN @SumDayValue ELSE 0 END,
 							[OUTPUT_VALUE_RUR] = CASE WHEN @SumDayValue < 0 THEN @SumDayValue ELSE 0 END,
 							[INPUT_VALUE_USD]  = @INPUT_VALUE_USD,
@@ -909,10 +911,10 @@ AS BEGIN
 					group by PaymentDate
 				) as D ON A.[Date] = D.PaymentDate;
 
-				SET @INPUT_VALUE_USD = CASE WHEN @SumDayValue > 0 THEN [dbo].f_Round(@SumDayValue * @USDRATE, 2) ELSE 0 END;
-				SET @INPUT_VALUE_EURO = CASE WHEN @SumDayValue > 0 THEN [dbo].f_Round(@SumDayValue * @EURORATE, 2) ELSE 0 END;
-				SET @OUTPUT_VALUE_USD = CASE WHEN @SumDayValue < 0 THEN [dbo].f_Round(@SumDayValue * @USDRATE, 2) ELSE 0 END;
-				SET @OUTPUT_VALUE_EURO = CASE WHEN @SumDayValue < 0 THEN [dbo].f_Round(@SumDayValue * @EURORATE, 2) ELSE 0 END;
+				SET @INPUT_VALUE_USD = CASE WHEN @SumDayValue > 0 THEN [dbo].f_Round(@SumDayValue * (1/NULLIF(@USDRATE,0)), 2) ELSE 0 END;
+				SET @INPUT_VALUE_EURO = CASE WHEN @SumDayValue > 0 THEN [dbo].f_Round(@SumDayValue * (1/NULLIF(@EURORATE,0)), 2) ELSE 0 END;
+				SET @OUTPUT_VALUE_USD = CASE WHEN @SumDayValue < 0 THEN [dbo].f_Round(@SumDayValue * (1/NULLIF(@USDRATE,0)), 2) ELSE 0 END;
+				SET @OUTPUT_VALUE_EURO = CASE WHEN @SumDayValue < 0 THEN [dbo].f_Round(@SumDayValue * (1/NULLIF(@EURORATE,0)), 2) ELSE 0 END;
 
                 WITH CTE
                 AS
@@ -932,8 +934,8 @@ AS BEGIN
                         [VALUE_RUR] = @SumValue,
 						[USDRATE] = @USDRATE,
 						[EURORATE] = @EURORATE,
-						[VALUE_USD] = [dbo].f_Round(@SumValue * @USDRATE, 2),
-						[VALUE_EURO] = [dbo].f_Round(@SumValue * @EURORATE, 2),
+						[VALUE_USD] = [dbo].f_Round(@SumValue * (1/NULLIF(@USDRATE,0)), 2),
+						[VALUE_EURO] = [dbo].f_Round(@SumValue * (1/NULLIF(@EURORATE,0)), 2),
 						[INPUT_VALUE_RUR] =  CASE WHEN @SumDayValue > 0 THEN @SumDayValue ELSE 0 END,
 						[OUTPUT_VALUE_RUR] = CASE WHEN @SumDayValue < 0 THEN @SumDayValue ELSE 0 END,
 						[INPUT_VALUE_USD]  = @INPUT_VALUE_USD,
@@ -1052,10 +1054,10 @@ AS BEGIN
 				group by PaymentDate
 			) as D ON A.[Date] = D.PaymentDate;
 
-			SET @INPUT_VALUE_USD = CASE WHEN @SumDayValue > 0 THEN [dbo].f_Round(@SumDayValue * @USDRATE, 2) ELSE 0 END;
-			SET @INPUT_VALUE_EURO = CASE WHEN @SumDayValue > 0 THEN [dbo].f_Round(@SumDayValue * @EURORATE, 2) ELSE 0 END;
-			SET @OUTPUT_VALUE_USD = CASE WHEN @SumDayValue < 0 THEN [dbo].f_Round(@SumDayValue * @USDRATE, 2) ELSE 0 END;
-			SET @OUTPUT_VALUE_EURO = CASE WHEN @SumDayValue < 0 THEN [dbo].f_Round(@SumDayValue * @EURORATE, 2) ELSE 0 END;
+			SET @INPUT_VALUE_USD = CASE WHEN @SumDayValue > 0 THEN [dbo].f_Round(@SumDayValue * (1/NULLIF(@USDRATE,0)), 2) ELSE 0 END;
+			SET @INPUT_VALUE_EURO = CASE WHEN @SumDayValue > 0 THEN [dbo].f_Round(@SumDayValue * (1/NULLIF(@EURORATE,0)), 2) ELSE 0 END;
+			SET @OUTPUT_VALUE_USD = CASE WHEN @SumDayValue < 0 THEN [dbo].f_Round(@SumDayValue * (1/NULLIF(@USDRATE,0)), 2) ELSE 0 END;
+			SET @OUTPUT_VALUE_EURO = CASE WHEN @SumDayValue < 0 THEN [dbo].f_Round(@SumDayValue * (1/NULLIF(@EURORATE,0)), 2) ELSE 0 END;
 
             WITH CTE
             AS
@@ -1075,8 +1077,8 @@ AS BEGIN
                     [VALUE_RUR] = @SumValue,
 					[USDRATE] = @USDRATE,
 					[EURORATE] = @EURORATE,
-					[VALUE_USD] = [dbo].f_Round(@SumValue * @USDRATE, 2),
-					[VALUE_EURO] = [dbo].f_Round(@SumValue * @EURORATE, 2),
+					[VALUE_USD] = [dbo].f_Round(@SumValue * (1/NULLIF(@USDRATE,0)), 2),
+					[VALUE_EURO] = [dbo].f_Round(@SumValue * (1/NULLIF(@EURORATE,0)), 2),
 					[INPUT_VALUE_RUR] =  CASE WHEN @SumDayValue > 0 THEN @SumDayValue ELSE 0 END,
 					[OUTPUT_VALUE_RUR] = CASE WHEN @SumDayValue < 0 THEN @SumDayValue ELSE 0 END,
 					[INPUT_VALUE_USD]  = @INPUT_VALUE_USD,
