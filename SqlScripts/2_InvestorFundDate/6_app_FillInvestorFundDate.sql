@@ -1,6 +1,6 @@
 USE [CacheDB]
 GO
-CREATE PROCEDURE [dbo].[app_FillInvestorFundDate]
+CREATE OR ALTER PROCEDURE [dbo].[app_FillInvestorFundDate]
 (
 	@ParamINVESTOR Int -- инвестор, если NULL, то пересчёт будет по всем инвесторам
 )
@@ -12,7 +12,7 @@ AS BEGIN
 	-- ...
 
 
-	DECLARE @Investor int, @FundId Int
+	DECLARE @Investor int, @FundId Int, @ProcName NVarChar(Max) = OBJECT_NAME(@@PROCID), @Error NVarChar(Max)
 
 	declare obj_cur cursor local fast_forward for
 		-- 
@@ -41,8 +41,18 @@ AS BEGIN
 		@FundId
 	while(@@fetch_status = 0)
 	begin
-		EXEC [dbo].[app_FillInvestorFundDate_Inner]
-				@Investor = @Investor, @FundId = @FundId
+		
+		BEGIN TRY
+			EXEC [dbo].[app_FillInvestorFundDate_Inner]
+					@Investor = @Investor, @FundId = @FundId
+		END TRY
+		BEGIN CATCH
+			SET @Error = ERROR_MESSAGE();
+
+			-- ошибку в лог
+			INSERT INTO [dbo].[ProcessorErrors] ([Error])
+			SELECT @ProcName + ': ' + @Error;
+		END CATCH
 
 
 		fetch next from obj_cur into

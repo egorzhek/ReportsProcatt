@@ -1,6 +1,6 @@
 USE [CacheDB]
 GO
-ALTER PROCEDURE [dbo].[app_FillInvestorDateAssets]
+CREATE OR ALTER PROCEDURE [dbo].[app_FillInvestorDateAssets]
 (
 	@ParamINVESTOR Int -- инвестор, если NULL, то пересчёт будет по всем инвесторам
 )
@@ -21,7 +21,7 @@ AS BEGIN
 
 	DECLARE @CurrentDate Date = GetDate();
 	DECLARE @LastEndDate Date = DateAdd(DAY, -180, @CurrentDate);
-	DECLARE @IsDateAssets Bit;
+	DECLARE @IsDateAssets Bit, @ProcName NVarChar(Max) = OBJECT_NAME(@@PROCID), @Error NVarChar(Max);
 
 	declare @DOC2 Int, @INV2 Int;
 
@@ -66,7 +66,11 @@ AS BEGIN
 		fetch next from inv_cur into
 			@INV2
 		while(@@fetch_status = 0)
-		begin
+		BEGIN
+
+			BEGIN TRY
+
+
 			-- очистка временного кэша
 			delete from [CacheDB].[dbo].[InvestorDateAssetsLast]
 			where Investor_id = @INV2;
@@ -560,10 +564,19 @@ AS BEGIN
 			close docs_cur
 			deallocate docs_cur
 
+
+			END TRY
+			BEGIN CATCH
+				SET @Error = ERROR_MESSAGE();
+
+				-- ошибку в лог
+				INSERT INTO [dbo].[ProcessorErrors] ([Error])
+				SELECT @ProcName + ': ' + @Error;
+			END CATCH
 		
 			fetch next from inv_cur into
 				@INV2
-		end
+		END
 
 		close inv_cur
 		deallocate inv_cur

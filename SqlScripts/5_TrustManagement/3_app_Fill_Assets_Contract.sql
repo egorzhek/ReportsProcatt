@@ -12,7 +12,7 @@ AS BEGIN
 	-- ...
 
 
-	DECLARE @ContractId Int
+	DECLARE @ContractId Int, @ProcName NVarChar(Max) = OBJECT_NAME(@@PROCID), @Error NVarChar(Max)
 
 	declare obj_cur cursor local fast_forward for
 		-- 
@@ -31,8 +31,17 @@ AS BEGIN
 		@ContractId
 	while(@@fetch_status = 0)
 	begin
-		EXEC [dbo].[app_Fill_Assets_Contract_Inner]
-				@ContractId = @ContractId
+		BEGIN TRY
+			EXEC [dbo].[app_Fill_Assets_Contract_Inner]
+					@ContractId = @ContractId
+		END TRY
+		BEGIN CATCH
+			SET @Error = ERROR_MESSAGE();
+
+			-- ошибку в лог
+			INSERT INTO [dbo].[ProcessorErrors] ([Error])
+			SELECT @ProcName + ': ' + @Error;
+		END CATCH
 
 
 		fetch next from obj_cur into
