@@ -73,9 +73,78 @@ AS BEGIN
 	END
 END
 GO
+CREATE OR ALTER PROCEDURE [dbo].[app_SelectPayments]
+(
+	@ContractId Int = 17290
+)
+AS BEGIN
+	-- Юр лиц отсекаем, для них будут нули
+	IF EXISTS
+	(
+		SELECT 1
+		FROM [BAL_DATA_STD].[dbo].OD_FACES AS F WITH(NOLOCK)
+		INNER JOIN [BAL_DATA_STD].[dbo].D_B_CONTRACTS AS C WITH(NOLOCK) ON C.INVESTOR = F.SELF_ID AND C.E_DATE > GETDATE()
+		WHERE
+		C.DOC = @ContractId
+		AND F.S_TYPE = 1
+		AND F.LAST_FLAG = 1
+		AND F.E_DATE > GETDATE()
+	)
+	BEGIN
+		-- пустой запрос
+		SELECT
+			[InvestorId]      = 0,
+			[ContractId]      = 0,
+			[WIRING]          = 0,  -- ID Проводки
+			[TYPE_]           = -1,
+			[PaymentDateTime] = getdate(), -- Дата движения ДС (ЦБ)
+			[Amount_RUR]      = 0.00
+		where 1 = 0; -- запрос без записей
+		
+		return;
+	END
+
+	select distinct
+		[InvestorId]      = z.INVESTOR,
+		[ContractId]      = z.DOC,
+		[WIRING]          = W.ID,  -- ID Проводки
+		[TYPE_]           = -T.TYPE_,
+		[PaymentDateTime] = T.WIRDATE, -- Дата движения ДС (ЦБ)
+		[Amount_RUR]      = dbo.f_Round(-T.EQ_ * T.TYPE_, 2)
+	FROM [BAL_DATA_STD].[dbo].D_B_CONTRACTS      AS Z WITH(NOLOCK)
+	INNER JOIN [BAL_DATA_STD].[dbo].OD_ACC_PLANS AS P WITH(NOLOCK)    on P.SYS_NAME = 'MONEY'
+	INNER JOIN [BAL_DATA_STD].[dbo].OD_BALANCES  AS B WITH(NOLOCK)    on B.ACC_PLAN = P.ID and B.SYS_NAME = 'ФОНД'
+	INNER JOIN [BAL_DATA_STD].[dbo].OD_RESTS     AS R WITH(NOLOCK)    on R.BAL_ACC = B.ID and R.REG_1 = Z.INVESTOR and R.REG_3 = Z.DOC
+	INNER JOIN [BAL_DATA_STD].[dbo].OD_TURNS     AS T WITH(NOLOCK)    on T.REST = R.ID and T.WIRDATE < GetDate()
+	INNER JOIN [BAL_DATA_STD].[dbo].OD_WIRING    AS W WITH(NOLOCK)    on W.ID = T.WIRING
+
+	LEFT JOIN [BAL_DATA_STD].[dbo].OD_TURNS      AS rt WITH(NOLOCK)   on rt.WIRING = W.ID and rt.TYPE_ = -T.TYPE_
+	LEFT JOIN [BAL_DATA_STD].[dbo].OD_RESTS      AS rr WITH(NOLOCK)   on rr.ID     = rt.REST
+	LEFT JOIN [BAL_DATA_STD].[dbo].OD_BALANCES   AS rb WITH(NOLOCK)   on rb.ID     = rr.BAL_ACC
+	LEFT JOIN [BAL_DATA_STD].[dbo].OD_VALUES     AS sv WITH(NOLOCK)   on sv.ID     = rr.REG_2
+	LEFT JOIN [BAL_DATA_STD].[dbo].OD_SHARES     AS sh WITH(NOLOCK)   on sh.ID     = sv.ID
+	LEFT JOIN [BAL_DATA_STD].[dbo].OD_SYS_TABS   AS sc WITH(NOLOCK)   on sc.CODE   = 'SHARE_CLASS' and sc.NUM = sh.CLASS
+	LEFT JOIN [BAL_DATA_STD].[dbo].OD_VALUES     AS nv WITH(NOLOCK)	  on nv.ID     = sh.NOM_VAL
+
+	INNER JOIN [BAL_DATA_STD].[dbo].OD_STEPS     AS S WITH(NOLOCK)    on S.ID = W.O_STEP
+	INNER JOIN [BAL_DATA_STD].[dbo].OD_DOCS      AS D WITH(NOLOCK)    on D.ID = S.DOC
+	INNER JOIN [BAL_DATA_STD].[dbo].OD_DOLS      AS DOL WITH(NOLOCK)  on DOL.DOC = d.ID -- возьмем подвалы документов
+	LEFT JOIN [BAL_DATA_STD].[dbo].D_OP_VAL      AS DV WITH(NOLOCK)   on DV.DOC = D.ID and DV.DESCR in (1743,1766) and DV.LINE = DOL.ID -- узнаем коды валюты операции 
+	LEFT JOIN [BAL_DATA_STD].[dbo].OD_VALUES     AS VO WITH(NOLOCK)   on VO.ID = DV.VAL -- Получим код валюты
+	LEFT JOIN [BAL_DATA_STD].[dbo].D_OP_VAL      AS DV1 WITH(NOLOCK)  on DV1.DOC = D.Id and DV1.DESCR in (1746,1765) and DV1.LINE = DOL.ID -- получим сумму операции
+	LEFT JOIN [BAL_DATA_STD].[dbo].D_OP_VAL      AS DV2 WITH(NOLOCK)  on DV2.DOC = D.Id and DV2.DESCR in (1742,1763,1759,1772) and DV2.LINE = DOL.ID and DV2.VAL = Z.DOC -- т.к. одним документом можно провести деньги по разным договорам, оставим только те операции, которые касаются конкретного портфеля.
+	WHERE
+	T.IS_PLAN = 'F'
+	and w.ID is not null
+	and T.VALUE_ <> 0
+	and z.DOC = @ContractId
+	and S.S_TYPE not in (1052, 7612481)
+	and DV2.VAL is not null;
+END
+GO
 CREATE OR ALTER PROCEDURE [dbo].[app_Fill_Assets_Contract_Inner]
 (
-    @ContractId int --= 541873
+    @ContractId int = 2257804
 )
 AS BEGIN
     SET NOCOUNT ON;
@@ -97,6 +166,19 @@ AS BEGIN
 		@INPUT_COUPONS_RUR decimal(38,10),
 		@INPUT_COUPONS_USD decimal(38,10),
 		@INPUT_COUPONS_EURO decimal(38,10);
+
+
+	DECLARE
+		@AmountPayments_RUR decimal(38,10),
+		@AmountPayments_USD decimal(38,10),
+		@AmountPayments_EURO decimal(38,10),			
+		@INPUT_AmountPayments_RUR decimal(38,10),
+		@INPUT_AmountPayments_USD decimal(38,10),
+		@INPUT_AmountPayments_EURO decimal(38,10),
+		@OUTPUT_AmountPayments_RUR decimal(38,10),
+		@OUTPUT_AmountPayments_USD decimal(38,10),
+		@OUTPUT_AmountPayments_EURO decimal(38,10);
+
 
 	DECLARE @USDRATE_Last decimal(38,10), @EURORATE_Last decimal(38,10);
 
@@ -127,6 +209,12 @@ AS BEGIN
 
 	BEGIN TRY
         DROP TABLE #TempContract22;
+    END TRY
+    BEGIN CATCH
+    END CATCH;
+
+	BEGIN TRY
+        DROP TABLE #TempContract32;
     END TRY
     BEGIN CATCH
     END CATCH;
@@ -244,10 +332,6 @@ AS BEGIN
 			RT.[E_DATE] DESC,
 			RT.[OFICDATE] DESC
 	) AS VE;
-
-
-
-
 
 
 	-- минимальная и максимальная дата
@@ -399,12 +483,11 @@ AS BEGIN
 		AmountPayments_EURO = [dbo].f_Round(AmountPayments_EURO, 2)
 	from #TempContract22 as a;
 
-
 	SET @LastBeginDate = NULL-- взять максимальную дату из постоянного кэша и вычесть ещё пару дней на всякий случай (merge простит)
 
 	SELECT
 		@LastBeginDate = max([PaymentDateTime])
-	FROM [dbo].[DIVIDENDS_AND_COUPONS_History]
+	FROM [dbo].[DIVIDENDS_AND_COUPONS_History] nolock
 	WHERE InvestorId = @InvestorId and ContractId = @ContractId
 
 	IF @LastBeginDate is null
@@ -497,7 +580,75 @@ AS BEGIN
 		[AmountPayments_USD] = s.[AmountPayments_USD],
 		[AmountPayments_EURO] = s.[AmountPayments_EURO];
 
+	
+	CREATE TABLE #TempContract32
+	(
+		InvestorId Int,
+		ContractId Int,
+		WIRING Int,
+		TYPE_ Int,
+		PaymentDateTime Datetime,
+		Amount_RUR decimal (38,10),
 
+		PaymentDate date,
+		[USDRATE] decimal(38,10),
+		[EURORATE] decimal(38,10),
+		[AmountPayments_RUR] decimal(38,10),
+		[AmountPayments_USD] decimal(38,10),
+		[AmountPayments_EURO] decimal(38,10)
+	);
+
+	INSERT INTO #TempContract32
+	(
+		InvestorId, ContractId, WIRING, TYPE_, PaymentDateTime, Amount_RUR
+	)
+	EXEC [dbo].[app_SelectPayments]
+		@ContractId = @ContractId;
+	
+	-- вытягиваем курсы валют
+	UPDATE B SET
+		[USDRATE]  = VB.RATE,
+		[EURORATE] = VE.RATE,
+		[PaymentDate] = [PaymentDateTime],
+		[AmountPayments_RUR] = [Amount_RUR]
+	FROM #TempContract32 AS B
+	--  в долларах
+	OUTER APPLY
+	(
+		SELECT TOP 1
+			RT.[RATE]
+		FROM [BAL_DATA_STD].[dbo].[OD_VALUES_RATES] AS RT
+		WHERE RT.[VALUE_ID] = 2 -- доллары
+		AND RT.[E_DATE] >= B.[PaymentDateTime] and RT.[OFICDATE] < B.[PaymentDateTime]
+		ORDER BY
+			case when DATEPART(YEAR,RT.[E_DATE]) = 9999 then 1 else 0 end ASC,
+			RT.[E_DATE] DESC,
+			RT.[OFICDATE] DESC
+	) AS VB
+	--  в евро
+	OUTER APPLY
+	(
+		SELECT TOP 1
+			RT.[RATE]
+		FROM [BAL_DATA_STD].[dbo].[OD_VALUES_RATES] AS RT
+		WHERE RT.[VALUE_ID] = 5 -- евро
+		AND RT.[E_DATE] >= B.[PaymentDateTime] and RT.[OFICDATE] < B.[PaymentDateTime]
+		ORDER BY
+			case when DATEPART(YEAR,RT.[E_DATE]) = 9999 then 1 else 0 end ASC,
+			RT.[E_DATE] DESC,
+			RT.[OFICDATE] DESC
+	) AS VE;
+
+
+	UPDATE B SET
+		AmountPayments_USD = AmountPayments_RUR * (1.00/USDRATE),
+		AmountPayments_EURO = AmountPayments_RUR * (1.00/EURORATE)
+	FROM #TempContract32 AS B;
+
+	update a set
+		AmountPayments_USD = [dbo].f_Round(AmountPayments_USD, 2),
+		AmountPayments_EURO = [dbo].f_Round(AmountPayments_EURO, 2)
+	from #TempContract32 as a;
 
 
 	WITH CTE
@@ -578,11 +729,6 @@ AS BEGIN
 		[AmountPayments_EURO] = s.[AmountPayments_EURO];
 
 	
-
-
-
-
-
 
 
 
@@ -727,6 +873,34 @@ AS BEGIN
 						SET @OUTPUT_VALUE_USD = CASE WHEN @SumDayValue < 0 THEN [dbo].f_Round(@SumDayValue * (1/NULLIF(@USDRATE,0)), 2) ELSE 0 END;
 						SET @OUTPUT_VALUE_EURO = CASE WHEN @SumDayValue < 0 THEN [dbo].f_Round(@SumDayValue * (1/NULLIF(@EURORATE,0)), 2) ELSE 0 END;
 
+						
+
+
+
+						set @AmountPayments_RUR = NULL
+						set @AmountPayments_USD = NULL 
+						set @AmountPayments_EURO = NULL 
+						
+						select
+							@AmountPayments_RUR = sum(AmountPayments_RUR),
+							@AmountPayments_USD = sum(AmountPayments_USD),
+							@AmountPayments_EURO = sum(AmountPayments_EURO)
+						from #TempContract32
+						where PaymentDate = @OldDate
+						group by PaymentDate;
+
+						set @AmountPayments_RUR  = isnull(@AmountPayments_RUR, 0)
+						set @AmountPayments_USD  = isnull(@AmountPayments_USD, 0) 
+						set @AmountPayments_EURO = isnull(@AmountPayments_EURO, 0)
+
+						SET @INPUT_AmountPayments_RUR  = CASE WHEN @AmountPayments_RUR > 0 THEN @AmountPayments_RUR ELSE 0 END;
+						SET @INPUT_AmountPayments_USD  = CASE WHEN @AmountPayments_USD > 0 THEN @AmountPayments_USD ELSE 0 END;
+						SET @INPUT_AmountPayments_EURO = CASE WHEN @AmountPayments_EURO > 0 THEN @AmountPayments_EURO ELSE 0 END;
+						SET @OUTPUT_AmountPayments_RUR  = CASE WHEN @AmountPayments_RUR < 0 THEN @AmountPayments_RUR ELSE 0 END;
+						SET @OUTPUT_AmountPayments_USD  = CASE WHEN @AmountPayments_USD < 0 THEN @AmountPayments_USD ELSE 0 END;
+						SET @OUTPUT_AmountPayments_EURO = CASE WHEN @AmountPayments_EURO < 0 THEN @AmountPayments_EURO ELSE 0 END;
+
+
                         WITH CTE
                         AS
                         (
@@ -758,7 +932,15 @@ AS BEGIN
 								[INPUT_DIVIDENTS_EURO] = @INPUT_DIVIDENTS_EURO,
 								[INPUT_COUPONS_RUR] = @INPUT_COUPONS_RUR,
 								[INPUT_COUPONS_USD] = @INPUT_COUPONS_USD,
-								[INPUT_COUPONS_EURO] = @INPUT_COUPONS_EURO
+								[INPUT_COUPONS_EURO] = @INPUT_COUPONS_EURO,
+
+								[INPUT_AmountPayments_RUR] = @INPUT_AmountPayments_RUR,
+								[INPUT_AmountPayments_USD] = @INPUT_AmountPayments_USD,
+								[INPUT_AmountPayments_EURO] = @INPUT_AmountPayments_EURO,
+								[OUTPUT_AmountPayments_RUR] = @OUTPUT_AmountPayments_RUR,
+								[OUTPUT_AmountPayments_USD] = @OUTPUT_AmountPayments_USD,
+								[OUTPUT_AmountPayments_EURO] = @OUTPUT_AmountPayments_EURO
+
 								
                         ) AS s
                         on t.InvestorId = s.InvestorId and t.ContractId = s.ContractId and t.[Date] = s.[Date]
@@ -783,7 +965,14 @@ AS BEGIN
 								[INPUT_DIVIDENTS_EURO],
 								[INPUT_COUPONS_RUR],
 								[INPUT_COUPONS_USD],
-								[INPUT_COUPONS_EURO]
+								[INPUT_COUPONS_EURO],
+
+								[INPUT_AmountPayments_RUR],
+								[INPUT_AmountPayments_USD],
+								[INPUT_AmountPayments_EURO],
+								[OUTPUT_AmountPayments_RUR],
+								[OUTPUT_AmountPayments_USD],
+								[OUTPUT_AmountPayments_EURO]
                             )
                             values (
                                 s.[InvestorId],
@@ -805,7 +994,14 @@ AS BEGIN
 								s.[INPUT_DIVIDENTS_EURO],
 								s.[INPUT_COUPONS_RUR],
 								s.[INPUT_COUPONS_USD],
-								s.[INPUT_COUPONS_EURO]
+								s.[INPUT_COUPONS_EURO],
+								
+								s.[INPUT_AmountPayments_RUR],
+								s.[INPUT_AmountPayments_USD],
+								s.[INPUT_AmountPayments_EURO],
+								s.[OUTPUT_AmountPayments_RUR],
+								s.[OUTPUT_AmountPayments_USD],
+								s.[OUTPUT_AmountPayments_EURO]
                             )
                         when matched
                         then update set
@@ -825,7 +1021,14 @@ AS BEGIN
 							[INPUT_DIVIDENTS_EURO] = s.[INPUT_DIVIDENTS_EURO],
 							[INPUT_COUPONS_RUR] = s.[INPUT_COUPONS_RUR],
 							[INPUT_COUPONS_USD] = s.[INPUT_COUPONS_USD],
-							[INPUT_COUPONS_EURO] = s.[INPUT_COUPONS_EURO];
+							[INPUT_COUPONS_EURO] = s.[INPUT_COUPONS_EURO],
+
+							[INPUT_AmountPayments_RUR] = s.[INPUT_AmountPayments_RUR],
+							[INPUT_AmountPayments_USD] = s.[INPUT_AmountPayments_USD],
+							[INPUT_AmountPayments_EURO] = s.[INPUT_AmountPayments_EURO],
+							[OUTPUT_AmountPayments_RUR] = s.[OUTPUT_AmountPayments_RUR],
+							[OUTPUT_AmountPayments_USD] = s.[OUTPUT_AmountPayments_USD],
+							[OUTPUT_AmountPayments_EURO] = s.[OUTPUT_AmountPayments_EURO];
                     END
                 END
                 ELSE
@@ -871,6 +1074,34 @@ AS BEGIN
 					SET @OUTPUT_VALUE_USD = CASE WHEN @SumDayValue < 0 THEN [dbo].f_Round(@SumDayValue * (1/NULLIF(@USDRATE,0)), 2) ELSE 0 END;
 					SET @OUTPUT_VALUE_EURO = CASE WHEN @SumDayValue < 0 THEN [dbo].f_Round(@SumDayValue * (1/NULLIF(@EURORATE,0)), 2) ELSE 0 END;
 
+
+
+					set @AmountPayments_RUR = NULL
+					set @AmountPayments_USD = NULL 
+					set @AmountPayments_EURO = NULL 
+					
+					select
+						@AmountPayments_RUR = sum(AmountPayments_RUR),
+						@AmountPayments_USD = sum(AmountPayments_USD),
+						@AmountPayments_EURO = sum(AmountPayments_EURO)
+					from #TempContract32
+					where PaymentDate = @OldDate
+					group by PaymentDate;
+
+					set @AmountPayments_RUR  = isnull(@AmountPayments_RUR, 0)
+					set @AmountPayments_USD  = isnull(@AmountPayments_USD, 0) 
+					set @AmountPayments_EURO = isnull(@AmountPayments_EURO, 0)
+
+					SET @INPUT_AmountPayments_RUR  = CASE WHEN @AmountPayments_RUR > 0 THEN @AmountPayments_RUR ELSE 0 END;
+					SET @INPUT_AmountPayments_USD  = CASE WHEN @AmountPayments_USD > 0 THEN @AmountPayments_USD ELSE 0 END;
+					SET @INPUT_AmountPayments_EURO = CASE WHEN @AmountPayments_EURO > 0 THEN @AmountPayments_EURO ELSE 0 END;
+					SET @OUTPUT_AmountPayments_RUR  = CASE WHEN @AmountPayments_RUR < 0 THEN @AmountPayments_RUR ELSE 0 END;
+					SET @OUTPUT_AmountPayments_USD  = CASE WHEN @AmountPayments_USD < 0 THEN @AmountPayments_USD ELSE 0 END;
+					SET @OUTPUT_AmountPayments_EURO = CASE WHEN @AmountPayments_EURO < 0 THEN @AmountPayments_EURO ELSE 0 END;
+
+
+
+
                     WITH CTE
                     AS
                     (
@@ -902,7 +1133,14 @@ AS BEGIN
 							[INPUT_DIVIDENTS_EURO] = @INPUT_DIVIDENTS_EURO,
 							[INPUT_COUPONS_RUR] = @INPUT_COUPONS_RUR,
 							[INPUT_COUPONS_USD] = @INPUT_COUPONS_USD,
-							[INPUT_COUPONS_EURO] = @INPUT_COUPONS_EURO
+							[INPUT_COUPONS_EURO] = @INPUT_COUPONS_EURO,
+
+							[INPUT_AmountPayments_RUR] = @INPUT_AmountPayments_RUR,
+							[INPUT_AmountPayments_USD] = @INPUT_AmountPayments_USD,
+							[INPUT_AmountPayments_EURO] = @INPUT_AmountPayments_EURO,
+							[OUTPUT_AmountPayments_RUR] = @OUTPUT_AmountPayments_RUR,
+							[OUTPUT_AmountPayments_USD] = @OUTPUT_AmountPayments_USD,
+							[OUTPUT_AmountPayments_EURO] = @OUTPUT_AmountPayments_EURO
                     ) AS s
                     on t.InvestorId = s.InvestorId and t.ContractId = s.ContractId and t.[Date] = s.[Date]
                     when not matched
@@ -926,7 +1164,14 @@ AS BEGIN
 							[INPUT_DIVIDENTS_EURO],
 							[INPUT_COUPONS_RUR],
 							[INPUT_COUPONS_USD],
-							[INPUT_COUPONS_EURO]
+							[INPUT_COUPONS_EURO],
+
+							[INPUT_AmountPayments_RUR],
+							[INPUT_AmountPayments_USD],
+							[INPUT_AmountPayments_EURO],
+							[OUTPUT_AmountPayments_RUR],
+							[OUTPUT_AmountPayments_USD],
+							[OUTPUT_AmountPayments_EURO]
                         )
                         values (
                             s.[InvestorId],
@@ -948,7 +1193,14 @@ AS BEGIN
 							s.[INPUT_DIVIDENTS_EURO],
 							s.[INPUT_COUPONS_RUR],
 							s.[INPUT_COUPONS_USD],
-							s.[INPUT_COUPONS_EURO]
+							s.[INPUT_COUPONS_EURO],
+
+							s.[INPUT_AmountPayments_RUR],
+							s.[INPUT_AmountPayments_USD],
+							s.[INPUT_AmountPayments_EURO],
+							s.[OUTPUT_AmountPayments_RUR],
+							s.[OUTPUT_AmountPayments_USD],
+							s.[OUTPUT_AmountPayments_EURO]
                         )
                     when matched
                     then update set
@@ -968,7 +1220,14 @@ AS BEGIN
 						[INPUT_DIVIDENTS_EURO] = s.[INPUT_DIVIDENTS_EURO],
 						[INPUT_COUPONS_RUR] = s.[INPUT_COUPONS_RUR],
 						[INPUT_COUPONS_USD] = s.[INPUT_COUPONS_USD],
-						[INPUT_COUPONS_EURO] = s.[INPUT_COUPONS_EURO];
+						[INPUT_COUPONS_EURO] = s.[INPUT_COUPONS_EURO],
+
+						[INPUT_AmountPayments_RUR] = s.[INPUT_AmountPayments_RUR],
+						[INPUT_AmountPayments_USD] = s.[INPUT_AmountPayments_USD],
+						[INPUT_AmountPayments_EURO] = s.[INPUT_AmountPayments_EURO],
+						[OUTPUT_AmountPayments_RUR] = s.[OUTPUT_AmountPayments_RUR],
+						[OUTPUT_AmountPayments_USD] = s.[OUTPUT_AmountPayments_USD],
+						[OUTPUT_AmountPayments_EURO] = s.[OUTPUT_AmountPayments_EURO];
                 END
 
                 set @OldDate = @Date;
@@ -1041,6 +1300,34 @@ AS BEGIN
 				SET @OUTPUT_VALUE_USD = CASE WHEN @SumDayValue < 0 THEN [dbo].f_Round(@SumDayValue * (1/NULLIF(@USDRATE,0)), 2) ELSE 0 END;
 				SET @OUTPUT_VALUE_EURO = CASE WHEN @SumDayValue < 0 THEN [dbo].f_Round(@SumDayValue * (1/NULLIF(@EURORATE,0)), 2) ELSE 0 END;
 
+
+
+
+				set @AmountPayments_RUR = NULL
+				set @AmountPayments_USD = NULL 
+				set @AmountPayments_EURO = NULL 
+				
+				select
+					@AmountPayments_RUR = sum(AmountPayments_RUR),
+					@AmountPayments_USD = sum(AmountPayments_USD),
+					@AmountPayments_EURO = sum(AmountPayments_EURO)
+				from #TempContract32
+				where PaymentDate = @OldDate
+				group by PaymentDate;
+
+				set @AmountPayments_RUR  = isnull(@AmountPayments_RUR, 0)
+				set @AmountPayments_USD  = isnull(@AmountPayments_USD, 0) 
+				set @AmountPayments_EURO = isnull(@AmountPayments_EURO, 0)
+
+				SET @INPUT_AmountPayments_RUR  = CASE WHEN @AmountPayments_RUR > 0 THEN @AmountPayments_RUR ELSE 0 END;
+				SET @INPUT_AmountPayments_USD  = CASE WHEN @AmountPayments_USD > 0 THEN @AmountPayments_USD ELSE 0 END;
+				SET @INPUT_AmountPayments_EURO = CASE WHEN @AmountPayments_EURO > 0 THEN @AmountPayments_EURO ELSE 0 END;
+				SET @OUTPUT_AmountPayments_RUR  = CASE WHEN @AmountPayments_RUR < 0 THEN @AmountPayments_RUR ELSE 0 END;
+				SET @OUTPUT_AmountPayments_USD  = CASE WHEN @AmountPayments_USD < 0 THEN @AmountPayments_USD ELSE 0 END;
+				SET @OUTPUT_AmountPayments_EURO = CASE WHEN @AmountPayments_EURO < 0 THEN @AmountPayments_EURO ELSE 0 END;
+
+
+
                 WITH CTE
                 AS
                 (
@@ -1072,7 +1359,14 @@ AS BEGIN
 						[INPUT_DIVIDENTS_EURO] = @INPUT_DIVIDENTS_EURO,
 						[INPUT_COUPONS_RUR] = @INPUT_COUPONS_RUR,
 						[INPUT_COUPONS_USD] = @INPUT_COUPONS_USD,
-						[INPUT_COUPONS_EURO] = @INPUT_COUPONS_EURO
+						[INPUT_COUPONS_EURO] = @INPUT_COUPONS_EURO,
+
+						[INPUT_AmountPayments_RUR] = @INPUT_AmountPayments_RUR,
+						[INPUT_AmountPayments_USD] = @INPUT_AmountPayments_USD,
+						[INPUT_AmountPayments_EURO] = @INPUT_AmountPayments_EURO,
+						[OUTPUT_AmountPayments_RUR] = @OUTPUT_AmountPayments_RUR,
+						[OUTPUT_AmountPayments_USD] = @OUTPUT_AmountPayments_USD,
+						[OUTPUT_AmountPayments_EURO] = @OUTPUT_AmountPayments_EURO
                 ) AS s
                 on t.InvestorId = s.InvestorId and t.ContractId = s.ContractId and t.[Date] = s.[Date]
                 when not matched
@@ -1096,7 +1390,14 @@ AS BEGIN
 						[INPUT_DIVIDENTS_EURO],
 						[INPUT_COUPONS_RUR],
 						[INPUT_COUPONS_USD],
-						[INPUT_COUPONS_EURO]
+						[INPUT_COUPONS_EURO],
+
+						[INPUT_AmountPayments_RUR],
+						[INPUT_AmountPayments_USD],
+						[INPUT_AmountPayments_EURO],
+						[OUTPUT_AmountPayments_RUR],
+						[OUTPUT_AmountPayments_USD],
+						[OUTPUT_AmountPayments_EURO]
                     )
                     values (
                         s.[InvestorId],
@@ -1118,7 +1419,13 @@ AS BEGIN
 						s.[INPUT_DIVIDENTS_EURO],
 						s.[INPUT_COUPONS_RUR],
 						s.[INPUT_COUPONS_USD],
-						s.[INPUT_COUPONS_EURO]
+						s.[INPUT_COUPONS_EURO],
+						s.[INPUT_AmountPayments_RUR],
+						s.[INPUT_AmountPayments_USD],
+						s.[INPUT_AmountPayments_EURO],
+						s.[OUTPUT_AmountPayments_RUR],
+						s.[OUTPUT_AmountPayments_USD],
+						s.[OUTPUT_AmountPayments_EURO]
                     )
                 when matched
                 then update set
@@ -1138,7 +1445,14 @@ AS BEGIN
 					[INPUT_DIVIDENTS_EURO] = s.[INPUT_DIVIDENTS_EURO],
 					[INPUT_COUPONS_RUR] = s.[INPUT_COUPONS_RUR],
 					[INPUT_COUPONS_USD] = s.[INPUT_COUPONS_USD],
-					[INPUT_COUPONS_EURO] = s.[INPUT_COUPONS_EURO];
+					[INPUT_COUPONS_EURO] = s.[INPUT_COUPONS_EURO],
+
+					[INPUT_AmountPayments_RUR] = s.[INPUT_AmountPayments_RUR],
+					[INPUT_AmountPayments_USD] = s.[INPUT_AmountPayments_USD],
+					[INPUT_AmountPayments_EURO] = s.[INPUT_AmountPayments_EURO],
+					[OUTPUT_AmountPayments_RUR] = s.[OUTPUT_AmountPayments_RUR],
+					[OUTPUT_AmountPayments_USD] = s.[OUTPUT_AmountPayments_USD],
+					[OUTPUT_AmountPayments_EURO] = s.[OUTPUT_AmountPayments_EURO];
             END
         END
         ELSE
@@ -1184,6 +1498,31 @@ AS BEGIN
 			SET @OUTPUT_VALUE_USD = CASE WHEN @SumDayValue < 0 THEN [dbo].f_Round(@SumDayValue * (1/NULLIF(@USDRATE,0)), 2) ELSE 0 END;
 			SET @OUTPUT_VALUE_EURO = CASE WHEN @SumDayValue < 0 THEN [dbo].f_Round(@SumDayValue * (1/NULLIF(@EURORATE,0)), 2) ELSE 0 END;
 
+			
+			set @AmountPayments_RUR = NULL
+			set @AmountPayments_USD = NULL 
+			set @AmountPayments_EURO = NULL 
+			
+			select
+				@AmountPayments_RUR = sum(AmountPayments_RUR),
+				@AmountPayments_USD = sum(AmountPayments_USD),
+				@AmountPayments_EURO = sum(AmountPayments_EURO)
+			from #TempContract32
+			where PaymentDate = @OldDate
+			group by PaymentDate;
+
+			set @AmountPayments_RUR  = isnull(@AmountPayments_RUR, 0)
+			set @AmountPayments_USD  = isnull(@AmountPayments_USD, 0) 
+			set @AmountPayments_EURO = isnull(@AmountPayments_EURO, 0)
+
+			SET @INPUT_AmountPayments_RUR  = CASE WHEN @AmountPayments_RUR > 0 THEN @AmountPayments_RUR ELSE 0 END;
+			SET @INPUT_AmountPayments_USD  = CASE WHEN @AmountPayments_USD > 0 THEN @AmountPayments_USD ELSE 0 END;
+			SET @INPUT_AmountPayments_EURO = CASE WHEN @AmountPayments_EURO > 0 THEN @AmountPayments_EURO ELSE 0 END;
+			SET @OUTPUT_AmountPayments_RUR  = CASE WHEN @AmountPayments_RUR < 0 THEN @AmountPayments_RUR ELSE 0 END;
+			SET @OUTPUT_AmountPayments_USD  = CASE WHEN @AmountPayments_USD < 0 THEN @AmountPayments_USD ELSE 0 END;
+			SET @OUTPUT_AmountPayments_EURO = CASE WHEN @AmountPayments_EURO < 0 THEN @AmountPayments_EURO ELSE 0 END;
+
+
             WITH CTE
             AS
             (
@@ -1215,7 +1554,14 @@ AS BEGIN
 					[INPUT_DIVIDENTS_EURO] = @INPUT_DIVIDENTS_EURO,
 					[INPUT_COUPONS_RUR] = @INPUT_COUPONS_RUR,
 					[INPUT_COUPONS_USD] = @INPUT_COUPONS_USD,
-					[INPUT_COUPONS_EURO] = @INPUT_COUPONS_EURO
+					[INPUT_COUPONS_EURO] = @INPUT_COUPONS_EURO,
+
+					[INPUT_AmountPayments_RUR] = @INPUT_AmountPayments_RUR,
+					[INPUT_AmountPayments_USD] = @INPUT_AmountPayments_USD,
+					[INPUT_AmountPayments_EURO] = @INPUT_AmountPayments_EURO,
+					[OUTPUT_AmountPayments_RUR] = @OUTPUT_AmountPayments_RUR,
+					[OUTPUT_AmountPayments_USD] = @OUTPUT_AmountPayments_USD,
+					[OUTPUT_AmountPayments_EURO] = @OUTPUT_AmountPayments_EURO
             ) AS s
             on t.InvestorId = s.InvestorId and t.ContractId = s.ContractId and t.[Date] = s.[Date]
             when not matched
@@ -1239,7 +1585,14 @@ AS BEGIN
 					[INPUT_DIVIDENTS_EURO],
 					[INPUT_COUPONS_RUR],
 					[INPUT_COUPONS_USD],
-					[INPUT_COUPONS_EURO]
+					[INPUT_COUPONS_EURO],
+
+					[INPUT_AmountPayments_RUR],
+					[INPUT_AmountPayments_USD],
+					[INPUT_AmountPayments_EURO],
+					[OUTPUT_AmountPayments_RUR],
+					[OUTPUT_AmountPayments_USD],
+					[OUTPUT_AmountPayments_EURO]
                 )
                 values (
                     s.[InvestorId],
@@ -1261,7 +1614,14 @@ AS BEGIN
 					s.[INPUT_DIVIDENTS_EURO],
 					s.[INPUT_COUPONS_RUR],
 					s.[INPUT_COUPONS_USD],
-					s.[INPUT_COUPONS_EURO]
+					s.[INPUT_COUPONS_EURO],
+
+					s.[INPUT_AmountPayments_RUR],
+					s.[INPUT_AmountPayments_USD],
+					s.[INPUT_AmountPayments_EURO],
+					s.[OUTPUT_AmountPayments_RUR],
+					s.[OUTPUT_AmountPayments_USD],
+					s.[OUTPUT_AmountPayments_EURO]
                 )
             when matched
             then update set
@@ -1281,7 +1641,14 @@ AS BEGIN
 				[INPUT_DIVIDENTS_EURO] = s.[INPUT_DIVIDENTS_EURO],
 				[INPUT_COUPONS_RUR] = s.[INPUT_COUPONS_RUR],
 				[INPUT_COUPONS_USD] = s.[INPUT_COUPONS_USD],
-				[INPUT_COUPONS_EURO] = s.[INPUT_COUPONS_EURO];
+				[INPUT_COUPONS_EURO] = s.[INPUT_COUPONS_EURO],
+
+				[INPUT_AmountPayments_RUR] = s.[INPUT_AmountPayments_RUR],
+				[INPUT_AmountPayments_USD] = s.[INPUT_AmountPayments_USD],
+				[INPUT_AmountPayments_EURO] = s.[INPUT_AmountPayments_EURO],
+				[OUTPUT_AmountPayments_RUR] = s.[OUTPUT_AmountPayments_RUR],
+				[OUTPUT_AmountPayments_USD] = s.[OUTPUT_AmountPayments_USD],
+				[OUTPUT_AmountPayments_EURO] = s.[OUTPUT_AmountPayments_EURO];
         END
     END
     
@@ -1305,6 +1672,12 @@ AS BEGIN
 
 	BEGIN TRY
         DROP TABLE #TempContract3
+    END TRY
+    BEGIN CATCH
+    END CATCH;
+
+	BEGIN TRY
+        DROP TABLE #TempContract32;
     END TRY
     BEGIN CATCH
     END CATCH;

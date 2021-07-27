@@ -29,6 +29,13 @@ CREATE TABLE [dbo].[Assets_Contracts]
 	[INPUT_COUPONS_USD] [numeric](38, 10) NULL,
 	[INPUT_COUPONS_EURO] [numeric](38, 10) NULL,
 
+	[INPUT_AmountPayments_RUR] [numeric](38, 10) NULL,
+	[INPUT_AmountPayments_USD] [numeric](38, 10) NULL,
+	[INPUT_AmountPayments_EURO] [numeric](38, 10) NULL,
+	[OUTPUT_AmountPayments_RUR] [numeric](38, 10) NULL,
+	[OUTPUT_AmountPayments_USD] [numeric](38, 10) NULL,
+	[OUTPUT_AmountPayments_EURO] [numeric](38, 10) NULL,
+
 CONSTRAINT [PK_Assets_Contracts] PRIMARY KEY CLUSTERED
 (
 	[InvestorId] ASC,
@@ -65,6 +72,13 @@ CREATE TABLE [dbo].[Assets_ContractsLast]
 	[INPUT_COUPONS_RUR] [numeric](38, 10) NULL,
 	[INPUT_COUPONS_USD] [numeric](38, 10) NULL,
 	[INPUT_COUPONS_EURO] [numeric](38, 10) NULL,
+
+	[INPUT_AmountPayments_RUR] [numeric](38, 10) NULL,
+	[INPUT_AmountPayments_USD] [numeric](38, 10) NULL,
+	[INPUT_AmountPayments_EURO] [numeric](38, 10) NULL,
+	[OUTPUT_AmountPayments_RUR] [numeric](38, 10) NULL,
+	[OUTPUT_AmountPayments_USD] [numeric](38, 10) NULL,
+	[OUTPUT_AmountPayments_EURO] [numeric](38, 10) NULL,
 
 CONSTRAINT [PK_Assets_ContractsLast] PRIMARY KEY CLUSTERED 
 (
