@@ -13,13 +13,13 @@ CREATE TABLE [dbo].[Assets_Contracts]
 	[VALUE_USD] [numeric](38, 10) NULL,
 	[VALUE_EURO] [numeric](38, 10) NULL,
 
-	[INPUT_VALUE_RUR] [numeric](38, 10) NULL,
-	[INPUT_VALUE_USD] [numeric](38, 10) NULL,
-	[INPUT_VALUE_EURO] [numeric](38, 10) NULL,
+	[DailyIncrement_RUR] [numeric](38, 10) NULL,
+	[DailyIncrement_USD] [numeric](38, 10) NULL,
+	[DailyIncrement_EURO] [numeric](38, 10) NULL,
 
-	[OUTPUT_VALUE_RUR] [numeric](38, 10) NULL,
-	[OUTPUT_VALUE_USD] [numeric](38, 10) NULL,
-	[OUTPUT_VALUE_EURO] [numeric](38, 10) NULL,
+	[DailyDecrement_RUR] [numeric](38, 10) NULL,
+	[DailyDecrement_USD] [numeric](38, 10) NULL,
+	[DailyDecrement_EURO] [numeric](38, 10) NULL,
 
 	[INPUT_DIVIDENTS_RUR] [numeric](38, 10) NULL,
 	[INPUT_DIVIDENTS_USD] [numeric](38, 10) NULL,
@@ -29,12 +29,12 @@ CREATE TABLE [dbo].[Assets_Contracts]
 	[INPUT_COUPONS_USD] [numeric](38, 10) NULL,
 	[INPUT_COUPONS_EURO] [numeric](38, 10) NULL,
 
-	[INPUT_AmountPayments_RUR] [numeric](38, 10) NULL,
-	[INPUT_AmountPayments_USD] [numeric](38, 10) NULL,
-	[INPUT_AmountPayments_EURO] [numeric](38, 10) NULL,
-	[OUTPUT_AmountPayments_RUR] [numeric](38, 10) NULL,
-	[OUTPUT_AmountPayments_USD] [numeric](38, 10) NULL,
-	[OUTPUT_AmountPayments_EURO] [numeric](38, 10) NULL,
+	[INPUT_VALUE_RUR] [numeric](38, 10) NULL,
+	[INPUT_VALUE_USD] [numeric](38, 10) NULL,
+	[INPUT_VALUE_EURO] [numeric](38, 10) NULL,
+	[OUTPUT_VALUE_RUR] [numeric](38, 10) NULL,
+	[OUTPUT_VALUE_USD] [numeric](38, 10) NULL,
+	[OUTPUT_VALUE_EURO] [numeric](38, 10) NULL,
 
 CONSTRAINT [PK_Assets_Contracts] PRIMARY KEY CLUSTERED
 (
@@ -57,13 +57,13 @@ CREATE TABLE [dbo].[Assets_ContractsLast]
 	[VALUE_USD] [numeric](38, 10) NULL,
 	[VALUE_EURO] [numeric](38, 10) NULL,
 
-	[INPUT_VALUE_RUR] [numeric](38, 10) NULL,
-	[INPUT_VALUE_USD] [numeric](38, 10) NULL,
-	[INPUT_VALUE_EURO] [numeric](38, 10) NULL,
+	[DailyIncrement_RUR] [numeric](38, 10) NULL,
+	[DailyIncrement_USD] [numeric](38, 10) NULL,
+	[DailyIncrement_EURO] [numeric](38, 10) NULL,
 
-	[OUTPUT_VALUE_RUR] [numeric](38, 10) NULL,
-	[OUTPUT_VALUE_USD] [numeric](38, 10) NULL,
-	[OUTPUT_VALUE_EURO] [numeric](38, 10) NULL,
+	[DailyDecrement_RUR] [numeric](38, 10) NULL,
+	[DailyDecrement_USD] [numeric](38, 10) NULL,
+	[DailyDecrement_EURO] [numeric](38, 10) NULL,
 
 	[INPUT_DIVIDENTS_RUR] [numeric](38, 10) NULL,
 	[INPUT_DIVIDENTS_USD] [numeric](38, 10) NULL,
@@ -73,14 +73,14 @@ CREATE TABLE [dbo].[Assets_ContractsLast]
 	[INPUT_COUPONS_USD] [numeric](38, 10) NULL,
 	[INPUT_COUPONS_EURO] [numeric](38, 10) NULL,
 
-	[INPUT_AmountPayments_RUR] [numeric](38, 10) NULL,
-	[INPUT_AmountPayments_USD] [numeric](38, 10) NULL,
-	[INPUT_AmountPayments_EURO] [numeric](38, 10) NULL,
-	[OUTPUT_AmountPayments_RUR] [numeric](38, 10) NULL,
-	[OUTPUT_AmountPayments_USD] [numeric](38, 10) NULL,
-	[OUTPUT_AmountPayments_EURO] [numeric](38, 10) NULL,
+	[INPUT_VALUE_RUR] [numeric](38, 10) NULL,
+	[INPUT_VALUE_USD] [numeric](38, 10) NULL,
+	[INPUT_VALUE_EURO] [numeric](38, 10) NULL,
+	[OUTPUT_VALUE_RUR] [numeric](38, 10) NULL,
+	[OUTPUT_VALUE_USD] [numeric](38, 10) NULL,
+	[OUTPUT_VALUE_EURO] [numeric](38, 10) NULL,
 
-CONSTRAINT [PK_Assets_ContractsLast] PRIMARY KEY CLUSTERED 
+CONSTRAINT [PK_Assets_ContractsLast] PRIMARY KEY CLUSTERED
 (
 	[InvestorId] ASC,
 	[ContractId] ASC,

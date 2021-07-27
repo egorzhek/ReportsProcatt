@@ -156,10 +156,10 @@ AS BEGIN
 	DECLARE @LastBeginDate DateTime;
 
 	DECLARE
-		@INPUT_VALUE_USD decimal(38,10),
-		@INPUT_VALUE_EURO decimal(38,10),
-		@OUTPUT_VALUE_USD decimal(38,10),
-		@OUTPUT_VALUE_EURO decimal(38,10),
+		@DailyIncrement_USD decimal(38,10),
+		@DailyIncrement_EURO decimal(38,10),
+		@DailyDecrement_USD decimal(38,10),
+		@DailyDecrement_EURO decimal(38,10),
 		@INPUT_DIVIDENTS_RUR decimal(38,10),
 		@INPUT_DIVIDENTS_USD decimal(38,10),
 		@INPUT_DIVIDENTS_EURO decimal(38,10),
@@ -172,12 +172,12 @@ AS BEGIN
 		@AmountPayments_RUR decimal(38,10),
 		@AmountPayments_USD decimal(38,10),
 		@AmountPayments_EURO decimal(38,10),			
-		@INPUT_AmountPayments_RUR decimal(38,10),
-		@INPUT_AmountPayments_USD decimal(38,10),
-		@INPUT_AmountPayments_EURO decimal(38,10),
-		@OUTPUT_AmountPayments_RUR decimal(38,10),
-		@OUTPUT_AmountPayments_USD decimal(38,10),
-		@OUTPUT_AmountPayments_EURO decimal(38,10);
+		@INPUT_VALUE_RUR decimal(38,10),
+		@INPUT_VALUE_USD decimal(38,10),
+		@INPUT_VALUE_EURO decimal(38,10),
+		@OUTPUT_VALUE_RUR decimal(38,10),
+		@OUTPUT_VALUE_USD decimal(38,10),
+		@OUTPUT_VALUE_EURO decimal(38,10);
 
 
 	DECLARE @USDRATE_Last decimal(38,10), @EURORATE_Last decimal(38,10);
@@ -868,10 +868,10 @@ AS BEGIN
 							group by PaymentDate
 						) as D ON A.[Date] = D.PaymentDate;
 
-						SET @INPUT_VALUE_USD = CASE WHEN @SumDayValue > 0 THEN [dbo].f_Round(@SumDayValue * (1/NULLIF(@USDRATE,0)), 2) ELSE 0 END;
-						SET @INPUT_VALUE_EURO = CASE WHEN @SumDayValue > 0 THEN [dbo].f_Round(@SumDayValue * (1/NULLIF(@EURORATE,0)), 2) ELSE 0 END;
-						SET @OUTPUT_VALUE_USD = CASE WHEN @SumDayValue < 0 THEN [dbo].f_Round(@SumDayValue * (1/NULLIF(@USDRATE,0)), 2) ELSE 0 END;
-						SET @OUTPUT_VALUE_EURO = CASE WHEN @SumDayValue < 0 THEN [dbo].f_Round(@SumDayValue * (1/NULLIF(@EURORATE,0)), 2) ELSE 0 END;
+						SET @DailyIncrement_USD = CASE WHEN @SumDayValue > 0 THEN [dbo].f_Round(@SumDayValue * (1/NULLIF(@USDRATE,0)), 2) ELSE 0 END;
+						SET @DailyIncrement_EURO = CASE WHEN @SumDayValue > 0 THEN [dbo].f_Round(@SumDayValue * (1/NULLIF(@EURORATE,0)), 2) ELSE 0 END;
+						SET @DailyDecrement_USD = CASE WHEN @SumDayValue < 0 THEN [dbo].f_Round(@SumDayValue * (1/NULLIF(@USDRATE,0)), 2) ELSE 0 END;
+						SET @DailyDecrement_EURO = CASE WHEN @SumDayValue < 0 THEN [dbo].f_Round(@SumDayValue * (1/NULLIF(@EURORATE,0)), 2) ELSE 0 END;
 
 						
 
@@ -893,12 +893,12 @@ AS BEGIN
 						set @AmountPayments_USD  = isnull(@AmountPayments_USD, 0) 
 						set @AmountPayments_EURO = isnull(@AmountPayments_EURO, 0)
 
-						SET @INPUT_AmountPayments_RUR  = CASE WHEN @AmountPayments_RUR > 0 THEN @AmountPayments_RUR ELSE 0 END;
-						SET @INPUT_AmountPayments_USD  = CASE WHEN @AmountPayments_USD > 0 THEN @AmountPayments_USD ELSE 0 END;
-						SET @INPUT_AmountPayments_EURO = CASE WHEN @AmountPayments_EURO > 0 THEN @AmountPayments_EURO ELSE 0 END;
-						SET @OUTPUT_AmountPayments_RUR  = CASE WHEN @AmountPayments_RUR < 0 THEN @AmountPayments_RUR ELSE 0 END;
-						SET @OUTPUT_AmountPayments_USD  = CASE WHEN @AmountPayments_USD < 0 THEN @AmountPayments_USD ELSE 0 END;
-						SET @OUTPUT_AmountPayments_EURO = CASE WHEN @AmountPayments_EURO < 0 THEN @AmountPayments_EURO ELSE 0 END;
+						SET @INPUT_VALUE_RUR  = CASE WHEN @AmountPayments_RUR > 0 THEN @AmountPayments_RUR ELSE 0 END;
+						SET @INPUT_VALUE_USD  = CASE WHEN @AmountPayments_USD > 0 THEN @AmountPayments_USD ELSE 0 END;
+						SET @INPUT_VALUE_EURO = CASE WHEN @AmountPayments_EURO > 0 THEN @AmountPayments_EURO ELSE 0 END;
+						SET @OUTPUT_VALUE_RUR = CASE WHEN @AmountPayments_RUR < 0 THEN @AmountPayments_RUR ELSE 0 END;
+						SET @OUTPUT_VALUE_USD = CASE WHEN @AmountPayments_USD < 0 THEN @AmountPayments_USD ELSE 0 END;
+						SET @OUTPUT_VALUE_EURO = CASE WHEN @AmountPayments_EURO < 0 THEN @AmountPayments_EURO ELSE 0 END;
 
 
                         WITH CTE
@@ -921,12 +921,12 @@ AS BEGIN
 								[EURORATE] = @EURORATE,
 								[VALUE_USD] = [dbo].f_Round(@SumValue * (1/NULLIF(@USDRATE,0)), 2),
 								[VALUE_EURO] = [dbo].f_Round(@SumValue * (1/NULLIF(@EURORATE,0)), 2),
-								[INPUT_VALUE_RUR] =  CASE WHEN @SumDayValue > 0 THEN @SumDayValue ELSE 0 END,
-								[OUTPUT_VALUE_RUR] = CASE WHEN @SumDayValue < 0 THEN @SumDayValue ELSE 0 END,
-								[INPUT_VALUE_USD]  = @INPUT_VALUE_USD,
-								[INPUT_VALUE_EURO] = @INPUT_VALUE_EURO,
-								[OUTPUT_VALUE_USD] = @OUTPUT_VALUE_USD,
-								[OUTPUT_VALUE_EURO]= @OUTPUT_VALUE_EURO,
+								[DailyIncrement_RUR] = CASE WHEN @SumDayValue > 0 THEN @SumDayValue ELSE 0 END,
+								[DailyDecrement_RUR] = CASE WHEN @SumDayValue < 0 THEN @SumDayValue ELSE 0 END,
+								[DailyIncrement_USD]  = @DailyIncrement_USD,
+								[DailyIncrement_EURO] = @DailyIncrement_EURO,
+								[DailyDecrement_USD] = @DailyDecrement_USD,
+								[DailyDecrement_EURO]= @DailyDecrement_EURO,
 								[INPUT_DIVIDENTS_RUR] = @INPUT_DIVIDENTS_RUR,
 								[INPUT_DIVIDENTS_USD] = @INPUT_DIVIDENTS_USD,
 								[INPUT_DIVIDENTS_EURO] = @INPUT_DIVIDENTS_EURO,
@@ -934,12 +934,12 @@ AS BEGIN
 								[INPUT_COUPONS_USD] = @INPUT_COUPONS_USD,
 								[INPUT_COUPONS_EURO] = @INPUT_COUPONS_EURO,
 
-								[INPUT_AmountPayments_RUR] = @INPUT_AmountPayments_RUR,
-								[INPUT_AmountPayments_USD] = @INPUT_AmountPayments_USD,
-								[INPUT_AmountPayments_EURO] = @INPUT_AmountPayments_EURO,
-								[OUTPUT_AmountPayments_RUR] = @OUTPUT_AmountPayments_RUR,
-								[OUTPUT_AmountPayments_USD] = @OUTPUT_AmountPayments_USD,
-								[OUTPUT_AmountPayments_EURO] = @OUTPUT_AmountPayments_EURO
+								[INPUT_VALUE_RUR] = @INPUT_VALUE_RUR,
+								[INPUT_VALUE_USD] = @INPUT_VALUE_USD,
+								[INPUT_VALUE_EURO] = @INPUT_VALUE_EURO,
+								[OUTPUT_VALUE_RUR] = @OUTPUT_VALUE_RUR,
+								[OUTPUT_VALUE_USD] = @OUTPUT_VALUE_USD,
+								[OUTPUT_VALUE_EURO] = @OUTPUT_VALUE_EURO
 
 								
                         ) AS s
@@ -954,12 +954,12 @@ AS BEGIN
 								[EURORATE],
 								[VALUE_USD],
 								[VALUE_EURO],
-								[INPUT_VALUE_RUR],
-								[OUTPUT_VALUE_RUR],
-								[INPUT_VALUE_USD],
-								[INPUT_VALUE_EURO],
-								[OUTPUT_VALUE_USD],
-								[OUTPUT_VALUE_EURO],
+								[DailyIncrement_RUR],
+								[DailyDecrement_RUR],
+								[DailyIncrement_USD],
+								[DailyIncrement_EURO],
+								[DailyDecrement_USD],
+								[DailyDecrement_EURO],
 								[INPUT_DIVIDENTS_RUR],
 								[INPUT_DIVIDENTS_USD],
 								[INPUT_DIVIDENTS_EURO],
@@ -967,12 +967,12 @@ AS BEGIN
 								[INPUT_COUPONS_USD],
 								[INPUT_COUPONS_EURO],
 
-								[INPUT_AmountPayments_RUR],
-								[INPUT_AmountPayments_USD],
-								[INPUT_AmountPayments_EURO],
-								[OUTPUT_AmountPayments_RUR],
-								[OUTPUT_AmountPayments_USD],
-								[OUTPUT_AmountPayments_EURO]
+								[INPUT_VALUE_RUR],
+								[INPUT_VALUE_USD],
+								[INPUT_VALUE_EURO],
+								[OUTPUT_VALUE_RUR],
+								[OUTPUT_VALUE_USD],
+								[OUTPUT_VALUE_EURO]
                             )
                             values (
                                 s.[InvestorId],
@@ -983,12 +983,12 @@ AS BEGIN
 								s.[EURORATE],
 								s.[VALUE_USD],
 								s.[VALUE_EURO],
-								s.[INPUT_VALUE_RUR],
-								s.[OUTPUT_VALUE_RUR],
-								s.[INPUT_VALUE_USD],
-								s.[INPUT_VALUE_EURO],
-								s.[OUTPUT_VALUE_USD],
-								s.[OUTPUT_VALUE_EURO],
+								s.[DailyIncrement_RUR],
+								s.[DailyDecrement_RUR],
+								s.[DailyIncrement_USD],
+								s.[DailyIncrement_EURO],
+								s.[DailyDecrement_USD],
+								s.[DailyDecrement_EURO],
 								s.[INPUT_DIVIDENTS_RUR],
 								s.[INPUT_DIVIDENTS_USD],
 								s.[INPUT_DIVIDENTS_EURO],
@@ -996,12 +996,12 @@ AS BEGIN
 								s.[INPUT_COUPONS_USD],
 								s.[INPUT_COUPONS_EURO],
 								
-								s.[INPUT_AmountPayments_RUR],
-								s.[INPUT_AmountPayments_USD],
-								s.[INPUT_AmountPayments_EURO],
-								s.[OUTPUT_AmountPayments_RUR],
-								s.[OUTPUT_AmountPayments_USD],
-								s.[OUTPUT_AmountPayments_EURO]
+								s.[INPUT_VALUE_RUR],
+								s.[INPUT_VALUE_USD],
+								s.[INPUT_VALUE_EURO],
+								s.[OUTPUT_VALUE_RUR],
+								s.[OUTPUT_VALUE_USD],
+								s.[OUTPUT_VALUE_EURO]
                             )
                         when matched
                         then update set
@@ -1010,12 +1010,12 @@ AS BEGIN
 							[EURORATE] = s.[EURORATE],
 							[VALUE_USD] = s.[VALUE_USD],
 							[VALUE_EURO] = s.[VALUE_EURO],
-							[INPUT_VALUE_RUR] = s.[INPUT_VALUE_RUR],
-							[OUTPUT_VALUE_RUR] = s.[OUTPUT_VALUE_RUR],
-							[INPUT_VALUE_USD] = s.[INPUT_VALUE_USD],
-							[INPUT_VALUE_EURO] = s.[INPUT_VALUE_EURO],
-							[OUTPUT_VALUE_USD] = s.[OUTPUT_VALUE_USD],
-							[OUTPUT_VALUE_EURO] = s.[OUTPUT_VALUE_EURO],					
+							[DailyIncrement_RUR] = s.[DailyIncrement_RUR],
+							[DailyDecrement_RUR] = s.[DailyDecrement_RUR],
+							[DailyIncrement_USD] = s.[DailyIncrement_USD],
+							[DailyIncrement_EURO] = s.[DailyIncrement_EURO],
+							[DailyDecrement_USD] = s.[DailyDecrement_USD],
+							[DailyDecrement_EURO] = s.[DailyDecrement_EURO],					
 							[INPUT_DIVIDENTS_RUR] = s.[INPUT_DIVIDENTS_RUR],
 							[INPUT_DIVIDENTS_USD] = s.[INPUT_DIVIDENTS_USD],
 							[INPUT_DIVIDENTS_EURO] = s.[INPUT_DIVIDENTS_EURO],
@@ -1023,12 +1023,12 @@ AS BEGIN
 							[INPUT_COUPONS_USD] = s.[INPUT_COUPONS_USD],
 							[INPUT_COUPONS_EURO] = s.[INPUT_COUPONS_EURO],
 
-							[INPUT_AmountPayments_RUR] = s.[INPUT_AmountPayments_RUR],
-							[INPUT_AmountPayments_USD] = s.[INPUT_AmountPayments_USD],
-							[INPUT_AmountPayments_EURO] = s.[INPUT_AmountPayments_EURO],
-							[OUTPUT_AmountPayments_RUR] = s.[OUTPUT_AmountPayments_RUR],
-							[OUTPUT_AmountPayments_USD] = s.[OUTPUT_AmountPayments_USD],
-							[OUTPUT_AmountPayments_EURO] = s.[OUTPUT_AmountPayments_EURO];
+							[INPUT_VALUE_RUR] = s.[INPUT_VALUE_RUR],
+							[INPUT_VALUE_USD] = s.[INPUT_VALUE_USD],
+							[INPUT_VALUE_EURO] = s.[INPUT_VALUE_EURO],
+							[OUTPUT_VALUE_RUR] = s.[OUTPUT_VALUE_RUR],
+							[OUTPUT_VALUE_USD] = s.[OUTPUT_VALUE_USD],
+							[OUTPUT_VALUE_EURO] = s.[OUTPUT_VALUE_EURO];
                     END
                 END
                 ELSE
@@ -1069,10 +1069,10 @@ AS BEGIN
 						group by PaymentDate
 					) as D ON A.[Date] = D.PaymentDate;
 
-					SET @INPUT_VALUE_USD = CASE WHEN @SumDayValue > 0 THEN [dbo].f_Round(@SumDayValue * (1/NULLIF(@USDRATE,0)), 2) ELSE 0 END;
-					SET @INPUT_VALUE_EURO = CASE WHEN @SumDayValue > 0 THEN [dbo].f_Round(@SumDayValue * (1/NULLIF(@EURORATE,0)), 2) ELSE 0 END;
-					SET @OUTPUT_VALUE_USD = CASE WHEN @SumDayValue < 0 THEN [dbo].f_Round(@SumDayValue * (1/NULLIF(@USDRATE,0)), 2) ELSE 0 END;
-					SET @OUTPUT_VALUE_EURO = CASE WHEN @SumDayValue < 0 THEN [dbo].f_Round(@SumDayValue * (1/NULLIF(@EURORATE,0)), 2) ELSE 0 END;
+					SET @DailyIncrement_USD = CASE WHEN @SumDayValue > 0 THEN [dbo].f_Round(@SumDayValue * (1/NULLIF(@USDRATE,0)), 2) ELSE 0 END;
+					SET @DailyIncrement_EURO = CASE WHEN @SumDayValue > 0 THEN [dbo].f_Round(@SumDayValue * (1/NULLIF(@EURORATE,0)), 2) ELSE 0 END;
+					SET @DailyDecrement_USD = CASE WHEN @SumDayValue < 0 THEN [dbo].f_Round(@SumDayValue * (1/NULLIF(@USDRATE,0)), 2) ELSE 0 END;
+					SET @DailyDecrement_EURO = CASE WHEN @SumDayValue < 0 THEN [dbo].f_Round(@SumDayValue * (1/NULLIF(@EURORATE,0)), 2) ELSE 0 END;
 
 
 
@@ -1092,12 +1092,12 @@ AS BEGIN
 					set @AmountPayments_USD  = isnull(@AmountPayments_USD, 0) 
 					set @AmountPayments_EURO = isnull(@AmountPayments_EURO, 0)
 
-					SET @INPUT_AmountPayments_RUR  = CASE WHEN @AmountPayments_RUR > 0 THEN @AmountPayments_RUR ELSE 0 END;
-					SET @INPUT_AmountPayments_USD  = CASE WHEN @AmountPayments_USD > 0 THEN @AmountPayments_USD ELSE 0 END;
-					SET @INPUT_AmountPayments_EURO = CASE WHEN @AmountPayments_EURO > 0 THEN @AmountPayments_EURO ELSE 0 END;
-					SET @OUTPUT_AmountPayments_RUR  = CASE WHEN @AmountPayments_RUR < 0 THEN @AmountPayments_RUR ELSE 0 END;
-					SET @OUTPUT_AmountPayments_USD  = CASE WHEN @AmountPayments_USD < 0 THEN @AmountPayments_USD ELSE 0 END;
-					SET @OUTPUT_AmountPayments_EURO = CASE WHEN @AmountPayments_EURO < 0 THEN @AmountPayments_EURO ELSE 0 END;
+					SET @INPUT_VALUE_RUR  = CASE WHEN @AmountPayments_RUR > 0 THEN @AmountPayments_RUR ELSE 0 END;
+					SET @INPUT_VALUE_USD  = CASE WHEN @AmountPayments_USD > 0 THEN @AmountPayments_USD ELSE 0 END;
+					SET @INPUT_VALUE_EURO = CASE WHEN @AmountPayments_EURO > 0 THEN @AmountPayments_EURO ELSE 0 END;
+					SET @OUTPUT_VALUE_RUR = CASE WHEN @AmountPayments_RUR < 0 THEN @AmountPayments_RUR ELSE 0 END;
+					SET @OUTPUT_VALUE_USD = CASE WHEN @AmountPayments_USD < 0 THEN @AmountPayments_USD ELSE 0 END;
+					SET @OUTPUT_VALUE_EURO = CASE WHEN @AmountPayments_EURO < 0 THEN @AmountPayments_EURO ELSE 0 END;
 
 
 
@@ -1122,12 +1122,12 @@ AS BEGIN
 							[EURORATE] = @EURORATE,
 							[VALUE_USD] = [dbo].f_Round(@SumValue * (1/NULLIF(@USDRATE,0)), 2),
 							[VALUE_EURO] = [dbo].f_Round(@SumValue * (1/NULLIF(@EURORATE,0)), 2),
-							[INPUT_VALUE_RUR] =  CASE WHEN @SumDayValue > 0 THEN @SumDayValue ELSE 0 END,
-							[OUTPUT_VALUE_RUR] = CASE WHEN @SumDayValue < 0 THEN @SumDayValue ELSE 0 END,
-							[INPUT_VALUE_USD]  = @INPUT_VALUE_USD,
-							[INPUT_VALUE_EURO] = @INPUT_VALUE_EURO,
-							[OUTPUT_VALUE_USD] = @OUTPUT_VALUE_USD,
-							[OUTPUT_VALUE_EURO]= @OUTPUT_VALUE_EURO,
+							[DailyIncrement_RUR] =  CASE WHEN @SumDayValue > 0 THEN @SumDayValue ELSE 0 END,
+							[DailyDecrement_RUR] = CASE WHEN @SumDayValue < 0 THEN @SumDayValue ELSE 0 END,
+							[DailyIncrement_USD]  = @DailyIncrement_USD,
+							[DailyIncrement_EURO] = @DailyIncrement_EURO,
+							[DailyDecrement_USD] = @DailyDecrement_USD,
+							[DailyDecrement_EURO]= @DailyDecrement_EURO,
 							[INPUT_DIVIDENTS_RUR] = @INPUT_DIVIDENTS_RUR,
 							[INPUT_DIVIDENTS_USD] = @INPUT_DIVIDENTS_USD,
 							[INPUT_DIVIDENTS_EURO] = @INPUT_DIVIDENTS_EURO,
@@ -1135,12 +1135,12 @@ AS BEGIN
 							[INPUT_COUPONS_USD] = @INPUT_COUPONS_USD,
 							[INPUT_COUPONS_EURO] = @INPUT_COUPONS_EURO,
 
-							[INPUT_AmountPayments_RUR] = @INPUT_AmountPayments_RUR,
-							[INPUT_AmountPayments_USD] = @INPUT_AmountPayments_USD,
-							[INPUT_AmountPayments_EURO] = @INPUT_AmountPayments_EURO,
-							[OUTPUT_AmountPayments_RUR] = @OUTPUT_AmountPayments_RUR,
-							[OUTPUT_AmountPayments_USD] = @OUTPUT_AmountPayments_USD,
-							[OUTPUT_AmountPayments_EURO] = @OUTPUT_AmountPayments_EURO
+							[INPUT_VALUE_RUR] = @INPUT_VALUE_RUR,
+							[INPUT_VALUE_USD] = @INPUT_VALUE_USD,
+							[INPUT_VALUE_EURO] = @INPUT_VALUE_EURO,
+							[OUTPUT_VALUE_RUR] = @OUTPUT_VALUE_RUR,
+							[OUTPUT_VALUE_USD] = @OUTPUT_VALUE_USD,
+							[OUTPUT_VALUE_EURO] = @OUTPUT_VALUE_EURO
                     ) AS s
                     on t.InvestorId = s.InvestorId and t.ContractId = s.ContractId and t.[Date] = s.[Date]
                     when not matched
@@ -1153,12 +1153,12 @@ AS BEGIN
 							[EURORATE],
 							[VALUE_USD],
 							[VALUE_EURO],
-							[INPUT_VALUE_RUR],
-							[OUTPUT_VALUE_RUR],
-							[INPUT_VALUE_USD],
-							[INPUT_VALUE_EURO],
-							[OUTPUT_VALUE_USD],
-							[OUTPUT_VALUE_EURO],
+							[DailyIncrement_RUR],
+							[DailyDecrement_RUR],
+							[DailyIncrement_USD],
+							[DailyIncrement_EURO],
+							[DailyDecrement_USD],
+							[DailyDecrement_EURO],
 							[INPUT_DIVIDENTS_RUR],
 							[INPUT_DIVIDENTS_USD],
 							[INPUT_DIVIDENTS_EURO],
@@ -1166,12 +1166,12 @@ AS BEGIN
 							[INPUT_COUPONS_USD],
 							[INPUT_COUPONS_EURO],
 
-							[INPUT_AmountPayments_RUR],
-							[INPUT_AmountPayments_USD],
-							[INPUT_AmountPayments_EURO],
-							[OUTPUT_AmountPayments_RUR],
-							[OUTPUT_AmountPayments_USD],
-							[OUTPUT_AmountPayments_EURO]
+							[INPUT_VALUE_RUR],
+							[INPUT_VALUE_USD],
+							[INPUT_VALUE_EURO],
+							[OUTPUT_VALUE_RUR],
+							[OUTPUT_VALUE_USD],
+							[OUTPUT_VALUE_EURO]
                         )
                         values (
                             s.[InvestorId],
@@ -1182,12 +1182,12 @@ AS BEGIN
 							s.[EURORATE],
 							s.[VALUE_USD],
 							s.[VALUE_EURO],
-							s.[INPUT_VALUE_RUR],
-							s.[OUTPUT_VALUE_RUR],
-							s.[INPUT_VALUE_USD],
-							s.[INPUT_VALUE_EURO],
-							s.[OUTPUT_VALUE_USD],
-							s.[OUTPUT_VALUE_EURO],
+							s.[DailyIncrement_RUR],
+							s.[DailyDecrement_RUR],
+							s.[DailyIncrement_USD],
+							s.[DailyIncrement_EURO],
+							s.[DailyDecrement_USD],
+							s.[DailyDecrement_EURO],
 							s.[INPUT_DIVIDENTS_RUR],
 							s.[INPUT_DIVIDENTS_USD],
 							s.[INPUT_DIVIDENTS_EURO],
@@ -1195,12 +1195,12 @@ AS BEGIN
 							s.[INPUT_COUPONS_USD],
 							s.[INPUT_COUPONS_EURO],
 
-							s.[INPUT_AmountPayments_RUR],
-							s.[INPUT_AmountPayments_USD],
-							s.[INPUT_AmountPayments_EURO],
-							s.[OUTPUT_AmountPayments_RUR],
-							s.[OUTPUT_AmountPayments_USD],
-							s.[OUTPUT_AmountPayments_EURO]
+							s.[INPUT_VALUE_RUR],
+							s.[INPUT_VALUE_USD],
+							s.[INPUT_VALUE_EURO],
+							s.[OUTPUT_VALUE_RUR],
+							s.[OUTPUT_VALUE_USD],
+							s.[OUTPUT_VALUE_EURO]
                         )
                     when matched
                     then update set
@@ -1209,12 +1209,12 @@ AS BEGIN
 						[EURORATE] = s.[EURORATE],
 						[VALUE_USD] = s.[VALUE_USD],
 						[VALUE_EURO] = s.[VALUE_EURO],
-						[INPUT_VALUE_RUR] = s.[INPUT_VALUE_RUR],
-						[OUTPUT_VALUE_RUR] = s.[OUTPUT_VALUE_RUR],
-						[INPUT_VALUE_USD] = s.[INPUT_VALUE_USD],
-						[INPUT_VALUE_EURO] = s.[INPUT_VALUE_EURO],
-						[OUTPUT_VALUE_USD] = s.[OUTPUT_VALUE_USD],
-						[OUTPUT_VALUE_EURO] = s.[OUTPUT_VALUE_EURO],
+						[DailyIncrement_RUR] = s.[DailyIncrement_RUR],
+						[DailyDecrement_RUR] = s.[DailyDecrement_RUR],
+						[DailyIncrement_USD] = s.[DailyIncrement_USD],
+						[DailyIncrement_EURO] = s.[DailyIncrement_EURO],
+						[DailyDecrement_USD] = s.[DailyDecrement_USD],
+						[DailyDecrement_EURO] = s.[DailyDecrement_EURO],
 						[INPUT_DIVIDENTS_RUR] = s.[INPUT_DIVIDENTS_RUR],
 						[INPUT_DIVIDENTS_USD] = s.[INPUT_DIVIDENTS_USD],
 						[INPUT_DIVIDENTS_EURO] = s.[INPUT_DIVIDENTS_EURO],
@@ -1222,12 +1222,12 @@ AS BEGIN
 						[INPUT_COUPONS_USD] = s.[INPUT_COUPONS_USD],
 						[INPUT_COUPONS_EURO] = s.[INPUT_COUPONS_EURO],
 
-						[INPUT_AmountPayments_RUR] = s.[INPUT_AmountPayments_RUR],
-						[INPUT_AmountPayments_USD] = s.[INPUT_AmountPayments_USD],
-						[INPUT_AmountPayments_EURO] = s.[INPUT_AmountPayments_EURO],
-						[OUTPUT_AmountPayments_RUR] = s.[OUTPUT_AmountPayments_RUR],
-						[OUTPUT_AmountPayments_USD] = s.[OUTPUT_AmountPayments_USD],
-						[OUTPUT_AmountPayments_EURO] = s.[OUTPUT_AmountPayments_EURO];
+						[INPUT_VALUE_RUR] = s.[INPUT_VALUE_RUR],
+						[INPUT_VALUE_USD] = s.[INPUT_VALUE_USD],
+						[INPUT_VALUE_EURO] = s.[INPUT_VALUE_EURO],
+						[OUTPUT_VALUE_RUR] = s.[OUTPUT_VALUE_RUR],
+						[OUTPUT_VALUE_USD] = s.[OUTPUT_VALUE_USD],
+						[OUTPUT_VALUE_EURO] = s.[OUTPUT_VALUE_EURO];
                 END
 
                 set @OldDate = @Date;
@@ -1295,10 +1295,10 @@ AS BEGIN
 					group by PaymentDate
 				) as D ON A.[Date] = D.PaymentDate;
 
-				SET @INPUT_VALUE_USD = CASE WHEN @SumDayValue > 0 THEN [dbo].f_Round(@SumDayValue * (1/NULLIF(@USDRATE,0)), 2) ELSE 0 END;
-				SET @INPUT_VALUE_EURO = CASE WHEN @SumDayValue > 0 THEN [dbo].f_Round(@SumDayValue * (1/NULLIF(@EURORATE,0)), 2) ELSE 0 END;
-				SET @OUTPUT_VALUE_USD = CASE WHEN @SumDayValue < 0 THEN [dbo].f_Round(@SumDayValue * (1/NULLIF(@USDRATE,0)), 2) ELSE 0 END;
-				SET @OUTPUT_VALUE_EURO = CASE WHEN @SumDayValue < 0 THEN [dbo].f_Round(@SumDayValue * (1/NULLIF(@EURORATE,0)), 2) ELSE 0 END;
+				SET @DailyIncrement_USD = CASE WHEN @SumDayValue > 0 THEN [dbo].f_Round(@SumDayValue * (1/NULLIF(@USDRATE,0)), 2) ELSE 0 END;
+				SET @DailyIncrement_EURO = CASE WHEN @SumDayValue > 0 THEN [dbo].f_Round(@SumDayValue * (1/NULLIF(@EURORATE,0)), 2) ELSE 0 END;
+				SET @DailyDecrement_USD = CASE WHEN @SumDayValue < 0 THEN [dbo].f_Round(@SumDayValue * (1/NULLIF(@USDRATE,0)), 2) ELSE 0 END;
+				SET @DailyDecrement_EURO = CASE WHEN @SumDayValue < 0 THEN [dbo].f_Round(@SumDayValue * (1/NULLIF(@EURORATE,0)), 2) ELSE 0 END;
 
 
 
@@ -1319,12 +1319,12 @@ AS BEGIN
 				set @AmountPayments_USD  = isnull(@AmountPayments_USD, 0) 
 				set @AmountPayments_EURO = isnull(@AmountPayments_EURO, 0)
 
-				SET @INPUT_AmountPayments_RUR  = CASE WHEN @AmountPayments_RUR > 0 THEN @AmountPayments_RUR ELSE 0 END;
-				SET @INPUT_AmountPayments_USD  = CASE WHEN @AmountPayments_USD > 0 THEN @AmountPayments_USD ELSE 0 END;
-				SET @INPUT_AmountPayments_EURO = CASE WHEN @AmountPayments_EURO > 0 THEN @AmountPayments_EURO ELSE 0 END;
-				SET @OUTPUT_AmountPayments_RUR  = CASE WHEN @AmountPayments_RUR < 0 THEN @AmountPayments_RUR ELSE 0 END;
-				SET @OUTPUT_AmountPayments_USD  = CASE WHEN @AmountPayments_USD < 0 THEN @AmountPayments_USD ELSE 0 END;
-				SET @OUTPUT_AmountPayments_EURO = CASE WHEN @AmountPayments_EURO < 0 THEN @AmountPayments_EURO ELSE 0 END;
+				SET @INPUT_VALUE_RUR  = CASE WHEN @AmountPayments_RUR > 0 THEN @AmountPayments_RUR ELSE 0 END;
+				SET @INPUT_VALUE_USD  = CASE WHEN @AmountPayments_USD > 0 THEN @AmountPayments_USD ELSE 0 END;
+				SET @INPUT_VALUE_EURO = CASE WHEN @AmountPayments_EURO > 0 THEN @AmountPayments_EURO ELSE 0 END;
+				SET @OUTPUT_VALUE_RUR  = CASE WHEN @AmountPayments_RUR < 0 THEN @AmountPayments_RUR ELSE 0 END;
+				SET @OUTPUT_VALUE_USD  = CASE WHEN @AmountPayments_USD < 0 THEN @AmountPayments_USD ELSE 0 END;
+				SET @OUTPUT_VALUE_EURO = CASE WHEN @AmountPayments_EURO < 0 THEN @AmountPayments_EURO ELSE 0 END;
 
 
 
@@ -1348,12 +1348,12 @@ AS BEGIN
 						[EURORATE] = @EURORATE,
 						[VALUE_USD] = [dbo].f_Round(@SumValue * (1/NULLIF(@USDRATE,0)), 2),
 						[VALUE_EURO] = [dbo].f_Round(@SumValue * (1/NULLIF(@EURORATE,0)), 2),
-						[INPUT_VALUE_RUR] =  CASE WHEN @SumDayValue > 0 THEN @SumDayValue ELSE 0 END,
-						[OUTPUT_VALUE_RUR] = CASE WHEN @SumDayValue < 0 THEN @SumDayValue ELSE 0 END,
-						[INPUT_VALUE_USD]  = @INPUT_VALUE_USD,
-						[INPUT_VALUE_EURO] = @INPUT_VALUE_EURO,
-						[OUTPUT_VALUE_USD] = @OUTPUT_VALUE_USD,
-						[OUTPUT_VALUE_EURO]= @OUTPUT_VALUE_EURO,
+						[DailyIncrement_RUR] =  CASE WHEN @SumDayValue > 0 THEN @SumDayValue ELSE 0 END,
+						[DailyDecrement_RUR] = CASE WHEN @SumDayValue < 0 THEN @SumDayValue ELSE 0 END,
+						[DailyIncrement_USD]  = @DailyIncrement_USD,
+						[DailyIncrement_EURO] = @DailyIncrement_EURO,
+						[DailyDecrement_USD] = @DailyDecrement_USD,
+						[DailyDecrement_EURO]= @DailyDecrement_EURO,
 						[INPUT_DIVIDENTS_RUR] = @INPUT_DIVIDENTS_RUR,
 						[INPUT_DIVIDENTS_USD] = @INPUT_DIVIDENTS_USD,
 						[INPUT_DIVIDENTS_EURO] = @INPUT_DIVIDENTS_EURO,
@@ -1361,12 +1361,12 @@ AS BEGIN
 						[INPUT_COUPONS_USD] = @INPUT_COUPONS_USD,
 						[INPUT_COUPONS_EURO] = @INPUT_COUPONS_EURO,
 
-						[INPUT_AmountPayments_RUR] = @INPUT_AmountPayments_RUR,
-						[INPUT_AmountPayments_USD] = @INPUT_AmountPayments_USD,
-						[INPUT_AmountPayments_EURO] = @INPUT_AmountPayments_EURO,
-						[OUTPUT_AmountPayments_RUR] = @OUTPUT_AmountPayments_RUR,
-						[OUTPUT_AmountPayments_USD] = @OUTPUT_AmountPayments_USD,
-						[OUTPUT_AmountPayments_EURO] = @OUTPUT_AmountPayments_EURO
+						[INPUT_VALUE_RUR] = @INPUT_VALUE_RUR,
+						[INPUT_VALUE_USD] = @INPUT_VALUE_USD,
+						[INPUT_VALUE_EURO] = @INPUT_VALUE_EURO,
+						[OUTPUT_VALUE_RUR] = @OUTPUT_VALUE_RUR,
+						[OUTPUT_VALUE_USD] = @OUTPUT_VALUE_USD,
+						[OUTPUT_VALUE_EURO] = @OUTPUT_VALUE_EURO
                 ) AS s
                 on t.InvestorId = s.InvestorId and t.ContractId = s.ContractId and t.[Date] = s.[Date]
                 when not matched
@@ -1379,12 +1379,12 @@ AS BEGIN
 						[EURORATE],
 						[VALUE_USD],
 						[VALUE_EURO],
-						[INPUT_VALUE_RUR],
-						[OUTPUT_VALUE_RUR],
-						[INPUT_VALUE_USD],
-						[INPUT_VALUE_EURO],
-						[OUTPUT_VALUE_USD],
-						[OUTPUT_VALUE_EURO],
+						[DailyIncrement_RUR],
+						[DailyDecrement_RUR],
+						[DailyIncrement_USD],
+						[DailyIncrement_EURO],
+						[DailyDecrement_USD],
+						[DailyDecrement_EURO],
 						[INPUT_DIVIDENTS_RUR],
 						[INPUT_DIVIDENTS_USD],
 						[INPUT_DIVIDENTS_EURO],
@@ -1392,12 +1392,12 @@ AS BEGIN
 						[INPUT_COUPONS_USD],
 						[INPUT_COUPONS_EURO],
 
-						[INPUT_AmountPayments_RUR],
-						[INPUT_AmountPayments_USD],
-						[INPUT_AmountPayments_EURO],
-						[OUTPUT_AmountPayments_RUR],
-						[OUTPUT_AmountPayments_USD],
-						[OUTPUT_AmountPayments_EURO]
+						[INPUT_VALUE_RUR],
+						[INPUT_VALUE_USD],
+						[INPUT_VALUE_EURO],
+						[OUTPUT_VALUE_RUR],
+						[OUTPUT_VALUE_USD],
+						[OUTPUT_VALUE_EURO]
                     )
                     values (
                         s.[InvestorId],
@@ -1408,24 +1408,24 @@ AS BEGIN
 						s.[EURORATE],
 						s.[VALUE_USD],
 						s.[VALUE_EURO],
-						s.[INPUT_VALUE_RUR],
-						s.[OUTPUT_VALUE_RUR],
-						s.[INPUT_VALUE_USD],
-						s.[INPUT_VALUE_EURO],
-						s.[OUTPUT_VALUE_USD],
-						s.[OUTPUT_VALUE_EURO],
+						s.[DailyIncrement_RUR],
+						s.[DailyDecrement_RUR],
+						s.[DailyIncrement_USD],
+						s.[DailyIncrement_EURO],
+						s.[DailyDecrement_USD],
+						s.[DailyDecrement_EURO],
 						s.[INPUT_DIVIDENTS_RUR],
 						s.[INPUT_DIVIDENTS_USD],
 						s.[INPUT_DIVIDENTS_EURO],
 						s.[INPUT_COUPONS_RUR],
 						s.[INPUT_COUPONS_USD],
 						s.[INPUT_COUPONS_EURO],
-						s.[INPUT_AmountPayments_RUR],
-						s.[INPUT_AmountPayments_USD],
-						s.[INPUT_AmountPayments_EURO],
-						s.[OUTPUT_AmountPayments_RUR],
-						s.[OUTPUT_AmountPayments_USD],
-						s.[OUTPUT_AmountPayments_EURO]
+						s.[INPUT_VALUE_RUR],
+						s.[INPUT_VALUE_USD],
+						s.[INPUT_VALUE_EURO],
+						s.[OUTPUT_VALUE_RUR],
+						s.[OUTPUT_VALUE_USD],
+						s.[OUTPUT_VALUE_EURO]
                     )
                 when matched
                 then update set
@@ -1434,12 +1434,12 @@ AS BEGIN
 					[EURORATE] = s.[EURORATE],
 					[VALUE_USD] = s.[VALUE_USD],
 					[VALUE_EURO] = s.[VALUE_EURO],
-					[INPUT_VALUE_RUR] = s.[INPUT_VALUE_RUR],
-					[OUTPUT_VALUE_RUR] = s.[OUTPUT_VALUE_RUR],
-					[INPUT_VALUE_USD] = s.[INPUT_VALUE_USD],
-					[INPUT_VALUE_EURO] = s.[INPUT_VALUE_EURO],
-					[OUTPUT_VALUE_USD] = s.[OUTPUT_VALUE_USD],
-					[OUTPUT_VALUE_EURO] = s.[OUTPUT_VALUE_EURO],
+					[DailyIncrement_RUR] = s.[DailyIncrement_RUR],
+					[DailyDecrement_RUR] = s.[DailyDecrement_RUR],
+					[DailyIncrement_USD] = s.[DailyIncrement_USD],
+					[DailyIncrement_EURO] = s.[DailyIncrement_EURO],
+					[DailyDecrement_USD] = s.[DailyDecrement_USD],
+					[DailyDecrement_EURO] = s.[DailyDecrement_EURO],
 					[INPUT_DIVIDENTS_RUR] = s.[INPUT_DIVIDENTS_RUR],
 					[INPUT_DIVIDENTS_USD] = s.[INPUT_DIVIDENTS_USD],
 					[INPUT_DIVIDENTS_EURO] = s.[INPUT_DIVIDENTS_EURO],
@@ -1447,12 +1447,12 @@ AS BEGIN
 					[INPUT_COUPONS_USD] = s.[INPUT_COUPONS_USD],
 					[INPUT_COUPONS_EURO] = s.[INPUT_COUPONS_EURO],
 
-					[INPUT_AmountPayments_RUR] = s.[INPUT_AmountPayments_RUR],
-					[INPUT_AmountPayments_USD] = s.[INPUT_AmountPayments_USD],
-					[INPUT_AmountPayments_EURO] = s.[INPUT_AmountPayments_EURO],
-					[OUTPUT_AmountPayments_RUR] = s.[OUTPUT_AmountPayments_RUR],
-					[OUTPUT_AmountPayments_USD] = s.[OUTPUT_AmountPayments_USD],
-					[OUTPUT_AmountPayments_EURO] = s.[OUTPUT_AmountPayments_EURO];
+					[INPUT_VALUE_RUR] = s.[INPUT_VALUE_RUR],
+					[INPUT_VALUE_USD] = s.[INPUT_VALUE_USD],
+					[INPUT_VALUE_EURO] = s.[INPUT_VALUE_EURO],
+					[OUTPUT_VALUE_RUR] = s.[OUTPUT_VALUE_RUR],
+					[OUTPUT_VALUE_USD] = s.[OUTPUT_VALUE_USD],
+					[OUTPUT_VALUE_EURO] = s.[OUTPUT_VALUE_EURO];
             END
         END
         ELSE
@@ -1493,10 +1493,10 @@ AS BEGIN
 				group by PaymentDate
 			) as D ON A.[Date] = D.PaymentDate;
 
-			SET @INPUT_VALUE_USD = CASE WHEN @SumDayValue > 0 THEN [dbo].f_Round(@SumDayValue * (1/NULLIF(@USDRATE,0)), 2) ELSE 0 END;
-			SET @INPUT_VALUE_EURO = CASE WHEN @SumDayValue > 0 THEN [dbo].f_Round(@SumDayValue * (1/NULLIF(@EURORATE,0)), 2) ELSE 0 END;
-			SET @OUTPUT_VALUE_USD = CASE WHEN @SumDayValue < 0 THEN [dbo].f_Round(@SumDayValue * (1/NULLIF(@USDRATE,0)), 2) ELSE 0 END;
-			SET @OUTPUT_VALUE_EURO = CASE WHEN @SumDayValue < 0 THEN [dbo].f_Round(@SumDayValue * (1/NULLIF(@EURORATE,0)), 2) ELSE 0 END;
+			SET @DailyIncrement_USD = CASE WHEN @SumDayValue > 0 THEN [dbo].f_Round(@SumDayValue * (1/NULLIF(@USDRATE,0)), 2) ELSE 0 END;
+			SET @DailyIncrement_EURO = CASE WHEN @SumDayValue > 0 THEN [dbo].f_Round(@SumDayValue * (1/NULLIF(@EURORATE,0)), 2) ELSE 0 END;
+			SET @DailyDecrement_USD = CASE WHEN @SumDayValue < 0 THEN [dbo].f_Round(@SumDayValue * (1/NULLIF(@USDRATE,0)), 2) ELSE 0 END;
+			SET @DailyDecrement_EURO = CASE WHEN @SumDayValue < 0 THEN [dbo].f_Round(@SumDayValue * (1/NULLIF(@EURORATE,0)), 2) ELSE 0 END;
 
 			
 			set @AmountPayments_RUR = NULL
@@ -1515,12 +1515,12 @@ AS BEGIN
 			set @AmountPayments_USD  = isnull(@AmountPayments_USD, 0) 
 			set @AmountPayments_EURO = isnull(@AmountPayments_EURO, 0)
 
-			SET @INPUT_AmountPayments_RUR  = CASE WHEN @AmountPayments_RUR > 0 THEN @AmountPayments_RUR ELSE 0 END;
-			SET @INPUT_AmountPayments_USD  = CASE WHEN @AmountPayments_USD > 0 THEN @AmountPayments_USD ELSE 0 END;
-			SET @INPUT_AmountPayments_EURO = CASE WHEN @AmountPayments_EURO > 0 THEN @AmountPayments_EURO ELSE 0 END;
-			SET @OUTPUT_AmountPayments_RUR  = CASE WHEN @AmountPayments_RUR < 0 THEN @AmountPayments_RUR ELSE 0 END;
-			SET @OUTPUT_AmountPayments_USD  = CASE WHEN @AmountPayments_USD < 0 THEN @AmountPayments_USD ELSE 0 END;
-			SET @OUTPUT_AmountPayments_EURO = CASE WHEN @AmountPayments_EURO < 0 THEN @AmountPayments_EURO ELSE 0 END;
+			SET @INPUT_VALUE_RUR  = CASE WHEN @AmountPayments_RUR > 0 THEN @AmountPayments_RUR ELSE 0 END;
+			SET @INPUT_VALUE_USD  = CASE WHEN @AmountPayments_USD > 0 THEN @AmountPayments_USD ELSE 0 END;
+			SET @INPUT_VALUE_EURO = CASE WHEN @AmountPayments_EURO > 0 THEN @AmountPayments_EURO ELSE 0 END;
+			SET @OUTPUT_VALUE_RUR = CASE WHEN @AmountPayments_RUR < 0 THEN @AmountPayments_RUR ELSE 0 END;
+			SET @OUTPUT_VALUE_USD = CASE WHEN @AmountPayments_USD < 0 THEN @AmountPayments_USD ELSE 0 END;
+			SET @OUTPUT_VALUE_EURO = CASE WHEN @AmountPayments_EURO < 0 THEN @AmountPayments_EURO ELSE 0 END;
 
 
             WITH CTE
@@ -1543,12 +1543,12 @@ AS BEGIN
 					[EURORATE] = @EURORATE,
 					[VALUE_USD] = [dbo].f_Round(@SumValue * (1/NULLIF(@USDRATE,0)), 2),
 					[VALUE_EURO] = [dbo].f_Round(@SumValue * (1/NULLIF(@EURORATE,0)), 2),
-					[INPUT_VALUE_RUR] =  CASE WHEN @SumDayValue > 0 THEN @SumDayValue ELSE 0 END,
-					[OUTPUT_VALUE_RUR] = CASE WHEN @SumDayValue < 0 THEN @SumDayValue ELSE 0 END,
-					[INPUT_VALUE_USD]  = @INPUT_VALUE_USD,
-					[INPUT_VALUE_EURO] = @INPUT_VALUE_EURO,
-					[OUTPUT_VALUE_USD] = @OUTPUT_VALUE_USD,
-					[OUTPUT_VALUE_EURO]= @OUTPUT_VALUE_EURO,
+					[DailyIncrement_RUR] =  CASE WHEN @SumDayValue > 0 THEN @SumDayValue ELSE 0 END,
+					[DailyDecrement_RUR] = CASE WHEN @SumDayValue < 0 THEN @SumDayValue ELSE 0 END,
+					[DailyIncrement_USD]  = @DailyIncrement_USD,
+					[DailyIncrement_EURO] = @DailyIncrement_EURO,
+					[DailyDecrement_USD] = @DailyDecrement_USD,
+					[DailyDecrement_EURO]= @DailyDecrement_EURO,
 					[INPUT_DIVIDENTS_RUR] = @INPUT_DIVIDENTS_RUR,
 					[INPUT_DIVIDENTS_USD] = @INPUT_DIVIDENTS_USD,
 					[INPUT_DIVIDENTS_EURO] = @INPUT_DIVIDENTS_EURO,
@@ -1556,12 +1556,12 @@ AS BEGIN
 					[INPUT_COUPONS_USD] = @INPUT_COUPONS_USD,
 					[INPUT_COUPONS_EURO] = @INPUT_COUPONS_EURO,
 
-					[INPUT_AmountPayments_RUR] = @INPUT_AmountPayments_RUR,
-					[INPUT_AmountPayments_USD] = @INPUT_AmountPayments_USD,
-					[INPUT_AmountPayments_EURO] = @INPUT_AmountPayments_EURO,
-					[OUTPUT_AmountPayments_RUR] = @OUTPUT_AmountPayments_RUR,
-					[OUTPUT_AmountPayments_USD] = @OUTPUT_AmountPayments_USD,
-					[OUTPUT_AmountPayments_EURO] = @OUTPUT_AmountPayments_EURO
+					[INPUT_VALUE_RUR] = @INPUT_VALUE_RUR,
+					[INPUT_VALUE_USD] = @INPUT_VALUE_USD,
+					[INPUT_VALUE_EURO] = @INPUT_VALUE_EURO,
+					[OUTPUT_VALUE_RUR] = @OUTPUT_VALUE_RUR,
+					[OUTPUT_VALUE_USD] = @OUTPUT_VALUE_USD,
+					[OUTPUT_VALUE_EURO] = @OUTPUT_VALUE_EURO
             ) AS s
             on t.InvestorId = s.InvestorId and t.ContractId = s.ContractId and t.[Date] = s.[Date]
             when not matched
@@ -1574,12 +1574,12 @@ AS BEGIN
 					[EURORATE],
 					[VALUE_USD],
 					[VALUE_EURO],
-					[INPUT_VALUE_RUR],
-					[OUTPUT_VALUE_RUR],
-					[INPUT_VALUE_USD],
-					[INPUT_VALUE_EURO],
-					[OUTPUT_VALUE_USD],
-					[OUTPUT_VALUE_EURO],
+					[DailyIncrement_RUR],
+					[DailyDecrement_RUR],
+					[DailyIncrement_USD],
+					[DailyIncrement_EURO],
+					[DailyDecrement_USD],
+					[DailyDecrement_EURO],
 					[INPUT_DIVIDENTS_RUR],
 					[INPUT_DIVIDENTS_USD],
 					[INPUT_DIVIDENTS_EURO],
@@ -1587,12 +1587,12 @@ AS BEGIN
 					[INPUT_COUPONS_USD],
 					[INPUT_COUPONS_EURO],
 
-					[INPUT_AmountPayments_RUR],
-					[INPUT_AmountPayments_USD],
-					[INPUT_AmountPayments_EURO],
-					[OUTPUT_AmountPayments_RUR],
-					[OUTPUT_AmountPayments_USD],
-					[OUTPUT_AmountPayments_EURO]
+					[INPUT_VALUE_RUR],
+					[INPUT_VALUE_USD],
+					[INPUT_VALUE_EURO],
+					[OUTPUT_VALUE_RUR],
+					[OUTPUT_VALUE_USD],
+					[OUTPUT_VALUE_EURO]
                 )
                 values (
                     s.[InvestorId],
@@ -1603,12 +1603,12 @@ AS BEGIN
 					s.[EURORATE],
 					s.[VALUE_USD],
 					s.[VALUE_EURO],
-					s.[INPUT_VALUE_RUR],
-					s.[OUTPUT_VALUE_RUR],
-					s.[INPUT_VALUE_USD],
-					s.[INPUT_VALUE_EURO],
-					s.[OUTPUT_VALUE_USD],
-					s.[OUTPUT_VALUE_EURO],
+					s.[DailyIncrement_RUR],
+					s.[DailyDecrement_RUR],
+					s.[DailyIncrement_USD],
+					s.[DailyIncrement_EURO],
+					s.[DailyDecrement_USD],
+					s.[DailyDecrement_EURO],
 					s.[INPUT_DIVIDENTS_RUR],
 					s.[INPUT_DIVIDENTS_USD],
 					s.[INPUT_DIVIDENTS_EURO],
@@ -1616,12 +1616,12 @@ AS BEGIN
 					s.[INPUT_COUPONS_USD],
 					s.[INPUT_COUPONS_EURO],
 
-					s.[INPUT_AmountPayments_RUR],
-					s.[INPUT_AmountPayments_USD],
-					s.[INPUT_AmountPayments_EURO],
-					s.[OUTPUT_AmountPayments_RUR],
-					s.[OUTPUT_AmountPayments_USD],
-					s.[OUTPUT_AmountPayments_EURO]
+					s.[INPUT_VALUE_RUR],
+					s.[INPUT_VALUE_USD],
+					s.[INPUT_VALUE_EURO],
+					s.[OUTPUT_VALUE_RUR],
+					s.[OUTPUT_VALUE_USD],
+					s.[OUTPUT_VALUE_EURO]
                 )
             when matched
             then update set
@@ -1630,12 +1630,12 @@ AS BEGIN
 				[EURORATE] = s.[EURORATE],
 				[VALUE_USD] = s.[VALUE_USD],
 				[VALUE_EURO] = s.[VALUE_EURO],
-				[INPUT_VALUE_RUR] = s.[INPUT_VALUE_RUR],
-				[OUTPUT_VALUE_RUR] = s.[OUTPUT_VALUE_RUR],
-				[INPUT_VALUE_USD] = s.[INPUT_VALUE_USD],
-				[INPUT_VALUE_EURO] = s.[INPUT_VALUE_EURO],
-				[OUTPUT_VALUE_USD] = s.[OUTPUT_VALUE_USD],
-				[OUTPUT_VALUE_EURO] = s.[OUTPUT_VALUE_EURO],
+				[DailyIncrement_RUR] = s.[DailyIncrement_RUR],
+				[DailyDecrement_RUR] = s.[DailyDecrement_RUR],
+				[DailyIncrement_USD] = s.[DailyIncrement_USD],
+				[DailyIncrement_EURO] = s.[DailyIncrement_EURO],
+				[DailyDecrement_USD] = s.[DailyDecrement_USD],
+				[DailyDecrement_EURO] = s.[DailyDecrement_EURO],
 				[INPUT_DIVIDENTS_RUR] = s.[INPUT_DIVIDENTS_RUR],
 				[INPUT_DIVIDENTS_USD] = s.[INPUT_DIVIDENTS_USD],
 				[INPUT_DIVIDENTS_EURO] = s.[INPUT_DIVIDENTS_EURO],
@@ -1643,12 +1643,12 @@ AS BEGIN
 				[INPUT_COUPONS_USD] = s.[INPUT_COUPONS_USD],
 				[INPUT_COUPONS_EURO] = s.[INPUT_COUPONS_EURO],
 
-				[INPUT_AmountPayments_RUR] = s.[INPUT_AmountPayments_RUR],
-				[INPUT_AmountPayments_USD] = s.[INPUT_AmountPayments_USD],
-				[INPUT_AmountPayments_EURO] = s.[INPUT_AmountPayments_EURO],
-				[OUTPUT_AmountPayments_RUR] = s.[OUTPUT_AmountPayments_RUR],
-				[OUTPUT_AmountPayments_USD] = s.[OUTPUT_AmountPayments_USD],
-				[OUTPUT_AmountPayments_EURO] = s.[OUTPUT_AmountPayments_EURO];
+				[INPUT_VALUE_RUR] = s.[INPUT_VALUE_RUR],
+				[INPUT_VALUE_USD] = s.[INPUT_VALUE_USD],
+				[INPUT_VALUE_EURO] = s.[INPUT_VALUE_EURO],
+				[OUTPUT_VALUE_RUR] = s.[OUTPUT_VALUE_RUR],
+				[OUTPUT_VALUE_USD] = s.[OUTPUT_VALUE_USD],
+				[OUTPUT_VALUE_EURO] = s.[OUTPUT_VALUE_EURO];
         END
     END
     
