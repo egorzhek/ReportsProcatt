@@ -257,7 +257,7 @@ AS BEGIN
 		[Date], [Value]
 	)
     SELECT
-        [Date] = CAST(DATEADD(SECOND, 1, W.WIRDATE) as date),
+        [Date] = CAST(W.WIRDATE as date),
         [Value] = T.VALUE_ * T.TYPE_
     --INTO #TempContract1
     FROM [BAL_DATA_STD].[dbo].OD_RESTS AS R WITH(NOLOCK)
