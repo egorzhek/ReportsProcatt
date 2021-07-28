@@ -49,8 +49,8 @@ AS BEGIN
 			SET @Error = ERROR_MESSAGE();
 
 			-- ошибку в лог
-			INSERT INTO [dbo].[ProcessorErrors] ([Error])
-			SELECT @ProcName + ': ' + @Error;
+			INSERT INTO [dbo].[ProcessorErrors] ([Error], [Investor_id])
+			SELECT @ProcName + ': ' + @Error, @Investor;
 		END CATCH
 		
 		
