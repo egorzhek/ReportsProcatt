@@ -1,6 +1,6 @@
 USE [CacheDB]
 GO
--- создаём функцию секционирования
+-- СЃРѕР·РґР°С‘Рј С„СѓРЅРєС†РёСЋ СЃРµРєС†РёРѕРЅРёСЂРѕРІР°РЅРёСЏ
 GO
 CREATE PARTITION FUNCTION [YEAR_Partition_Function](date) AS 
 RANGE RIGHT FOR VALUES 
@@ -51,7 +51,7 @@ RANGE RIGHT FOR VALUES
 	N'2040-01-01'
 )
 GO
--- создаём схему секционирования
+-- СЃРѕР·РґР°С‘Рј СЃС…РµРјСѓ СЃРµРєС†РёРѕРЅРёСЂРѕРІР°РЅРёСЏ
 GO
 CREATE PARTITION SCHEME [YEAR_Partition_Scheme]
     AS PARTITION YEAR_Partition_Function

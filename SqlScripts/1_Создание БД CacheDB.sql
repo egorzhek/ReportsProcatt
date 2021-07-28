@@ -1,11 +1,11 @@
 CREATE DATABASE [CacheDB]
  CONTAINMENT = NONE
  ON  PRIMARY
-( NAME = N'CacheDB_Data', FILENAME = N'C:\Program Files\Microsoft SQL Server\MSSQL15.MSSQLSERVER01\MSSQL\DATA\CacheDB.mdf', -- указать местоположение
+( NAME = N'CacheDB_Data', FILENAME = N'C:\Program Files\Microsoft SQL Server\MSSQL15.MSSQLSERVER01\MSSQL\DATA\CacheDB.mdf', -- СѓРєР°Р·Р°С‚СЊ РјРµСЃС‚РѕРїРѕР»РѕР¶РµРЅРёРµ
 	SIZE = 10GB , MAXSIZE = UNLIMITED, FILEGROWTH = 10% )
  LOG ON 
 ( NAME = N'CacheDB_Log', 
-FILENAME = N'C:\Program Files\Microsoft SQL Server\MSSQL15.MSSQLSERVER01\MSSQL\DATA\CacheDB.ldf', -- указать местоположение
+FILENAME = N'C:\Program Files\Microsoft SQL Server\MSSQL15.MSSQLSERVER01\MSSQL\DATA\CacheDB.ldf', -- СѓРєР°Р·Р°С‚СЊ РјРµСЃС‚РѕРїРѕР»РѕР¶РµРЅРёРµ
 	SIZE = 2GB , MAXSIZE = UNLIMITED, FILEGROWTH = 10%)
  WITH CATALOG_COLLATION = DATABASE_DEFAULT
 GO

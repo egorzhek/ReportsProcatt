@@ -4,7 +4,7 @@ set @Year = 1999
 
 while @Year <= 2040
 begin
-SET @YearStr = '-- Äîáàâëÿåì ôàéëîâóþ ãðóïïó òàê
+SET @YearStr = '-- Ð”Ð¾Ð±Ð°Ð²Ð»ÑÐµÐ¼ Ñ„Ð°Ð¹Ð»Ð¾Ð²ÑƒÑŽ Ð³Ñ€ÑƒÐ¿Ð¿Ñƒ Ñ‚Ð°Ðº
 ALTER DATABASE [CacheDB]
 ADD FILEGROUP YearFG_' + cast(@Year as nvarchar(max)) + ';
 GO

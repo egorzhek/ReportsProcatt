@@ -1,7 +1,7 @@
--- Нужно определить физическое местоположение файлов, на каких дисках
+-- РќСѓР¶РЅРѕ РѕРїСЂРµРґРµР»РёС‚СЊ С„РёР·РёС‡РµСЃРєРѕРµ РјРµСЃС‚РѕРїРѕР»РѕР¶РµРЅРёРµ С„Р°Р№Р»РѕРІ, РЅР° РєР°РєРёС… РґРёСЃРєР°С…
 USE [CacheDB]
 GO
--- Добавляем файловую группу так
+-- Р”РѕР±Р°РІР»СЏРµРј С„Р°Р№Р»РѕРІСѓСЋ РіСЂСѓРїРїСѓ С‚Р°Рє
 ALTER DATABASE [CacheDB]
 ADD FILEGROUP YearFG_1999;
 GO
@@ -16,7 +16,7 @@ ADD FILE
 )  
 TO FILEGROUP YearFG_1999;
 GO
--- Добавляем файловую группу так
+-- Р”РѕР±Р°РІР»СЏРµРј С„Р°Р№Р»РѕРІСѓСЋ РіСЂСѓРїРїСѓ С‚Р°Рє
 ALTER DATABASE [CacheDB]
 ADD FILEGROUP YearFG_2000;
 GO
@@ -31,7 +31,7 @@ ADD FILE
 )  
 TO FILEGROUP YearFG_2000;
 GO
--- Добавляем файловую группу так
+-- Р”РѕР±Р°РІР»СЏРµРј С„Р°Р№Р»РѕРІСѓСЋ РіСЂСѓРїРїСѓ С‚Р°Рє
 ALTER DATABASE [CacheDB]
 ADD FILEGROUP YearFG_2001;
 GO
@@ -46,7 +46,7 @@ ADD FILE
 )  
 TO FILEGROUP YearFG_2001;
 GO
--- Добавляем файловую группу так
+-- Р”РѕР±Р°РІР»СЏРµРј С„Р°Р№Р»РѕРІСѓСЋ РіСЂСѓРїРїСѓ С‚Р°Рє
 ALTER DATABASE [CacheDB]
 ADD FILEGROUP YearFG_2002;
 GO
@@ -61,7 +61,7 @@ ADD FILE
 )  
 TO FILEGROUP YearFG_2002;
 GO
--- Добавляем файловую группу так
+-- Р”РѕР±Р°РІР»СЏРµРј С„Р°Р№Р»РѕРІСѓСЋ РіСЂСѓРїРїСѓ С‚Р°Рє
 ALTER DATABASE [CacheDB]
 ADD FILEGROUP YearFG_2003;
 GO
@@ -76,7 +76,7 @@ ADD FILE
 )  
 TO FILEGROUP YearFG_2003;
 GO
--- Добавляем файловую группу так
+-- Р”РѕР±Р°РІР»СЏРµРј С„Р°Р№Р»РѕРІСѓСЋ РіСЂСѓРїРїСѓ С‚Р°Рє
 ALTER DATABASE [CacheDB]
 ADD FILEGROUP YearFG_2004;
 GO
@@ -91,7 +91,7 @@ ADD FILE
 )  
 TO FILEGROUP YearFG_2004;
 GO
--- Добавляем файловую группу так
+-- Р”РѕР±Р°РІР»СЏРµРј С„Р°Р№Р»РѕРІСѓСЋ РіСЂСѓРїРїСѓ С‚Р°Рє
 ALTER DATABASE [CacheDB]
 ADD FILEGROUP YearFG_2005;
 GO
@@ -106,7 +106,7 @@ ADD FILE
 )  
 TO FILEGROUP YearFG_2005;
 GO
--- Добавляем файловую группу так
+-- Р”РѕР±Р°РІР»СЏРµРј С„Р°Р№Р»РѕРІСѓСЋ РіСЂСѓРїРїСѓ С‚Р°Рє
 ALTER DATABASE [CacheDB]
 ADD FILEGROUP YearFG_2006;
 GO
@@ -121,7 +121,7 @@ ADD FILE
 )  
 TO FILEGROUP YearFG_2006;
 GO
--- Добавляем файловую группу так
+-- Р”РѕР±Р°РІР»СЏРµРј С„Р°Р№Р»РѕРІСѓСЋ РіСЂСѓРїРїСѓ С‚Р°Рє
 ALTER DATABASE [CacheDB]
 ADD FILEGROUP YearFG_2007;
 GO
@@ -136,7 +136,7 @@ ADD FILE
 )  
 TO FILEGROUP YearFG_2007;
 GO
--- Добавляем файловую группу так
+-- Р”РѕР±Р°РІР»СЏРµРј С„Р°Р№Р»РѕРІСѓСЋ РіСЂСѓРїРїСѓ С‚Р°Рє
 ALTER DATABASE [CacheDB]
 ADD FILEGROUP YearFG_2008;
 GO
@@ -151,7 +151,7 @@ ADD FILE
 )  
 TO FILEGROUP YearFG_2008;
 GO
--- Добавляем файловую группу так
+-- Р”РѕР±Р°РІР»СЏРµРј С„Р°Р№Р»РѕРІСѓСЋ РіСЂСѓРїРїСѓ С‚Р°Рє
 ALTER DATABASE [CacheDB]
 ADD FILEGROUP YearFG_2009;
 GO
@@ -166,7 +166,7 @@ ADD FILE
 )  
 TO FILEGROUP YearFG_2009;
 GO
--- Добавляем файловую группу так
+-- Р”РѕР±Р°РІР»СЏРµРј С„Р°Р№Р»РѕРІСѓСЋ РіСЂСѓРїРїСѓ С‚Р°Рє
 ALTER DATABASE [CacheDB]
 ADD FILEGROUP YearFG_2010;
 GO
@@ -181,7 +181,7 @@ ADD FILE
 )  
 TO FILEGROUP YearFG_2010;
 GO
--- Добавляем файловую группу так
+-- Р”РѕР±Р°РІР»СЏРµРј С„Р°Р№Р»РѕРІСѓСЋ РіСЂСѓРїРїСѓ С‚Р°Рє
 ALTER DATABASE [CacheDB]
 ADD FILEGROUP YearFG_2011;
 GO
@@ -196,7 +196,7 @@ ADD FILE
 )  
 TO FILEGROUP YearFG_2011;
 GO
--- Добавляем файловую группу так
+-- Р”РѕР±Р°РІР»СЏРµРј С„Р°Р№Р»РѕРІСѓСЋ РіСЂСѓРїРїСѓ С‚Р°Рє
 ALTER DATABASE [CacheDB]
 ADD FILEGROUP YearFG_2012;
 GO
@@ -211,7 +211,7 @@ ADD FILE
 )  
 TO FILEGROUP YearFG_2012;
 GO
--- Добавляем файловую группу так
+-- Р”РѕР±Р°РІР»СЏРµРј С„Р°Р№Р»РѕРІСѓСЋ РіСЂСѓРїРїСѓ С‚Р°Рє
 ALTER DATABASE [CacheDB]
 ADD FILEGROUP YearFG_2013;
 GO
@@ -226,7 +226,7 @@ ADD FILE
 )  
 TO FILEGROUP YearFG_2013;
 GO
--- Добавляем файловую группу так
+-- Р”РѕР±Р°РІР»СЏРµРј С„Р°Р№Р»РѕРІСѓСЋ РіСЂСѓРїРїСѓ С‚Р°Рє
 ALTER DATABASE [CacheDB]
 ADD FILEGROUP YearFG_2014;
 GO
@@ -241,7 +241,7 @@ ADD FILE
 )  
 TO FILEGROUP YearFG_2014;
 GO
--- Добавляем файловую группу так
+-- Р”РѕР±Р°РІР»СЏРµРј С„Р°Р№Р»РѕРІСѓСЋ РіСЂСѓРїРїСѓ С‚Р°Рє
 ALTER DATABASE [CacheDB]
 ADD FILEGROUP YearFG_2015;
 GO
@@ -256,7 +256,7 @@ ADD FILE
 )  
 TO FILEGROUP YearFG_2015;
 GO
--- Добавляем файловую группу так
+-- Р”РѕР±Р°РІР»СЏРµРј С„Р°Р№Р»РѕРІСѓСЋ РіСЂСѓРїРїСѓ С‚Р°Рє
 ALTER DATABASE [CacheDB]
 ADD FILEGROUP YearFG_2016;
 GO
@@ -271,7 +271,7 @@ ADD FILE
 )  
 TO FILEGROUP YearFG_2016;
 GO
--- Добавляем файловую группу так
+-- Р”РѕР±Р°РІР»СЏРµРј С„Р°Р№Р»РѕРІСѓСЋ РіСЂСѓРїРїСѓ С‚Р°Рє
 ALTER DATABASE [CacheDB]
 ADD FILEGROUP YearFG_2017;
 GO
@@ -286,7 +286,7 @@ ADD FILE
 )  
 TO FILEGROUP YearFG_2017;
 GO
--- Добавляем файловую группу так
+-- Р”РѕР±Р°РІР»СЏРµРј С„Р°Р№Р»РѕРІСѓСЋ РіСЂСѓРїРїСѓ С‚Р°Рє
 ALTER DATABASE [CacheDB]
 ADD FILEGROUP YearFG_2018;
 GO
@@ -301,7 +301,7 @@ ADD FILE
 )  
 TO FILEGROUP YearFG_2018;
 GO
--- Добавляем файловую группу так
+-- Р”РѕР±Р°РІР»СЏРµРј С„Р°Р№Р»РѕРІСѓСЋ РіСЂСѓРїРїСѓ С‚Р°Рє
 ALTER DATABASE [CacheDB]
 ADD FILEGROUP YearFG_2019;
 GO
@@ -316,7 +316,7 @@ ADD FILE
 )  
 TO FILEGROUP YearFG_2019;
 GO
--- Добавляем файловую группу так
+-- Р”РѕР±Р°РІР»СЏРµРј С„Р°Р№Р»РѕРІСѓСЋ РіСЂСѓРїРїСѓ С‚Р°Рє
 ALTER DATABASE [CacheDB]
 ADD FILEGROUP YearFG_2020;
 GO
@@ -331,7 +331,7 @@ ADD FILE
 )  
 TO FILEGROUP YearFG_2020;
 GO
--- Добавляем файловую группу так
+-- Р”РѕР±Р°РІР»СЏРµРј С„Р°Р№Р»РѕРІСѓСЋ РіСЂСѓРїРїСѓ С‚Р°Рє
 ALTER DATABASE [CacheDB]
 ADD FILEGROUP YearFG_2021;
 GO
@@ -346,7 +346,7 @@ ADD FILE
 )  
 TO FILEGROUP YearFG_2021;
 GO
--- Добавляем файловую группу так
+-- Р”РѕР±Р°РІР»СЏРµРј С„Р°Р№Р»РѕРІСѓСЋ РіСЂСѓРїРїСѓ С‚Р°Рє
 ALTER DATABASE [CacheDB]
 ADD FILEGROUP YearFG_2022;
 GO
@@ -361,7 +361,7 @@ ADD FILE
 )  
 TO FILEGROUP YearFG_2022;
 GO
--- Добавляем файловую группу так
+-- Р”РѕР±Р°РІР»СЏРµРј С„Р°Р№Р»РѕРІСѓСЋ РіСЂСѓРїРїСѓ С‚Р°Рє
 ALTER DATABASE [CacheDB]
 ADD FILEGROUP YearFG_2023;
 GO
@@ -376,7 +376,7 @@ ADD FILE
 )  
 TO FILEGROUP YearFG_2023;
 GO
--- Добавляем файловую группу так
+-- Р”РѕР±Р°РІР»СЏРµРј С„Р°Р№Р»РѕРІСѓСЋ РіСЂСѓРїРїСѓ С‚Р°Рє
 ALTER DATABASE [CacheDB]
 ADD FILEGROUP YearFG_2024;
 GO
@@ -391,7 +391,7 @@ ADD FILE
 )  
 TO FILEGROUP YearFG_2024;
 GO
--- Добавляем файловую группу так
+-- Р”РѕР±Р°РІР»СЏРµРј С„Р°Р№Р»РѕРІСѓСЋ РіСЂСѓРїРїСѓ С‚Р°Рє
 ALTER DATABASE [CacheDB]
 ADD FILEGROUP YearFG_2025;
 GO
@@ -406,7 +406,7 @@ ADD FILE
 )  
 TO FILEGROUP YearFG_2025;
 GO
--- Добавляем файловую группу так
+-- Р”РѕР±Р°РІР»СЏРµРј С„Р°Р№Р»РѕРІСѓСЋ РіСЂСѓРїРїСѓ С‚Р°Рє
 ALTER DATABASE [CacheDB]
 ADD FILEGROUP YearFG_2026;
 GO
@@ -421,7 +421,7 @@ ADD FILE
 )  
 TO FILEGROUP YearFG_2026;
 GO
--- Добавляем файловую группу так
+-- Р”РѕР±Р°РІР»СЏРµРј С„Р°Р№Р»РѕРІСѓСЋ РіСЂСѓРїРїСѓ С‚Р°Рє
 ALTER DATABASE [CacheDB]
 ADD FILEGROUP YearFG_2027;
 GO
@@ -436,7 +436,7 @@ ADD FILE
 )  
 TO FILEGROUP YearFG_2027;
 GO
--- Добавляем файловую группу так
+-- Р”РѕР±Р°РІР»СЏРµРј С„Р°Р№Р»РѕРІСѓСЋ РіСЂСѓРїРїСѓ С‚Р°Рє
 ALTER DATABASE [CacheDB]
 ADD FILEGROUP YearFG_2028;
 GO
@@ -451,7 +451,7 @@ ADD FILE
 )  
 TO FILEGROUP YearFG_2028;
 GO
--- Добавляем файловую группу так
+-- Р”РѕР±Р°РІР»СЏРµРј С„Р°Р№Р»РѕРІСѓСЋ РіСЂСѓРїРїСѓ С‚Р°Рє
 ALTER DATABASE [CacheDB]
 ADD FILEGROUP YearFG_2029;
 GO
@@ -466,7 +466,7 @@ ADD FILE
 )  
 TO FILEGROUP YearFG_2029;
 GO
--- Добавляем файловую группу так
+-- Р”РѕР±Р°РІР»СЏРµРј С„Р°Р№Р»РѕРІСѓСЋ РіСЂСѓРїРїСѓ С‚Р°Рє
 ALTER DATABASE [CacheDB]
 ADD FILEGROUP YearFG_2030;
 GO
@@ -481,7 +481,7 @@ ADD FILE
 )  
 TO FILEGROUP YearFG_2030;
 GO
--- Добавляем файловую группу так
+-- Р”РѕР±Р°РІР»СЏРµРј С„Р°Р№Р»РѕРІСѓСЋ РіСЂСѓРїРїСѓ С‚Р°Рє
 ALTER DATABASE [CacheDB]
 ADD FILEGROUP YearFG_2031;
 GO
@@ -496,7 +496,7 @@ ADD FILE
 )  
 TO FILEGROUP YearFG_2031;
 GO
--- Добавляем файловую группу так
+-- Р”РѕР±Р°РІР»СЏРµРј С„Р°Р№Р»РѕРІСѓСЋ РіСЂСѓРїРїСѓ С‚Р°Рє
 ALTER DATABASE [CacheDB]
 ADD FILEGROUP YearFG_2032;
 GO
@@ -511,7 +511,7 @@ ADD FILE
 )  
 TO FILEGROUP YearFG_2032;
 GO
--- Добавляем файловую группу так
+-- Р”РѕР±Р°РІР»СЏРµРј С„Р°Р№Р»РѕРІСѓСЋ РіСЂСѓРїРїСѓ С‚Р°Рє
 ALTER DATABASE [CacheDB]
 ADD FILEGROUP YearFG_2033;
 GO
@@ -526,7 +526,7 @@ ADD FILE
 )  
 TO FILEGROUP YearFG_2033;
 GO
--- Добавляем файловую группу так
+-- Р”РѕР±Р°РІР»СЏРµРј С„Р°Р№Р»РѕРІСѓСЋ РіСЂСѓРїРїСѓ С‚Р°Рє
 ALTER DATABASE [CacheDB]
 ADD FILEGROUP YearFG_2034;
 GO
@@ -541,7 +541,7 @@ ADD FILE
 )  
 TO FILEGROUP YearFG_2034;
 GO
--- Добавляем файловую группу так
+-- Р”РѕР±Р°РІР»СЏРµРј С„Р°Р№Р»РѕРІСѓСЋ РіСЂСѓРїРїСѓ С‚Р°Рє
 ALTER DATABASE [CacheDB]
 ADD FILEGROUP YearFG_2035;
 GO
@@ -556,7 +556,7 @@ ADD FILE
 )  
 TO FILEGROUP YearFG_2035;
 GO
--- Добавляем файловую группу так
+-- Р”РѕР±Р°РІР»СЏРµРј С„Р°Р№Р»РѕРІСѓСЋ РіСЂСѓРїРїСѓ С‚Р°Рє
 ALTER DATABASE [CacheDB]
 ADD FILEGROUP YearFG_2036;
 GO
@@ -571,7 +571,7 @@ ADD FILE
 )  
 TO FILEGROUP YearFG_2036;
 GO
--- Добавляем файловую группу так
+-- Р”РѕР±Р°РІР»СЏРµРј С„Р°Р№Р»РѕРІСѓСЋ РіСЂСѓРїРїСѓ С‚Р°Рє
 ALTER DATABASE [CacheDB]
 ADD FILEGROUP YearFG_2037;
 GO
@@ -586,7 +586,7 @@ ADD FILE
 )  
 TO FILEGROUP YearFG_2037;
 GO
--- Добавляем файловую группу так
+-- Р”РѕР±Р°РІР»СЏРµРј С„Р°Р№Р»РѕРІСѓСЋ РіСЂСѓРїРїСѓ С‚Р°Рє
 ALTER DATABASE [CacheDB]
 ADD FILEGROUP YearFG_2038;
 GO
@@ -601,7 +601,7 @@ ADD FILE
 )  
 TO FILEGROUP YearFG_2038;
 GO
--- Добавляем файловую группу так
+-- Р”РѕР±Р°РІР»СЏРµРј С„Р°Р№Р»РѕРІСѓСЋ РіСЂСѓРїРїСѓ С‚Р°Рє
 ALTER DATABASE [CacheDB]
 ADD FILEGROUP YearFG_2039;
 GO
@@ -616,7 +616,7 @@ ADD FILE
 )  
 TO FILEGROUP YearFG_2039;
 GO
--- Добавляем файловую группу так
+-- Р”РѕР±Р°РІР»СЏРµРј С„Р°Р№Р»РѕРІСѓСЋ РіСЂСѓРїРїСѓ С‚Р°Рє
 ALTER DATABASE [CacheDB]
 ADD FILEGROUP YearFG_2040;
 GO
