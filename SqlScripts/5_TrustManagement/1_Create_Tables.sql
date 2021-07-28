@@ -176,6 +176,9 @@ CONSTRAINT [PK_Operations_History_Contracts] PRIMARY KEY CLUSTERED
 )ON YEAR_Partition_Scheme_Time ([Date])
 )
 GO
+CREATE NONCLUSTERED INDEX [IX_Operations_History_Contracts]
+ON [dbo].[Operations_History_Contracts] ([InvestorId],[ContractId])
+GO
 CREATE TABLE [dbo].[Operations_History_Contracts_Last]
 (
 	[Id] BigInt Identity(1,1),
@@ -197,4 +200,7 @@ CONSTRAINT [PK_Operations_History_Contracts_Last] PRIMARY KEY CLUSTERED
 	[Date] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_Operations_History_Contracts_Last]
+ON [dbo].[Operations_History_Contracts_Last] ([InvestorId],[ContractId])
 GO

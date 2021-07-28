@@ -47,3 +47,12 @@ SELECT *
 FROM [CacheDB].[dbo].[Assets_ContractsLast] nolock
 WHERE InvestorId = 13338758 and	ContractId = 13338775
 order by [Date]
+
+
+-- запрос к данным по истории ДУ
+select * from [dbo].[Operations_History_Contracts]
+where InvestorId = 8498291 and ContractId = 32846586
+UNION ALL
+select * from [dbo].[Operations_History_Contracts_Last]
+where InvestorId = 8498291 and ContractId = 32846586
+order by [Date]
