@@ -154,3 +154,47 @@ CONSTRAINT [PK_DIVIDENDS_AND_COUPONS_History_Last] PRIMARY KEY CLUSTERED
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
+CREATE TABLE [dbo].[Operations_History_Contracts]
+(
+	[Id] BigInt Identity(1,1),
+	[InvestorId] [int] NOT NULL,
+	[ContractId] [int] NOT NULL,
+	[Date] [datetime] NOT NULL,
+	[Type] [int] NULL,
+	[T_Name] NVarchar(300),
+	[ISIN] NVarchar(50),
+	[Investment] NVarchar(300),
+	[Price] [numeric](38, 7) NULL,
+	[Amount] [numeric](38, 7) NULL,
+	[Value_Nom] [numeric](38, 7) NULL,
+	[Currency] [int] NULL,
+	[Fee] [numeric](38, 7),
+CONSTRAINT [PK_Operations_History_Contracts] PRIMARY KEY CLUSTERED
+(
+	[Id] ASC,
+	[Date] ASC
+)ON YEAR_Partition_Scheme_Time ([Date])
+)
+GO
+CREATE TABLE [dbo].[Operations_History_Contracts_Last]
+(
+	[Id] BigInt Identity(1,1),
+	[InvestorId] [int] NOT NULL,
+	[ContractId] [int] NOT NULL,
+	[Date] [datetime] NOT NULL,
+	[Type] [int] NULL,
+	[T_Name] NVarchar(300),
+	[ISIN] NVarchar(50),
+	[Investment] NVarchar(300),
+	[Price] [numeric](38, 7) NULL,
+	[Amount] [numeric](38, 7) NULL,
+	[Value_Nom] [numeric](38, 7) NULL,
+	[Currency] [int] NULL,
+	[Fee] [numeric](38, 7),
+CONSTRAINT [PK_Operations_History_Contracts_Last] PRIMARY KEY CLUSTERED
+(
+	[Id] ASC,
+	[Date] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO

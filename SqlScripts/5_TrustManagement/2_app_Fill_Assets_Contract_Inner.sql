@@ -1,5 +1,13 @@
 USE [CacheDB]
 GO
+CREATE OR ALTER FUNCTION [dbo].[f_Date] ( @d_date datetime )
+returns datetime as
+/* отбрасывание времени, оставляем только дату, через отбрасывание дробной части */
+begin
+   if @d_date is null return '30.12.1899' /* в FB возвращает 17.11.1858, тут пусть будет 30.12.1899 (дельфёвый ноль) */
+   return cast( floor( cast( @d_date as float ) ) as datetime )
+end
+GO
 CREATE OR ALTER PROCEDURE [dbo].[app_Refresh_Assets_Info]
 (
 	@ContractId Int
@@ -142,6 +150,392 @@ AS BEGIN
 	and DV2.VAL is not null;
 END
 GO
+CREATE OR ALTER PROCEDURE [dbo].[app_Refresh_Operation_History]
+(
+	@InvestorId Int,
+	@ContractId Int
+)
+AS BEGIN
+	-- Юр лиц отсекаем, для них история пока не ведётся
+	IF EXISTS
+	(
+		SELECT 1
+		FROM [BAL_DATA_STD].[dbo].OD_FACES AS F WITH(NOLOCK)
+		INNER JOIN [BAL_DATA_STD].[dbo].D_B_CONTRACTS AS C WITH(NOLOCK) ON C.INVESTOR = F.SELF_ID AND C.E_DATE > GETDATE()
+		WHERE
+		C.DOC = @ContractId
+		AND F.S_TYPE = 1
+		AND F.LAST_FLAG = 1
+		AND F.E_DATE > GETDATE()
+	)
+	BEGIN
+		return;
+	END
+
+	declare @CurrentDateFormat Nvarchar(50), @DynSql  Nvarchar(50);
+
+	select
+		@CurrentDateFormat = date_format
+	from sys.dm_exec_sessions
+	where session_id = @@spid;
+
+	set dateformat dmy;
+
+	--declare @ContractId int = 2257804;
+	--declare @InvestorId int = 2149652;
+	declare @StartDate datetime		= NULL; --'01.01.1900'
+	declare @EndDate datetime		= '31.12.2999';
+
+	DECLARE @CurrentDate Date = GetDate();
+	DECLARE @LastEndDate Date = DateAdd(DAY, -180, @CurrentDate);
+	DECLARE @LastEndDate2 Date = DateAdd(DAY, -360, @CurrentDate);
+
+	-- вычисляем последнее залитое значение в постоянном кэше Max to @StartDate
+	-- если его нет, то @StartDate datetime = '01.01.1900'
+	-- > @StartDate
+	SELECT
+		@StartDate = max([Date])
+	FROM [dbo].[Operations_History_Contracts]
+	WHERE [InvestorId] = @InvestorId AND [ContractId] = @ContractId;
+
+	IF @StartDate is null
+	BEGIN
+		set @StartDate = '1901-01-01';
+	END
+
+	-- чистим временный кеш
+	DELETE FROM [dbo].[Operations_History_Contracts_Last]
+	WHERE [InvestorId] = @InvestorId AND [ContractId] = @ContractId;
+
+	-- чистим постоянный кеш на последнюю дату - так надо - могут появиться новыестроки именно на этот момент времени
+	if @StartDate > @LastEndDate2 -- но не более года
+	BEGIN
+		DELETE FROM [dbo].[Operations_History_Contracts]
+		WHERE [InvestorId] = @InvestorId AND [ContractId] = @ContractId AND [Date] = @StartDate;
+	END
+	ELSE
+	BEGIN
+		-- скорректируем на день более, чтобы не вставляло лишних строк
+		set @StartDate = DATEADD(DAY, 1, @StartDate);
+	END
+
+
+
+	declare @P1 datetime = @StartDate
+	declare @P2 datetime = @EndDate
+	declare @P3 int = null
+	declare @P4 int = @ContractId
+	declare @P5 int = 1025
+
+	BEGIN TRY
+		DROP TABLE #FFF;
+	END TRY
+	BEGIN CATCH
+	END CATCH
+
+	CREATE TABLE #FFF
+	(
+		[InvestorId] [int] NOT NULL,
+		[ContractId] [int] NOT NULL,
+		[Date] [datetime] NULL,
+		[Type] [int] NULL,
+		[T_Name] NVarchar(300) Collate DATABASE_DEFAULT NULL,
+		[ISIN] NVarchar(50) Collate DATABASE_DEFAULT NULL,
+		[Investment] NVarchar(300) Collate DATABASE_DEFAULT NULL,
+		[Price] [numeric](38, 7) NULL,
+		[Amount] [numeric](38, 7) NULL,
+		[Value_Nom] [numeric](38, 7) NULL,
+		[Currency] [int] NULL,
+		[Fee] [numeric](38, 7)
+	);
+
+
+	INSERT INTO #FFF
+	(
+		[InvestorId], [ContractId], [Date], [Type],
+		[T_Name], [ISIN], [Investment], [Price],
+		[Amount], [Value_Nom], [Currency], [Fee]
+	)
+	SELECT
+		Investor, ContractID, W_Date, Type,
+		T_Name, ISIN, Investment, Price,
+		Amount, Value_Nom, Currency, Fee
+	FROM
+	--------------------Вводы-выводы денежных средств-----------------
+	(
+		SELECT distinct
+			z.INVESTOR as Investor,
+			z.DOC as ContractID,
+			T.WIRDATE as W_Date, -- Дата движения ДС (ЦБ)
+			-T.TYPE_ as Type, --Тип (1 - ввод, -1 - вывод)
+			w.NAME as T_Name,-- Наименование операции
+			null as ISIN, --ISIN ценной бумаги
+			VO.NAME as Investment, --Название инструмента
+			null as Price, --Цена одной бумаги
+			null as Amount, --Количество бумаг
+			DV1.VAL as Value_Nom, -- Сумма сделки в валюте номинала
+			--dbo.f_Round(-T.EQ_*T.TYPE_, 2) as Value_RUR, -- Сумма сделки в рублях
+			VO.ID as Currency, --код валюты
+			0 as Fee --Комиссия		
+		FROM [BAL_DATA_STD].[dbo].D_B_CONTRACTS AS Z WITH(NOLOCK)
+		INNER JOIN [BAL_DATA_STD].[dbo].OD_ACC_PLANS AS P WITH(NOLOCK) on P.SYS_NAME = 'MONEY'
+		INNER JOIN [BAL_DATA_STD].[dbo].OD_BALANCES AS B WITH(NOLOCK) on B.ACC_PLAN = P.ID and B.SYS_NAME = 'ФОНД'
+		INNER JOIN [BAL_DATA_STD].[dbo].OD_RESTS AS R WITH(NOLOCK) on R.BAL_ACC = B.ID and R.REG_1 = Z.INVESTOR and R.REG_3 = Z.DOC
+		INNER JOIN [BAL_DATA_STD].[dbo].OD_TURNS AS T WITH(NOLOCK) on T.REST = R.ID and T.WIRDATE >= @StartDate and T.WIRDATE <= @EndDate
+		INNER JOIN [BAL_DATA_STD].[dbo].OD_WIRING AS W WITH(NOLOCK) on W.ID = T.WIRING
+		left join [BAL_DATA_STD].[dbo].OD_TURNS AS rt WITH(NOLOCK) on rt.WIRING = W.ID and rt.TYPE_ = -T.TYPE_
+		left join [BAL_DATA_STD].[dbo].OD_RESTS AS rr WITH(NOLOCK) on rr.ID = rt.REST
+		left join [BAL_DATA_STD].[dbo].OD_BALANCES AS rb WITH(NOLOCK) on rb.ID = rr.BAL_ACC
+		left join [BAL_DATA_STD].[dbo].OD_VALUES AS sv WITH(NOLOCK) on sv.ID = rr.REG_2
+		left join [BAL_DATA_STD].[dbo].OD_SHARES AS sh WITH(NOLOCK) on sh.ID = sv.ID
+		left join [BAL_DATA_STD].[dbo].OD_SYS_TABS AS sc WITH(NOLOCK) on sc.CODE = 'SHARE_CLASS' and sc.NUM = sh.CLASS
+		left join [BAL_DATA_STD].[dbo].OD_VALUES AS nv WITH(NOLOCK) on nv.ID = sh.NOM_VAL
+		INNER JOIN [BAL_DATA_STD].[dbo].OD_STEPS AS S WITH(NOLOCK) on S.ID = W.O_STEP
+		left join [BAL_DATA_STD].[dbo].OD_DOCS AS D WITH(NOLOCK) on D.ID = S.DOC
+
+		left join [BAL_DATA_STD].[dbo].OD_DOLS AS DOL WITH(NOLOCK) on DOL.DOC = d.ID -- возьмем подвалы документов
+		left join [BAL_DATA_STD].[dbo].D_OP_VAL AS DV WITH(NOLOCK) on DV.DOC = D.ID and DV.DESCR in (1743,1766) and DV.LINE = DOL.ID -- узнаем коды валюты операции 
+		left join [BAL_DATA_STD].[dbo].OD_VALUES AS VO WITH(NOLOCK) on VO.ID = DV.VAL -- Получим код валюты
+		INNER JOIN [BAL_DATA_STD].[dbo].D_OP_VAL AS DV1 WITH(NOLOCK) on DV1.DOC = D.Id and DV1.DESCR in (1746,1765) and DV1.LINE = DOL.ID -- получим сумму операции
+		INNER JOIN [BAL_DATA_STD].[dbo].D_OP_VAL AS DV2 WITH(NOLOCK) on DV2.DOC = D.Id and DV2.DESCR in (1742,1763,1759,1772) and DV2.LINE = DOL.ID and DV2.VAL = Z.DOC -- т.к. одним документом можно провести деньги по разным договорам, оставим только те операции, которые касаются конкретного портфеля.
+		WHERE
+		T.IS_PLAN = 'F'
+		and W.ID is not null
+		and T.VALUE_ <> 0
+		and z.DOC = @ContractId
+		and S.S_TYPE not in (1052 ,7612481)
+		and DV2.VAL is not null
+		and DV1.VAL is not null
+	) as AAA
+	UNION ALL
+	--------------------Вводы-выводы ценных бумаг-----------------
+	(
+	--Declare @ContractId int = 2257804 
+
+		select
+			Investor, ContractID, W_Date, Type,
+			T_Name, ISIN, Investment,
+			Price = case when Amount = 0 then 0.00 else dbo.f_Round((Value_RUR * (1/isnull(VB.RATE,1)))/Amount, 2) end,
+			Amount, Value_Nom = dbo.f_Round(Value_RUR * (1/isnull(VB.RATE,1)), 2), Currency, Fee
+		from
+		(
+			select distinct
+				z.INVESTOR as Investor,
+				z.DOC as ContractID,
+				dbo.f_Date(T.WIRDATE) as W_Date, -- Дата движения ДС (ЦБ)
+				-T.TYPE_ as Type, --Тип (1 - ввод, -1 - вывод)
+				w.NAME as T_Name,-- Наименование операции
+				sv.ISIN as ISIN, --ISIN ценной бумаги
+				sv.NAME as Investment, --Название инструмента
+				null as Price, --Цена одной бумаги  -------------------------Высчитываем сумму в валюте номинала (по курсу) а потом делим на Amount 
+				w.D_AMOUNT - w.K_AMOUNT as Amount, --Количество бумаг
+				null as Value_Nom, -- Сумма сделки в валюте номинала -найти курс валюты и пересчитать из рублей
+		
+				NOM_VAL as Currency, --код валюты
+				0 as Fee, --Комиссия
+				dbo.f_Round(-T.EQ_*T.TYPE_, 2) as Value_RUR -- Сумма сделки в рублях
+			
+			FROM [BAL_DATA_STD].[dbo].D_B_CONTRACTS AS Z WITH(NOLOCK)
+			INNER JOIN [BAL_DATA_STD].[dbo].OD_ACC_PLANS AS P WITH(NOLOCK) on P.SYS_NAME = 'MONEY'
+			INNER JOIN [BAL_DATA_STD].[dbo].OD_BALANCES AS B WITH(NOLOCK) on B.ACC_PLAN = P.ID and B.SYS_NAME = 'ФОНД'
+			INNER JOIN [BAL_DATA_STD].[dbo].OD_RESTS AS R WITH(NOLOCK) on R.BAL_ACC = B.ID and R.REG_1 = Z.INVESTOR and R.REG_3 = Z.DOC
+			INNER JOIN [BAL_DATA_STD].[dbo].OD_TURNS AS T WITH(NOLOCK) on T.REST = R.ID and T.WIRDATE >= @StartDate and T.WIRDATE <= @EndDate
+			INNER JOIN [BAL_DATA_STD].[dbo].OD_WIRING AS W WITH(NOLOCK) on W.ID = T.WIRING
+			left join [BAL_DATA_STD].[dbo].OD_TURNS AS rt WITH(NOLOCK) on rt.WIRING = W.ID and rt.TYPE_ = -T.TYPE_
+			left join [BAL_DATA_STD].[dbo].OD_RESTS AS rr WITH(NOLOCK) on rr.ID = rt.REST
+			left join [BAL_DATA_STD].[dbo].OD_BALANCES AS rb WITH(NOLOCK) on rb.ID = rr.BAL_ACC
+			left join [BAL_DATA_STD].[dbo].OD_VALUES AS sv WITH(NOLOCK) on sv.ID = rr.REG_2
+			left join [BAL_DATA_STD].[dbo].OD_SHARES AS sh WITH(NOLOCK) on sh.ID = sv.ID
+			left join [BAL_DATA_STD].[dbo].OD_SYS_TABS AS sc WITH(NOLOCK) on sc.CODE = 'SHARE_CLASS' and sc.NUM = sh.CLASS
+			left join [BAL_DATA_STD].[dbo].OD_VALUES AS nv WITH(NOLOCK) on nv.ID = sh.NOM_VAL
+			INNER JOIN [BAL_DATA_STD].[dbo].OD_STEPS AS S WITH(NOLOCK) on S.ID = W.O_STEP
+			INNER JOIN [BAL_DATA_STD].[dbo].OD_DOCS AS D WITH(NOLOCK) on D.ID = S.DOC
+
+			left join [BAL_DATA_STD].[dbo].OD_DOLS AS DOL WITH(NOLOCK) on DOL.DOC = d.ID -- возьмем подвалы документов
+			left join [BAL_DATA_STD].[dbo].D_OP_VAL AS DV WITH(NOLOCK) on DV.DOC=D.ID and DV.DESCR in (1743,1766) and DV.LINE=DOL.ID -- узнаем коды валюты операции 
+			left join [BAL_DATA_STD].[dbo].OD_VALUES AS VO WITH(NOLOCK) on VO.ID = DV.VAL -- Получим код валюты
+			left join [BAL_DATA_STD].[dbo].D_OP_VAL AS DV1 WITH(NOLOCK) on DV1.DOC = D.Id and DV1.DESCR in (1746,1765) and DV1.LINE=DOL.ID -- получим сумму операции
+			INNER JOIN [BAL_DATA_STD].[dbo].D_OP_VAL AS DV2 WITH(NOLOCK) on DV2.DOC = D.Id and DV2.DESCR in (1742,1763,1759,1772) and DV2.LINE = DOL.ID and DV2.VAL = Z.DOC -- т.к. одним документом можно провести деньги по разным договорам, оставим только те операции, которые касаются конкретного портфеля.
+
+			WHERE
+			T.IS_PLAN = 'F'
+			and W.ID is not null
+			and T.VALUE_ <> 0
+			and Z.DOC = @ContractId
+			and S.S_TYPE not in (1052 ,7612481)
+			and DV2.VAL is not null
+			and DV1.VAL is null
+		) as RR
+		OUTER APPLY
+		(
+			SELECT TOP 1
+				RT.[RATE]
+			FROM [BAL_DATA_STD].[dbo].[OD_VALUES_RATES] AS RT
+			WHERE RT.[VALUE_ID] = RR.Currency -- валюта
+			AND RT.[E_DATE] >= RR.W_Date and RT.[OFICDATE] < RR.W_Date
+			ORDER BY
+				case when DATEPART(YEAR,RT.[E_DATE]) = 9999 then 1 else 0 end ASC,
+				RT.[E_DATE] DESC,
+				RT.[OFICDATE] DESC
+		) AS VB
+	)
+	UNION ALL
+	--------------------Выплаты купонов-----------------
+	(
+		SELECT
+			@InvestorId as Investor,  ----------Добавить
+			R.REG_3 as ContractID, --------Добавить
+			dbo.f_Date(T.WIRDATE) as W_Date, -- Дата движения ДС (ЦБ)
+			1 as Type, --Тип (1 - ввод, -1 - вывод)
+			(select 'Выплата купонов') as T_Name,-- Наименование операции
+			V.ISIN as ISIN, --ISIN ценной бумаги
+			V.NAME as Investment, --Название инструмента
+			null as Price, --Цена одной бумаги  
+			null as Amount, --Количество бумаг
+			 SUM( T.VALUE_ ) as Value_Nom, -- Сумма сделки в валюте номинала 
+			VV.Id as Currency, --код валюты
+			0 as Fee --Комиссия
+		FROM [BAL_DATA_STD].[dbo].OD_BALANCES AS B WITH(NOLOCK)
+		INNER JOIN [BAL_DATA_STD].[dbo].OD_RESTS AS R WITH(NOLOCK) ON R.BAL_ACC = B.ID and R.REG_3 = @ContractId
+		INNER JOIN [BAL_DATA_STD].[dbo].OD_SHARES AS S WITH(NOLOCK) ON S.ID = R.REG_2 and S.CLASS = 2
+		INNER JOIN [BAL_DATA_STD].[dbo].OD_VALUES AS V WITH(NOLOCK) ON V.ID = R.REG_2
+		INNER JOIN [BAL_DATA_STD].[dbo].OD_TURNS AS T WITH(NOLOCK) ON T.REST = R.ID AND T.WIRDATE >= @StartDate AND T.WIRDATE < @EndDate AND S.ID IS NOT NULL AND T.TYPE_ = -1
+		INNER JOIN [BAL_DATA_STD].[dbo].OD_VALUES AS VV WITH(NOLOCK) ON R.VALUE_ID = VV.ID
+		CROSS APPLY
+		(
+			SELECT TOP(1)
+				PERCENT_, SUMMA
+			FROM  [BAL_DATA_STD].[dbo].OD_COUPONS AS C WITH(NOLOCK)
+			WHERE C.SHARE = S.ID AND C.E_DATE <= dbo.f_Date(T.WIRDATE) order by E_DATE desc
+		) CC
+		WHERE
+			B.ACC_PLAN = 95
+			AND B.SYS_NAME = 'ПИФ-ДИВ'
+			AND T.IS_PLAN = 'F'
+		GROUP BY R.REG_3, S.ISSUER, S.ID, V.ISIN, V.NAME, dbo.f_Date(T.WIRDATE), CC.PERCENT_, VV.SYSNAME, VV.ID
+	)
+	UNION ALL
+	--------------------Выплаты дивидендов-----------------
+	(
+		SELECT
+			@InvestorId as Investor,  ---------Добавить
+			R.REG_3 as ContractID, --------Добавить
+			dbo.f_Date(T.WIRDATE) as W_Date, -- Дата движения ДС (ЦБ)
+			1 as Type, --Тип (1 - ввод, -1 - вывод)
+			(select 'Выплата дивидендов') as T_Name,-- Наименование операции
+			V.ISIN as ISIN, --ISIN ценной бумаги
+			V.NAME as Investment, --Название инструмента
+			null as Price, --Цена одной бумаги  
+			null as Amount, --Количество бумаг
+			 SUM( T.VALUE_ ) as Value_Nom, -- Сумма сделки в валюте номинала 
+			VV.Id as Currency, --код валюты
+			0 as Fee --Комиссия
+		FROM [BAL_DATA_STD].[dbo].OD_BALANCES AS B WITH(NOLOCK)
+		INNER JOIN [BAL_DATA_STD].[dbo].OD_RESTS AS R WITH(NOLOCK) ON R.BAL_ACC = B.ID AND R.REG_3 = @ContractId
+		INNER JOIN [BAL_DATA_STD].[dbo].OD_SHARES AS S WITH(NOLOCK) ON S.ID = R.REG_2 AND S.CLASS in (1,7,10)
+		INNER JOIN [BAL_DATA_STD].[dbo].OD_VALUES AS V WITH(NOLOCK) ON V.ID = R.REG_2
+		INNER JOIN [BAL_DATA_STD].[dbo].OD_TURNS AS T WITH(NOLOCK) ON T.REST = R.ID AND T.WIRDATE >= @StartDate AND T.WIRDATE < @EndDate AND S.ID IS NOT NULL AND T.TYPE_=-1
+		INNER JOIN [BAL_DATA_STD].[dbo].OD_VALUES AS VV WITH(NOLOCK) ON VV.id = R.VALUE_ID
+		WHERE
+			B.ACC_PLAN = 95
+			AND B.SYS_NAME = 'ПИФ-ДИВ'
+			AND T.IS_PLAN = 'F'
+		GROUP BY R.REG_3, S.ISSUER, S.ID, V.ISIN, V.NAME, dbo.f_Date(T.WIRDATE), VV.SYSNAME, VV.ID
+	)
+	UNION ALL
+	--------------------Сделки в рамках Договора ДУ-----------------
+	(
+		SELECT 
+			q.INVESTOR as Investor, -- ID Инвестора
+			q.PORTFOLIO as ContractID, -- ИД портфеля
+			q.F_DATE_P as W_Date, -- Дата оплаты(операции)
+			q.OPERATION as Type, --Тип операции 1-покупка, 2-продажа, 3-приход ЦБ, 4-расход ЦБ, 5-приход ДС, 6-расход ДС, 7-перевод ДС, 8-перевод ЦБ, 9-мена (приход), 10-мена (расход)
+			(CASE 
+				WHEN q.OPERATION = 1 THEN 'Покупка'
+				WHEN q.OPERATION = 2 THEN 'Продажа'
+				WHEN q.OPERATION = 3 THEN 'Ввод ЦБ'
+				WHEN q.OPERATION = 4 THEN 'Вывод ЦБ'
+				WHEN q.OPERATION = 5 THEN 'Пополнение счета'
+				WHEN q.OPERATION = 6 THEN 'Вывод со счета'
+				WHEN q.OPERATION = 7 THEN 'Перевод ДС'
+				WHEN q.OPERATION = 8 THEN 'Перевод ЦБ'
+				WHEN q.OPERATION = 9 THEN 'Обмен (приход)'
+				WHEN q.OPERATION = 10 THEN 'Обмен (расход)'
+			END	) as T_Name,-- Наименование операции
+			s.ISIN as ISIN, --ISIN ценной бумаги
+			s.NAME as Investment, --Название инструмента
+			q.PRICE as Price, --Цена одной бумаги  
+			q.AMOUNT as Amount, --Количество бумаг
+			q.SUMMA as Value_Nom, -- Сумма сделки в валюте номинала (с учетом НКД)
+			v.Id as Currency, --код валюты
+			q.RUR_TAX as Fee --Комиссия в валюте эмитента ------------------Делить на курс валюты эмитента(код валюты) на дату операции	
+		FROM [BAL_DATA_STD].[dbo].PR_B_DEALS( @P1, @P2, @P3, @P4, @P5 ) AS q
+		left join [BAL_DATA_STD].[dbo].OD_VALUES AS s with(nolock) on s.ID = q.SHARE
+		left join [BAL_DATA_STD].[dbo].OD_SHARES AS sh with(nolock) on sh.ID = s.ID
+		left join [BAL_DATA_STD].[dbo].OD_VALUES AS v with(nolock) on v.ID = q.VAL
+		left join [BAL_DATA_STD].[dbo].OD_VALUES AS p with(nolock) on p.ID = q.D_VAL
+		left join [BAL_DATA_STD].[dbo].OD_VALUES AS vt with(nolock) on vt.ID = q.T_VAL
+		left join [BAL_DATA_STD].[dbo].OD_VALUES AS vr with(nolock) on vr.ID = q.R_VAL
+		left join [BAL_DATA_STD].[dbo].OD_VALUES AS vb with(nolock) on vb.ID = q.B_VAL
+		left join [BAL_DATA_STD].[dbo].OD_VALUES AS vm with(nolock) on vm.ID = q.M_VAL
+		left join [BAL_DATA_STD].[dbo].OD_VALUES AS vc with(nolock) on vc.ID = q.C_VAL
+		left join [BAL_DATA_STD].[dbo].OD_VALUES AS vx with(nolock) on vx.ID = q.X_VAL
+		left join [BAL_DATA_STD].[dbo].OD_DOCS AS dd with(nolock) on dd.ID = q.DIR_ID
+		left join [BAL_DATA_STD].[dbo].OD_CHAINS AS c with(nolock) on c.ID = q.CHAIN
+		left join [BAL_DATA_STD].[dbo].OD_FACES AS cf with(nolock) on cf.SELF_ID=q.CONTRAGENT and ((cf.B_DATE<=q.D_DATE and cf.E_DATE>q.D_DATE) or (cf.B_DATE>q.D_DATE and cf.SELF_ID=cf.ID) or (cf.E_DATE<=q.D_DATE and cf.LAST_FLAG=1))
+		left join [BAL_DATA_STD].[dbo].OD_FACES AS mf with(nolock) on mf.SELF_ID=q.MEDIATOR   and ((mf.B_DATE<=q.D_DATE and mf.E_DATE>q.D_DATE) or (mf.B_DATE>q.D_DATE and mf.SELF_ID=mf.ID) or (mf.E_DATE<=q.D_DATE and mf.LAST_FLAG=1))
+		left join [BAL_DATA_STD].[dbo].OD_FACES AS nf with(nolock) on nf.SELF_ID=q.MARKET     and ((nf.B_DATE<=q.D_DATE and nf.E_DATE>q.D_DATE) or (nf.B_DATE>q.D_DATE and nf.SELF_ID=nf.ID) or (nf.E_DATE<=q.D_DATE and nf.LAST_FLAG=1))
+		left join [BAL_DATA_STD].[dbo].OD_FACES AS i with(nolock) on i.SELF_ID=sh.ISSUER and ((i.B_DATE<=q.D_DATE and i.E_DATE>q.D_DATE) or (i.B_DATE>q.D_DATE and i.SELF_ID=i.ID) or (i.E_DATE<=q.D_DATE and i.LAST_FLAG=1))
+		left join [BAL_DATA_STD].[dbo].OD_SYS_TABS AS sc with(nolock) on sc.CODE ='SHARE_CLASS' and sc.NUM = sh.CLASS
+		left join [BAL_DATA_STD].[dbo].OD_SYS_TABS AS st with(nolock) on st.CODE ='A_SHARE_TYPE' and st.NUM = sh.TYPE_ and sh.CLASS = 1
+		left join [BAL_DATA_STD].[dbo].OD_FACE_ACCS AS ac with(nolock) on ac.ID = q.ACC
+		WHERE
+			q.IS_REPO <> 1 or q.F_DATE_P is null or q.F_DATE_R is null or q.F_DATE_P >= @p1 or q.F_DATE_R >= @P1
+	)
+	--ORDER BY W_Date
+
+	
+	-- заливаем постоянный кэш по принципу >= @StartDate and < @LastEndDate
+	INSERT INTO [dbo].[Operations_History_Contracts]
+	(
+		[InvestorId], [ContractId], [Date], [Type],
+		[T_Name], [ISIN], [Investment], [Price],
+		[Amount], [Value_Nom], [Currency], [Fee]
+	)
+	select
+		[InvestorId], [ContractId], [Date], [Type],
+		[T_Name], [ISIN], [Investment], [Price],
+		[Amount], [Value_Nom], [Currency], [Fee]
+	from #FFF
+	WHERE [Date] >= @StartDate and [Date] < @LastEndDate;
+
+	-- заливаем временный кэш по принципу >= @LastEndDate
+	INSERT INTO [dbo].[Operations_History_Contracts_Last]
+	(
+		[InvestorId], [ContractId], [Date], [Type],
+		[T_Name], [ISIN], [Investment], [Price],
+		[Amount], [Value_Nom], [Currency], [Fee]
+	)
+	select
+		[InvestorId], [ContractId], [Date], [Type],
+		[T_Name], [ISIN], [Investment], [Price],
+		[Amount], [Value_Nom], [Currency], [Fee]
+	from #FFF
+	WHERE [Date] >= @LastEndDate;
+
+
+	BEGIN TRY
+		DROP TABLE #FFF;
+	END TRY
+	BEGIN CATCH
+	END CATCH
+
+	if @CurrentDateFormat = N'mdy'
+	BEGIN
+		set dateformat mdy;
+	END
+END
+GO
 CREATE OR ALTER PROCEDURE [dbo].[app_Fill_Assets_Contract_Inner]
 (
     @ContractId int = 2257804
@@ -192,6 +586,11 @@ AS BEGIN
 
 	-- обновление информации по договору
 	EXEC [dbo].[app_Refresh_Assets_Info] @ContractId = @ContractId;
+
+	-- обновление истории операций
+	EXEC [dbo].[app_Refresh_Operation_History]
+			@InvestorId = @InvestorId,
+			@ContractId = @ContractId;
 
     if @InvestorId is null return;
 
@@ -311,7 +710,7 @@ AS BEGIN
 	(
 		SELECT TOP 1
 			RT.[RATE]
-		FROM [BAL_DATA_STD].[dbo].[OD_VALUES_RATES] AS RT
+		FROM [BAL_DATA_STD].[dbo].[OD_VALUES_RATES] AS RT WITH(NOLOCK)
 		WHERE RT.[VALUE_ID] = 2 -- доллары
 		AND RT.[E_DATE] >= B.[Date] and RT.[OFICDATE] < B.[Date]
 		ORDER BY
@@ -324,7 +723,7 @@ AS BEGIN
 	(
 		SELECT TOP 1
 			RT.[RATE]
-		FROM [BAL_DATA_STD].[dbo].[OD_VALUES_RATES] AS RT
+		FROM [BAL_DATA_STD].[dbo].[OD_VALUES_RATES] AS RT WITH(NOLOCK)
 		WHERE RT.[VALUE_ID] = 5 -- евро
 		AND RT.[E_DATE] >= B.[Date] and RT.[OFICDATE] < B.[Date]
 		ORDER BY
@@ -641,8 +1040,8 @@ AS BEGIN
 
 
 	UPDATE B SET
-		AmountPayments_USD = AmountPayments_RUR * (1.00/USDRATE),
-		AmountPayments_EURO = AmountPayments_RUR * (1.00/EURORATE)
+		AmountPayments_USD = AmountPayments_RUR * (1.00/nullif(USDRATE,0)),
+		AmountPayments_EURO = AmountPayments_RUR * (1.00/nullif(EURORATE,0))
 	FROM #TempContract32 AS B;
 
 	update a set
