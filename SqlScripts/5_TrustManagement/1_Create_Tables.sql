@@ -180,6 +180,9 @@ GO
 CREATE NONCLUSTERED INDEX [IX_Operations_History_Contracts]
 ON [dbo].[Operations_History_Contracts] ([InvestorId],[ContractId])
 GO
+CREATE NONCLUSTERED INDEX [IX_Operations_History_Contracts_PaperId]
+ON [dbo].[Operations_History_Contracts] ([PaperId])
+GO
 CREATE TABLE [dbo].[Operations_History_Contracts_Last]
 (
 	[Id] BigInt Identity(1,1),
@@ -205,6 +208,9 @@ CONSTRAINT [PK_Operations_History_Contracts_Last] PRIMARY KEY CLUSTERED
 GO
 CREATE NONCLUSTERED INDEX [IX_Operations_History_Contracts_Last]
 ON [dbo].[Operations_History_Contracts_Last] ([InvestorId],[ContractId])
+GO
+CREATE NONCLUSTERED INDEX [IX_Operations_History_Contracts_Last_PaperId]
+ON [dbo].[Operations_History_Contracts_Last] ([PaperId])
 GO
 CREATE TABLE [dbo].[InvestmentIds]
 (
