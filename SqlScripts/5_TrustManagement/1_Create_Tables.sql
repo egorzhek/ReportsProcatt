@@ -231,3 +231,85 @@ ALTER TABLE [dbo].[InvestmentIds] ADD
 CONSTRAINT [DF_InvestmentIds_RecordDate]
 DEFAULT (sysdatetime()) FOR [RecordDate]
 GO
+CREATE TABLE [dbo].[PortFolio_Daily_Before]
+(
+	[InvestorId] [int] NOT NULL,
+	[ContractId] [int] NOT NULL,
+	[WIRING_ID] [int] NOT NULL,
+	[WIRDATE] [date] NOT NULL,
+	[S_DATE] [datetime] NOT NULL,
+	[NUM] [NVarchar](200) NULL,
+	[Value] [numeric](38, 10) NULL,
+CONSTRAINT [PK_PortFolio_Daily_Before] PRIMARY KEY CLUSTERED
+(
+	[InvestorId] ASC,
+	[ContractId] ASC,
+	[WIRING_ID] ASC,
+	[WIRDATE] ASC
+)ON YEAR_Partition_Scheme ([WIRDATE])
+)
+GO
+CREATE TABLE [dbo].[PortFolio_Daily]
+(
+	[InvestorId] [int] NOT NULL,
+	[ContractId] [int] NOT NULL,
+	[PortfolioDate] [date] NOT NULL,
+	[Id] BigInt Identity(1,1),
+	[InvestmentId] BigInt NULL,
+	[VALUE_ID] [int] NULL,
+	[BAL_ACC] [int] NULL,
+	[CLASS] [int] NULL,
+	[AMOUNT] [numeric](38, 10) NULL,
+	[S_BAL_SUMMA_RUR] [numeric](38, 10)NULL,
+	[NOMINAL] [numeric](38, 10) NULL,
+	[RUR_PRICE] [numeric](38, 10) NULL,
+	[Nom_Price] [numeric](38, 10) NULL,
+	[VALUE_RUR] [numeric](38, 10) NULL,
+	[VALUE_NOM] [numeric](38, 10) NULL,
+	[CUR_ID] [int] NULL,
+	[CUR_NAME] [Nvarchar](200) NULL,
+	[RATE] [numeric](38, 10) NULL,
+	[RATE_DATE] [datetime] NULL,
+	[Value_Nom_Culc] [numeric](38, 10) NULL,
+	[RecordDate] DateTime2 CONSTRAINT DF_PortFolio_Daily_RecordDate Default SysDateTime(),
+CONSTRAINT [PK_PortFolio_Daily] PRIMARY KEY CLUSTERED
+(
+	[InvestorId] ASC,
+	[ContractId] ASC,
+	[PortfolioDate] ASC,
+	[Id] ASC
+)ON YEAR_Partition_Scheme ([PortfolioDate])
+)
+GO
+CREATE TABLE [dbo].[PortFolio_Daily_Last]
+(
+	[InvestorId] [int] NOT NULL,
+	[ContractId] [int] NOT NULL,
+	[PortfolioDate] [date] NOT NULL,
+	[Id] BigInt Identity(1,1),
+	[InvestmentId] BigInt NULL,
+	[VALUE_ID] [int] NULL,
+	[BAL_ACC] [int] NULL,
+	[CLASS] [int] NULL,
+	[AMOUNT] [numeric](38, 10) NULL,
+	[S_BAL_SUMMA_RUR] [numeric](38, 10)NULL,
+	[NOMINAL] [numeric](38, 10) NULL,
+	[RUR_PRICE] [numeric](38, 10) NULL,
+	[Nom_Price] [numeric](38, 10) NULL,
+	[VALUE_RUR] [numeric](38, 10) NULL,
+	[VALUE_NOM] [numeric](38, 10) NULL,
+	[CUR_ID] [int] NULL,
+	[CUR_NAME] [Nvarchar](200) NULL,
+	[RATE] [numeric](38, 10) NULL,
+	[RATE_DATE] [datetime] NULL,
+	[Value_Nom_Culc] [numeric](38, 10) NULL,
+	[RecordDate] DateTime2 CONSTRAINT DF_PortFolio_Daily_Last_RecordDate Default SysDateTime(),
+CONSTRAINT [PK_PortFolio_Daily_Last] PRIMARY KEY CLUSTERED
+(
+	[InvestorId] ASC,
+	[ContractId] ASC,
+	[PortfolioDate] ASC,
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO

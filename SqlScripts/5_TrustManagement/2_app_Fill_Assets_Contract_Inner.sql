@@ -541,6 +541,512 @@ AS BEGIN
 	END
 END
 GO
+CREATE OR ALTER PROCEDURE [dbo].[app_FillPortFolio_Daily]
+(
+	@InvestorId INT = 17357,
+	@ContractId INT = 2257804,
+	@P_DATE DATETIME = NULL
+)
+AS BEGIN
+	IF @P_DATE IS NULL return;
+	declare @CurrentDateFormat Nvarchar(50);
+
+	select
+		@CurrentDateFormat = date_format
+	from sys.dm_exec_sessions
+	where session_id = @@spid;
+
+	--select @CurrentDateFormat;
+
+	SET DATEFORMAT DMY;
+
+	DECLARE @CurrentDate Date = getdate()
+	DECLARE @LastEndDate Date = DateAdd(DAY, -180, @CurrentDate)
+
+
+	-----для проверки, данный блок надо расскоментировать
+	--DECLARE @InvestorId INT = 17357			;		-- Инвестор (множество инветоров) (ID субъектов) перечисленных через запятую (может быть пустым);
+	--DECLARE @ContractId INT = 2257804			;		-- Множество портфелей (договоров, пулов, множеств) перечисленных через запятую (может быть пустым); если множество портфелей пустое, то выбираются данные всех портфелей указанных в первом параметре инвесторов; не могут быть одновременно пустыми и первый, и второй параметр;
+	--DECLARE @P_DATE DATETIME = '30.05.2018';	-- дата со временем, на которую надо получить содержимое портфеля; данные получаются на указанную в этом параметре секунду (т.е. на начало этой секунды); таким образом если время указывается нулевое (параметр содержит только дату), то все котировки, номиналы и другие показатели берутся за предыдущий день; т.е. начало суток есть синоним конца предыдущих суток;
+
+
+	DECLARE @R_RATER INT = null;				-- Котировщик, используем данные из договора (портфеля);
+	DECLARE @R_MODE INT = null;				-- Способ взятия котировки (null - используется способ указанный в договоре (портфеле));
+	DECLARE @P_FLAGS INT = (2+8+16+32);
+
+
+	-- вычищаем постоянный кэш на указанную дату
+	DELETE FROM [dbo].[PortFolio_Daily]
+	WHERE [InvestorId] = @InvestorId AND [ContractId] = @ContractId AND [PortfolioDate]  = cast(@P_DATE as Date);
+
+	-- вычищаем временный кэш на указанную дату
+	DELETE FROM [dbo].[PortFolio_Daily_Last]
+	WHERE [InvestorId] = @InvestorId AND [ContractId] = @ContractId AND [PortfolioDate]  = cast(@P_DATE as Date);
+
+	-- заполняем временную таблицу
+	BEGIN TRY
+		DROP TABLE #PortFolio_Daily;
+	END TRY
+	BEGIN CATCH
+	END CATCH
+
+	CREATE TABLE #PortFolio_Daily
+	(
+		[InvestorId] [int] NOT NULL,
+		[ContractId] [int] NOT NULL,
+		[PortfolioDate] [date] NOT NULL,
+		[INVESTMENT] [Nvarchar](500) NULL,
+		[VALUE_ID] [int] NULL,
+		[BAL_ACC] [int] NULL,
+		[CLASS] [int] NULL,
+		[AMOUNT] [numeric](38, 10) NULL,
+		[S_BAL_SUMMA_RUR] [numeric](38, 10)NULL,
+		[NOMINAL] [numeric](38, 10) NULL,
+		[RUR_PRICE] [numeric](38, 10) NULL,
+		[Nom_Price] [numeric](38, 10) NULL,
+		[VALUE_RUR] [numeric](38, 10) NULL,
+		[VALUE_NOM] [numeric](38, 10) NULL,
+		[CUR_ID] [int] NULL,
+		[CUR_NAME] [Nvarchar](200) NULL,
+		[RATE] [numeric](38, 10) NULL,
+		[RATE_DATE] [datetime] NULL
+	);
+
+	INSERT INTO #PortFolio_Daily
+	(
+		[InvestorId],
+		[ContractId],
+		[PortfolioDate],
+		[INVESTMENT],
+		[VALUE_ID],
+		[BAL_ACC],
+		[CLASS],
+		[AMOUNT],
+		[S_BAL_SUMMA_RUR],
+		[NOMINAL],
+		[RUR_PRICE],
+		[Nom_Price],
+		[VALUE_RUR],
+		[VALUE_NOM],
+		[CUR_ID],
+		[CUR_NAME],
+		[RATE],
+		[RATE_DATE]
+	)
+	SELECT
+		C.INVESTOR as InvestorId, -- Идентификатор инвестора
+		CONTR as ContractId, -- ИД портфеля (Если 0 - это фонд)
+		cast(@P_DATE as Date) as PortfolioDate,
+		INVESTMENT, -- краткое описание позиции портфеля;
+		VALUE_ID, -- ID  позиции портфеля;
+		BAL_ACC,  -- ID балансового счёта;
+		case 
+			when BAL_ACC=2820 then 100
+			when BAL_ACC in (2774, 2925) then 101
+			else s.class 
+		end as CLASS,  -- Тип позиции (2 - облигация, 1 - акция, 7 - расписка, 3 - вексель,  100 - Денежные средства у брокера, 101 - Прочие вложения)
+		AMOUNT, -- количество ценных бумаг, валюты, контрактов или другого имущества;
+		S_BAL_SUMMA_RUR = BAL_SUMMA, -- балансовая стоимость по позиции с переоценкой;
+		S.NOMINAL, -- Номинал (В валюте номинала)
+		RUR_PRICE , --стоимость одной позиции в рублях
+		ROUND(RUR_PRICE/Cur.RATE/Cur.CNT,2) as Nom_Price, --стоимость одной позиции в валюте номинвала 
+		RUR_RATE as VALUE_RUR, -- оценка имущества в национальной валюте;
+		ROUND(RUR_RATE/Cur.RATE/Cur.CNT, 3) as VALUE_NOM, -- оценка имущества в валюте инструмента;
+		ISNULL(S.NOM_VAL,P.VALUE_ID) as CUR_ID, -- Валюта номина
+		VC.[SYSNAME] as CUR_NAME, -- Код валюты номинала
+		Cur.RATE/Cur.CNT as RATE, -- Курс валюты номинала к рублю
+		Cur.OFICDATE as RATE_DATE -- Дата котировки курса
+	--INTO TTT
+	FROM [BAL_DATA_STD].[dbo].PR_B_PORTFOLIO(@InvestorId, @ContractId, @P_DATE, @P_FLAGS, @R_MODE, @R_RATER) P
+	LEFT JOIN [BAL_DATA_STD].[dbo].D_B_CONTRACTS AS C WITH(NOLOCK) ON P.CONTR = C.DOC
+	LEFT JOIN [BAL_DATA_STD].[dbo].OD_VALUES AS V WITH(NOLOCK) ON V.ID = VALUE_ID 
+	LEFT JOIN [BAL_DATA_STD].[dbo].OD_SHARES AS S WITH(NOLOCK) ON S.SELF_ID = p.VALUE_ID AND S.E_DATE > GetDate()
+	CROSS APPLY [BAL_DATA_STD].[dbo].PR_GET_RATE( ISNULL(S.NOM_VAL,P.VALUE_ID),DATEADD(day,-1,@P_DATE),null,null) Cur
+	LEFT JOIN [BAL_DATA_STD].[dbo].OD_VALUES AS VC WITH(NOLOCK) ON VC.ID = ISNULL(S.NOM_VAL,P.VALUE_ID)
+	WHERE CONTR > 0 -- Отбросим паевые фонды.
+	--and BAL_ACC in (2774,2925,2820)
+	and BAL_ACC not in (2814, 2782); --убираем НДФЛ из списка портфеля
+
+
+	-- проливаем INVESTMENT
+	INSERT INTO [dbo].[InvestmentIds] ([Investment])
+	select
+		R.[INVESTMENT]
+	from
+	(
+		-- источник содержит уникальные ненуловые значения
+		select INVESTMENT
+		From #PortFolio_Daily
+		WHERE INVESTMENT IS NOT NULL
+		GROUP BY INVESTMENT
+	) AS R
+	LEFT JOIN [dbo].[InvestmentIds] AS T ON R.INVESTMENT = T.[Investment] -- таблица тоже содержит уникальные значения
+	WHERE T.[Id] IS NULL;
+
+	-- select * from [dbo].[InvestmentIds]
+
+	-- если дата меньше 180, вставляем в постоянный кэш
+	-- иначе во временный кэш
+
+	-- заполняем Value_Nom из истории
+
+	IF @P_DATE < @LastEndDate
+	BEGIN
+		INSERT INTO [dbo].[PortFolio_Daily]
+		(
+			[InvestorId],
+			[ContractId],
+			[PortfolioDate] ,
+			[InvestmentId],
+			[VALUE_ID],
+			[BAL_ACC],
+			[CLASS],
+			[AMOUNT],
+			[S_BAL_SUMMA_RUR],
+			[NOMINAL],
+			[RUR_PRICE],
+			[Nom_Price],
+			[VALUE_RUR],
+			[VALUE_NOM],
+			[CUR_ID],
+			[CUR_NAME],
+			[RATE],
+			[RATE_DATE],
+			[Value_Nom_Culc]
+		)
+		select
+			a.InvestorId,
+			a.ContractId,
+			a.PortfolioDate,
+			InvestmentId = b.Id,
+			a.VALUE_ID,
+			a.BAL_ACC,
+			a.CLASS,
+			a.AMOUNT,
+			a.S_BAL_SUMMA_RUR,
+			a.NOMINAL,
+			a.RUR_PRICE,
+			a.Nom_Price,
+			a.VALUE_RUR,
+			a.VALUE_NOM,
+			a.CUR_ID,
+			a.CUR_NAME,
+			a.RATE,
+			a.RATE_DATE,
+			s.Value_Nom_Culc
+		From #PortFolio_Daily as a
+		join [dbo].[InvestmentIds] as b on a.INVESTMENT = b.Investment
+		outer apply
+		(
+			select
+				Value_Nom_Culc = sum(Value_Nom)
+			from
+			(
+				select
+					Value_Nom = SUM(case when T_Name = 'Продажа' then -Value_Nom else Value_Nom end)
+				from Operations_History_Contracts AS FA
+				where
+				InvestorId = a.InvestorId and ContractId = a.ContractId and PaperId = a.VALUE_ID
+				and (T_Name like 'Ввод ЦБ%' or T_Name in ('Вывод ЦБ','Покупка','Продажа'))
+				and [Date] < a.PortfolioDate
+				UNION ALL
+				select
+					Value_Nom = SUM(case when T_Name = 'Продажа' then -Value_Nom else Value_Nom end)
+				from Operations_History_Contracts_Last AS FB
+				where
+				InvestorId = a.InvestorId and ContractId = a.ContractId and PaperId = a.VALUE_ID
+				and (T_Name like 'Ввод ЦБ%' or T_Name in ('Вывод ЦБ','Покупка','Продажа'))
+				and [Date] < a.PortfolioDate
+			) as G
+		) as s;
+	END
+	ELSE
+	BEGIN
+		INSERT INTO [dbo].[PortFolio_Daily_Last]
+		(
+			[InvestorId],
+			[ContractId],
+			[PortfolioDate] ,
+			[InvestmentId],
+			[VALUE_ID],
+			[BAL_ACC],
+			[CLASS],
+			[AMOUNT],
+			[S_BAL_SUMMA_RUR],
+			[NOMINAL],
+			[RUR_PRICE],
+			[Nom_Price],
+			[VALUE_RUR],
+			[VALUE_NOM],
+			[CUR_ID],
+			[CUR_NAME],
+			[RATE],
+			[RATE_DATE],
+			[Value_Nom_Culc]
+		)
+		select
+			a.InvestorId,
+			a.ContractId,
+			a.PortfolioDate,
+			InvestmentId = b.Id,
+			a.VALUE_ID,
+			a.BAL_ACC,
+			a.CLASS,
+			a.AMOUNT,
+			a.S_BAL_SUMMA_RUR,
+			a.NOMINAL,
+			a.RUR_PRICE,
+			a.Nom_Price,
+			a.VALUE_RUR,
+			a.VALUE_NOM,
+			a.CUR_ID,
+			a.CUR_NAME,
+			a.RATE,
+			a.RATE_DATE,
+			s.Value_Nom_Culc
+		From #PortFolio_Daily as a
+		join [dbo].[InvestmentIds] as b on a.INVESTMENT = b.Investment
+		outer apply
+		(
+			select
+				Value_Nom_Culc = sum(Value_Nom)
+			from
+			(
+				select
+					Value_Nom = SUM(case when T_Name = 'Продажа' then -Value_Nom else Value_Nom end)
+				from Operations_History_Contracts AS FA
+				where
+				InvestorId = a.InvestorId and ContractId = a.ContractId and PaperId = a.VALUE_ID
+				and (T_Name like 'Ввод ЦБ%' or T_Name in ('Вывод ЦБ','Покупка','Продажа'))
+				and [Date] < a.PortfolioDate
+				UNION ALL
+				select
+					Value_Nom = SUM(case when T_Name = 'Продажа' then -Value_Nom else Value_Nom end)
+				from Operations_History_Contracts_Last AS FB
+				where
+				InvestorId = a.InvestorId and ContractId = a.ContractId and PaperId = a.VALUE_ID
+				and (T_Name like 'Ввод ЦБ%' or T_Name in ('Вывод ЦБ','Покупка','Продажа'))
+				and [Date] < a.PortfolioDate
+			) as G
+		) as s;
+	END
+
+
+
+
+
+	-- возвращаем DateFormat
+	if @CurrentDateFormat = N'mdy'
+	BEGIN
+		set dateformat mdy;
+	END
+
+	BEGIN TRY
+		DROP TABLE #PortFolio_Daily;
+	END TRY
+	BEGIN CATCH
+	END CATCH;
+
+
+	/*
+	d.	
+	После загрузки портфелей необходимо рассчитать балансовую стоимость позиции в валюте номинала (поле BAL_SUMMA). 
+	Для этого за весь период до PortfolioDate нужно посчитать сумму OPERATIONS_HISTORY_CONTRACTS. 
+	Value_Nom по логике (Покупка бумаг + Ввод ЦБ – Вывод ЦБ - Продажа) для каждого PORTFOLIO_DAILY.VALUE_ID= OPERATIONS_HISTORY_CONTRACTS.ID.
+	*/
+END
+GO
+CREATE OR ALTER PROCEDURE [dbo].[app_FillPortFolio_Daily_Before]
+(
+	@InvestorId INT,
+	@ContractId INT
+)
+AS BEGIN
+	-- Юр лиц не считать
+	IF EXISTS
+	(
+		SELECT 1
+		FROM [BAL_DATA_STD].[dbo].OD_FACES AS F WITH(NOLOCK)
+		INNER JOIN [BAL_DATA_STD].[dbo].D_B_CONTRACTS AS C WITH(NOLOCK) ON C.INVESTOR = F.SELF_ID AND C.E_DATE > GETDATE()
+		WHERE
+		C.DOC = @ContractId
+		AND F.S_TYPE = 1
+		AND F.LAST_FLAG = 1
+		AND F.E_DATE > GETDATE()
+	)
+	BEGIN
+		-- пифы для юр.лиц. считаем
+		if not exists
+		(
+			select 1
+			from [BAL_DATA_STD].[dbo].od_faces F 
+			inner join [BAL_DATA_STD].[dbo].D_B_CONTRACTS C ON F.self_ID=C.INVESTOR
+			LEFT JOIN [BAL_DATA_STD].[dbo].OD_DOCS D ON C.DOC=D.ID
+			LEFT JOIN [BAL_DATA_STD].[dbo].OD_SHARES S ON  S.ISSUER = F.SELF_ID
+			where F.LAST_FLAG=1 AND C.I_TYPE=5 AND C.E_DATE>GETDATE() AND F.E_DATE>GETDATE() AND S.E_DATE>GetDate() AND D.ID <> 541875
+			and D.ID = @ContractId
+		)
+		BEGIN
+			return;
+		END
+	END
+	
+	declare @InvestorIdC Int, @ContractIdC Int, @WIRDATEC DateTime;
+
+	BEGIN TRY
+		DROP TABLE #ForUpd;
+	END TRY
+	BEGIN CATCH
+	END CATCH;
+
+
+	CREATE TABLE #ForUpd
+	(
+		[InvestorId] [int] NOT NULL,
+		[ContractId] [int] NOT NULL,
+		[WIRING_ID] [int] NOT NULL,
+		[WIRDATE] [date] NOT NULL,
+		[S_DATE] [datetime] NOT NULL,
+		[NUM] [NVarchar](200) NULL,
+		[Value] [numeric](38, 10) NULL
+	);
+
+
+	-- получаем новые или изменённые записи
+	INSERT INTO #ForUpd
+	(
+		[InvestorId],
+		[ContractId],
+		[WIRING_ID],
+		[WIRDATE],
+		[S_DATE],
+		[NUM],
+		[Value]
+	)
+	select
+		A.InvestorId,
+		A.ContractId,
+		A.WIRING_ID,
+		A.WIRDATE,
+		A.S_DATE,
+		A.NUM,
+		A.[Value]
+	from
+	(
+		SELECT
+			InvestorId = @InvestorId,
+			ContractId = RE.REG_1,
+			WIRING_ID = W.ID,
+			WIRDATE = cast(W.WIRDATE as Date),
+			S_DATE = CAST(FORMAT(S_DATE,'yyyy-MM-dd HH:mm:ss') AS datetime),
+			D.NUM,
+			TU.VALUE_ * TU.TYPE_ as [Value]
+		--INTO GGG
+		FROM [BAL_DATA_STD].[dbo].OD_WIRING AS W WITH(NOLOCK)
+		INNER JOIN [BAL_DATA_STD].[dbo].OD_STEPS AS ST WITH(NOLOCK) ON ST.ID = W.O_STEP 
+		INNER JOIN [BAL_DATA_STD].[dbo].OD_TURNS AS TU WITH(NOLOCK) ON W.ID = TU.WIRING
+		INNER JOIN [BAL_DATA_STD].[dbo].OD_RESTS AS RE WITH(NOLOCK) ON TU.REST = RE.ID
+		INNER JOIN [BAL_DATA_STD].[dbo].OD_BALANCES AS BA WITH(NOLOCK) ON RE.BAL_ACC = BA.ID AND BA.SYS_NAME = 'ЧАПИФ'
+		INNER JOIN [BAL_DATA_STD].[dbo].OD_ACC_PLANS AS AP WITH(NOLOCK) ON BA.ACC_PLAN = Ap.ID AND AP.SYS_NAME = 'PROFIT'
+		INNER JOIN [BAL_DATA_STD].[dbo].OD_DOCS AS D WITH(NOLOCK) ON RE.REG_1 = D.ID
+		WHERE RE.REG_1 = @ContractId
+	) as A
+	LEFT JOIN 
+	(
+		select
+			InvestorId, ContractId, WIRING_ID, WIRDATE, S_DATE, NUM, [Value]
+		from [dbo].[PortFolio_Daily_Before] AS WW WITH(NOLOCK)
+		where InvestorId = @InvestorId and ContractId = @ContractId
+	) as B
+	ON A.InvestorId = B.InvestorId
+		and A.ContractId = B.ContractId
+		and A.WIRING_ID = B.WIRING_ID
+		AND A.WIRDATE = B.WIRDATE
+	WHERE B.InvestorId IS NULL OR A.S_DATE <> B.S_DATE
+	--ORDER BY W.WIRDATE;
+
+	
+	-- сдесь перезаполняем портфели, если что-то поменялось
+
+	declare mycur cursor fast_forward for
+		select
+			InvestorId, ContractId, WIRDATE
+		from #ForUpd
+		group by
+			InvestorId, ContractId, WIRDATE
+	open mycur
+	fetch next from mycur into @InvestorIdC, @ContractIdC, @WIRDATEC
+	while @@FETCH_STATUS = 0
+	begin
+		EXEC [dbo].[app_FillPortFolio_Daily]
+				@InvestorId = @InvestorIdC,
+				@ContractId = @ContractIdC,
+				@P_DATE = @WIRDATEC
+		
+		  fetch next from mycur into @InvestorIdC, @ContractIdC, @WIRDATEC
+	end
+	close mycur
+	deallocate mycur;
+
+	-- заполняем постоянный кэш - временного нет
+	
+	WITH CTE
+    AS
+    (
+        SELECT *
+        FROM [dbo].[PortFolio_Daily_Before]
+        WHERE InvestorId = @InvestorId and ContractId = @ContractId
+    ) 
+    MERGE
+        CTE as t
+    USING
+    (
+        select
+			InvestorId,
+			ContractId,
+			WIRING_ID,
+			WIRDATE,
+			S_DATE,
+			NUM,
+			[Value]
+		from #ForUpd
+    ) AS s
+    ON s.InvestorId = t.InvestorId
+		and s.ContractId = t.ContractId
+		and s.WIRING_ID = t.WIRING_ID
+		AND s.WIRDATE = t.WIRDATE
+    when not matched
+        then insert (
+            InvestorId,
+			ContractId,
+			WIRING_ID,
+			WIRDATE,
+			S_DATE,
+			NUM,
+			[Value]
+        )
+        values (
+            s.InvestorId,
+			s.ContractId,
+			s.WIRING_ID,
+			s.WIRDATE,
+			s.S_DATE,
+			s.NUM,
+			s.[Value]
+        )
+    when matched
+    then update set
+		[S_DATE] = s.[S_DATE],
+        [NUM] = s.[NUM],
+		[Value] = s.[Value];
+
+	BEGIN TRY
+		DROP TABLE #ForUpd;
+	END TRY
+	BEGIN CATCH
+	END CATCH;
+END
+GO
 CREATE OR ALTER PROCEDURE [dbo].[app_Fill_Assets_Contract_Inner]
 (
     @ContractId int = 2257804
@@ -594,6 +1100,11 @@ AS BEGIN
 
 	-- обновление истории операций
 	EXEC [dbo].[app_Refresh_Operation_History]
+			@InvestorId = @InvestorId,
+			@ContractId = @ContractId;
+	
+	-- перезаливка портфелей, если нужно -- обязательно после истории
+	EXEC [dbo].[app_FillPortFolio_Daily_Before]
 			@InvestorId = @InvestorId,
 			@ContractId = @ContractId;
 
