@@ -246,7 +246,8 @@ AS BEGIN
 		[Amount] [numeric](38, 7) NULL,
 		[Value_Nom] [numeric](38, 7) NULL,
 		[Currency] [int] NULL,
-		[Fee] [numeric](38, 7)
+		[Fee] [numeric](38, 7),
+		[PaperId] [int] NULL
 	);
 
 
@@ -254,12 +255,12 @@ AS BEGIN
 	(
 		[InvestorId], [ContractId], [Date], [Type],
 		[T_Name], [ISIN], [Investment], [Price],
-		[Amount], [Value_Nom], [Currency], [Fee]
+		[Amount], [Value_Nom], [Currency], [Fee], [PaperId]
 	)
 	SELECT
 		Investor, ContractID, W_Date, Type,
 		T_Name, ISIN, Investment, Price,
-		Amount, Value_Nom, Currency, Fee
+		Amount, Value_Nom, Currency, Fee, PaperId
 	FROM
 	--------------------Вводы-выводы денежных средств-----------------
 	(
@@ -276,7 +277,8 @@ AS BEGIN
 			DV1.VAL as Value_Nom, -- Сумма сделки в валюте номинала
 			--dbo.f_Round(-T.EQ_*T.TYPE_, 2) as Value_RUR, -- Сумма сделки в рублях
 			VO.ID as Currency, --код валюты
-			0 as Fee --Комиссия		
+			0 as Fee, --Комиссия
+			sv.ID as PaperId
 		FROM [BAL_DATA_STD].[dbo].D_B_CONTRACTS AS Z WITH(NOLOCK)
 		INNER JOIN [BAL_DATA_STD].[dbo].OD_ACC_PLANS AS P WITH(NOLOCK) on P.SYS_NAME = 'MONEY'
 		INNER JOIN [BAL_DATA_STD].[dbo].OD_BALANCES AS B WITH(NOLOCK) on B.ACC_PLAN = P.ID and B.SYS_NAME = 'ФОНД'
@@ -316,7 +318,7 @@ AS BEGIN
 			Investor, ContractID, W_Date, Type,
 			T_Name, ISIN, Investment,
 			Price = case when Amount = 0 then 0.00 else dbo.f_Round((Value_RUR * (1/isnull(VB.RATE,1)))/Amount, 2) end,
-			Amount, Value_Nom = dbo.f_Round(Value_RUR * (1/isnull(VB.RATE,1)), 2), Currency, Fee
+			Amount, Value_Nom = dbo.f_Round(Value_RUR * (1/isnull(VB.RATE,1)), 2), Currency, Fee, PaperId
 		from
 		(
 			select distinct
@@ -333,8 +335,8 @@ AS BEGIN
 		
 				NOM_VAL as Currency, --код валюты
 				0 as Fee, --Комиссия
-				dbo.f_Round(-T.EQ_*T.TYPE_, 2) as Value_RUR -- Сумма сделки в рублях
-			
+				dbo.f_Round(-T.EQ_*T.TYPE_, 2) as Value_RUR, -- Сумма сделки в рублях
+				sv.ID as PaperId
 			FROM [BAL_DATA_STD].[dbo].D_B_CONTRACTS AS Z WITH(NOLOCK)
 			INNER JOIN [BAL_DATA_STD].[dbo].OD_ACC_PLANS AS P WITH(NOLOCK) on P.SYS_NAME = 'MONEY'
 			INNER JOIN [BAL_DATA_STD].[dbo].OD_BALANCES AS B WITH(NOLOCK) on B.ACC_PLAN = P.ID and B.SYS_NAME = 'ФОНД'
@@ -394,7 +396,8 @@ AS BEGIN
 			null as Amount, --Количество бумаг
 			 SUM( T.VALUE_ ) as Value_Nom, -- Сумма сделки в валюте номинала 
 			VV.Id as Currency, --код валюты
-			0 as Fee --Комиссия
+			0 as Fee, --Комиссия
+			V.ID as PaperId
 		FROM [BAL_DATA_STD].[dbo].OD_BALANCES AS B WITH(NOLOCK)
 		INNER JOIN [BAL_DATA_STD].[dbo].OD_RESTS AS R WITH(NOLOCK) ON R.BAL_ACC = B.ID and R.REG_3 = @ContractId
 		INNER JOIN [BAL_DATA_STD].[dbo].OD_SHARES AS S WITH(NOLOCK) ON S.ID = R.REG_2 and S.CLASS = 2
@@ -412,7 +415,7 @@ AS BEGIN
 			B.ACC_PLAN = 95
 			AND B.SYS_NAME = 'ПИФ-ДИВ'
 			AND T.IS_PLAN = 'F'
-		GROUP BY R.REG_3, S.ISSUER, S.ID, V.ISIN, V.NAME, dbo.f_Date(T.WIRDATE), CC.PERCENT_, VV.SYSNAME, VV.ID
+		GROUP BY R.REG_3, S.ISSUER, S.ID, V.ISIN, V.NAME, dbo.f_Date(T.WIRDATE), CC.PERCENT_, VV.SYSNAME, VV.ID, V.ID
 	)
 	UNION ALL
 	--------------------Выплаты дивидендов-----------------
@@ -429,7 +432,8 @@ AS BEGIN
 			null as Amount, --Количество бумаг
 			 SUM( T.VALUE_ ) as Value_Nom, -- Сумма сделки в валюте номинала 
 			VV.Id as Currency, --код валюты
-			0 as Fee --Комиссия
+			0 as Fee, --Комиссия
+			V.ID as PaperId
 		FROM [BAL_DATA_STD].[dbo].OD_BALANCES AS B WITH(NOLOCK)
 		INNER JOIN [BAL_DATA_STD].[dbo].OD_RESTS AS R WITH(NOLOCK) ON R.BAL_ACC = B.ID AND R.REG_3 = @ContractId
 		INNER JOIN [BAL_DATA_STD].[dbo].OD_SHARES AS S WITH(NOLOCK) ON S.ID = R.REG_2 AND S.CLASS in (1,7,10)
@@ -440,7 +444,7 @@ AS BEGIN
 			B.ACC_PLAN = 95
 			AND B.SYS_NAME = 'ПИФ-ДИВ'
 			AND T.IS_PLAN = 'F'
-		GROUP BY R.REG_3, S.ISSUER, S.ID, V.ISIN, V.NAME, dbo.f_Date(T.WIRDATE), VV.SYSNAME, VV.ID
+		GROUP BY R.REG_3, S.ISSUER, S.ID, V.ISIN, V.NAME, dbo.f_Date(T.WIRDATE), VV.SYSNAME, VV.ID, V.ID
 	)
 	UNION ALL
 	--------------------Сделки в рамках Договора ДУ-----------------
@@ -468,7 +472,8 @@ AS BEGIN
 			q.AMOUNT as Amount, --Количество бумаг
 			q.SUMMA as Value_Nom, -- Сумма сделки в валюте номинала (с учетом НКД)
 			v.Id as Currency, --код валюты
-			q.RUR_TAX as Fee --Комиссия в валюте эмитента ------------------Делить на курс валюты эмитента(код валюты) на дату операции	
+			q.RUR_TAX as Fee, --Комиссия в валюте эмитента ------------------Делить на курс валюты эмитента(код валюты) на дату операции
+			s.ID as PaperId
 		FROM [BAL_DATA_STD].[dbo].PR_B_DEALS( @P1, @P2, @P3, @P4, @P5 ) AS q
 		left join [BAL_DATA_STD].[dbo].OD_VALUES AS s with(nolock) on s.ID = q.SHARE
 		left join [BAL_DATA_STD].[dbo].OD_SHARES AS sh with(nolock) on sh.ID = s.ID
@@ -500,12 +505,12 @@ AS BEGIN
 	(
 		[InvestorId], [ContractId], [Date], [Type],
 		[T_Name], [ISIN], [Investment], [Price],
-		[Amount], [Value_Nom], [Currency], [Fee]
+		[Amount], [Value_Nom], [Currency], [Fee], [PaperId]
 	)
 	select
 		[InvestorId], [ContractId], [Date], [Type],
 		[T_Name], [ISIN], [Investment], [Price],
-		[Amount], [Value_Nom], [Currency], [Fee]
+		[Amount], [Value_Nom], [Currency], [Fee], [PaperId]
 	from #FFF
 	WHERE [Date] >= @StartDate and [Date] < @LastEndDate;
 
@@ -514,12 +519,12 @@ AS BEGIN
 	(
 		[InvestorId], [ContractId], [Date], [Type],
 		[T_Name], [ISIN], [Investment], [Price],
-		[Amount], [Value_Nom], [Currency], [Fee]
+		[Amount], [Value_Nom], [Currency], [Fee], [PaperId]
 	)
 	select
 		[InvestorId], [ContractId], [Date], [Type],
 		[T_Name], [ISIN], [Investment], [Price],
-		[Amount], [Value_Nom], [Currency], [Fee]
+		[Amount], [Value_Nom], [Currency], [Fee], [PaperId]
 	from #FFF
 	WHERE [Date] >= @LastEndDate;
 

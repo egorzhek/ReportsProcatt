@@ -169,6 +169,7 @@ CREATE TABLE [dbo].[Operations_History_Contracts]
 	[Value_Nom] [numeric](38, 7) NULL,
 	[Currency] [int] NULL,
 	[Fee] [numeric](38, 7),
+	[PaperId] [int] NULL,
 CONSTRAINT [PK_Operations_History_Contracts] PRIMARY KEY CLUSTERED
 (
 	[Id] ASC,
@@ -194,6 +195,7 @@ CREATE TABLE [dbo].[Operations_History_Contracts_Last]
 	[Value_Nom] [numeric](38, 7) NULL,
 	[Currency] [int] NULL,
 	[Fee] [numeric](38, 7),
+	[PaperId] [int] NULL,
 CONSTRAINT [PK_Operations_History_Contracts_Last] PRIMARY KEY CLUSTERED
 (
 	[Id] ASC,
@@ -203,4 +205,23 @@ CONSTRAINT [PK_Operations_History_Contracts_Last] PRIMARY KEY CLUSTERED
 GO
 CREATE NONCLUSTERED INDEX [IX_Operations_History_Contracts_Last]
 ON [dbo].[Operations_History_Contracts_Last] ([InvestorId],[ContractId])
+GO
+CREATE TABLE [dbo].[InvestmentIds]
+(
+	[Id] [bigint] IDENTITY(1,1) NOT NULL,
+	[Investment] [nvarchar](500) NOT NULL,
+	[RecordDate] [datetime2](7) NULL,
+CONSTRAINT [PK__InvestmentIds__Id] PRIMARY KEY CLUSTERED
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY],
+CONSTRAINT [AK_Investment] UNIQUE NONCLUSTERED
+(
+	[Investment] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[InvestmentIds] ADD
+CONSTRAINT [DF_InvestmentIds_RecordDate]
+DEFAULT (sysdatetime()) FOR [RecordDate]
 GO
