@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Report ScriptLanguage="CSharp" DoublePass="true" TextQuality="Regular" ReportInfo.Name="Simple List" ReportInfo.Author="Fast Reports Inc" ReportInfo.Description="Демонстрация простого листа" ReportInfo.Created="01/17/2008 03:05:57" ReportInfo.Modified="07/22/2021 11:36:31" ReportInfo.CreatorVersion="2021.3.0.0">
+<Report ScriptLanguage="CSharp" DoublePass="true" TextQuality="Regular" ReportInfo.Name="Simple List" ReportInfo.Author="Fast Reports Inc" ReportInfo.Description="Демонстрация простого листа" ReportInfo.Created="01/17/2008 03:05:57" ReportInfo.Modified="07/29/2021 10:22:45" ReportInfo.CreatorVersion="2021.3.0.0">
   <ScriptText>using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -212,26 +212,28 @@ namespace FastReport
         <TextObject Name="Text3030" Width="718.2" Height="28.35" Fill.Color="LightGray" Text="История операций" VertAlign="Center" Font="Arial, 12pt, style=Bold"/>
       </DataHeaderBand>
     </DataBand>
-    <DataBand Name="Data4000" Top="1165.55" Width="718.2" Height="28.35"/>
-    <DataBand Name="Data4001" Top="1197.9" Width="718.2" Height="18.9" Fill.Color="WhiteSmoke" DataSource="tree1">
-      <TextObject Name="Text4001" Width="179.55" Height="18.9" Text="[tree1.ValutaName]" Font="Tahoma, 12pt"/>
-      <DataBand Name="Data4002" Top="1220.8" Width="718.2" Height="18.9" Fill.Color="WhiteSmoke" EvenStyle="EvenRows" DataSource="tree2">
-        <TextObject Name="Text4005" Left="37.8" Width="425.25" Height="18.9" Text="[tree2.TypeName]" VertAlign="Center" Font="Tahoma, 8pt"/>
-        <DataBand Name="Data4004" Top="1243.7" Width="718.2" Height="37.8" Fill.Color="WhiteSmoke" EvenStyle="EvenRows" DataSource="tree3" PrintIfDetailEmpty="true">
-          <TextObject Name="Text4006" Left="56.7" Width="510.3" Height="18.9" Text="[tree3.ChildName]" VertAlign="Center" Font="Tahoma, 8pt"/>
-          <TextObject Name="Text4007" Left="576.45" Width="113.4" Height="18.9" Text="[tree3.PriceName]" VertAlign="Center" Font="Tahoma, 10pt, style=Bold"/>
-          <TextObject Name="Text4008" Left="56.7" Top="18.9" Width="113.4" Height="18.9" Text="[tree3.Ammount]" VertAlign="Center" Font="Tahoma, 8pt"/>
-          <TextObject Name="Text4009" Left="576.45" Top="18.9" Width="113.4" Height="18.9" Text="[tree3.Detail]" VertAlign="Center" Font="Tahoma, 8pt"/>
-          <DataBand Name="Data4014" Top="1285.5" Width="718.2" Height="37.8" Fill.Color="WhiteSmoke" EvenStyle="EvenRows" DataSource="tree4">
-            <TextObject Name="Text4016" Left="75.6" Width="491.4" Height="18.9" Text="[tree4.Child2Name]" VertAlign="Center" Font="Tahoma, 8pt"/>
-            <TextObject Name="Text4017" Left="585.9" Width="113.4" Height="18.9" Text="[tree4.PriceName]" VertAlign="Center" Font="Tahoma, 10pt, style=Bold"/>
-            <TextObject Name="Text4018" Left="75.6" Top="18.9" Width="113.4" Height="18.9" Text="[tree4.Ammount]" VertAlign="Center" Font="Tahoma, 8pt"/>
-            <TextObject Name="Text4019" Left="585.9" Top="18.9" Width="113.4" Height="18.9" Text="[tree4.Detail]" VertAlign="Center" Font="Tahoma, 8pt"/>
+    <DataBand Name="Data4000" Top="1165.55" Width="718.2" Height="48.38">
+      <TextObject Name="Text4042" Top="21.92" Width="718.2" Height="26.46" Fill.Color="LightGray" Text="Портфель на Дата конца периода" VertAlign="Center" Font="Arial, 12pt, style=Bold"/>
+      <DataBand Name="Data4001" Top="1217.93" Width="718.2" Height="18.9" Fill.Color="WhiteSmoke" DataSource="tree1">
+        <TextObject Name="Text4001" Width="179.55" Height="18.9" Text="[tree1.ValutaName]" Font="Tahoma, 12pt"/>
+        <DataBand Name="Data4002" Top="1240.83" Width="718.2" Height="18.9" Fill.Color="WhiteSmoke" EvenStyle="EvenRows" DataSource="tree2">
+          <TextObject Name="Text4005" Left="37.8" Width="425.25" Height="18.9" Text="[tree2.TypeName]" VertAlign="Center" Font="Tahoma, 8pt"/>
+          <DataBand Name="Data4004" Top="1263.73" Width="718.2" Height="37.8" Fill.Color="WhiteSmoke" EvenStyle="EvenRows" DataSource="tree3" PrintIfDetailEmpty="true">
+            <TextObject Name="Text4006" Left="56.7" Width="510.3" Height="18.9" Text="[tree3.ChildName]" VertAlign="Center" Font="Tahoma, 8pt"/>
+            <TextObject Name="Text4007" Left="576.45" Width="113.4" Height="18.9" Text="[tree3.PriceName]" VertAlign="Center" Font="Tahoma, 10pt, style=Bold"/>
+            <TextObject Name="Text4008" Left="56.7" Top="18.9" Width="113.4" Height="18.9" Text="[tree3.Ammount]" VertAlign="Center" Font="Tahoma, 8pt"/>
+            <TextObject Name="Text4009" Left="576.45" Top="18.9" Width="113.4" Height="18.9" Text="[tree3.Detail]" VertAlign="Center" Font="Tahoma, 8pt"/>
+            <DataBand Name="Data4014" Top="1305.53" Width="718.2" Height="37.8" Fill.Color="WhiteSmoke" EvenStyle="EvenRows" DataSource="tree4">
+              <TextObject Name="Text4016" Left="75.6" Width="491.4" Height="18.9" Text="[tree4.Child2Name]" VertAlign="Center" Font="Tahoma, 8pt"/>
+              <TextObject Name="Text4017" Left="585.9" Width="113.4" Height="18.9" Text="[tree4.PriceName]" VertAlign="Center" Font="Tahoma, 10pt, style=Bold"/>
+              <TextObject Name="Text4018" Left="75.6" Top="18.9" Width="113.4" Height="18.9" Text="[tree4.Ammount]" VertAlign="Center" Font="Tahoma, 8pt"/>
+              <TextObject Name="Text4019" Left="585.9" Top="18.9" Width="113.4" Height="18.9" Text="[tree4.Detail]" VertAlign="Center" Font="Tahoma, 8pt"/>
+            </DataBand>
           </DataBand>
         </DataBand>
       </DataBand>
     </DataBand>
-    <PageFooterBand Name="PageFooter1" Top="1327.3" Width="718.2" Height="28.35" Fill.Color="WhiteSmoke" CanGrow="true">
+    <PageFooterBand Name="PageFooter1" Top="1347.33" Width="718.2" Height="28.35" Fill.Color="WhiteSmoke" CanGrow="true">
       <TextObject Name="Text10" Left="481.95" Width="226.8" Height="28.35" Text="Страница [Page] из [TotalPages]" HorzAlign="Right" VertAlign="Center" Font="Tahoma, 8pt"/>
     </PageFooterBand>
   </ReportPage>
