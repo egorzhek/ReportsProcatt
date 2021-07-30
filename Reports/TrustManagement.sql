@@ -12,6 +12,10 @@ DECLARE
 declare @MinDate date, @MaxDate date
 
 Declare @SItog numeric(30,10), @AmountDayMinus_RUR numeric(30,10), @Snach numeric(30,10), @AmountDayPlus_RUR numeric(30,10),
+@Sum_INPUT_VALUE_RUR  numeric(30,10),
+@Sum_OUTPUT_VALUE_RUR numeric(30,10),
+@Sum_INPUT_COUPONS_RUR numeric(30,10),
+@Sum_INPUT_DIVIDENTS_RUR numeric(30,10),
 @InvestResult numeric(30,10);
 
 SELECT
@@ -116,7 +120,11 @@ where [Date] = @StartDate
 -- сумма всех выводов средств
 SELECT
 	@AmountDayMinus_RUR = sum(OUTPUT_VALUE_RUR), -- отрицательное значение
-	@AmountDayPlus_RUR = sum(INPUT_VALUE_RUR + INPUT_DIVIDENTS_RUR + INPUT_COUPONS_RUR) 
+	@AmountDayPlus_RUR = sum(INPUT_VALUE_RUR + INPUT_DIVIDENTS_RUR + INPUT_COUPONS_RUR),
+	@Sum_INPUT_VALUE_RUR = sum(INPUT_VALUE_RUR),
+	@Sum_OUTPUT_VALUE_RUR = sum(OUTPUT_VALUE_RUR),
+	@Sum_INPUT_COUPONS_RUR = sum(INPUT_COUPONS_RUR),
+	@Sum_INPUT_DIVIDENTS_RUR = sum(INPUT_DIVIDENTS_RUR)
 FROM #ResInvAssets
 
 --select @SItog as '@SItog', @Snach as '@Snach', @OUTPUT_VALUE_RUR as '@OUTPUT_VALUE_RUR', @AmountDayPlus_RUR as '@AmountDayPlus_RUR'
@@ -212,9 +220,9 @@ where [InvestorId] = @InvestorId and [ContractId] = @ContractId;
 
 select
 	ActiveDateToName = 'Активы на ' + FORMAT(@EndDate,'dd.MM.yyyy'),
-	ActiveDateToValue =  CAST(Round(@SItog,2) as Decimal(38,2)),
+	ActiveDateToValue =  CAST(Round(@SItog,2) as Decimal(30,2)),
 	ProfitName = 'Доход за период ' + FORMAT(@StartDate,'dd.MM.yyyy') + ' - ' + FORMAT(@EndDate,'dd.MM.yyyy'),
-	ProfitValue = CAST(Round(@InvestResult,2) as Decimal(38,2)),
+	ProfitValue = CAST(Round(@InvestResult,2) as Decimal(30,2)),
 	ProfitProcentValue = CAST(Round(@InvestResult/@ResutSum * 100,2) as Decimal(38,2)),
 	OpenDate = FORMAT(@DATE_OPEN,'dd.MM.yyyy'),
 	LS_NUM = '2940000083',
@@ -226,27 +234,22 @@ select
 	ContractOpenDate = FORMAT(@DATE_OPEN,'dd.MM.yyyy'),
 	SuccessFee = 99.99
 
-select ActiveName = 'Активы на 20.04.2007', ActiveValue = 29448888.50, Sort = 1
+select ActiveName = 'Активы на ' + FORMAT(@StartDate,'dd.MM.yyyy') , ActiveValue = CAST(Round(@Snach,2) as Decimal(38,2)), Sort = 1
 union
-select 'Пополнения', 854000000.00, 2
+select 'Пополнения', CAST(Round(@Sum_INPUT_VALUE_RUR,2) as Decimal(30,2)), 2
 union
-select 'Выводы', 804819679.28, 3
+select 'Выводы', CAST(Round(@Sum_OUTPUT_VALUE_RUR,2) as Decimal(30,2)), 3
 union
-select 'Дивиденды', 23456.15, 4
+select 'Дивиденды', @Sum_INPUT_DIVIDENTS_RUR, 4
 union
-select 'Купоны', 13567.25, 5
+select 'Купоны', @Sum_INPUT_COUPONS_RUR, 5
 order by 3
 
-select
-Date = cast('2007-04-20' as Date), RATE = 1332.68
-union
-select cast('2007-04-21' as Date), 1333.00
-union
-select cast('2007-04-22' as Date), 1334.00
-union
-select cast('2007-04-23' as Date), 1332.00
-union
-select cast('2007-04-24' as Date), 1335.00
+
+SELECT
+	[Date], [RATE] = VALUE_RUR
+FROM #ResInvAssets
+order by [Date]
 
 
 
