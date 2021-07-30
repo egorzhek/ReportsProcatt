@@ -733,9 +733,10 @@ AS BEGIN
 			a.CUR_NAME,
 			a.RATE,
 			a.RATE_DATE,
-			s.BAL_SUMMA
+			BAL_SUMMA = NULL --s.BAL_SUMMA
 		From #PortFolio_Daily as a
 		join [dbo].[InvestmentIds] as b on a.INVESTMENT = b.Investment
+		/*
 		outer apply
 		(
 			select
@@ -758,7 +759,9 @@ AS BEGIN
 				and (T_Name like 'Ввод ЦБ%' or T_Name in ('Вывод ЦБ','Покупка','Продажа'))
 				and [Date] < a.PortfolioDate
 			) as G
-		) as s;
+		) as s
+		*/
+		
 	END
 	ELSE
 	BEGIN
