@@ -73,7 +73,7 @@ update #ResInvAssets set
 	INPUT_COUPONS_RUR = 0,  INPUT_COUPONS_USD = 0,  INPUT_COUPONS_EURO = 0,
 	INPUT_VALUE_RUR = 0, OUTPUT_VALUE_RUR = 0
 where [Date] = @StartDate
-and (DailyIncrement_RUR <> 0 or DailyDecrement_RUR <> 0) -- вводы и выводы были в этот день
+and (OUTPUT_VALUE_RUR <> 0 or INPUT_VALUE_RUR <> 0 or INPUT_COUPONS_RUR <> 0 or INPUT_DIVIDENTS_RUR <> 0) -- вводы и выводы были в этот день
 
 -- посчитать последний день обратно
 update a set 
@@ -88,7 +88,7 @@ INPUT_COUPONS_RUR = 0,  INPUT_COUPONS_USD = 0,  INPUT_COUPONS_EURO = 0,
 INPUT_VALUE_RUR = 0, OUTPUT_VALUE_RUR = 0
 from #ResInvAssets as a
 where [Date] = @EndDate
-and (DailyIncrement_RUR <> 0 or DailyDecrement_RUR <> 0) -- вводы и выводы были в этот день
+and (OUTPUT_VALUE_RUR <> 0 or INPUT_VALUE_RUR <> 0 or INPUT_COUPONS_RUR <> 0 or INPUT_DIVIDENTS_RUR <> 0) -- вводы и выводы были в этот день
 
 -- преобразование на начальную и последнюю дату
 -----------------------------------------------
