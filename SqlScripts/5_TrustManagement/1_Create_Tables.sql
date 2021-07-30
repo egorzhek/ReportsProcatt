@@ -270,7 +270,7 @@ CREATE TABLE [dbo].[PortFolio_Daily]
 	[CUR_NAME] [Nvarchar](200) NULL,
 	[RATE] [numeric](38, 10) NULL,
 	[RATE_DATE] [datetime] NULL,
-	[Value_Nom_Culc] [numeric](38, 10) NULL,
+	[BAL_SUMMA] [numeric](38, 10) NULL,
 	[RecordDate] DateTime2 CONSTRAINT DF_PortFolio_Daily_RecordDate Default SysDateTime(),
 CONSTRAINT [PK_PortFolio_Daily] PRIMARY KEY CLUSTERED
 (
@@ -302,7 +302,7 @@ CREATE TABLE [dbo].[PortFolio_Daily_Last]
 	[CUR_NAME] [Nvarchar](200) NULL,
 	[RATE] [numeric](38, 10) NULL,
 	[RATE_DATE] [datetime] NULL,
-	[Value_Nom_Culc] [numeric](38, 10) NULL,
+	[BAL_SUMMA] [numeric](38, 10) NULL,
 	[RecordDate] DateTime2 CONSTRAINT DF_PortFolio_Daily_Last_RecordDate Default SysDateTime(),
 CONSTRAINT [PK_PortFolio_Daily_Last] PRIMARY KEY CLUSTERED
 (

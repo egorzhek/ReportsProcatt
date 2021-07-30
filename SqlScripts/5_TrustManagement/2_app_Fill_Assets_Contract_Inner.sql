@@ -595,7 +595,7 @@ AS BEGIN
 		[InvestorId] [int] NOT NULL,
 		[ContractId] [int] NOT NULL,
 		[PortfolioDate] [date] NOT NULL,
-		[INVESTMENT] [Nvarchar](500) NULL,
+		[INVESTMENT] [Nvarchar](500) Collate DATABASE_DEFAULT NULL,
 		[VALUE_ID] [int] NULL,
 		[BAL_ACC] [int] NULL,
 		[CLASS] [int] NULL,
@@ -607,7 +607,7 @@ AS BEGIN
 		[VALUE_RUR] [numeric](38, 10) NULL,
 		[VALUE_NOM] [numeric](38, 10) NULL,
 		[CUR_ID] [int] NULL,
-		[CUR_NAME] [Nvarchar](200) NULL,
+		[CUR_NAME] [Nvarchar](200) Collate DATABASE_DEFAULT NULL,
 		[RATE] [numeric](38, 10) NULL,
 		[RATE_DATE] [datetime] NULL
 	);
@@ -712,7 +712,7 @@ AS BEGIN
 			[CUR_NAME],
 			[RATE],
 			[RATE_DATE],
-			[Value_Nom_Culc]
+			[BAL_SUMMA]
 		)
 		select
 			a.InvestorId,
@@ -733,13 +733,13 @@ AS BEGIN
 			a.CUR_NAME,
 			a.RATE,
 			a.RATE_DATE,
-			s.Value_Nom_Culc
+			s.BAL_SUMMA
 		From #PortFolio_Daily as a
 		join [dbo].[InvestmentIds] as b on a.INVESTMENT = b.Investment
 		outer apply
 		(
 			select
-				Value_Nom_Culc = sum(Value_Nom)
+				BAL_SUMMA = sum(Value_Nom)
 			from
 			(
 				select
@@ -782,7 +782,7 @@ AS BEGIN
 			[CUR_NAME],
 			[RATE],
 			[RATE_DATE],
-			[Value_Nom_Culc]
+			[BAL_SUMMA]
 		)
 		select
 			a.InvestorId,
@@ -803,13 +803,13 @@ AS BEGIN
 			a.CUR_NAME,
 			a.RATE,
 			a.RATE_DATE,
-			s.Value_Nom_Culc
+			s.BAL_SUMMA
 		From #PortFolio_Daily as a
 		join [dbo].[InvestmentIds] as b on a.INVESTMENT = b.Investment
 		outer apply
 		(
 			select
-				Value_Nom_Culc = sum(Value_Nom)
+				BAL_SUMMA = sum(Value_Nom)
 			from
 			(
 				select
