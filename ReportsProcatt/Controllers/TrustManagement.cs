@@ -36,6 +36,7 @@ namespace ReportsProcatt.Controllers
 
         [HttpGet]
         public IActionResult Get(
+            [FromQuery] string InvestorId,
             [FromQuery] string ContractId,
             [FromQuery] string DateFrom,
             [FromQuery] string DateTo
@@ -86,6 +87,8 @@ namespace ReportsProcatt.Controllers
 
 
                     command1.Parameters.AddWithValue("@ContractIdSharp", ContractId);
+                    command1.Parameters.AddWithValue("@InvestorIdSharp", InvestorId);
+                    
 
                     //command1.Parameters.Add("@DateTo", SqlDbType.NVarChar);
                     //command1.Parameters["@DateTo"].Value = DateTo;
