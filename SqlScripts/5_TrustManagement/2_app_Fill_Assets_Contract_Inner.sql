@@ -665,7 +665,7 @@ AS BEGIN
 	LEFT JOIN [BAL_DATA_STD].[dbo].OD_VALUES AS VC WITH(NOLOCK) ON VC.ID = ISNULL(S.NOM_VAL,P.VALUE_ID)
 	WHERE CONTR > 0 -- Отбросим паевые фонды.
 	--and BAL_ACC in (2774,2925,2820)
-	and BAL_ACC not in (2814, 2782); --убираем НДФЛ из списка портфеля
+	--and BAL_ACC not in (2814, 2782); --убираем НДФЛ из списка портфеля
 
 
 	-- проливаем INVESTMENT
