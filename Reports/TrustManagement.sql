@@ -253,47 +253,44 @@ order by [Date]
 
 
 
-select ActiveName = 'Всего', ActiveValue = 37023.40, Sort = 1, Color = '#FFFFFF'
+select ActiveName = 'Всего', ActiveValue = CAST(Round(@Sum_INPUT_DIVIDENTS_RUR + @Sum_INPUT_COUPONS_RUR,2) as Decimal(30,2)), Sort = 1, Color = '#FFFFFF'
 union
-select 'Дивиденды', 23456.15, 4, '#7FE5F0'
+select 'Дивиденды', CAST(Round(@Sum_INPUT_DIVIDENTS_RUR,2) as Decimal(30,2)), 4, '#7FE5F0'
 union
-select 'Купоны', 13567.25, 5, '#4CA3DD'
+select 'Купоны', CAST(Round(@Sum_INPUT_COUPONS_RUR,2) as Decimal(30,2)), 5, '#4CA3DD'
 order by 3
 
 
--- Дивиденты, купоны
+-- Дивиденты, купоны - график
 select
-Date = cast('2007-04-20' as Date), Dividends = 1332.68, Coupons = 50.68
-union
-select cast('2007-04-21' as Date), 1333.00, 34.00
-union
-select cast('2007-04-22' as Date), 0.00, 0.00
-union
-select cast('2007-04-23' as Date), 1332.00, 1220.00
-union
-select cast('2007-04-24' as Date), 0.00, 500.00
-union
-select cast('2007-04-25' as Date), 660.00, 0.00
-union
-select cast('2007-04-26' as Date), 0.00, 0.00
-union
-select cast('2007-04-27' as Date), 1335.00, 1513.00
+	[Date],
+	[Dividends] = [INPUT_DIVIDENTS_RUR],
+	[Coupons] = [INPUT_COUPONS_RUR]
+From #ResInvAssets
+where INPUT_DIVIDENTS_RUR <> 0 or INPUT_DIVIDENTS_USD <> 0 
+order by [Date];
 
 -- Детализация купонов и дивидендов
-
 select
-[Date] = '20.04.2007', -- Дата выплаты
-[ToolName] = 'Сбербанк', -- Инструмент
-[PriceType] = 'Дивиденды', -- Тип выплаты
-[ContractName] = 'Стратегия ДУ "Агрессивная"', -- Название договора
-[Price] = 123.12 -- Cумма в валюте выплаты
-union
+	[Date] = FORMAT([PaymentDateTime],'dd.MM.yyyy'),
+	[ToolName] = [ShareName],
+	[PriceType] = case when [Type] = 1 then 'Купоны' else 'Дивиденды' end,
+	[ContractName] = [ShareName],
+	[Price] = CAST(Round([AmountPayments_RUR],2) as Decimal(30,2)),
+	[PaymentDateTime]
+from [CacheDB].[dbo].[DIVIDENDS_AND_COUPONS_History]
+where InvestorId = @InvestorId and ContractId = @ContractId
+union all
 select
-'21.04.2007',
-'ВТБ',
-'Купоны',
-'Стратегия ДУ "Консервативная"',
-24.14
+	[Date] =  FORMAT([PaymentDateTime],'dd.MM.yyyy'),
+	[ToolName] = [ShareName],
+	[PriceType] = case when [Type] = 1 then 'Купоны' else 'Дивиденды' end,
+	[ContractName] = [ShareName],
+	[Price] = CAST(Round([AmountPayments_RUR],2) as Decimal(30,2)),
+	[PaymentDateTime]
+from [CacheDB].[dbo].[DIVIDENDS_AND_COUPONS_History_Last]
+where InvestorId = @InvestorId and ContractId = @ContractId
+order by [PaymentDateTime]
 
 
 select
