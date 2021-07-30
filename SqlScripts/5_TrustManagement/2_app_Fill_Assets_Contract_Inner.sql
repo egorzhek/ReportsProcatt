@@ -891,7 +891,8 @@ AS BEGIN
 		END
 	END
 	
-	declare @InvestorIdC Int, @ContractIdC Int, @WIRDATEC DateTime;
+	declare @InvestorIdC Int, @ContractIdC Int, @WIRDATEC DateTime,
+		@ErrorMessage Nvarchar(max), @ErrorSeverity Int, @ErrorState Int;
 
 	BEGIN TRY
 		DROP TABLE #ForUpd;
@@ -978,10 +979,35 @@ AS BEGIN
 	fetch next from mycur into @InvestorIdC, @ContractIdC, @WIRDATEC
 	while @@FETCH_STATUS = 0
 	begin
-		EXEC [dbo].[app_FillPortFolio_Daily]
-				@InvestorId = @InvestorIdC,
-				@ContractId = @ContractIdC,
-				@P_DATE = @WIRDATEC
+		BEGIN TRY
+
+			EXEC [dbo].[app_FillPortFolio_Daily]
+					@InvestorId = @InvestorIdC,
+					@ContractId = @ContractIdC,
+					@P_DATE = @WIRDATEC
+		END TRY
+		BEGIN CATCH
+			SELECT
+				@ErrorMessage = N'app_FillPortFolio_Daily: ' + ERROR_MESSAGE(),
+				@ErrorSeverity = ERROR_SEVERITY(),
+				@ErrorState = ERROR_STATE();
+
+			-- запись в лог
+			INSERT INTO [dbo].[ProcessorErrors]
+			(Error, ContractId, Investor_id, PDate)
+			VALUES (@ErrorMessage, @ContractIdC, @InvestorIdC, @WIRDATEC);
+
+			-- закрытие курсора
+			close mycur
+			deallocate mycur;
+
+			-- возврат ошибки
+			RAISERROR (@ErrorMessage, -- Message text.
+					   @ErrorSeverity, -- Severity.
+					   @ErrorState -- State.
+					   );
+			RETURN; -- ВЫХОД
+		END CATCH;
 		
 		  fetch next from mycur into @InvestorIdC, @ContractIdC, @WIRDATEC
 	end

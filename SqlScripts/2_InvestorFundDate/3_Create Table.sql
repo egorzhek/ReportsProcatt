@@ -77,6 +77,7 @@ CREATE TABLE [dbo].[ProcessorErrors]
 	[RecordDate] [datetime2] NOT NULL,
 	[ContractId] [int] NULL,
 	[Investor_id] [int] NULL,
+	[PDate] [date] NULL,
 CONSTRAINT [PK__ProcessorErrors__tid] PRIMARY KEY CLUSTERED
 (
 	[Id] ASC
