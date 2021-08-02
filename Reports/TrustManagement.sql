@@ -394,6 +394,7 @@ select
 	ChildId = cast(a.InvestmentId as BigInt),
 	TypeId = cast(c.id as BigInt),
 	ChildName = i.Investment,
+	ValutaId = cast(a.CUR_ID as BigInt),
 	PriceName = N'105,45 ₽', -- потом доделать
 	Ammount = N'11 шт.', -- потом доделать
 	Detail = N'+5,43 ₽ (+4,7%)' -- потом доделать

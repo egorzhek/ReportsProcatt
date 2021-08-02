@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Report ScriptLanguage="CSharp" DoublePass="true" TextQuality="Regular" ReportInfo.Name="Simple List" ReportInfo.Author="Fast Reports Inc" ReportInfo.Description="Демонстрация простого листа" ReportInfo.Created="01/17/2008 03:05:57" ReportInfo.Modified="07/29/2021 10:22:45" ReportInfo.CreatorVersion="2021.3.0.0">
+<Report ScriptLanguage="CSharp" DoublePass="true" TextQuality="Regular" ReportInfo.Name="Simple List" ReportInfo.Author="Fast Reports Inc" ReportInfo.Description="Демонстрация простого листа" ReportInfo.Created="01/17/2008 03:05:57" ReportInfo.Modified="08/02/2021 17:18:35" ReportInfo.CreatorVersion="2021.3.0.0">
   <ScriptText>using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -64,24 +64,25 @@ namespace FastReport
       <Column Name="Fee" DataType="System.Decimal"/>
       <Column Name="Status" DataType="System.String"/>
     </TableDataSource>
-    <TableDataSource Name="tree1" ReferenceName="tree1" Enabled="true">
+    <TableDataSource Name="tree1" ReferenceName="tree1" DataType="System.Int32" Enabled="true">
       <Column Name="ValutaId" DataType="System.Int64"/>
       <Column Name="ValutaName" DataType="System.String"/>
     </TableDataSource>
-    <TableDataSource Name="tree2" ReferenceName="tree2" Enabled="true">
+    <TableDataSource Name="tree2" ReferenceName="tree2" DataType="System.Int32" Enabled="true">
       <Column Name="TypeId" DataType="System.Int64"/>
       <Column Name="ValutaId" DataType="System.Int64"/>
       <Column Name="TypeName" DataType="System.String"/>
     </TableDataSource>
-    <TableDataSource Name="tree3" ReferenceName="tree3" Enabled="true">
+    <TableDataSource Name="tree3" ReferenceName="tree3" DataType="System.Int32" Enabled="true">
       <Column Name="ChildId" DataType="System.Int64"/>
       <Column Name="TypeId" DataType="System.Int64"/>
+      <Column Name="ValutaId" DataType="System.Int64"/>
       <Column Name="ChildName" DataType="System.String"/>
       <Column Name="PriceName" DataType="System.String"/>
       <Column Name="Ammount" DataType="System.String"/>
       <Column Name="Detail" DataType="System.String"/>
     </TableDataSource>
-    <TableDataSource Name="tree4" ReferenceName="tree4" Enabled="true">
+    <TableDataSource Name="tree4" ReferenceName="tree4" DataType="System.Int32" Enabled="true">
       <Column Name="Child2Id" DataType="System.Int64"/>
       <Column Name="ChildId" DataType="System.Int64"/>
       <Column Name="Child2Name" DataType="System.String"/>
@@ -90,7 +91,7 @@ namespace FastReport
       <Column Name="Detail" DataType="System.String"/>
     </TableDataSource>
     <Relation Name="Relationtree2" ReferenceName="Relationtree2" ParentDataSource="tree1" ChildDataSource="tree2" ParentColumns="ValutaId" ChildColumns="ValutaId" Enabled="true"/>
-    <Relation Name="Relationtree3" ReferenceName="Relationtree3" ParentDataSource="tree2" ChildDataSource="tree3" ParentColumns="TypeId" ChildColumns="TypeId" Enabled="true"/>
+    <Relation Name="Relationtree3" ReferenceName="Relationtree3" ParentDataSource="tree2" ChildDataSource="tree3" ParentColumns="TypeId&#13;&#10;ValutaId" ChildColumns="TypeId&#13;&#10;ValutaId" Enabled="true"/>
     <Relation Name="Relationtree4" ReferenceName="Relationtree4" ParentDataSource="tree3" ChildDataSource="tree4" ParentColumns="ChildId" ChildColumns="ChildId" Enabled="true"/>
   </Dictionary>
   <ReportPage Name="Page1" Watermark.Font="Arial, 60pt">

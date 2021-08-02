@@ -9,7 +9,7 @@ https://localhost:49183/FundInfo?InvestorId=16541&FundId=17578&DateFrom=19.09.20
 
 
 Информация по Стратегии ДУ
-https://localhost:49183/TrustManagement?InvestorId=17337&ContractId=17340
+https://localhost:49183/TrustManagement?InvestorId=2250624&ContractId=13320529
 https://localhost:49183/TrustManagement?InvestorId=17337&ContractId=17340&DateFrom=19.09.2003
 https://localhost:49183/TrustManagement?InvestorId=17337&ContractId=17340&DateTo=20.12.2018
 https://localhost:49183/TrustManagement?InvestorId=17337&ContractId=17340&DateFrom=19.09.2003&DateTo=20.12.2018
