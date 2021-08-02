@@ -558,7 +558,7 @@ AS BEGIN
 
 	--select @CurrentDateFormat;
 
-	SET DATEFORMAT DMY;
+	SET DATEFORMAT dmy;
 
 	DECLARE @CurrentDate Date = getdate()
 	DECLARE @LastEndDate Date = DateAdd(DAY, -180, @CurrentDate)
@@ -893,6 +893,15 @@ AS BEGIN
 			return;
 		END
 	END
+
+	declare @CurrentDateFormat Nvarchar(50);
+
+	select
+		@CurrentDateFormat = date_format
+	from sys.dm_exec_sessions
+	where session_id = @@spid;
+
+	SET DATEFORMAT dmy;
 	
 	declare @InvestorIdC Int, @ContractIdC Int, @WIRDATEC DateTime,
 		@ErrorMessage Nvarchar(max), @ErrorSeverity Int, @ErrorState Int;
@@ -1074,6 +1083,12 @@ AS BEGIN
 	END TRY
 	BEGIN CATCH
 	END CATCH;
+
+	-- возвращаем DateFormat
+	if @CurrentDateFormat = N'mdy'
+	BEGIN
+		set dateformat mdy;
+	END
 END
 GO
 CREATE OR ALTER PROCEDURE [dbo].[app_Fill_Assets_Contract_Inner]
