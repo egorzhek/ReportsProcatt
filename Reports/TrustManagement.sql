@@ -199,7 +199,10 @@ set @InvestResult =
 	deallocate obj_cur
 
 
-	set @ResutSum = @ResutSum/@SumT
+	if @SumT > 0
+	begin
+		set @ResutSum = @ResutSum/@SumT
+	end
 
 	--select
 	--@InvestResult as 'Результат инвестиций',
@@ -246,10 +249,20 @@ select 'Купоны', @Sum_INPUT_COUPONS_RUR, 5
 order by 3
 
 
-SELECT
-	[Date], [RATE] = VALUE_RUR
-FROM #ResInvAssets
-order by [Date]
+if exists
+(
+	select top 1 1 from #ResInvAssets
+)
+begin
+	SELECT
+		[Date], [RATE] = VALUE_RUR
+	FROM #ResInvAssets
+	order by [Date]
+end
+else
+begin
+	select [Date] = cast(GETDATE() as date), [RATE] = 0
+end
 
 
 
@@ -290,32 +303,49 @@ select
 	[PaymentDateTime]
 from [CacheDB].[dbo].[DIVIDENDS_AND_COUPONS_History_Last]
 where InvestorId = @InvestorId and ContractId = @ContractId
-order by [PaymentDateTime]
+order by [PaymentDateTime];
 
 
 select
-[Date] = '20.04.2007', -- Дата
-[OperName] = 'Покупка', -- Тип операции
-[ISIN] = 'RU011',
-[ToolName] = 'Сбербанк', -- Инструмент
-[Price] = 100.15, -- Цена бумаги
-[PaperAmount] = 12.00, -- Количество бумаг
-[Valuta] = N'₽', -- Валюта
-[Cost] = 123.12, -- Сумма сделки
-[Fee] = 12.13, -- Комиссия
-[Status] = 'Исполнена' -- Статус
+	[Date] = FORMAT([Date], 'dd.MM.yyyy'),
+	[OperName] = T_Name,
+	[ISIN],
+	[ToolName] = Investment,
+	[Price] = CAST(Round([Price],2) as Decimal(30,2)),
+	[PaperAmount] = CAST(Round([Amount],2) as Decimal(30,2)),
+	[Valuta] =
+		case
+			when [Currency] = 1 then N'₽'
+			when [Currency] = 2 then N'$'
+			when [Currency] = 5 then N'€'
+			else N'?'
+		end,
+	[Cost] = CAST(Round([Value_Nom],2) as Decimal(30,2)),
+	[Fee] = CAST(Round([Fee],2) as Decimal(30,2)),
+	[Status] = N''
+from [CacheDB].[dbo].[Operations_History_Contracts]
+where InvestorId = @InvestorId and ContractId = @ContractId
 union
 select
-[Date] = '21.04.2007', 
-[OperName] = 'Продажа',
-[ISIN] = 'RU012',
-[ToolName] = 'ВТБ',
-[Price] = 123.12,
-[PaperAmount] = 123.00,
-[Valuta] = N'₽',
-[Cost] = 225.12,
-[Fee] = 2.13,
-[Status] = 'Исполнена'
+	[Date] = FORMAT([Date], 'dd.MM.yyyy'),
+	[OperName] = T_Name,
+	[ISIN],
+	[ToolName] = Investment,
+	[Price] = CAST(Round([Price],2) as Decimal(30,2)),
+	[PaperAmount] = CAST(Round([Amount],2) as Decimal(30,2)),
+	[Valuta] =
+		case
+			when [Currency] = 1 then N'₽'
+			when [Currency] = 2 then N'$'
+			when [Currency] = 5 then N'€'
+			else N'?'
+		end,
+	[Cost] = CAST(Round([Value_Nom],2) as Decimal(30,2)),
+	[Fee] = CAST(Round([Fee],2) as Decimal(30,2)),
+	[Status] = N''
+from [CacheDB].[dbo].[Operations_History_Contracts_Last]
+where InvestorId = @InvestorId and ContractId = @ContractId
+order by [Date];
 
 
 -- Дерево - четыре уровня вложенности
