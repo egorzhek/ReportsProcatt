@@ -348,41 +348,71 @@ where InvestorId = @InvestorId and ContractId = @ContractId
 order by [Date];
 
 
+BEGIN TRY
+	drop table #TrustTree;
+END TRY
+BEGIN CATCH
+END CATCH;
+
+
+select *
+INTO #TrustTree
+from
+(
+	select * 
+	from [CacheDB].[dbo].[PortFolio_Daily] with(nolock)
+	where InvestorId = @InvestorId and ContractId = @ContractId
+	and PortfolioDate = @EndDate
+	union all
+	select * 
+	from [CacheDB].[dbo].[PortFolio_Daily_Last] with(nolock)
+	where InvestorId = @InvestorId and ContractId = @ContractId
+	and PortfolioDate = @EndDate
+) as r;
+
 -- Дерево - четыре уровня вложенности
 -- tree1
-select ValutaId = 145, ValutaName = 'Рубли'
---union
---select ValutaId = 148, ValutaName = 'Доллары'
+select
+	ValutaId = cast(CUR_ID as BigInt),
+	ValutaName = CUR_NAME
+from #TrustTree
+GROUP BY CUR_ID, CUR_NAME
+ORDER BY CUR_ID;
 
 -- tree2
-select TypeId = 1, ValutaId = 145, TypeName = 'Денежные средства'
-union
-select TypeId = 2, ValutaId = 145, TypeName = 'Акции'
-union
-select TypeId = 3, ValutaId = 145, TypeName = 'Облигации'
---
-union
-select TypeId = 4, ValutaId = 148, TypeName = 'Денежные средства'
-union
-select TypeId = 5, ValutaId = 148, TypeName = 'Акции'
-union
-select TypeId = 6, ValutaId = 148, TypeName = 'Облигации'
-
+select
+	TypeId = cast(c.id as BigInt),
+	TypeName = c.CategoryName,
+	ValutaId = cast(a.CUR_ID as BigInt)
+from #TrustTree as a
+inner join [CacheDB].[dbo].[ClassCategories] as cc on a.CLASS = cc.ClassId
+inner join [CacheDB].[dbo].[Categories] as c on cc.CategoryId = c.Id
+group by c.id, c.CategoryName, a.CUR_ID
 
 -- tree3
-select ChildId = 1, TypeId = 1, ChildName = 'Брокерский счёт АО ГПБ', PriceName = N'500 ₽', Ammount = '', Detail = N''
-union
-select ChildId = 2, TypeId = 1, ChildName = 'Брокерский счёт АО Открытие брокер', PriceName = N'500 ₽', Ammount = '', Detail = N''
-union
-select ChildId = 3, TypeId = 2, ChildName = 'Сбербанк, ао', PriceName = N'105,45 ₽', Ammount = '1 шт.', Detail = N'+5,43 ₽ (+4,7%)'
-union
-select ChildId = 4, TypeId = 3, ChildName = 'ОФЗ, 26257', PriceName = N'125,22 ₽', Ammount = '11 шт.', Detail = N'-15,48 ₽ (-11,2%)'
+select
+	ChildId = cast(a.InvestmentId as BigInt),
+	TypeId = cast(c.id as BigInt),
+	ChildName = i.Investment,
+	PriceName = N'105,45 ₽', -- потом доделать
+	Ammount = N'11 шт.', -- потом доделать
+	Detail = N'+5,43 ₽ (+4,7%)' -- потом доделать
+from #TrustTree as a
+inner join [CacheDB].[dbo].[ClassCategories] as cc on a.CLASS = cc.ClassId
+inner join [CacheDB].[dbo].[Categories] as c on cc.CategoryId = c.Id
+inner join [CacheDB].[dbo].[InvestmentIds] as i on a.InvestmentId = i.Id
 
--- tree4
-select Child2Id = 1, ChildId = 4, Child2Name = 'ОФЗ, 26257', PriceName = N'125,22 ₽', Ammount = '5 шт.', Detail = N'-15,48 ₽ (-11,2%)'
-union
-select Child2Id = 2, ChildId = 4, Child2Name = 'ОФЗ, 26257', PriceName = N'125,22 ₽', Ammount = '1 шт.', Detail = N'-15,48 ₽ (-11,2%)'
 
+-- tree4 -- потом доделать - четвёртый уровень
+select Child2Id = cast(1 as BigInt), ChildId = cast(4 as BigInt), Child2Name = 'ОФЗ, 26257', PriceName = N'125,22 ₽', Ammount = '5 шт.', Detail = N'-15,48 ₽ (-11,2%)'
+union
+select Child2Id = cast(2 as BigInt), ChildId = cast(4 as BigInt), Child2Name = 'ОФЗ, 26257', PriceName = N'125,22 ₽', Ammount = '1 шт.', Detail = N'-15,48 ₽ (-11,2%)'
+
+BEGIN TRY
+	drop table #TrustTree;
+END TRY
+BEGIN CATCH
+END CATCH;
 
 BEGIN TRY
 	DROP TABLE #ResInvAssets

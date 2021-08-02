@@ -313,3 +313,53 @@ CONSTRAINT [PK_PortFolio_Daily_Last] PRIMARY KEY CLUSTERED
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
+CREATE TABLE [dbo].[Categories]
+(
+	Id Int NOT NULL,
+	CategoryName Nvarchar(100),
+CONSTRAINT [PK_Categories] PRIMARY KEY CLUSTERED
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+INSERT INTO [dbo].[Categories](Id, CategoryName) VALUES (1, N'Акции')
+GO
+INSERT INTO [dbo].[Categories](Id, CategoryName) VALUES (2, N'Облигации')
+GO
+INSERT INTO [dbo].[Categories](Id, CategoryName) VALUES (3, N'Вексели')
+GO
+INSERT INTO [dbo].[Categories](Id, CategoryName) VALUES (4, N'Денежные средства')
+GO
+INSERT INTO [dbo].[Categories](Id, CategoryName) VALUES (5, N'Фонды')
+GO
+INSERT INTO [dbo].[Categories](Id, CategoryName) VALUES (6, N'Деривативы')
+GO
+CREATE TABLE [dbo].[ClassCategories]
+(
+	ClassId Int NOT NULL,
+	CategoryId Int NOT NULL,
+CONSTRAINT [PK_ClassCategories] PRIMARY KEY CLUSTERED
+(
+	[ClassId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+INSERT INTO [dbo].[ClassCategories] (ClassId, CategoryId ) VALUES (1, 1)
+GO
+INSERT INTO [dbo].[ClassCategories] (ClassId, CategoryId ) VALUES (2, 2)
+GO
+INSERT INTO [dbo].[ClassCategories] (ClassId, CategoryId ) VALUES (3, 3)
+GO
+INSERT INTO [dbo].[ClassCategories] (ClassId, CategoryId ) VALUES (4, 6)
+GO
+INSERT INTO [dbo].[ClassCategories] (ClassId, CategoryId ) VALUES (5, 6)
+GO
+INSERT INTO [dbo].[ClassCategories] (ClassId, CategoryId ) VALUES (7, 1)
+GO
+INSERT INTO [dbo].[ClassCategories] (ClassId, CategoryId ) VALUES (10, 5)
+GO
+INSERT INTO [dbo].[ClassCategories] (ClassId, CategoryId ) VALUES (100, 4)
+GO
+INSERT INTO [dbo].[ClassCategories] (ClassId, CategoryId ) VALUES (101, 4)
+GO

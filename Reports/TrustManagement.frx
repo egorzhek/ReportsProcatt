@@ -64,26 +64,26 @@ namespace FastReport
       <Column Name="Fee" DataType="System.Decimal"/>
       <Column Name="Status" DataType="System.String"/>
     </TableDataSource>
-    <TableDataSource Name="tree1" ReferenceName="tree1" DataType="System.Int32" Enabled="true">
-      <Column Name="ValutaId" DataType="System.Int32"/>
+    <TableDataSource Name="tree1" ReferenceName="tree1" Enabled="true">
+      <Column Name="ValutaId" DataType="System.String"/>
       <Column Name="ValutaName" DataType="System.String"/>
     </TableDataSource>
-    <TableDataSource Name="tree2" ReferenceName="tree2" DataType="System.Int32" Enabled="true">
-      <Column Name="TypeId" DataType="System.Int32"/>
-      <Column Name="ValutaId" DataType="System.Int32"/>
+    <TableDataSource Name="tree2" ReferenceName="tree2" Enabled="true">
+      <Column Name="TypeId" DataType="System.String"/>
+      <Column Name="ValutaId" DataType="System.String"/>
       <Column Name="TypeName" DataType="System.String"/>
     </TableDataSource>
-    <TableDataSource Name="tree3" ReferenceName="tree3" DataType="System.Int32" Enabled="true">
-      <Column Name="ChildId" DataType="System.Int32"/>
-      <Column Name="TypeId" DataType="System.Int32"/>
+    <TableDataSource Name="tree3" ReferenceName="tree3" Enabled="true">
+      <Column Name="ChildId" DataType="System.String"/>
+      <Column Name="TypeId" DataType="System.String"/>
       <Column Name="ChildName" DataType="System.String"/>
       <Column Name="PriceName" DataType="System.String"/>
       <Column Name="Ammount" DataType="System.String"/>
       <Column Name="Detail" DataType="System.String"/>
     </TableDataSource>
-    <TableDataSource Name="tree4" ReferenceName="tree4" DataType="System.Int32" Enabled="true">
-      <Column Name="Child2Id" DataType="System.Int32"/>
-      <Column Name="ChildId" DataType="System.Int32"/>
+    <TableDataSource Name="tree4" ReferenceName="tree4" Enabled="true">
+      <Column Name="Child2Id" DataType="System.String"/>
+      <Column Name="ChildId" DataType="System.String"/>
       <Column Name="Child2Name" DataType="System.String"/>
       <Column Name="PriceName" DataType="System.String"/>
       <Column Name="Ammount" DataType="System.String"/>
