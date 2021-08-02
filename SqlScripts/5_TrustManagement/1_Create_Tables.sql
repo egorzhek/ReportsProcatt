@@ -323,17 +323,17 @@ CONSTRAINT [PK_Categories] PRIMARY KEY CLUSTERED
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-INSERT INTO [dbo].[Categories](Id, CategoryName) VALUES (1, N'Акции')
+INSERT INTO [dbo].[Categories](Id, CategoryName) VALUES (1, N'РђРєС†РёРё')
 GO
-INSERT INTO [dbo].[Categories](Id, CategoryName) VALUES (2, N'Облигации')
+INSERT INTO [dbo].[Categories](Id, CategoryName) VALUES (2, N'РћР±Р»РёРіР°С†РёРё')
 GO
-INSERT INTO [dbo].[Categories](Id, CategoryName) VALUES (3, N'Вексели')
+INSERT INTO [dbo].[Categories](Id, CategoryName) VALUES (3, N'Р’РµРєСЃРµР»Рё')
 GO
-INSERT INTO [dbo].[Categories](Id, CategoryName) VALUES (4, N'Денежные средства')
+INSERT INTO [dbo].[Categories](Id, CategoryName) VALUES (4, N'Р”РµРЅРµР¶РЅС‹Рµ СЃСЂРµРґСЃС‚РІР°')
 GO
-INSERT INTO [dbo].[Categories](Id, CategoryName) VALUES (5, N'Фонды')
+INSERT INTO [dbo].[Categories](Id, CategoryName) VALUES (5, N'Р¤РѕРЅРґС‹')
 GO
-INSERT INTO [dbo].[Categories](Id, CategoryName) VALUES (6, N'Деривативы')
+INSERT INTO [dbo].[Categories](Id, CategoryName) VALUES (6, N'Р”РµСЂРёРІР°С‚РёРІС‹')
 GO
 CREATE TABLE [dbo].[ClassCategories]
 (
@@ -362,4 +362,24 @@ GO
 INSERT INTO [dbo].[ClassCategories] (ClassId, CategoryId ) VALUES (100, 4)
 GO
 INSERT INTO [dbo].[ClassCategories] (ClassId, CategoryId ) VALUES (101, 4)
+GO
+CREATE TABLE [dbo].[Currencies]
+(
+	Id Int NOT NULL,
+	CurrencyName Nvarchar(50) NOT NULL,
+	Symbol Nvarchar(10) NOT NULL,
+CONSTRAINT [PK_Currencies] PRIMARY KEY CLUSTERED
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+INSERT INTO [dbo].[Currencies] (Id, CurrencyName, Symbol)
+VALUES (1, N'Р РѕСЃСЃРёР№СЃРєРёР№ СЂСѓР±Р»СЊ', N'в‚Ѕ')
+GO
+INSERT INTO [dbo].[Currencies] (Id, CurrencyName, Symbol)
+VALUES (2, N'Р”РѕР»Р»Р°СЂ', N'$')
+GO
+INSERT INTO [dbo].[Currencies] (Id, CurrencyName, Symbol)
+VALUES (5, N'Р•РІСЂРѕ', N'в‚¬')
 GO

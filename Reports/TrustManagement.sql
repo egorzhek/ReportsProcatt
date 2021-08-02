@@ -395,13 +395,14 @@ select
 	TypeId = cast(c.id as BigInt),
 	ChildName = i.Investment,
 	ValutaId = cast(a.CUR_ID as BigInt),
-	PriceName = N'105,45 ₽', -- потом доделать
-	Ammount = N'11 шт.', -- потом доделать
-	Detail = N'+5,43 ₽ (+4,7%)' -- потом доделать
+	PriceName =  CAST(CAST(Round(a.[VALUE_NOM],2) as Decimal(30,2)) as Nvarchar(50)) + ' ' + IsNull(cr.[Symbol], N'?'),
+	Ammount = CAST(CAST(Round(a.[AMOUNT],2) as Decimal(30,2)) as Nvarchar(50)),
+	Detail = N'' -- потом доделать +5,43 ₽ (+4,7%)
 from #TrustTree as a
 inner join [CacheDB].[dbo].[ClassCategories] as cc on a.CLASS = cc.ClassId
 inner join [CacheDB].[dbo].[Categories] as c on cc.CategoryId = c.Id
 inner join [CacheDB].[dbo].[InvestmentIds] as i on a.InvestmentId = i.Id
+left join  [CacheDB].[dbo].[Currencies] as cr on a.CUR_ID = cr.id
 
 
 -- tree4 -- потом доделать - четвёртый уровень
