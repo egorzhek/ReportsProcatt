@@ -235,7 +235,8 @@ select
 	ContractNumber = @NUM,
 	Fee = 99.99,
 	ContractOpenDate = FORMAT(@DATE_OPEN,'dd.MM.yyyy'),
-	SuccessFee = 99.99
+	SuccessFee = 99.99,
+	DateFromName = FORMAT(@StartDate,'dd.MM.yyyy')
 
 select ActiveName = 'Активы на ' + FORMAT(@StartDate,'dd.MM.yyyy') , ActiveValue = CAST(Round(@Snach,2) as Decimal(38,2)), Sort = 1
 union

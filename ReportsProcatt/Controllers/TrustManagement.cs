@@ -187,12 +187,12 @@ namespace ReportsProcatt.Controllers
                             var br1 = plt2.AddBar(valuesA, xs2);
                             br1.BarWidth = br1.BarWidth / 4;
                             br1.PositionOffset = -br1.BarWidth/2;
-                            br1.FillColor = ColorTranslator.FromHtml("#7FE5F0");
+                            br1.FillColor = ColorTranslator.FromHtml(vDataSet.Tables[3].Rows[1]["Color"].ToString());
 
                             var br2 = plt2.AddBar(valuesB, xs2);
                             br2.BarWidth = br2.BarWidth / 4;
                             br2.PositionOffset = br2.BarWidth/2;
-                            br2.FillColor = ColorTranslator.FromHtml("#4CA3DD");
+                            br2.FillColor = ColorTranslator.FromHtml(vDataSet.Tables[3].Rows[2]["Color"].ToString());
 
 
                             plt2.YAxis.TickLabelNotation(offset: false, multiplier: false);
