@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Report ScriptLanguage="CSharp" DoublePass="true" TextQuality="Regular" ReportInfo.Name="Simple List" ReportInfo.Author="Fast Reports Inc" ReportInfo.Description="Демонстрация простого листа" ReportInfo.Created="01/17/2008 03:05:57" ReportInfo.Modified="08/02/2021 18:28:20" ReportInfo.CreatorVersion="2021.3.0.0">
+<Report ScriptLanguage="CSharp" DoublePass="true" TextQuality="Regular" ReportInfo.Name="Simple List" ReportInfo.Author="Fast Reports Inc" ReportInfo.Description="Демонстрация простого листа" ReportInfo.Created="01/17/2008 03:05:57" ReportInfo.Modified="08/02/2021 18:44:14" ReportInfo.CreatorVersion="2021.3.0.0">
   <ScriptText>using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -169,12 +169,11 @@ namespace FastReport
         <TableColumn Name="Column3108" Width="75.6"/>
         <TableColumn Name="Column3109" Width="68.04"/>
         <TableColumn Name="Column3117" Width="83.16"/>
-        <TableColumn Name="Column3121" Width="86.94"/>
+        <TableColumn Name="Column3121" Width="181.44"/>
         <TableColumn Name="Column3125" Width="56.7"/>
         <TableColumn Name="Column3129" Width="75.6"/>
         <TableColumn Name="Column3133" Width="83.16"/>
         <TableColumn Name="Column3137" Width="94.5"/>
-        <TableColumn Name="Column3138" Width="94.5"/>
         <TableRow Name="Row3006" Height="37.8">
           <TableCell Name="Cell3110" Border.Lines="All" Text="[Sixth.Date]" HorzAlign="Center" VertAlign="Center" Font="Arial, 8pt"/>
           <TableCell Name="Cell3111" Border.Lines="All" Text="[Sixth.OperName]" VertAlign="Center" Font="Arial, 7pt"/>
@@ -184,7 +183,6 @@ namespace FastReport
           <TableCell Name="Cell3130" Border.Lines="All" Text="[Sixth.PaperAmount]" HorzAlign="Center" VertAlign="Center" Font="Arial, 7pt"/>
           <TableCell Name="Cell3134" Border.Lines="All" Text="[Sixth.Cost] [Sixth.Valuta]" HorzAlign="Center" VertAlign="Center" Font="Arial, 7pt"/>
           <TableCell Name="Cell3138" Border.Lines="All" Text="[Sixth.Fee] [Sixth.Valuta]" HorzAlign="Center" VertAlign="Center" Font="Arial, 8pt"/>
-          <TableCell Name="Cell3139" Border.Lines="All" Text="[Sixth.Status]" HorzAlign="Center" VertAlign="Center" Font="Arial, 8pt"/>
         </TableRow>
       </TableObject>
       <DataHeaderBand Name="DataHeader3100" Top="1053.6" Width="718.2" Height="66.15">
@@ -192,12 +190,11 @@ namespace FastReport
           <TableColumn Name="Column3111" Width="75.6"/>
           <TableColumn Name="Column3112" Width="68.04"/>
           <TableColumn Name="Column3115" Width="83.16"/>
-          <TableColumn Name="Column3119" Width="86.94"/>
+          <TableColumn Name="Column3119" Width="181.44"/>
           <TableColumn Name="Column3123" Width="56.7"/>
           <TableColumn Name="Column3127" Width="75.6"/>
           <TableColumn Name="Column3131" Width="83.16"/>
           <TableColumn Name="Column3135" Width="94.5"/>
-          <TableColumn Name="Column3136" Width="94.5"/>
           <TableRow Name="Row3005" Height="37.8">
             <TableCell Name="Cell3113" Border.Lines="All" Fill.Color="WhiteSmoke" Text="Дата" HorzAlign="Center" VertAlign="Center" Font="Arial, 8pt, style=Bold"/>
             <TableCell Name="Cell3114" Border.Lines="All" Fill.Color="WhiteSmoke" Text="Тип операции" HorzAlign="Center" VertAlign="Center" Font="Arial, 8pt, style=Bold"/>
@@ -207,7 +204,6 @@ namespace FastReport
             <TableCell Name="Cell3128" Border.Lines="All" Fill.Color="WhiteSmoke" Text="Кол-во бумаг" HorzAlign="Center" VertAlign="Center" Font="Arial, 8pt, style=Bold"/>
             <TableCell Name="Cell3132" Border.Lines="All" Fill.Color="WhiteSmoke" Text="Сумма сделки" HorzAlign="Center" VertAlign="Center" Font="Arial, 8pt, style=Bold"/>
             <TableCell Name="Cell3136" Border.Lines="All" Fill.Color="WhiteSmoke" Text="Комиссия" HorzAlign="Center" VertAlign="Center" Font="Arial, 8pt, style=Bold"/>
-            <TableCell Name="Cell3137" Border.Lines="All" Fill.Color="WhiteSmoke" Text="Статус операции" HorzAlign="Center" VertAlign="Center" Font="Arial, 8pt, style=Bold"/>
           </TableRow>
         </TableObject>
         <TextObject Name="Text3030" Width="718.2" Height="28.35" Fill.Color="LightGray" Text="История операций" VertAlign="Center" Font="Arial, 12pt, style=Bold"/>
