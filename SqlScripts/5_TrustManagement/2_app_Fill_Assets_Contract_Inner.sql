@@ -331,11 +331,10 @@ AS BEGIN
 				sv.NAME as Investment, --Название инструмента
 				null as Price, --Цена одной бумаги  -------------------------Высчитываем сумму в валюте номинала (по курсу) а потом делим на Amount 
 				w.D_AMOUNT - w.K_AMOUNT as Amount, --Количество бумаг
-				null as Value_Nom, -- Сумма сделки в валюте номинала -найти курс валюты и пересчитать из рублей
-		
-				NOM_VAL as Currency, --код валюты
+				dbo.f_Round(-T.EQ_ * T.TYPE_, 2) * case when sh.NOM_VAL = 1 then 1 else (1/VV.RATE) end as Value_Nom, -- Сумма сделки в валюте номинала -найти курс валюты и пересчитать из рублей
+				sh.NOM_VAL as Currency, --код валюты
 				0 as Fee, --Комиссия
-				dbo.f_Round(-T.EQ_*T.TYPE_, 2) as Value_RUR, -- Сумма сделки в рублях
+				dbo.f_Round(-T.EQ_ * T.TYPE_, 2) as Value_RUR, -- Сумма сделки в рублях
 				sv.ID as PaperId
 			FROM [BAL_DATA_STD].[dbo].D_B_CONTRACTS AS Z WITH(NOLOCK)
 			INNER JOIN [BAL_DATA_STD].[dbo].OD_ACC_PLANS AS P WITH(NOLOCK) on P.SYS_NAME = 'MONEY'
@@ -358,7 +357,18 @@ AS BEGIN
 			left join [BAL_DATA_STD].[dbo].OD_VALUES AS VO WITH(NOLOCK) on VO.ID = DV.VAL -- Получим код валюты
 			left join [BAL_DATA_STD].[dbo].D_OP_VAL AS DV1 WITH(NOLOCK) on DV1.DOC = D.Id and DV1.DESCR in (1746,1765) and DV1.LINE=DOL.ID -- получим сумму операции
 			INNER JOIN [BAL_DATA_STD].[dbo].D_OP_VAL AS DV2 WITH(NOLOCK) on DV2.DOC = D.Id and DV2.DESCR in (1742,1763,1759,1772) and DV2.LINE = DOL.ID and DV2.VAL = Z.DOC -- т.к. одним документом можно провести деньги по разным договорам, оставим только те операции, которые касаются конкретного портфеля.
-
+			OUTER APPLY
+			(
+				SELECT TOP 1
+					RT.[RATE]
+				FROM [BAL_DATA_STD].[dbo].[OD_VALUES_RATES] AS RT
+				WHERE RT.[VALUE_ID] = sh.NOM_VAL -- валюта
+				AND RT.[E_DATE] >= T.WIRDATE and RT.[OFICDATE] < T.WIRDATE
+				ORDER BY
+					case when DATEPART(YEAR,RT.[E_DATE]) = 9999 then 1 else 0 end ASC,
+					RT.[E_DATE] DESC,
+					RT.[OFICDATE] DESC
+			) AS VV
 			WHERE
 			T.IS_PLAN = 'F'
 			and W.ID is not null
@@ -472,7 +482,7 @@ AS BEGIN
 			q.AMOUNT as Amount, --Количество бумаг
 			q.SUMMA as Value_Nom, -- Сумма сделки в валюте номинала (с учетом НКД)
 			v.Id as Currency, --код валюты
-			q.RUR_TAX as Fee, --Комиссия в валюте эмитента ------------------Делить на курс валюты эмитента(код валюты) на дату операции
+			q.RUR_TAX * case when v.Id = 1 then 1 else (1/VV.RATE) end as Fee, --Комиссия в валюте эмитента ------------------Делить на курс валюты эмитента(код валюты) на дату операции
 			s.ID as PaperId
 		FROM [BAL_DATA_STD].[dbo].PR_B_DEALS( @P1, @P2, @P3, @P4, @P5 ) AS q
 		left join [BAL_DATA_STD].[dbo].OD_VALUES AS s with(nolock) on s.ID = q.SHARE
@@ -494,6 +504,18 @@ AS BEGIN
 		left join [BAL_DATA_STD].[dbo].OD_SYS_TABS AS sc with(nolock) on sc.CODE ='SHARE_CLASS' and sc.NUM = sh.CLASS
 		left join [BAL_DATA_STD].[dbo].OD_SYS_TABS AS st with(nolock) on st.CODE ='A_SHARE_TYPE' and st.NUM = sh.TYPE_ and sh.CLASS = 1
 		left join [BAL_DATA_STD].[dbo].OD_FACE_ACCS AS ac with(nolock) on ac.ID = q.ACC
+		OUTER APPLY
+		(
+			SELECT TOP 1
+				RT.[RATE]
+			FROM [BAL_DATA_STD].[dbo].[OD_VALUES_RATES] AS RT
+			WHERE RT.[VALUE_ID] = v.Id -- валюта
+			AND RT.[E_DATE] >= q.F_DATE_P and RT.[OFICDATE] < q.F_DATE_P
+			ORDER BY
+				case when DATEPART(YEAR,RT.[E_DATE]) = 9999 then 1 else 0 end ASC,
+				RT.[E_DATE] DESC,
+				RT.[OFICDATE] DESC
+		) AS VV
 		WHERE
 			q.IS_REPO <> 1 or q.F_DATE_P is null or q.F_DATE_R is null or q.F_DATE_P >= @p1 or q.F_DATE_R >= @P1
 	)
