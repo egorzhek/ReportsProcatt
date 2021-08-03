@@ -416,7 +416,7 @@ select
 	ChildName = i.Investment,
 	ValutaId = cast(a.CUR_ID as BigInt),
 	PriceName =  CAST(CAST(Round(a.[VALUE_NOM],2) as Decimal(30,2)) as Nvarchar(50)) + ' ' + IsNull(cr.[Symbol], N'?'),
-	Ammount = CAST(CAST(Round(a.[AMOUNT],2) as Decimal(30,2)) as Nvarchar(50)) + ' шт.',
+	Ammount = case when c.Id <> 4 then CAST(CAST(Round(a.[AMOUNT],2) as Decimal(30,2)) as Nvarchar(50)) + N' шт.' else N'' end,
 	Detail = N'' -- потом доделать +5,43 ₽ (+4,7%)
 from #TrustTree as a
 inner join [CacheDB].[dbo].[ClassCategories] as cc on a.CLASS = cc.ClassId
