@@ -1,5 +1,58 @@
 USE [CacheDB]
 GO
+CREATE OR ALTER FUNCTION [dbo].[f_AsDate]
+(
+	@d_str varchar(255)
+)
+returns datetime as
+/* преобразование строки в дату */
+begin
+   declare @dd datetime, @i int, @L int;
+   set @dd = '30.12.1899'
+   set @d_str = ltrim(@d_str);
+   if isdate(@d_str)=1 begin
+      set @i = charindex('.', @d_str);
+      if @i > 0 begin
+         set @i = charindex('.', @d_str, @i+1);
+         if @i > 0 begin
+            set @L = charindex(' ', @d_str);
+            if @L = 0 set @L = len(@d_str)+1;
+            if @L - @i = 5
+               set @dd = convert(datetime, @d_str, 104)
+            else
+               set @dd = convert(datetime, @d_str, 4)
+         end
+      end
+   end
+   return @dd
+end
+GO
+CREATE OR ALTER FUNCTION [dbo].[f_Concat]
+(
+	@S1 varchar(255), @S2 varchar(255)
+) returns varchar(255) as
+begin
+   declare @RES varchar(255);
+   if @S1 is not null set @RES=@S1 else set @RES='';
+   if @S2 is not null set @RES=@RES+@S2;
+   return @RES
+end
+GO
+CREATE OR ALTER FUNCTION [dbo].[f_Concat3]
+(
+	@S1 varchar(255),
+	@S2 varchar(255),
+	@S3 varchar(255)
+)
+returns varchar(255)
+as begin
+   declare @RES varchar(255);
+   if @S1 is not null set @RES=@S1 else set @RES='';
+   if @S2 is not null set @RES=@RES+@S2;
+   if @S3 is not null set @RES=@RES+@S3;
+   return @RES
+end
+GO
 CREATE OR ALTER FUNCTION [dbo].[f_Date] ( @d_date datetime )
 returns datetime as
 /* отбрасывание времени, оставляем только дату, через отбрасывание дробной части */
@@ -881,6 +934,419 @@ AS BEGIN
 	*/
 END
 GO
+CREATE OR ALTER PROCEDURE [dbo].[app_Fill_POSITION_KEEPING]
+(
+	@DateStart Date = '18.01.2018', -- дата открытия договора
+	@DateEnd Date = '05.10.2018', -- указанный день в PortFolio_Daily
+
+	@ContractId int = 2257804,
+	@InvestorId Int = 2149652
+)
+AS BEGIN
+	set dateformat DMY;
+	set nocount on;
+
+	DECLARE @CurrentDate Date = getdate();
+	DECLARE @LastEndDate Date = DateAdd(DAY, -180, @CurrentDate);
+
+	-- вычищаем постоянный кэш на указанную дату
+	DELETE FROM [dbo].[POSITION_KEEPING]
+	WHERE [InvestorId] = @InvestorId AND [ContractId] = @ContractId AND [Fifo_Date]  = @DateEnd;
+
+	-- вычищаем временный кэш на указанную дату
+	DELETE FROM [dbo].[POSITION_KEEPING_Last]
+	WHERE [InvestorId] = @InvestorId AND [ContractId] = @ContractId AND [Fifo_Date]  = @DateEnd;
+
+
+
+	declare @FinInstruments table
+	(
+		ShareId int,
+		ShareName nvarchar (200),
+		ShareTypeClass int,
+		ShareTypeName nvarchar (50),
+		NomCurrencyId int,
+		NomCurrencyCode nvarchar(5),
+		RsetId int,
+		ISIN varchar(12)
+	)
+
+	declare @Partition table
+	(
+		InvestorId int,
+		ContractId int,
+		ShareId int,	-- ИД ЦБ
+		ISIN nvarchar(12),
+		Class int,
+		Instrument nvarchar(300),
+		CUR nvarchar(50),
+		CUR_ID int,
+		Oblig_Date_end date,
+		Oferta_Date date,
+		Oferta_Type nvarchar(300),
+		IsActive bit,	-- на конец периода в портфеле	
+		Fifo_Date date,
+		In_Wir int,
+		In_Date date,
+		Ic_Name nvarchar(300),
+		Il_Num int, 
+		In_Dol int,
+		Ir_Trans nvarchar (300),
+		Amount decimal(20,7),
+		In_Summa decimal (20,7),
+		In_Eq decimal (20,7),
+		In_Comm decimal (20,7),
+		In_Price decimal (20,7),
+		In_Price_eq decimal (20,7),
+		IN_PRICE_UKD decimal (20,7), 
+		Today_PRICE decimal (20,7),
+		Value_NOM decimal (20,7),
+		Dividends decimal (20,7), 
+		UKD decimal (20,7),
+		NKD decimal (20,7),
+		Amortizations decimal (20,7),
+		Coupons decimal (20,7),
+		Out_Wir int,
+		Out_Date datetime,
+		Od_Id int,
+		Oc_Name nvarchar (300),
+		Ol_Num int,
+		Out_Dol int,
+		Out_Summa decimal (20,7),	-- Сумма в проводке по списанию в валюте учета
+		Out_Eq decimal (20,7)		-- Сумма в проводке по списанию в рублях
+	)
+
+	declare @ISIN NVarchar(12), @Instrument  NVarchar(300), @CUR_ID Int, @CUR NVarchar(50);
+
+
+	insert into @FinInstruments
+	(
+		ShareId,
+		ShareName,
+		ShareTypeClass,
+		ShareTypeName,
+		NomCurrencyId,
+		NomCurrencyCode,
+		RsetId,
+		ISIN
+	)
+	select 
+		R.REG_2 as ShareId,
+		V.NAME as ShareName,
+		S.CLASS as ShareTypeClass, 
+		ST.NAME as ShareTypeName,
+		N.ID as NomCurrencyId,
+		N.SYSNAME as NomCurrencyCode, 
+		R.ID as RestId,
+		V.ISIN as ISIN
+	from [BAL_DATA_STD].[dbo].OD_ACC_PLANS AS P WITH(NOLOCK)
+	inner join [BAL_DATA_STD].[dbo].OD_BALANCES AS B WITH(NOLOCK) on B.ACC_PLAN=P.ID and B.SYS_NAME like 'ПОРТФЕЛЬ%' 
+	inner join [BAL_DATA_STD].[dbo].OD_RESTS AS R WITH(NOLOCK) on R.BAL_ACC=B.ID and R.REG_3 = @ContractId
+	left join [BAL_DATA_STD].[dbo].OD_VALUES AS V WITH(NOLOCK) on V.ID=R.REG_2
+	left join [BAL_DATA_STD].[dbo].OD_SHARES AS S WITH(NOLOCK) on S.ID=R.REG_2
+	left join [BAL_DATA_STD].[dbo].OD_SYS_TABS AS ST WITH(NOLOCK) on ST.CODE='SHARE_CLASS' and S.CLASS=ST.NUM 
+	left join [BAL_DATA_STD].[dbo].OD_VALUES AS N WITH(NOLOCK) on N.ID=R.VALUE_ID   /*S.NOM_VAL*/
+	left join [BAL_DATA_STD].[dbo].OD_TURNS AS T WITH(NOLOCK)  on T.REST = R.ID --and T.WIRDATE>=@DateStart 
+	where P.WHOS = 17284 and P.SYS_NAME = 'MONEY' and T.IS_PLAN = 'F'
+	group by B.NUM_S, R.REG_2, V.NAME, B.SYS_NAME, V.V_TYPE, S.CLASS, ST.NAME, N.ID, N.SYSNAME, R.ID, B.WALK, V.ISIN
+	having (sum( T.TYPE_ * T.AMOUNT_ )<>0 )
+		or (sum( case when T.WIRDATE<@DateEnd then T.AMOUNT_ else 0.0 end)<>0 )
+	order by  B.WALK, V.NAME;
+	--option(loop join,force order)
+
+	-- test вот такой фильтр
+	--delete from @FinInstruments
+	--where ShareId <> 18699268
+
+	-- test
+	--select
+		--@DateStart = MinWIRDATE
+	--from @FinInstruments
+
+	--select @DateStart
+
+	-- test
+	--select * from @FinInstruments
+	--order by ShareId
+	--return;
+
+	-- Теперь самое интересное 
+	declare @ApplId int = 123654789 --ид для идентификации выборки из временой таблицы (произвольный)
+
+	declare @practitionerId int
+
+	select @practitionerId = min(ShareId) from @FinInstruments
+
+	while @practitionerId is not null
+	begin
+
+		-- Если есть записи во временной таблице удаляем их
+		delete from [BAL_DATA_STD].[dbo].TMP_FIFO_JOURNAL where Appl_ID = @ApplId
+		--print @practitionerId
+		-- Запрлняем журнал FIFO
+		-- используем встоенную функцию Fansy для расчета журнала FIFO
+		exec [BAL_DATA_STD].[dbo].PR_INS_FIFO_LIFO 
+			1,						-- Считаем FIFO
+			@ApplId,				-- ИД Идентификации
+			@DateStart,				-- Начало периода
+			@DateEnd,				-- Окончание периода
+			'MONEY',				-- План счетов
+			'ПОРТФЕЛЬ,ПОРТФЕЛЬ-2,РБП.ФИ.',	
+			NULL,NULL,
+			@practitionerId,		-- ИД бумаги
+			@ContractId,			-- ИД Договора
+			NULL,NULL,NULL;
+
+
+		
+			select top 1
+				@ISIN = ISIN,
+				@Instrument = ShareName,
+				@CUR_ID = NomCurrencyId,
+				@CUR = NomCurrencyCode
+			from @FinInstruments
+			where ShareId = @practitionerId
+
+
+			insert into @Partition
+			(
+				InvestorId,
+				ContractId,
+				ShareId,	-- ИД ЦБ
+				ISIN,
+				Class,
+				Instrument,
+				CUR,
+				CUR_ID,
+				Oblig_Date_end,
+				Oferta_Date,
+				Oferta_Type,
+				IsActive,	-- на конец периода в портфеле	
+				Fifo_Date,
+				In_Wir,
+				In_Date,
+				Ic_Name,
+				Il_Num, 
+				In_Dol,
+				Ir_Trans,
+				Amount,
+				In_Summa,
+				In_Eq,
+				In_Comm,
+				In_Price,
+				In_Price_eq,
+				IN_PRICE_UKD, 
+				Today_PRICE,
+				Value_NOM,
+				Dividends, 
+				UKD,
+				NKD,
+				Amortizations,
+				Coupons,
+				Out_Wir,
+				Out_Date,
+				Od_Id,
+				Oc_Name,
+				Ol_Num,
+				Out_Dol,
+				Out_Summa,	-- Сумма в проводке по списанию в валюте учета
+				Out_Eq		-- Сумма в проводке по списанию в рублях
+			)
+			select
+				@InvestorId as InvestorId,
+				@ContractId as ContractId,
+				@practitionerId as ShareId,
+				@ISIN as ISIN,
+				null as Class, ------- Добавить из таблицы OD_Shares
+				@Instrument as Instrument,
+				@CUR as CUR,
+				@CUR_ID as CUR_ID,
+				null as Oblig_Date_end,
+				null as Oferta_Date,
+				null as Oferta_Type,
+				(case when OW.WIRDATE is null then '1' else '0' end) as IsActive,
+				@DateEnd as Fifo_Date,
+				(case when IW.TAG>0 then IW.TAG else J.IN_WIR end) as IN_WIR,
+				(case when A.VAL is not null then dbo.f_AsDate(A.VAL) when IW.TAG>0 then IIW.WIRDATE else IW.WIRDATE end) as IN_DATE,
+				dbo.f_concat( (case when IW.TAG>0 then dbo.f_concat3( dbo.f_concat3( '( конвертация из ', IIC.NAME, ' '), IID.NUM_DATE, ' )') else '' end),IC.NAME) as IC_NAME,
+				IL.NUM as IL_NUM,
+				IL.ID as IN_DOL,
+				IR.TRANS as IR_TRANS,
+				ROUND(J.AMOUNT,2) as AMOUNT,
+				J.IN_SUMMA, 
+				J.IN_EQ, 
+				J.IN_COMM, 
+				J.IN_PRICE, 
+				J.IN_PRICE_EQ,
+				null as IN_PRICE_UKD, --IN_PRICE + запрос в историю операцию
+				null as Today_PRICE, --добавить цену за бумагу на дату ФИФО из таблицы OD_VALUES_RATES
+				null as Value_NOM, --Today_PRICE * Amount
+				null as Dividends, ---Добавить алгоритм расчета дивов
+				null as UKD, --- Нужно слазить в таблицу с историей и найти на дату покупки сумму УКД, разделить на Amount из портфеля и умножить на Amount из FIFO.
+				null as NKD, --- Нужно в портфеле на дату найти Value_NOM для BAL_ACC = 2782 для заданного ShareId, разделить на Amount из портфеля и умножить на Amount из FIFO
+				null as Amortizations, ---Добавить алгоритм расчета амортизации
+				null as Coupons, ---Добавить алгоритм расчета купонов
+				J.OUT_WIR,
+				OW.WIRDATE as OUT_DATE,  
+				OD.ID as OD_ID,
+				OC.NAME as OC_NAME,      
+				OL.NUM as OL_NUM,        
+				OL.ID as OUT_DOL,
+				J.OUT_SUMMA as OUT_SUMMA_F, 
+				J.OUT_EQ as OUT_EQ_F
+			FROM [BAL_DATA_STD].[dbo].TMP_FIFO_JOURNAL AS J WITH(NOLOCK)
+			left join [BAL_DATA_STD].[dbo].OD_WIRING AS IW WITH(NOLOCK) on IW.ID = J.IN_WIR
+			left join [BAL_DATA_STD].[dbo].OD_DOLS   AS IL WITH(NOLOCK) on IL.ID = IW.DOL
+			left join [BAL_DATA_STD].[dbo].OD_STEPS  AS IE WITH(NOLOCK) on IE.ID = IW.O_STEP 
+			left join [BAL_DATA_STD].[dbo].OD_DOCS AS ID WITH(NOLOCK)    on ID.ID = (case when IL.DOC is null then IE.DOC else IL.DOC end)     /* процедура сбора информации по провдкам должна работать по вторичному документу ввода */
+			left join [BAL_DATA_STD].[dbo].OD_DOC_CATS AS IC WITH(NOLOCK) on IC.ID = ID.D_CAT
+			left join [BAL_DATA_STD].[dbo].D_B_REESTR  AS IR WITH(NOLOCK) on IR.DOL = IL.ID
+			left join [BAL_DATA_STD].[dbo].OP_FIELDS AS F WITH(NOLOCK) on F.OP = IC.ID and IC.SYS_NAME = 'OP_P_INPUT_SHARE' and F.AS_NAME = 'INPUT_DATE'
+			left join [BAL_DATA_STD].[dbo].D_OP_VAL AS A WITH(NOLOCK) on A.DESCR = F.ID and A.LINE = IL.ID
+
+			left join [BAL_DATA_STD].[dbo].OD_WIRING AS IIW WITH(NOLOCK) on IIW.ID = IW.TAG
+			left join [BAL_DATA_STD].[dbo].OD_STEPS AS IIE WITH(NOLOCK) on IIE.ID = IIW.O_STEP
+			left join [BAL_DATA_STD].[dbo].OD_DOCS AS IID WITH(NOLOCK) on IID.ID = IIE.DOC
+			left join [BAL_DATA_STD].[dbo].OD_DOC_CATS AS IIC WITH(NOLOCK) on IIC.ID = IID.D_CAT
+
+			left join [BAL_DATA_STD].[dbo].OD_WIRING AS OW WITH(NOLOCK) on OW.ID = J.OUT_WIR
+			left join [BAL_DATA_STD].[dbo].OD_STEPS AS OE WITH(NOLOCK)  on OE.ID = OW.O_STEP
+			left join [BAL_DATA_STD].[dbo].OD_DOLS AS OL WITH(NOLOCK)   on OL.ID = OW.DOL
+			left join [BAL_DATA_STD].[dbo].OD_DOCS AS OD WITH(NOLOCK)    on OD.ID = (case when OL.DOC is null then OE.DOC else OL.DOC end)
+			left join [BAL_DATA_STD].[dbo].OD_DOC_CATS AS OC WITH(NOLOCK) on OC.ID = OD.D_CAT
+			left join [BAL_DATA_STD].[dbo].D_B_REESTR AS O_R WITH(NOLOCK) on O_R.DOL = OL.ID
+			where J.APPL_ID = @ApplId;
+
+		select @practitionerId = min(ShareId) from @FinInstruments where ShareId > @practitionerId
+	end
+
+
+	INSERT INTO [dbo].[InvestmentIds] ([Investment])
+	select
+		R.[Instrument]
+	from
+	(
+		-- источник содержит уникальные ненуловые значения
+		select Instrument
+		From @Partition
+		WHERE Instrument IS NOT NULL
+		GROUP BY Instrument
+	) AS R
+	LEFT JOIN [dbo].[InvestmentIds] AS T ON R.Instrument = T.[Investment] -- таблица тоже содержит уникальные значения
+	WHERE T.[Id] IS NULL;
+
+	INSERT INTO [dbo].[InvestmentIds] ([Investment])
+	select
+		R.[Ic_Name]
+	from
+	(
+		-- источник содержит уникальные ненуловые значения
+		select Ic_Name
+		From @Partition
+		WHERE Ic_Name IS NOT NULL
+		GROUP BY Ic_Name
+	) AS R
+	LEFT JOIN [dbo].[InvestmentIds] AS T ON R.Ic_Name = T.[Investment] -- таблица тоже содержит уникальные значения
+	WHERE T.[Id] IS NULL;
+
+	INSERT INTO [dbo].[InvestmentIds] ([Investment])
+	select
+		R.[Oc_Name]
+	from
+	(
+		-- источник содержит уникальные ненуловые значения
+		select Oc_Name
+		From @Partition
+		WHERE Oc_Name IS NOT NULL
+		GROUP BY Oc_Name
+	) AS R
+	LEFT JOIN [dbo].[InvestmentIds] AS T ON R.Oc_Name = T.[Investment] -- таблица тоже содержит уникальные значения
+	WHERE T.[Id] IS NULL;
+
+-- Oc_Name
+
+	IF @DateEnd < @LastEndDate
+	BEGIN
+		INSERT INTO [dbo].[POSITION_KEEPING]
+		(
+			[InvestorId], [ContractId], [ShareId], [Fifo_Date],
+			[ISIN], [Class],
+			[InstrumentId],
+			[CUR_ID], [Oblig_Date_end], [Oferta_Date], [Oferta_Type],
+			[IsActive], [In_Wir], [In_Date],
+			[Ic_NameId],
+			[Il_Num], [In_Dol], [Ir_Trans], [Amount],
+			[In_Summa], [In_Eq], [In_Comm], [In_Price],
+			[In_Price_eq], [IN_PRICE_UKD], [Today_PRICE], [Value_NOM],
+			[Dividends], [UKD], [NKD], [Amortizations],
+			[Coupons], [Out_Wir], [Out_Date], [Od_Id],
+			[Oc_NameId],
+			[Ol_Num], [Out_Dol], [Out_Summa],
+			[Out_Eq]
+		)
+		select
+		InvestorId, ContractId, ShareId, Fifo_Date,
+		ISIN, Class,
+		InstrumentId = b.Id, --
+		--CUR, -- название валюты не надо
+		CUR_ID, Oblig_Date_end, Oferta_Date, Oferta_Type,
+		IsActive, In_Wir, In_Date,
+		Ic_NameId = c.Id, --
+		Il_Num, In_Dol, Ir_Trans, Amount,
+		In_Summa, In_Eq, In_Comm, In_Price,
+		In_Price_eq, IN_PRICE_UKD, Today_PRICE, Value_NOM,
+		Dividends, UKD, NKD, Amortizations,
+		Coupons, Out_Wir, Out_Date, Od_Id,
+		Oc_NameId = d.Id, --
+		Ol_Num, Out_Dol, Out_Summa,
+		Out_Eq
+		from @Partition as a
+		join [dbo].[InvestmentIds] as b on a.Instrument = b.Investment
+		left join [dbo].[InvestmentIds] as c on a.Ic_Name = c.Investment
+		left join [dbo].[InvestmentIds] as d on a.Oc_Name = d.Investment
+	END
+	ELSE
+	BEGIN
+		INSERT INTO [dbo].[POSITION_KEEPING_Last]
+		(
+			[InvestorId], [ContractId], [ShareId], [Fifo_Date],
+			[ISIN], [Class],
+			[InstrumentId],
+			[CUR_ID], [Oblig_Date_end], [Oferta_Date], [Oferta_Type],
+			[IsActive], [In_Wir], [In_Date],
+			[Ic_NameId],
+			[Il_Num], [In_Dol], [Ir_Trans], [Amount],
+			[In_Summa], [In_Eq], [In_Comm], [In_Price],
+			[In_Price_eq], [IN_PRICE_UKD], [Today_PRICE], [Value_NOM],
+			[Dividends], [UKD], [NKD], [Amortizations],
+			[Coupons], [Out_Wir], [Out_Date], [Od_Id],
+			[Oc_NameId],
+			[Ol_Num], [Out_Dol], [Out_Summa],
+			[Out_Eq]
+		)
+		select
+		InvestorId, ContractId, ShareId, Fifo_Date,
+		ISIN, Class,
+		InstrumentId = b.Id, --
+		--CUR, -- название валюты не надо
+		CUR_ID, Oblig_Date_end, Oferta_Date, Oferta_Type,
+		IsActive, In_Wir, In_Date,
+		Ic_NameId = c.Id, --
+		Il_Num, In_Dol, Ir_Trans, Amount,
+		In_Summa, In_Eq, In_Comm, In_Price,
+		In_Price_eq, IN_PRICE_UKD, Today_PRICE, Value_NOM,
+		Dividends, UKD, NKD, Amortizations,
+		Coupons, Out_Wir, Out_Date, Od_Id,
+		Oc_NameId = d.Id, --
+		Ol_Num, Out_Dol, Out_Summa,
+		Out_Eq
+		from @Partition as a
+		join [dbo].[InvestmentIds] as b on a.Instrument = b.Investment
+		left join [dbo].[InvestmentIds] as c on a.Ic_Name = c.Investment
+		left join [dbo].[InvestmentIds] as d on a.Oc_Name = d.Investment
+	END
+END
+GO
 CREATE OR ALTER PROCEDURE [dbo].[app_FillPortFolio_Daily_Before]
 (
 	@InvestorId INT,
@@ -916,7 +1382,7 @@ AS BEGIN
 		END
 	END
 
-	declare @CurrentDateFormat Nvarchar(50);
+	declare @CurrentDateFormat Nvarchar(50), @DateStart Date;
 
 	select
 		@CurrentDateFormat = date_format
@@ -1015,10 +1481,23 @@ AS BEGIN
 	begin
 		BEGIN TRY
 
+			select
+				@DateStart = DATE_OPEN -- не пустое
+			from [dbo].[Assets_Info] nolock
+			where ContractId = @ContractIdC
+
 			EXEC [dbo].[app_FillPortFolio_Daily]
 					@InvestorId = @InvestorIdC,
 					@ContractId = @ContractIdC,
 					@P_DATE = @WIRDATEC
+			
+			-- заполнение позиций
+			EXEC [dbo].[app_Fill_POSITION_KEEPING]
+					@DateStart = @DateStart,
+					@DateEnd = @WIRDATEC,
+					@ContractId = @ContractIdC,
+					@InvestorId = @InvestorIdC
+
 		END TRY
 		BEGIN CATCH
 			SELECT
