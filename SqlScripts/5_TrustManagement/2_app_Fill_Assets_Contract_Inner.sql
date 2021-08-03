@@ -973,7 +973,7 @@ AS BEGIN
 			ContractId = RE.REG_1,
 			WIRING_ID = W.ID,
 			WIRDATE = cast(W.WIRDATE as Date),
-			S_DATE = CAST(FORMAT(S_DATE,'yyyy-MM-dd HH:mm:ss') AS datetime),
+			S_DATE = cast(FORMAT(S_DATE,'dd-MM-yyyy HH:mm:ss') as datetime),
 			D.NUM,
 			TU.VALUE_ * TU.TYPE_ as [Value]
 		--INTO GGG

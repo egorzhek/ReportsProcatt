@@ -11,6 +11,8 @@ AS BEGIN
 	-- EXEC [dbo].[app_Fill_Assets_Contract] @ParamINVESTOR = 2 - по определённому инвестору
 	-- ...
 
+	set dateformat dmy;
+
 
 	DECLARE @ContractId Int, @ProcName NVarChar(Max) = OBJECT_NAME(@@PROCID), @Error NVarChar(Max)
 
