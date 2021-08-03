@@ -371,6 +371,25 @@ from
 	and PortfolioDate = @EndDate
 ) as r;
 
+
+-- Прибавляем VALUE_NOM от BAL_ACC 2782
+UPDATE T SET
+	T.VALUE_NOM = T.VALUE_NOM + R.VALUE_NOM
+FROM
+(
+	select
+		VALUE_ID, VALUE_NOM = SUM(VALUE_NOM)
+	from #TrustTree
+	where BAL_ACC = 2782
+	GROUP BY VALUE_ID
+) AS R
+JOIN #TrustTree AS T ON R.VALUE_ID = T.VALUE_ID AND (T.BAL_ACC <> 2782 OR T.BAL_ACC IS NULL);
+
+-- убираем BAL_ACC 2782
+delete from #TrustTree
+where BAL_ACC = 2782;
+
+
 -- Дерево - четыре уровня вложенности
 -- tree1
 select
