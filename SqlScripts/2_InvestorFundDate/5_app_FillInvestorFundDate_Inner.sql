@@ -396,6 +396,133 @@ AS BEGIN
 		[M_DATE] = s.[M_DATE];
 END
 GO
+CREATE OR ALTER PROCEDURE [dbo].[app_Fill_SHARES_INFO]
+AS BEGIN
+	MERGE
+		[dbo].[SHARES_INFO] as t
+	USING
+	(
+		select 
+			S.SELF_ID,				-- ИД облигации
+			V.SYSNAME,				-- код бумаги
+			V.NAME,					-- Наименование акции (эмитент, выпуск)
+			FF.NAME as IssuerName,	-- Наименование эмитента
+			S.MNEM,					-- Наименование выпуска
+			S.NUM_REG,				-- Регистрационный номер
+			S.DATE_REG,				-- Дата регистрации
+			V.ISIN,					-- Код ISIN
+			V.CFI,					-- Код CFI
+			S.ISSUENUM,				-- Порядковый номер выпуска
+			S.BIRTHDATE,			-- Дата выпуска
+			S.DEATHDATE,			-- Дата прекращения действия выпуска
+			S.MODE,					-- Форма выпуска (1 - бездокументарная , 2 - документарная на предъявителя , 3 - в форме сертификатов, 4 - документарная именная)
+			S.ISSUER,				-- ИД Эмитента
+			S.COUNT_,				-- Объем
+			S.NOMINAL,				-- Номинал
+			S.NOM_VAL,				-- Код валюты номинала
+			S.TYPE_,				-- Тип акции (1-обыкновеннаяб 2- привилигированная, 3- привилигированная тип А, 4 - привилигированная тип Б)
+			S.STATUS,				-- Выпуск Активен
+			S.REP_DATE,				-- Дата отчета
+			F.REESTR,				-- Реестродержатель
+			so.VAL as OP_NOLIQUID,  -- Ограничение по ликвидности (Код)
+			so.VALUE_,				-- Ограничение по ликвидности (причина)
+			s.B_DATE,				-- Дата начал актуальности
+			s.E_DATE				-- Дата окончания актуальности
+		FROM [BAL_DATA_STD].[dbo].DUAL AS d
+		inner join [BAL_DATA_STD].[dbo].OD_DOC_CATS AS sc WITH(NOLOCK) ON sc.SYS_NAME = 'OD_FACES'
+		inner join [BAL_DATA_STD].[dbo].OP_FIELDS   AS sf WITH(NOLOCK) ON sf.OP = sc.ID and sf.AS_NAME = 'NOLIQUID'
+		inner join [BAL_DATA_STD].[dbo].OD_SHARES   AS s  WITH(NOLOCK) ON s.CLASS = 1 and s.SELF_ID = s.ID
+		left join [BAL_DATA_STD].[dbo].OD_VALUES    AS V  WITH(NOLOCK) ON V.ID = s.SELF_ID 
+		left join [BAL_DATA_STD].[dbo].OD_FACES     AS FF WITH(NOLOCK) ON FF.SELF_ID = S.ISSUER and FF.LAST_FLAG = 1
+		left join [BAL_DATA_STD].[dbo].OD_U_FACES   AS F  WITH(NOLOCK) ON F.FACE = FF.ID
+		left join [BAL_DATA_STD].[dbo].OD_OPTIONS   AS so WITH(NOLOCK) ON so.DESCR = sf.ID and so.OBJECT = s.ISSUER and so.B_DATE <= GETDATE() and so.E_DATE > GETDATE()
+	) AS s
+	on t.SELF_ID = s.SELF_ID
+	when not matched
+		then insert
+		(
+			[SELF_ID],
+			[SYSNAME],
+			[NAME],
+			[IssuerName],
+			[MNEM],
+			[NUM_REG],
+			[DATE_REG],
+			[ISIN],
+			[CFI],
+			[ISSUENUM],
+			[BIRTHDATE],
+			[DEATHDATE],
+			[MODE],
+			[ISSUER],
+			[COUNT_],
+			[NOMINAL],
+			[NOM_VAL],
+			[TYPE_],
+			[STATUS],
+			[REP_DATE],
+			[REESTR],
+			[OP_NOLIQUID],
+			[VALUE_],
+			[B_DATE],
+			[E_DATE]
+		)
+		values
+		(
+			s.[SELF_ID],
+			s.[SYSNAME],
+			s.[NAME],
+			s.[IssuerName],
+			s.[MNEM],
+			s.[NUM_REG],
+			s.[DATE_REG],
+			s.[ISIN],
+			s.[CFI],
+			s.[ISSUENUM],
+			s.[BIRTHDATE],
+			s.[DEATHDATE],
+			s.[MODE],
+			s.[ISSUER],
+			s.[COUNT_],
+			s.[NOMINAL],
+			s.[NOM_VAL],
+			s.[TYPE_],
+			s.[STATUS],
+			s.[REP_DATE],
+			s.[REESTR],
+			s.[OP_NOLIQUID],
+			s.[VALUE_],
+			s.[B_DATE],
+			s.[E_DATE]
+		)
+	when matched
+	then update set
+		[SYSNAME] = s.[SYSNAME],
+		[NAME] = s.[NAME],
+		[IssuerName] = s.[IssuerName],
+		[MNEM] = s.[MNEM],
+		[NUM_REG] = s.[NUM_REG],
+		[DATE_REG] = s.[DATE_REG],
+		[ISIN] = s.[ISIN],
+		[CFI] = s.[CFI],
+		[ISSUENUM] = s.[ISSUENUM],
+		[BIRTHDATE] = s.[BIRTHDATE],
+		[DEATHDATE] = s.[DEATHDATE],
+		[MODE] = s.[MODE],
+		[ISSUER] = s.[ISSUER],
+		[COUNT_] = s.[COUNT_],
+		[NOMINAL] = s.[NOMINAL],
+		[NOM_VAL] = s.[NOM_VAL],
+		[TYPE_] = s.[TYPE_],
+		[STATUS] = s.[STATUS],
+		[REP_DATE] = s.[REP_DATE],
+		[REESTR] = s.[REESTR],
+		[OP_NOLIQUID] = s.[OP_NOLIQUID],
+		[VALUE_] = s.[VALUE_],
+		[B_DATE] = s.[B_DATE],
+		[E_DATE] = s.[E_DATE];
+END
+GO
 CREATE OR ALTER PROCEDURE [dbo].[app_FillInvestorFundDate_Inner]
 (
 	@Investor int = 16541, @FundId Int = 17578

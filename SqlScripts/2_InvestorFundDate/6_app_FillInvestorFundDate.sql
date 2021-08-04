@@ -71,6 +71,17 @@ AS BEGIN
 		INSERT INTO [dbo].[ProcessorErrors] ([Error])
 		SELECT 'app_Fill_SHARES_DIVIDENDS : ' + @Error;
 	END CATCH;
+
+	BEGIN TRY
+		EXEC [dbo].[app_Fill_SHARES_INFO]
+	END TRY
+	BEGIN CATCH
+		SET @Error = ERROR_MESSAGE();
+
+		-- ошибку в лог
+		INSERT INTO [dbo].[ProcessorErrors] ([Error])
+		SELECT 'app_Fill_SHARES_INFO : ' + @Error;
+	END CATCH;
 	
 
 	declare obj_cur cursor local fast_forward for
