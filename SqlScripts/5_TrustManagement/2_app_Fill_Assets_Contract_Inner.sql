@@ -1046,29 +1046,13 @@ AS BEGIN
 	left join [BAL_DATA_STD].[dbo].OD_SHARES AS S WITH(NOLOCK) on S.ID=R.REG_2
 	left join [BAL_DATA_STD].[dbo].OD_SYS_TABS AS ST WITH(NOLOCK) on ST.CODE='SHARE_CLASS' and S.CLASS=ST.NUM 
 	left join [BAL_DATA_STD].[dbo].OD_VALUES AS N WITH(NOLOCK) on N.ID=R.VALUE_ID   /*S.NOM_VAL*/
-	left join [BAL_DATA_STD].[dbo].OD_TURNS AS T WITH(NOLOCK)  on T.REST = R.ID --and T.WIRDATE>=@DateStart 
+	left join [BAL_DATA_STD].[dbo].OD_TURNS AS T WITH(NOLOCK)  on T.REST = R.ID and T.WIRDATE >= @DateStart 
 	where P.WHOS = 17284 and P.SYS_NAME = 'MONEY' and T.IS_PLAN = 'F'
 	group by B.NUM_S, R.REG_2, V.NAME, B.SYS_NAME, V.V_TYPE, S.CLASS, ST.NAME, N.ID, N.SYSNAME, R.ID, B.WALK, V.ISIN
 	having (sum( T.TYPE_ * T.AMOUNT_ )<>0 )
-		or (sum( case when T.WIRDATE<@DateEnd then T.AMOUNT_ else 0.0 end)<>0 )
+		or (sum( case when T.WIRDATE < @DateEnd then T.AMOUNT_ else 0.0 end)<>0 )
 	order by  B.WALK, V.NAME;
 	--option(loop join,force order)
-
-	-- test вот такой фильтр
-	--delete from @FinInstruments
-	--where ShareId <> 18699268
-
-	-- test
-	--select
-		--@DateStart = MinWIRDATE
-	--from @FinInstruments
-
-	--select @DateStart
-
-	-- test
-	--select * from @FinInstruments
-	--order by ShareId
-	--return;
 
 	-- Теперь самое интересное 
 	declare @ApplId int = 123654789 --ид для идентификации выборки из временой таблицы (произвольный)
