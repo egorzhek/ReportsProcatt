@@ -99,3 +99,52 @@ CONSTRAINT [P_CALENDAR] PRIMARY KEY CLUSTERED
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
+CREATE TABLE [dbo].[OBLIG_INFO]
+(
+	[SELF_ID] [int] NOT NULL,
+	[SYSNAME] [nvarchar](64) NULL,
+	[NAME] [nvarchar](255) NULL,
+	[ISSUER] [int] NULL,
+	[IssuerName] [nvarchar](255) NULL,
+	[NUM_REG] [nvarchar](124) NULL,
+	[ISIN] [nvarchar](12) NULL,
+	[CFI] [nvarchar](12) NULL,
+	[DATE_REG] [datetime] NULL,
+	[COUNT_] [numeric](27, 7) NULL,
+	[ISSUENUM] [int] NULL,
+	[MNEM] [nvarchar](255) NULL,
+	[BIRTHDATE] [datetime] NULL,
+	[DEATHDATE] [datetime] NULL,
+	[MODE] [int] NULL,
+	[NOMINAL] [numeric](22, 8) NULL,
+	[NOM_TYPE] [smallint] NULL,
+	[NOM_VAL] [int] NULL,
+	[TYPE_] [int] NULL,
+	[IS_MARGIN] [smallint] NULL,
+	[IS_MCS] [smallint] NULL,
+	[STATUS] [smallint] NULL,
+	[IS_EUR_BOND] [int] NULL,
+	[IS_SAVE] [int] NULL,
+	[IS_CONV] [int] NULL,
+	[PERIOD] [int] NULL,
+	[PERCENT_] [numeric](22, 8) NULL,
+	[DAYS] [int] NULL,
+	[PRICE] [numeric](22, 8) NULL,
+	[PERIOD_M] [int] NULL,
+	[STAVKA] [numeric](22, 8) NULL,
+	[IS_GG] [int] NULL,
+	[REP_DATE] [datetime] NULL,
+	[NKD_MFU] [int] NULL,
+	[P_MODEL] [int] NULL,
+	[IS_IN] [smallint] NULL,
+	[GUARANTOR] [int] NULL,
+	[B_DATE] [datetime] NULL,
+	[E_DATE] [datetime] NULL,
+	[OP_NOLIQUID] [nvarchar](255) NULL,
+	[VALUE_] [nvarchar](255) NULL,
+CONSTRAINT [PK_OBLIG_INFO] PRIMARY KEY CLUSTERED
+(
+	[SELF_ID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO

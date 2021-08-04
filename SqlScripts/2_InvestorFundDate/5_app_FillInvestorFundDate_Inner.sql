@@ -11,6 +11,193 @@ as begin
 	where b.H_DATE is null;
 end
 GO
+CREATE OR ALTER PROCEDURE [dbo].[app_Fill_OBLIG_INFO]
+AS BEGIN
+	MERGE
+		[dbo].[OBLIG_INFO] as t
+	USING
+	(
+		select 
+			S.SELF_ID,				-- ИД облигации
+			V.SYSNAME,				-- код бумаги
+			V.NAME,					-- Наименование облигации (эмитент, транш)
+			S.ISSUER,				-- Эмитент
+			FF.NAME as IssuerName,  -- Наименование эмитента
+			S.NUM_REG,				-- Регистрационный номер
+			V.ISIN,					-- Код ISIN
+			V.CFI,					-- Код CFI
+			S.DATE_REG,				-- Дата регистрации (допуска)
+			S.COUNT_,				-- Объем выпуска, шт.
+			S.ISSUENUM,				-- Номер транша
+			S.MNEM,					-- Транш
+			S.BIRTHDATE,			-- Начало начисл. купонов
+			S.DEATHDATE,			-- Дата погашения
+			S.MODE,					-- Форма выпуска (1 - бездокументарная , 2 - документарная на предъявителя , 3 - в форме сертификатов, 4 - документарная именная)
+			S.NOMINAL,				-- Номинал
+			S.NOM_TYPE,				-- Тип номинала (1 - Амортизируемый, 0 - Постоянный )
+			S.NOM_VAL,				-- Код валюты номинала
+			S.TYPE_,				-- Тип купонного дохода ( 2 -  с переменной %-ой ставкой, 3 - с фиксированной ставкий)
+			S.IS_MARGIN,			-- Маржинальная?
+			S.IS_MCS,				-- О.Ц.Х.?
+			S.STATUS,				-- Статус ЦБ (1 - Выпуск активен, 0 - выпуск блокирован)
+			OS.IS_EUR_BOND,			-- Еврооблигация?
+			OS.IS_SAVE,				-- Метод расчета (1 -ре
+			OS.IS_CONV,				-- Тип структуры		
+			OS.PERIOD,				-- Дней в периоде
+			OS.PERCENT_,			-- Ставка дохода
+			Os.DAYS,				-- Число дней в году
+			OS.PRICE,				-- Цена размещения
+			OS.PERIOD_M,			-- Месяцев в периоде
+			OS.STAVKA,				-- Ставка дисконтирования
+			OS.IS_GG,				-- Имеет госгарантию?
+			s.REP_DATE,				-- Дата отчета
+			OS.NKD_MFU,				-- Тип купонного дохода
+			OS.P_MODEL,				-- Модель процентных периодов
+			V.IS_IN,				-- Принята к учету?
+			os.GUARANTOR,			-- Поручитель
+			s.B_DATE,				-- Дата начал актуальности
+			s.E_DATE,				-- Дата окончания актуальности
+			op.VAL as OP_NOLIQUID,  -- Ограничение по ликвидности (Код)
+			op.VALUE_				-- Ограничение по ликвидности (причина)
+		from [BAL_DATA_STD].[dbo].OD_SHARES AS S WITH(NOLOCK)
+		inner join [BAL_DATA_STD].[dbo].OD_VALUES AS v WITH(NOLOCK) ON s.id = v.id
+		left join [BAL_DATA_STD].[dbo].OD_O_SHARES AS os WITH(NOLOCK) ON os.SHARE = s.ID
+		left join [BAL_DATA_STD].[dbo].OD_OPTIONS AS op WITH(NOLOCK) ON op.DESCR = 11950585 and op.OBJECT = s.ISSUER and op.B_DATE <= GETDATE() and op.E_DATE > GETDATE()
+		left join [BAL_DATA_STD].[dbo].OD_FACES AS ff WITH(NOLOCK) ON ff.SELF_ID = s.ISSUER and ff.LAST_FLAG = 1
+		where s.CLASS = 2 and os.IS_SERT = 0
+	) AS s
+	on t.SELF_ID = s.SELF_ID
+	when not matched
+		then insert (
+			[SELF_ID],
+			[SYSNAME],
+			[NAME],
+			[ISSUER],
+			[IssuerName],
+			[NUM_REG],
+			[ISIN],
+			[CFI],
+			[DATE_REG],
+			[COUNT_],
+			[ISSUENUM],
+			[MNEM],
+			[BIRTHDATE],
+			[DEATHDATE],
+			[MODE],
+			[NOMINAL],
+			[NOM_TYPE],
+			[NOM_VAL],
+			[TYPE_],
+			[IS_MARGIN],
+			[IS_MCS],
+			[STATUS],
+			[IS_EUR_BOND],
+			[IS_SAVE],
+			[IS_CONV],
+			[PERIOD],
+			[PERCENT_],
+			[DAYS],
+			[PRICE],
+			[PERIOD_M],
+			[STAVKA],
+			[IS_GG],
+			[REP_DATE],
+			[NKD_MFU],
+			[P_MODEL],
+			[IS_IN],
+			[GUARANTOR],
+			[B_DATE],
+			[E_DATE],
+			[OP_NOLIQUID],
+			[VALUE_]
+		)
+		values (
+			s.[SELF_ID],
+			s.[SYSNAME],
+			s.[NAME],
+			s.[ISSUER],
+			s.[IssuerName],
+			s.[NUM_REG],
+			s.[ISIN],
+			s.[CFI],
+			s.[DATE_REG],
+			s.[COUNT_],
+			s.[ISSUENUM],
+			s.[MNEM],
+			s.[BIRTHDATE],
+			s.[DEATHDATE],
+			s.[MODE],
+			s.[NOMINAL],
+			s.[NOM_TYPE],
+			s.[NOM_VAL],
+			s.[TYPE_],
+			s.[IS_MARGIN],
+			s.[IS_MCS],
+			s.[STATUS],
+			s.[IS_EUR_BOND],
+			s.[IS_SAVE],
+			s.[IS_CONV],
+			s.[PERIOD],
+			s.[PERCENT_],
+			s.[DAYS],
+			s.[PRICE],
+			s.[PERIOD_M],
+			s.[STAVKA],
+			s.[IS_GG],
+			s.[REP_DATE],
+			s.[NKD_MFU],
+			s.[P_MODEL],
+			s.[IS_IN],
+			s.[GUARANTOR],
+			s.[B_DATE],
+			s.[E_DATE],
+			s.[OP_NOLIQUID],
+			s.[VALUE_]
+		)
+	when matched
+	then update set
+		[SYSNAME] = s.[SYSNAME],
+		[NAME] = s.[NAME],
+		[ISSUER] = s.[ISSUER],
+		[IssuerName] = s.[IssuerName],
+		[NUM_REG] = s.[NUM_REG],
+		[ISIN] = s.[ISIN],
+		[CFI] = s.[CFI],
+		[DATE_REG] = s.[DATE_REG],
+		[COUNT_] = s.[COUNT_],
+		[ISSUENUM] = s.[ISSUENUM],
+		[MNEM] = s.[MNEM],
+		[BIRTHDATE] = s.[BIRTHDATE],
+		[DEATHDATE] = s.[DEATHDATE],
+		[MODE] = s.[MODE],
+		[NOMINAL] = s.[NOMINAL],
+		[NOM_TYPE] = s.[NOM_TYPE],
+		[NOM_VAL] = s.[NOM_VAL],
+		[TYPE_] = s.[TYPE_],
+		[IS_MARGIN] = s.[IS_MARGIN],
+		[IS_MCS] = s.[IS_MCS],
+		[STATUS] = s.[STATUS],
+		[IS_EUR_BOND] = s.[IS_EUR_BOND],
+		[IS_SAVE] = s.[IS_SAVE],
+		[IS_CONV] = s.[IS_CONV],
+		[PERIOD] = s.[PERIOD],
+		[PERCENT_] = s.[PERCENT_],
+		[DAYS] = s.[DAYS],
+		[PRICE] = s.[PRICE],
+		[PERIOD_M] = s.[PERIOD_M],
+		[STAVKA] = s.[STAVKA],
+		[IS_GG] = s.[IS_GG],
+		[REP_DATE] = s.[REP_DATE],
+		[NKD_MFU] = s.[NKD_MFU],
+		[P_MODEL] = s.[P_MODEL],
+		[IS_IN] = s.[IS_IN],
+		[GUARANTOR] = s.[GUARANTOR],
+		[B_DATE] = s.[B_DATE],
+		[E_DATE] = s.[E_DATE],
+		[OP_NOLIQUID] = s.[OP_NOLIQUID],
+		[VALUE_] = s.[VALUE_];
+END
+GO
 CREATE OR ALTER PROCEDURE [dbo].[app_FillInvestorFundDate_Inner]
 (
 	@Investor int = 16541, @FundId Int = 17578
