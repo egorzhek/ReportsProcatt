@@ -330,6 +330,72 @@ AS BEGIN
 		[ACTUAL_DATE] = s.[ACTUAL_DATE];
 END
 GO
+CREATE OR ALTER PROCEDURE [dbo].[app_Fill_SHARES_DIVIDENDS]
+AS BEGIN
+	MERGE
+		[dbo].[SHARES_DIVIDENDS] as t
+	USING
+	(
+		select 
+			S.ID,
+			Z.R_DATE,	-- Дата отсечки
+			Z.SHARE,	-- ИД Акции 
+			Z.EMI,		-- Эмитент
+			Z.A_TYPE,	-- Тип акции
+			Z.A_CLASS,	-- Вид ЦБ
+			Z.PROFIT,	-- Сумма доходов
+			Z.CNT,		-- Количество ЦБ
+			Z.B_DATE,	-- Дата начала
+			Z.E_DATE,	-- Дата окончания
+			Z.M_DATE	-- Дата собрания
+		FROM [BAL_DATA_STD].[dbo].[OD_DIVIDENDS] AS Z with(nolock)
+		inner join [BAL_DATA_STD].[dbo].[OD_SHARES] AS S with(nolock) on Z.EMI = S.ISSUER and Z.A_TYPE = S.TYPE_ and (Z.SHARE = SELF_ID or Z.SHARE is NULL)
+		WHERE
+			Z.A_CLASS in (1, 7, 10) --(только акции, паи и депозитарки не интересуют) если необходимо используем 7(депозитарки) и 10 (паи) классы
+	) AS s
+	on t.ID = s.ID and t.R_DATE = s.R_DATE
+	when not matched
+		then insert
+		(
+			[ID],
+			[R_DATE],
+			[SHARE],
+			[EMI],
+			[A_TYPE],
+			[A_CLASS],
+			[PROFIT],
+			[CNT],
+			[B_DATE],
+			[E_DATE],
+			[M_DATE]
+		)
+		values
+		(
+			s.[ID],
+			s.[R_DATE],
+			s.[SHARE],
+			s.[EMI],
+			s.[A_TYPE],
+			s.[A_CLASS],
+			s.[PROFIT],
+			s.[CNT],
+			s.[B_DATE],
+			s.[E_DATE],
+			s.[M_DATE]
+		)
+	when matched
+	then update set
+		[SHARE] = s.[SHARE],
+		[EMI] = s.[EMI],
+		[A_TYPE] = s.[A_TYPE],
+		[A_CLASS] = s.[A_CLASS],
+		[PROFIT] = s.[PROFIT],
+		[CNT] = s.[CNT],
+		[B_DATE] = s.[B_DATE],
+		[E_DATE] = s.[E_DATE],
+		[M_DATE] = s.[M_DATE];
+END
+GO
 CREATE OR ALTER PROCEDURE [dbo].[app_FillInvestorFundDate_Inner]
 (
 	@Investor int = 16541, @FundId Int = 17578
