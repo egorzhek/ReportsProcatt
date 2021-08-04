@@ -38,6 +38,28 @@ AS BEGIN
 		INSERT INTO [dbo].[ProcessorErrors] ([Error])
 		SELECT 'app_Fill_OBLIG_INFO : ' + @Error;
 	END CATCH;
+
+	BEGIN TRY
+		EXEC [dbo].[app_Fill_OBLIG_COUPONS]
+	END TRY
+	BEGIN CATCH
+		SET @Error = ERROR_MESSAGE();
+
+		-- ошибку в лог
+		INSERT INTO [dbo].[ProcessorErrors] ([Error])
+		SELECT 'app_Fill_OBLIG_COUPONS : ' + @Error;
+	END CATCH;
+
+	BEGIN TRY
+		EXEC [dbo].[app_Fill_OBLIG_OFERTS]
+	END TRY
+	BEGIN CATCH
+		SET @Error = ERROR_MESSAGE();
+
+		-- ошибку в лог
+		INSERT INTO [dbo].[ProcessorErrors] ([Error])
+		SELECT 'app_Fill_OBLIG_OFERTS : ' + @Error;
+	END CATCH;
 	
 
 	declare obj_cur cursor local fast_forward for

@@ -198,6 +198,138 @@ AS BEGIN
 		[VALUE_] = s.[VALUE_];
 END
 GO
+CREATE OR ALTER PROCEDURE [dbo].[app_Fill_OBLIG_COUPONS]
+AS BEGIN
+	MERGE
+		[dbo].[OBLIG_COUPONS] as t
+	USING
+	(
+		select
+			C.SHARE,				-- ИД Облигации	(связь с OD_SHARES по SELF_ID)
+			C.B_DATE,				-- Дата начала периода
+			C.E_DATE,				-- Дата конца периода
+			C.PERCENT_,				-- Ставка в % годовых
+			C.IS_PAY,				-- Тип купона ( 1- Выплатной, 0 - Расчетный)
+			C.SUMMA,				-- Сумма к выплате
+			C.DELTA,				-- Сумма амортизации
+			C.DELTA + C.SUMMA as ANN, -- Аннуитет (выплата)
+			C.IS_PERCENT,			-- Выплата в процентах ? ( 1 - выплата задана процентом, 0 - выплата задана суммой )
+			C.O_PRICE,				-- Цена оферты
+			C.B_PAY,				-- Дата начала выплаты
+			C.E_PAY,				-- Дата окончания выплаты
+			C.P_DATE,				-- Дата выплаты
+			C.NOMINAL,				-- Номинал
+			C.DEFOLT_DATE,			-- Дата объявления дефолта
+			C.ACTUAL_DATE,			-- Дата объявления ставки/суммы выплаты
+			C.CALC_SUMMA			-- Сумма к начислению
+		from [BAL_DATA_STD].[dbo].OD_COUPONS AS C WITH(nolock)
+	) AS s
+	on t.[SHARE] = s.[SHARE] and t.[B_DATE] = s.[B_DATE] and t.[E_DATE] = s.[E_DATE]
+	when not matched
+		then insert
+		(
+			[SHARE],
+			[B_DATE],
+			[E_DATE],
+			[PERCENT_],
+			[IS_PAY],
+			[SUMMA],
+			[DELTA],
+			[ANN],
+			[IS_PERCENT],
+			[O_PRICE],
+			[B_PAY],
+			[E_PAY],
+			[P_DATE],
+			[NOMINAL],
+			[DEFOLT_DATE],
+			[ACTUAL_DATE],
+			[CALC_SUMMA]
+		)
+		values
+		(
+			s.[SHARE],
+			s.[B_DATE],
+			s.[E_DATE],
+			s.[PERCENT_],
+			s.[IS_PAY],
+			s.[SUMMA],
+			s.[DELTA],
+			s.[ANN],
+			s.[IS_PERCENT],
+			s.[O_PRICE],
+			s.[B_PAY],
+			s.[E_PAY],
+			s.[P_DATE],
+			s.[NOMINAL],
+			s.[DEFOLT_DATE],
+			s.[ACTUAL_DATE],
+			s.[CALC_SUMMA]
+		)
+	when matched
+	then update set
+		[PERCENT_] = s.[PERCENT_],
+		[IS_PAY] = s.[IS_PAY],
+		[SUMMA] = s.[SUMMA],
+		[DELTA] = s.[DELTA],
+		[ANN] = s.[ANN],
+		[IS_PERCENT] = s.[IS_PERCENT],
+		[O_PRICE] = s.[O_PRICE],
+		[B_PAY] = s.[B_PAY],
+		[E_PAY] = s.[E_PAY],
+		[P_DATE] = s.[P_DATE],
+		[NOMINAL] = s.[NOMINAL],
+		[DEFOLT_DATE] = s.[DEFOLT_DATE],
+		[ACTUAL_DATE] = s.[ACTUAL_DATE],
+		[CALC_SUMMA] = s.[CALC_SUMMA];
+END
+GO
+CREATE OR ALTER PROCEDURE [dbo].[app_Fill_OBLIG_OFERTS]
+AS BEGIN
+	MERGE
+		[dbo].[OBLIG_OFERTS] as t
+	USING
+	(
+		select
+			C.SHARE,		-- ИД Облигации (связь с OD_SHARES по SELF_ID)
+			C.B_DATE,		-- Дата начала периода
+			C.E_DATE,		-- Дата окончания периода
+			C.P_DATE,		-- Дата выплаты
+			C.O_PRICE,		-- Цена оферты
+			C.O_TYPE,		-- Тип оферты (1 - Право эмитента (колл), 2 - право инвесторов (пут))
+			C.ACTUAL_DATE	-- Дата объявления оферты
+		FROM [BAL_DATA_STD].[dbo].OD_OFFERS AS C WITH(NOLOCK)
+	) AS s
+	on t.[SHARE] = s.[SHARE] and t.[B_DATE] = s.[B_DATE] and t.[E_DATE] = s.[E_DATE]
+	when not matched
+		then insert
+		(
+			[SHARE],
+			[B_DATE],
+			[E_DATE],
+			[P_DATE],
+			[O_PRICE],
+			[O_TYPE],
+			[ACTUAL_DATE]
+		)
+		values
+		(
+			s.[SHARE],
+			s.[B_DATE],
+			s.[E_DATE],
+			s.[P_DATE],
+			s.[O_PRICE],
+			s.[O_TYPE],
+			s.[ACTUAL_DATE]
+		)
+	when matched
+	then update set
+		[P_DATE] = s.[P_DATE],
+		[O_PRICE] = s.[O_PRICE],
+		[O_TYPE] = s.[O_TYPE],
+		[ACTUAL_DATE] = s.[ACTUAL_DATE];
+END
+GO
 CREATE OR ALTER PROCEDURE [dbo].[app_FillInvestorFundDate_Inner]
 (
 	@Investor int = 16541, @FundId Int = 17578
