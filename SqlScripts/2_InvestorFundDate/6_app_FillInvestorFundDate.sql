@@ -10,9 +10,23 @@ AS BEGIN
 	-- EXEC [dbo].[app_FillInvestorFundDate] @ParamINVESTOR = 1 - по определённому инвестору
 	-- EXEC [dbo].[app_FillInvestorFundDate] @ParamINVESTOR = 2 - по определённому инвестору
 	-- ...
+	
 
 
 	DECLARE @Investor int, @FundId Int, @ProcName NVarChar(Max) = OBJECT_NAME(@@PROCID), @Error NVarChar(Max)
+
+
+	-- загрузка календаря праздничных дней
+	BEGIN TRY
+		EXEC [dbo].[app_LoadCalendar];
+	END TRY
+	BEGIN CATCH
+		SET @Error = ERROR_MESSAGE();
+
+		-- ошибку в лог
+		INSERT INTO [dbo].[ProcessorErrors] ([Error])
+		SELECT 'app_LoadCalendar : ' + @Error;
+	END CATCH;
 
 	declare obj_cur cursor local fast_forward for
 		-- 

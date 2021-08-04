@@ -1,6 +1,16 @@
 -- расчёт и сохранение по инвестору и пифу
 USE [CacheDB]
 GO
+CREATE OR ALTER PROCEDURE [dbo].[app_LoadCalendar]
+as begin
+	insert into [dbo].[OD_CALENDAR] (H_DATE, MARKET)
+	select
+		a.H_DATE, a.MARKET
+	from [BAL_DATA_STD].[dbo].[OD_CALENDAR] as a
+	LEFT JOIN [dbo].[OD_CALENDAR] as b on a.H_DATE = b.H_DATE and a.MARKET = b.MARKET
+	where b.H_DATE is null;
+end
+GO
 CREATE OR ALTER PROCEDURE [dbo].[app_FillInvestorFundDate_Inner]
 (
 	@Investor int = 16541, @FundId Int = 17578
