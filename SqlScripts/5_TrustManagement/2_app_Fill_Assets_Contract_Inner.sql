@@ -1279,13 +1279,75 @@ AS BEGIN
 		Il_Num, In_Dol, Ir_Trans, Amount,
 		In_Summa, In_Eq, In_Comm, In_Price,
 		In_Price_eq, IN_PRICE_UKD, Today_PRICE, Value_NOM,
-		Dividends, UKD, NKD, Amortizations,
+		Dividends,
+		UKD = CL.Val * a.Amount,
+		NKD = CV.VAL * a.AMOUNT,
+		Amortizations,
 		Coupons, Out_Wir, Out_Date, Od_Id,
 		Oc_NameId = d.Id, --
 		Ol_Num, Out_Dol, Out_Summa,
 		Out_Eq
 		from @Partition as a
 		join [dbo].[InvestmentIds] as b on a.Instrument = b.Investment
+		outer apply
+		(
+			select Val = Sum(VAL)
+			from
+			(
+				select VAL = sum((C.Value_Nom - (C.Price*nullif(C.Amount,0))) / nullif(C.Amount,0))
+				From [dbo].[Operations_History_Contracts] as C with(nolock)
+				WHERE C.InvestorId = a.InvestorId and C.ContractId = a.ContractId and C.PaperId = a.ShareId
+				and cast(c.[Date] as Date) = a.In_Date
+				UNION ALL
+				select VAL = sum((C.Value_Nom - (C.Price*nullif(C.Amount,0))) / nullif(C.Amount,0))
+				From [dbo].[Operations_History_Contracts_Last] as C with(nolock)
+				WHERE C.InvestorId = a.InvestorId and C.ContractId = a.ContractId and C.PaperId = a.ShareId
+				and cast(c.[Date] as Date) = a.In_Date
+			) as r
+		) as CL
+		outer apply
+		(
+			select
+				VAL = sum(VAL)
+			from
+			(
+				select
+					 VAL = sum(C.VALUE_NOM / nullif(NN2.AMOUNT,0))
+				from [dbo].[PortFolio_Daily] as C with(nolock)
+				outer apply
+				(
+						select
+							 AMOUNT = sum(NN.AMOUNT)
+						from [dbo].[PortFolio_Daily] as NN with(nolock)
+						where NN.InvestorId = C.InvestorId and NN.ContractId = C.ContractId
+						and NN.PortfolioDate = C.PortfolioDate and NN.VALUE_ID = c.VALUE_ID
+						and NN.BAL_ACC <> 2782
+						and NN.AMOUNT > 0
+				) as NN2
+				where C.InvestorId = a.InvestorId and C.ContractId = a.ContractId
+				and C.PortfolioDate = a.Fifo_Date and c.VALUE_ID = a.ShareId
+				and C.BAL_ACC = 2782
+
+				UNION ALL
+
+				select
+					 VAL = sum(C.VALUE_NOM / nullif(NN2.AMOUNT,0))
+				from [dbo].[PortFolio_Daily_Last] as C with(nolock)
+				outer apply
+				(
+						select
+							 AMOUNT = sum(NN.AMOUNT)
+						from [dbo].[PortFolio_Daily_Last] as NN with(nolock)
+						where NN.InvestorId = C.InvestorId and NN.ContractId = C.ContractId
+						and NN.PortfolioDate = C.PortfolioDate and NN.VALUE_ID = c.VALUE_ID
+						and NN.BAL_ACC <> 2782
+						and NN.AMOUNT > 0
+				) as NN2
+				where C.InvestorId = a.InvestorId and C.ContractId = a.ContractId
+				and C.PortfolioDate = a.Fifo_Date and c.VALUE_ID = a.ShareId
+				and C.BAL_ACC = 2782
+			) as R
+		) as CV
 		left join [dbo].[InvestmentIds] as c on a.Ic_Name = c.Investment
 		left join [dbo].[InvestmentIds] as d on a.Oc_Name = d.Investment
 	END
@@ -1319,13 +1381,75 @@ AS BEGIN
 		Il_Num, In_Dol, Ir_Trans, Amount,
 		In_Summa, In_Eq, In_Comm, In_Price,
 		In_Price_eq, IN_PRICE_UKD, Today_PRICE, Value_NOM,
-		Dividends, UKD, NKD, Amortizations,
+		Dividends,
+		UKD = CL.Val * a.Amount,
+		NKD = CV.VAL * a.AMOUNT,
+		Amortizations,
 		Coupons, Out_Wir, Out_Date, Od_Id,
 		Oc_NameId = d.Id, --
 		Ol_Num, Out_Dol, Out_Summa,
 		Out_Eq
 		from @Partition as a
 		join [dbo].[InvestmentIds] as b on a.Instrument = b.Investment
+		outer apply
+		(
+			select Val = Sum(VAL)
+			from
+			(
+				select VAL = sum((C.Value_Nom - (C.Price*nullif(C.Amount,0))) / nullif(C.Amount,0))
+				From [dbo].[Operations_History_Contracts] as C with(nolock)
+				WHERE C.InvestorId = a.InvestorId and C.ContractId = a.ContractId and C.PaperId = a.ShareId
+				and cast(c.[Date] as Date) = a.In_Date
+				UNION ALL
+				select VAL = sum((C.Value_Nom - (C.Price*nullif(C.Amount,0))) / nullif(C.Amount,0))
+				From [dbo].[Operations_History_Contracts_Last] as C with(nolock)
+				WHERE C.InvestorId = a.InvestorId and C.ContractId = a.ContractId and C.PaperId = a.ShareId
+				and cast(c.[Date] as Date) = a.In_Date
+			) as r
+		) as CL
+		outer apply
+		(
+			select
+				VAL = sum(VAL)
+			from
+			(
+				select
+					 VAL = sum(C.VALUE_NOM / nullif(NN2.AMOUNT,0))
+				from [dbo].[PortFolio_Daily] as C with(nolock)
+				outer apply
+				(
+						select
+							 AMOUNT = sum(NN.AMOUNT)
+						from [dbo].[PortFolio_Daily] as NN with(nolock)
+						where NN.InvestorId = C.InvestorId and NN.ContractId = C.ContractId
+						and NN.PortfolioDate = C.PortfolioDate and NN.VALUE_ID = c.VALUE_ID
+						and NN.BAL_ACC <> 2782
+						and NN.AMOUNT > 0
+				) as NN2
+				where C.InvestorId = a.InvestorId and C.ContractId = a.ContractId
+				and C.PortfolioDate = a.Fifo_Date and c.VALUE_ID = a.ShareId
+				and C.BAL_ACC = 2782
+
+				UNION ALL
+
+				select
+					 VAL = sum(C.VALUE_NOM / nullif(NN2.AMOUNT,0))
+				from [dbo].[PortFolio_Daily_Last] as C with(nolock)
+				outer apply
+				(
+						select
+							 AMOUNT = sum(NN.AMOUNT)
+						from [dbo].[PortFolio_Daily_Last] as NN with(nolock)
+						where NN.InvestorId = C.InvestorId and NN.ContractId = C.ContractId
+						and NN.PortfolioDate = C.PortfolioDate and NN.VALUE_ID = c.VALUE_ID
+						and NN.BAL_ACC <> 2782
+						and NN.AMOUNT > 0
+				) as NN2
+				where C.InvestorId = a.InvestorId and C.ContractId = a.ContractId
+				and C.PortfolioDate = a.Fifo_Date and c.VALUE_ID = a.ShareId
+				and C.BAL_ACC = 2782
+			) as R
+		) as CV
 		left join [dbo].[InvestmentIds] as c on a.Ic_Name = c.Investment
 		left join [dbo].[InvestmentIds] as d on a.Oc_Name = d.Investment
 	END
