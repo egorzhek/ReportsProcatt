@@ -1331,6 +1331,223 @@ AS BEGIN
 	END
 END
 GO
+CREATE OR ALTER PROCEDURE [dbo].[Calc_Cupons]
+(
+	@InvestorId Int = 2149652, -- обязательно
+	@ContractId Int = 2257804, -- обязательно
+	@PaperId Int = 5399933, -- обязательно
+	@StartDate Date = NULL -- дата с которой происходит перерасчёт - если не указано, то будет проводиться поиск данной даты
+)
+as begin
+	set nocount on;
+
+	if @StartDate is null
+	begin
+		select
+			@StartDate = min([Date])
+		from
+		(
+			select [Date]
+			from Operations_History_Contracts with(nolock)
+			where 
+			InvestorId = @InvestorId and ContractId = @ContractId
+			and PaperId = @PaperId
+			and T_Name = 'Выплата купонов'
+			UNION ALL
+			select [Date]
+			from Operations_History_Contracts_Last with(nolock)
+			where 
+			InvestorId = @InvestorId and ContractId = @ContractId
+			and PaperId = @PaperId
+			and T_Name = 'Выплата купонов'
+		) as d
+	end
+
+	-- начальная дата не указана или не найдена - выход
+	if @StartDate is null return;
+
+	declare @Cur_Date Date, @Prev_Date date;
+
+	set @Cur_Date = @StartDate;
+	set @Prev_Date = DateAdd(DAY, -1, @StartDate);
+
+	declare @CurrentRows table
+	(
+		[IsActive] [bit] NULL,
+		[InvestorId] [int] NOT NULL,
+		[ContractId] [int] NOT NULL,
+		[ShareId] [int] NOT NULL,
+		[AMOUNT] [decimal](20, 7) NULL,
+		[In_Wir] [int] NULL,
+		[Coupons] [decimal](20, 7) NULL,
+		[PrevCoupons] [decimal](20, 7) NULL
+	)
+
+startprocess:
+	-- текущий день, предыдущий день
+	--select @Cur_Date, @Prev_Date
+
+	delete from @CurrentRows;
+
+	insert into @CurrentRows
+	(
+		[IsActive],
+		[InvestorId],
+		[ContractId],
+		[ShareId],
+		[AMOUNT],
+		[In_Wir]
+	)
+	select
+		[IsActive],
+		[InvestorId],
+		[ContractId],
+		[ShareId],
+		[AMOUNT],
+		[In_Wir]
+	from
+	(
+		select
+			a.IsActive, a.InvestorId, a.ContractId, a.ShareId, A.AMOUNT, a.In_Wir
+		from [dbo].[POSITION_KEEPING] as a with(nolock)
+		where a.InvestorId = @InvestorId and a.ContractId = @ContractId
+		and a.ShareId = @PaperId
+		and a.Fifo_Date = @Cur_Date
+		union all
+		select
+			a.IsActive, a.InvestorId, a.ContractId, a.ShareId, A.AMOUNT, a.In_Wir
+		from [dbo].[POSITION_KEEPING_Last] as a with(nolock)
+		where a.InvestorId = @InvestorId and a.ContractId = @ContractId
+		and a.ShareId = @PaperId
+		and a.Fifo_Date = @Cur_Date
+	)
+	as res
+	where res.IsActive = 1 -- активные на текущий день
+	or
+	(
+		-- или неактивные, но активные были вчера
+		res.IsActive = 0
+		and res.In_Wir in
+		(
+			select
+				a.In_Wir
+			from [dbo].[POSITION_KEEPING] as a with(nolock)
+			where a.InvestorId = @InvestorId and a.ContractId = @ContractId
+			and a.ShareId = @PaperId
+			and a.Fifo_Date = @Prev_Date
+			and a.IsActive = 1
+			union
+			select
+				a.In_Wir
+			from [dbo].[POSITION_KEEPING_Last] as a with(nolock)
+			where a.InvestorId = @InvestorId and a.ContractId = @ContractId
+			and a.ShareId = @PaperId
+			and a.Fifo_Date = @Prev_Date
+			and a.IsActive = 1
+		)
+	)
+
+	-- записей нет на текущий день, выход
+	if not exists
+	(
+		select top 1 1 from @CurrentRows
+	)
+	begin
+		return; -- выход
+	end;
+
+	
+
+	update b
+		set b.Coupons = k.Coupons
+	from @CurrentRows as b
+	inner join
+	(
+		select 
+			In_Wir, Coupons = r.Val / nullif(sum(a.AMOUNT) over(),0) * a.Amount
+		from @CurrentRows as a
+		outer apply
+		(
+			select Val = sum(rr.Val)
+			from
+			(
+				select
+					Val = sum(df.Value_Nom)
+				from [dbo].[Operations_History_Contracts] as df with(nolock)
+				where 
+				df.InvestorId = a.InvestorId
+				and df.ContractId = a.ContractId
+				and df.PaperId = a.ShareId
+				and df.T_Name = 'Выплата купонов'
+				and cast(df.[Date] as Date) = @Cur_Date
+				union all
+				select
+					Val = sum(df.Value_Nom)
+				from [dbo].[Operations_History_Contracts_Last] as df with(nolock)
+				where 
+				df.InvestorId = a.InvestorId
+				and df.ContractId = a.ContractId
+				and df.PaperId = a.ShareId
+				and df.T_Name = 'Выплата купонов'
+				and cast(df.[Date] as Date) = @Cur_Date
+			) as rr
+		) as r
+		where a.IsActive = 1
+	) as k on b.In_Wir = k.In_Wir
+	where b.IsActive = 1;
+
+	-- купоны вчерашнего дня
+	update a set
+		PrevCoupons = b.Cval * a.AMOUNT
+	from @CurrentRows as a
+	left join
+	(
+		-- купоны предыдущего дня
+		select
+			a.In_Wir, Cval = a.Coupons / nullif(A.AMOUNT,0)
+		from [dbo].[POSITION_KEEPING] as a with(nolock)
+		where a.InvestorId = @InvestorId and a.ContractId = @ContractId
+		and a.ShareId = @PaperId
+		and a.Fifo_Date = @Prev_Date
+		and a.IsActive = 1
+		union all
+		select
+			a.In_Wir, Cval = a.Coupons / nullif(A.AMOUNT,0)
+		from [dbo].[POSITION_KEEPING_Last] as a with(nolock)
+		where a.InvestorId = @InvestorId and a.ContractId = @ContractId
+		and a.ShareId = @PaperId
+		and a.Fifo_Date = @Prev_Date
+		and a.IsActive = 1
+	) as b on a.In_Wir = b.In_Wir;
+
+	-- сливаем в БД рассчёт за день
+	update b set
+		b.Coupons = isnull(a.Coupons,0) + isnull(a.PrevCoupons,0)
+	from @CurrentRows as a
+	join [dbo].[POSITION_KEEPING] as b on
+		a.InvestorId = b.InvestorId
+		and a.ContractId = b.ContractId
+		and a.ShareId = b.ShareId
+		and b.Fifo_Date = @Cur_Date
+
+	update b set
+		b.Coupons = isnull(a.Coupons,0) + isnull(a.PrevCoupons,0)
+	from @CurrentRows as a
+	join [dbo].[POSITION_KEEPING_Last] as b on
+		a.InvestorId = b.InvestorId
+		and a.ContractId = b.ContractId
+		and a.ShareId = b.ShareId
+		and b.Fifo_Date = @Cur_Date
+
+
+	-- переход на следующий день
+	set @Cur_Date  = DateAdd(DAY, 1, @Cur_Date);
+	set @Prev_Date = DateAdd(DAY, -1, @Cur_Date);
+
+	-- цикл +1 день -- выход, когда записи кончатся
+	goto startprocess
+end
+GO
 CREATE OR ALTER PROCEDURE [dbo].[app_FillPortFolio_Daily_Before]
 (
 	@InvestorId INT,
@@ -1375,8 +1592,9 @@ AS BEGIN
 
 	SET DATEFORMAT dmy;
 	
-	declare @InvestorIdC Int, @ContractIdC Int, @WIRDATEC DateTime,
-		@ErrorMessage Nvarchar(max), @ErrorSeverity Int, @ErrorState Int;
+	declare @InvestorIdC Int, @ContractIdC Int, @WIRDATEC DateTime, @WIRDATE date,
+		@ErrorMessage Nvarchar(max), @ErrorSeverity Int, @ErrorState Int,
+		@PaperId2 Int, @WIRDATE2 Date;
 
 	BEGIN TRY
 		DROP TABLE #ForUpd;
@@ -1507,6 +1725,60 @@ AS BEGIN
 		END CATCH;
 		
 		  fetch next from mycur into @InvestorIdC, @ContractIdC, @WIRDATEC
+	end
+	close mycur
+	deallocate mycur;
+
+	-- двойной курсор для обновления купонов
+	declare mycur cursor fast_forward for
+		select
+			InvestorId, ContractId, WIRDATE = cast(min(WIRDATE) as Date)
+		from #ForUpd
+		group by
+			InvestorId, ContractId
+	open mycur
+	fetch next from mycur into @InvestorIdC, @ContractIdC, @WIRDATE
+	while @@FETCH_STATUS = 0
+	begin
+			declare mycur2 cursor fast_forward for
+				select
+					PaperId, [Date] = min([Date])
+				from
+				(
+					select
+						PaperId, [Date] = cast([Date] as Date)
+					from Operations_History_Contracts with(nolock)
+					where T_Name = 'Выплата купонов'
+					and InvestorId = @InvestorIdC and ContractId = @ContractIdC
+					and cast([Date] as Date) >= @WIRDATE
+					and PaperId is not null
+					Union
+					select
+						PaperId, [Date] = cast([Date] as Date)
+					from Operations_History_Contracts_Last with(nolock)
+					where T_Name = 'Выплата купонов'
+					and InvestorId = @InvestorIdC and ContractId = @ContractIdC
+					and cast([Date] as Date) >= @WIRDATE
+					and PaperId is not null
+				) as d
+				group by PaperId
+			open mycur2
+			fetch next from mycur2 into @PaperId2, @WIRDATE2
+			while @@FETCH_STATUS = 0
+			begin
+				EXEC [dbo].[Calc_Cupons]
+						@InvestorId = @InvestorIdC,
+						@ContractId = @ContractIdC,
+						@PaperId = @PaperId2,
+						@StartDate = @WIRDATE2
+		
+				fetch next from mycur2 into @PaperId2, @WIRDATE2
+			end
+			close mycur2
+			deallocate mycur2;
+		
+		
+		  fetch next from mycur into @InvestorIdC, @ContractIdC, @WIRDATE
 	end
 	close mycur
 	deallocate mycur;
