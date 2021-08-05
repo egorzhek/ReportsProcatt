@@ -1012,6 +1012,7 @@ AS BEGIN
 		Oc_Name nvarchar (300),
 		Ol_Num int,
 		Out_Dol int,
+		OutPrice decimal (20,7),
 		Out_Summa decimal (20,7),	-- Сумма в проводке по списанию в валюте учета
 		Out_Eq decimal (20,7)		-- Сумма в проводке по списанию в рублях
 	)
@@ -1133,6 +1134,7 @@ AS BEGIN
 				Oc_Name,
 				Ol_Num,
 				Out_Dol,
+				OutPrice,
 				Out_Summa,	-- Сумма в проводке по списанию в валюте учета
 				Out_Eq		-- Сумма в проводке по списанию в рублях
 			)
@@ -1176,7 +1178,8 @@ AS BEGIN
 				OC.NAME as OC_NAME,      
 				OL.NUM as OL_NUM,        
 				OL.ID as OUT_DOL,
-				J.OUT_SUMMA as OUT_SUMMA_F, 
+				O_R.PRICE as OutPrice,
+				O_R.PRICE * ROUND(J.AMOUNT,2) as OUT_SUMMA_F,
 				J.OUT_EQ as OUT_EQ_F
 			FROM [BAL_DATA_STD].[dbo].TMP_FIFO_JOURNAL AS J WITH(NOLOCK)
 			left join [BAL_DATA_STD].[dbo].OD_WIRING AS IW WITH(NOLOCK) on IW.ID = J.IN_WIR
@@ -1265,7 +1268,7 @@ AS BEGIN
 			[Dividends], [UKD], [NKD], [Amortizations],
 			[Coupons], [Out_Wir], [Out_Date], [Od_Id],
 			[Oc_NameId],
-			[Ol_Num], [Out_Dol], [Out_Summa],
+			[Ol_Num], [Out_Dol], OutPrice, [Out_Summa],
 			[Out_Eq]
 		)
 		select
@@ -1285,7 +1288,7 @@ AS BEGIN
 		Amortizations,
 		Coupons, Out_Wir, Out_Date, Od_Id,
 		Oc_NameId = d.Id, --
-		Ol_Num, Out_Dol, Out_Summa,
+		Ol_Num, Out_Dol, a.OutPrice, Out_Summa,
 		Out_Eq
 		from @Partition as a
 		join [dbo].[InvestmentIds] as b on a.Instrument = b.Investment
@@ -1367,7 +1370,7 @@ AS BEGIN
 			[Dividends], [UKD], [NKD], [Amortizations],
 			[Coupons], [Out_Wir], [Out_Date], [Od_Id],
 			[Oc_NameId],
-			[Ol_Num], [Out_Dol], [Out_Summa],
+			[Ol_Num], [Out_Dol], OutPrice, [Out_Summa],
 			[Out_Eq]
 		)
 		select
@@ -1387,7 +1390,7 @@ AS BEGIN
 		Amortizations,
 		Coupons, Out_Wir, Out_Date, Od_Id,
 		Oc_NameId = d.Id, --
-		Ol_Num, Out_Dol, Out_Summa,
+		Ol_Num, Out_Dol, a.OutPrice, Out_Summa,
 		Out_Eq
 		from @Partition as a
 		join [dbo].[InvestmentIds] as b on a.Instrument = b.Investment
@@ -1497,6 +1500,7 @@ as begin
 
 	declare @CurrentRows table
 	(
+		[id] BigInt,
 		[IsActive] [bit] NULL,
 		[InvestorId] [int] NOT NULL,
 		[ContractId] [int] NOT NULL,
@@ -1515,6 +1519,7 @@ startprocess:
 
 	insert into @CurrentRows
 	(
+		[id],
 		[IsActive],
 		[InvestorId],
 		[ContractId],
@@ -1523,6 +1528,7 @@ startprocess:
 		[In_Wir]
 	)
 	select
+		[id],
 		[IsActive],
 		[InvestorId],
 		[ContractId],
@@ -1532,14 +1538,14 @@ startprocess:
 	from
 	(
 		select
-			a.IsActive, a.InvestorId, a.ContractId, a.ShareId, A.AMOUNT, a.In_Wir
+			a.Id, a.IsActive, a.InvestorId, a.ContractId, a.ShareId, A.AMOUNT, a.In_Wir
 		from [dbo].[POSITION_KEEPING] as a with(nolock)
 		where a.InvestorId = @InvestorId and a.ContractId = @ContractId
 		and a.ShareId = @PaperId
 		and a.Fifo_Date = @Cur_Date
 		union all
 		select
-			a.IsActive, a.InvestorId, a.ContractId, a.ShareId, A.AMOUNT, a.In_Wir
+			a.Id, a.IsActive, a.InvestorId, a.ContractId, a.ShareId, A.AMOUNT, a.In_Wir
 		from [dbo].[POSITION_KEEPING_Last] as a with(nolock)
 		where a.InvestorId = @InvestorId and a.ContractId = @ContractId
 		and a.ShareId = @PaperId
@@ -1653,7 +1659,8 @@ startprocess:
 		and a.ContractId = b.ContractId
 		and a.ShareId = b.ShareId
 		and b.Fifo_Date = @Cur_Date
-		and a.In_Wir = b.In_Wir;
+		and a.In_Wir = b.In_Wir
+		and a.id = b.id;
 
 	update b set
 		b.Coupons = isnull(a.Coupons,0) + isnull(a.PrevCoupons,0)
@@ -1663,7 +1670,10 @@ startprocess:
 		and a.ContractId = b.ContractId
 		and a.ShareId = b.ShareId
 		and b.Fifo_Date = @Cur_Date
-		and a.In_Wir = b.In_Wir;
+		and a.In_Wir = b.In_Wir
+		and a.id = b.id;
+
+
 
 
 	-- переход на следующий день
