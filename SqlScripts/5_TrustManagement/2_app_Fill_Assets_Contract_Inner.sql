@@ -1653,6 +1653,7 @@ startprocess:
 		and a.ContractId = b.ContractId
 		and a.ShareId = b.ShareId
 		and b.Fifo_Date = @Cur_Date
+		and a.In_Wir = b.In_Wir;
 
 	update b set
 		b.Coupons = isnull(a.Coupons,0) + isnull(a.PrevCoupons,0)
@@ -1662,6 +1663,7 @@ startprocess:
 		and a.ContractId = b.ContractId
 		and a.ShareId = b.ShareId
 		and b.Fifo_Date = @Cur_Date
+		and a.In_Wir = b.In_Wir;
 
 
 	-- переход на следующий день
