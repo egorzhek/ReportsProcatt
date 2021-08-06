@@ -1467,6 +1467,7 @@ CREATE OR ALTER PROCEDURE [dbo].[Calc_Cupons]
 )
 as begin
 	set nocount on;
+	declare @BufDate Date, @BufDate2 Date;
 
 	if @StartDate is null
 	begin
@@ -1505,11 +1506,24 @@ as begin
 		[InvestorId] [int] NOT NULL,
 		[ContractId] [int] NOT NULL,
 		[ShareId] [int] NOT NULL,
-		[AMOUNT] [decimal](20, 7) NULL,
+		[AMOUNT] [decimal](30, 7) NULL,
 		[In_Wir] [int] NULL,
-		[Coupons] [decimal](20, 7) NULL,
-		[PrevCoupons] [decimal](20, 7) NULL
-	)
+		[Coupons] [decimal](30, 7) NULL,
+		[PrevCoupons] [decimal](30, 7) NULL
+	);
+
+	declare @CurrentRows2 table
+	(
+		[id] BigInt,
+		[IsActive] [bit] NULL,
+		[InvestorId] [int] NOT NULL,
+		[ContractId] [int] NOT NULL,
+		[ShareId] [int] NOT NULL,
+		[AMOUNT] [decimal](30, 7) NULL,
+		[In_Wir] [int] NULL,
+		[Coupons] [decimal](30, 7) NULL,
+		[PrevCoupons] [decimal](30, 7) NULL
+	);
 
 startprocess:
 	-- текущий день, предыдущий день
@@ -1538,14 +1552,14 @@ startprocess:
 	from
 	(
 		select
-			a.Id, a.IsActive, a.InvestorId, a.ContractId, a.ShareId, A.AMOUNT, a.In_Wir
+			a.Id, a.IsActive, a.InvestorId, a.ContractId, a.ShareId, A.AMOUNT, a.In_Wir, a.Out_Date
 		from [dbo].[POSITION_KEEPING] as a with(nolock)
 		where a.InvestorId = @InvestorId and a.ContractId = @ContractId
 		and a.ShareId = @PaperId
 		and a.Fifo_Date = @Cur_Date
 		union all
 		select
-			a.Id, a.IsActive, a.InvestorId, a.ContractId, a.ShareId, A.AMOUNT, a.In_Wir
+			a.Id, a.IsActive, a.InvestorId, a.ContractId, a.ShareId, A.AMOUNT, a.In_Wir, a.Out_Date
 		from [dbo].[POSITION_KEEPING_Last] as a with(nolock)
 		where a.InvestorId = @InvestorId and a.ContractId = @ContractId
 		and a.ShareId = @PaperId
@@ -1557,6 +1571,7 @@ startprocess:
 	(
 		-- или неактивные, но активные были вчера
 		res.IsActive = 0
+		and res.Out_Date >= @Prev_Date
 		and res.In_Wir in
 		(
 			select
@@ -1580,7 +1595,19 @@ startprocess:
 	-- записей нет на текущий день, выход
 	if not exists
 	(
-		select top 1 1 from @CurrentRows
+		select
+			top 1 1
+		from [dbo].[POSITION_KEEPING] as a with(nolock)
+		where a.InvestorId = @InvestorId and a.ContractId = @ContractId
+		and a.ShareId = @PaperId
+		and a.Fifo_Date = @Cur_Date
+		union all
+		select
+			top 1 1
+		from [dbo].[POSITION_KEEPING_Last] as a with(nolock)
+		where a.InvestorId = @InvestorId and a.ContractId = @ContractId
+		and a.ShareId = @PaperId
+		and a.Fifo_Date = @Cur_Date
 	)
 	begin
 		return; -- выход
@@ -1674,11 +1701,144 @@ startprocess:
 		and a.id = b.id;
 
 
+	-- обработка неактивных
+	delete from @CurrentRows2;
+
+	insert into @CurrentRows2
+	(
+		[id],
+		[IsActive],
+		[InvestorId],
+		[ContractId],
+		[ShareId],
+		[AMOUNT],
+		[In_Wir]
+	)
+	select
+		[id],
+		[IsActive],
+		[InvestorId],
+		[ContractId],
+		[ShareId],
+		[AMOUNT],
+		[In_Wir]
+	from
+	(
+		select
+			a.Id, a.IsActive, a.InvestorId, a.ContractId, a.ShareId, A.AMOUNT, a.In_Wir
+		from [dbo].[POSITION_KEEPING] as a with(nolock)
+		where a.InvestorId = @InvestorId and a.ContractId = @ContractId
+		and a.ShareId = @PaperId
+		and a.Fifo_Date = @Cur_Date
+		union all
+		select
+			a.Id, a.IsActive, a.InvestorId, a.ContractId, a.ShareId, A.AMOUNT, a.In_Wir
+		from [dbo].[POSITION_KEEPING_Last] as a with(nolock)
+		where a.InvestorId = @InvestorId and a.ContractId = @ContractId
+		and a.ShareId = @PaperId
+		and a.Fifo_Date = @Cur_Date
+	)
+	as res
+	where res.IsActive = 0 -- неактивные на текущий день
+	and id not in (select Id from @CurrentRows);
+
+
+	update zz
+		set zz.Coupons = isnull(res.Coupons,0)
+	from @CurrentRows2 as zz
+	outer apply
+	(
+		select Coupons = sum(Coupons)
+		from
+		(
+			select
+				a.Coupons
+			from [dbo].[POSITION_KEEPING] as a with(nolock)
+			where a.InvestorId = zz.InvestorId and a.ContractId = zz.ContractId
+			and a.ShareId = zz.ShareId
+			and a.In_Wir = zz.In_Wir
+			and a.Fifo_Date = @Prev_Date
+			and a.IsActive = 0
+			and a.Amount = zz.AMOUNT
+			union all
+			select
+				a.Coupons
+			from [dbo].[POSITION_KEEPING_Last] as a with(nolock)
+			where a.InvestorId = zz.InvestorId and a.ContractId = zz.ContractId
+			and a.ShareId = zz.ShareId
+			and a.In_Wir = zz.In_Wir
+			and a.Fifo_Date = @Prev_Date
+			and a.IsActive = 0
+			and a.Amount = zz.AMOUNT
+		) as rs
+	)
+	as res
+
+
+	-- сливаем в БД рассчёт за день по неактивным
+	update b set
+		b.Coupons = isnull(a.Coupons,0)
+	from @CurrentRows2 as a
+	join [dbo].[POSITION_KEEPING] as b on
+		a.InvestorId = b.InvestorId
+		and a.ContractId = b.ContractId
+		and a.ShareId = b.ShareId
+		and b.Fifo_Date = @Cur_Date
+		and a.In_Wir = b.In_Wir
+		and a.id = b.id;
+
+	update b set
+		b.Coupons = isnull(a.Coupons,0)
+	from @CurrentRows2 as a
+	join [dbo].[POSITION_KEEPING_Last] as b on
+		a.InvestorId = b.InvestorId
+		and a.ContractId = b.ContractId
+		and a.ShareId = b.ShareId
+		and b.Fifo_Date = @Cur_Date
+		and a.In_Wir = b.In_Wir
+		and a.id = b.id;
 
 
 	-- переход на следующий день
-	set @Cur_Date  = DateAdd(DAY, 1, @Cur_Date);
-	set @Prev_Date = DateAdd(DAY, -1, @Cur_Date);
+
+	set @BufDate = NULL;
+	set @BufDate2 = NULL;
+
+	
+	select top 1
+		@BufDate = a.Fifo_Date
+	from [dbo].[POSITION_KEEPING] as a with(nolock)
+	where a.InvestorId = @InvestorId and a.ContractId = @ContractId
+	and a.ShareId = @PaperId
+	and a.Fifo_Date > @Cur_Date
+	order by a.Fifo_Date
+
+	select top 1
+		@BufDate2 = a.Fifo_Date
+	from [dbo].[POSITION_KEEPING] as a with(nolock)
+	where a.InvestorId = @InvestorId and a.ContractId = @ContractId
+	and a.ShareId = @PaperId
+	and a.Fifo_Date > @Cur_Date
+	order by a.Fifo_Date
+
+	if @BufDate is null and @BufDate2 is not null set @BufDate = @BufDate2;
+	if @BufDate2 is null and @BufDate is not null set @BufDate2 = @BufDate;
+
+	if @BufDate is null return;
+	if @BufDate2 is null return;
+
+	select
+		@BufDate = min([date])
+	from
+	(
+		select [date] = @BufDate
+		union
+		select [date] = @BufDate2
+	) as d
+
+	set @Prev_Date = @Cur_Date;
+	set @Cur_Date  = @BufDate;
+	
 
 	-- цикл +1 день -- выход, когда записи кончатся
 	goto startprocess
