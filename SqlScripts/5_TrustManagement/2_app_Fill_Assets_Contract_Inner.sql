@@ -1849,7 +1849,7 @@ CREATE OR ALTER PROCEDURE [dbo].[Calc_Amortization]
 	@InvestorId Int = 2149652, -- обязательно
 	@ContractId Int = 2257804, -- обязательно
 	@PaperId Int = 18309966, -- обязательно
-	@StartDate Date = '2018-09-29' -- дата с которой происходит перерасчёт - если не указано, то будет проводиться поиск данной даты
+	@StartDate Date = NULL -- дата с которой происходит перерасчёт - если не указано, то будет проводиться поиск данной даты
 )
 as begin
 	set nocount on;
