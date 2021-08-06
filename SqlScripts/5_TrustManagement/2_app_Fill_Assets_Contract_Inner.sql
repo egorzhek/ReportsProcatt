@@ -1844,6 +1844,405 @@ startprocess:
 	goto startprocess
 end
 GO
+CREATE OR ALTER PROCEDURE [dbo].[Calc_Amortization]
+(
+	@InvestorId Int = 2149652, -- обязательно
+	@ContractId Int = 2257804, -- обязательно
+	@PaperId Int = 18309966, -- обязательно
+	@StartDate Date = '2018-09-29' -- дата с которой происходит перерасчёт - если не указано, то будет проводиться поиск данной даты
+)
+as begin
+	set nocount on;
+	declare @BufDate Date, @BufDate2 Date;
+
+	if @StartDate is null
+	begin
+		select
+			@StartDate = min([Date])
+		from
+		(
+			select [Date]
+			from Operations_History_Contracts with(nolock)
+			where 
+			InvestorId = @InvestorId and ContractId = @ContractId
+			and PaperId = @PaperId
+			and T_Name = 'Выплата купонов'
+			UNION ALL
+			select [Date]
+			from Operations_History_Contracts_Last with(nolock)
+			where 
+			InvestorId = @InvestorId and ContractId = @ContractId
+			and PaperId = @PaperId
+			and T_Name = 'Выплата купонов'
+		) as d
+	end
+
+	-- начальная дата не указана или не найдена - выход
+	if @StartDate is null return;
+
+	declare @Cur_Date Date, @Prev_Date date;
+
+	set @Cur_Date = @StartDate;
+	set @Prev_Date = DateAdd(DAY, -1, @StartDate);
+
+	declare @CurrentRows table
+	(
+		[id] BigInt,
+		[IsActive] [bit] NULL,
+		[InvestorId] [int] NOT NULL,
+		[ContractId] [int] NOT NULL,
+		[ShareId] [int] NOT NULL,
+		[AMOUNT] [decimal](30, 7) NULL,
+		[In_Wir] [int] NULL,
+		[Amortizations] [decimal](30, 7) NULL,
+		[PrevAmortizations] [decimal](30, 7) NULL
+	);
+
+
+	declare @CurrentRows2 table
+	(
+		[id] BigInt,
+		[IsActive] [bit] NULL,
+		[InvestorId] [int] NOT NULL,
+		[ContractId] [int] NOT NULL,
+		[ShareId] [int] NOT NULL,
+		[AMOUNT] [decimal](30, 7) NULL,
+		[In_Wir] [int] NULL,
+		[Amortizations] [decimal](30, 7) NULL,
+		[PrevAmortizations] [decimal](30, 7) NULL
+	);
+
+	
+startprocess:
+	-- текущий день, предыдущий день
+	--select @Cur_Date, @Prev_Date
+
+	delete from @CurrentRows;
+
+	insert into @CurrentRows
+	(
+		[id],
+		[IsActive],
+		[InvestorId],
+		[ContractId],
+		[ShareId],
+		[AMOUNT],
+		[In_Wir]
+	)
+	select
+		[id],
+		[IsActive],
+		[InvestorId],
+		[ContractId],
+		[ShareId],
+		[AMOUNT],
+		[In_Wir]
+	from
+	(
+		select
+			a.Id, a.IsActive, a.InvestorId, a.ContractId, a.ShareId, A.AMOUNT, a.In_Wir, a.Out_Date
+		from [dbo].[POSITION_KEEPING] as a with(nolock)
+		where a.InvestorId = @InvestorId and a.ContractId = @ContractId
+		and a.ShareId = @PaperId
+		and a.Fifo_Date = @Cur_Date
+		union all
+		select
+			a.Id, a.IsActive, a.InvestorId, a.ContractId, a.ShareId, A.AMOUNT, a.In_Wir, a.Out_Date
+		from [dbo].[POSITION_KEEPING_Last] as a with(nolock)
+		where a.InvestorId = @InvestorId and a.ContractId = @ContractId
+		and a.ShareId = @PaperId
+		and a.Fifo_Date = @Cur_Date
+	)
+	as res
+	where res.IsActive = 1 -- активные на текущий день
+	or
+	(
+		-- или неактивные, но активные были вчера
+		res.IsActive = 0
+		and res.Out_Date >= @Prev_Date
+		and res.In_Wir in
+		(
+			select
+				a.In_Wir
+			from [dbo].[POSITION_KEEPING] as a with(nolock)
+			where a.InvestorId = @InvestorId and a.ContractId = @ContractId
+			and a.ShareId = @PaperId
+			and a.Fifo_Date = @Prev_Date
+			and a.IsActive = 1
+			union
+			select
+				a.In_Wir
+			from [dbo].[POSITION_KEEPING_Last] as a with(nolock)
+			where a.InvestorId = @InvestorId and a.ContractId = @ContractId
+			and a.ShareId = @PaperId
+			and a.Fifo_Date = @Prev_Date
+			and a.IsActive = 1
+		)
+	)
+
+		-- записей нет на текущий день, выход
+	if not exists
+	(
+		select
+			top 1 1
+		from [dbo].[POSITION_KEEPING] as a with(nolock)
+		where a.InvestorId = @InvestorId and a.ContractId = @ContractId
+		and a.ShareId = @PaperId
+		and a.Fifo_Date = @Cur_Date
+		union all
+		select
+			top 1 1
+		from [dbo].[POSITION_KEEPING_Last] as a with(nolock)
+		where a.InvestorId = @InvestorId and a.ContractId = @ContractId
+		and a.ShareId = @PaperId
+		and a.Fifo_Date = @Cur_Date
+	)
+	begin
+		return; -- выход
+	end;
+
+	-- подсчёт амортизации на текущий день
+	update a set
+		Amortizations = a.AMOUNT * d.DELTA
+	from @CurrentRows as a
+	cross apply
+	(
+		select Val = sum(r.Val)
+		from
+		(
+			select
+				Val = sum(df.Value_Nom)
+			from [dbo].[Operations_History_Contracts] as df with(nolock)
+			where 
+			df.InvestorId = a.InvestorId
+			and df.ContractId = a.ContractId
+			and df.PaperId = a.ShareId
+			and df.T_Name = 'Выплата купонов'
+			and cast(df.[Date] as Date) = @Cur_Date
+			union all
+			select
+				Val = sum(df.Value_Nom)
+			from [dbo].[Operations_History_Contracts_Last] as df with(nolock)
+			where 
+			df.InvestorId = a.InvestorId
+			and df.ContractId = a.ContractId
+			and df.PaperId = a.ShareId
+			and df.T_Name = 'Выплата купонов'
+			and cast(df.[Date] as Date) = @Cur_Date
+		) as r
+	) as rr
+	outer apply
+	(
+		select top 1
+			OC.DELTA
+		From OBLIG_COUPONS as OC with(nolock)
+		where OC.SHARE = a.ShareId
+		and OC.E_DATE <= @Cur_Date
+		order by OC.E_DATE desc
+	) as d
+	where rr.Val > 0;
+
+
+	-- test
+	--select * From @CurrentRows
+
+	
+
+	-- амортизация вчерашнего дня
+	update a set
+		PrevAmortizations = b.Cval * a.AMOUNT
+	from @CurrentRows as a
+	left join
+	(
+		-- амортизация предыдущего дня
+		select
+			a.In_Wir, Cval = a.Amortizations / nullif(A.AMOUNT,0)
+		from [dbo].[POSITION_KEEPING] as a with(nolock)
+		where a.InvestorId = @InvestorId and a.ContractId = @ContractId
+		and a.ShareId = @PaperId
+		and a.Fifo_Date = @Prev_Date
+		and a.IsActive = 1
+		union all
+		select
+			a.In_Wir, Cval = a.Amortizations / nullif(A.AMOUNT,0)
+		from [dbo].[POSITION_KEEPING_Last] as a with(nolock)
+		where a.InvestorId = @InvestorId and a.ContractId = @ContractId
+		and a.ShareId = @PaperId
+		and a.Fifo_Date = @Prev_Date
+		and a.IsActive = 1
+	) as b on a.In_Wir = b.In_Wir;
+
+
+	-- сливаем в БД рассчёт за день
+	update b set
+		b.Amortizations = isnull(a.Amortizations,0) + isnull(a.PrevAmortizations,0)
+	from @CurrentRows as a
+	join [dbo].[POSITION_KEEPING] as b on
+		a.InvestorId = b.InvestorId
+		and a.ContractId = b.ContractId
+		and a.ShareId = b.ShareId
+		and b.Fifo_Date = @Cur_Date
+		and a.In_Wir = b.In_Wir
+		and a.id = b.id;
+
+	update b set
+		b.Amortizations = isnull(a.Amortizations,0) + isnull(a.PrevAmortizations,0)
+	from @CurrentRows as a
+	join [dbo].[POSITION_KEEPING_Last] as b on
+		a.InvestorId = b.InvestorId
+		and a.ContractId = b.ContractId
+		and a.ShareId = b.ShareId
+		and b.Fifo_Date = @Cur_Date
+		and a.In_Wir = b.In_Wir
+		and a.id = b.id;
+
+
+
+
+
+	-- обработка неактивных
+	delete from @CurrentRows2;
+
+	insert into @CurrentRows2
+	(
+		[id],
+		[IsActive],
+		[InvestorId],
+		[ContractId],
+		[ShareId],
+		[AMOUNT],
+		[In_Wir]
+	)
+	select
+		[id],
+		[IsActive],
+		[InvestorId],
+		[ContractId],
+		[ShareId],
+		[AMOUNT],
+		[In_Wir]
+	from
+	(
+		select
+			a.Id, a.IsActive, a.InvestorId, a.ContractId, a.ShareId, A.AMOUNT, a.In_Wir
+		from [dbo].[POSITION_KEEPING] as a with(nolock)
+		where a.InvestorId = @InvestorId and a.ContractId = @ContractId
+		and a.ShareId = @PaperId
+		and a.Fifo_Date = @Cur_Date
+		union all
+		select
+			a.Id, a.IsActive, a.InvestorId, a.ContractId, a.ShareId, A.AMOUNT, a.In_Wir
+		from [dbo].[POSITION_KEEPING_Last] as a with(nolock)
+		where a.InvestorId = @InvestorId and a.ContractId = @ContractId
+		and a.ShareId = @PaperId
+		and a.Fifo_Date = @Cur_Date
+	)
+	as res
+	where res.IsActive = 0 -- неактивные на текущий день
+	and id not in (select Id from @CurrentRows);
+
+
+	update zz
+		set zz.Amortizations = isnull(res.Amortizations,0)
+	from @CurrentRows2 as zz
+	outer apply
+	(
+		select Amortizations = sum(Amortizations)
+		from
+		(
+			select
+				a.Amortizations
+			from [dbo].[POSITION_KEEPING] as a with(nolock)
+			where a.InvestorId = zz.InvestorId and a.ContractId = zz.ContractId
+			and a.ShareId = zz.ShareId
+			and a.In_Wir = zz.In_Wir
+			and a.Fifo_Date = @Prev_Date
+			and a.IsActive = 0
+			and a.Amount = zz.AMOUNT
+			union all
+			select
+				a.Amortizations
+			from [dbo].[POSITION_KEEPING_Last] as a with(nolock)
+			where a.InvestorId = zz.InvestorId and a.ContractId = zz.ContractId
+			and a.ShareId = zz.ShareId
+			and a.In_Wir = zz.In_Wir
+			and a.Fifo_Date = @Prev_Date
+			and a.IsActive = 0
+			and a.Amount = zz.AMOUNT
+		) as rs
+	)
+	as res
+
+
+	-- сливаем в БД рассчёт за день по неактивным
+	update b set
+		b.Amortizations = isnull(a.Amortizations,0)
+	from @CurrentRows2 as a
+	join [dbo].[POSITION_KEEPING] as b on
+		a.InvestorId = b.InvestorId
+		and a.ContractId = b.ContractId
+		and a.ShareId = b.ShareId
+		and b.Fifo_Date = @Cur_Date
+		and a.In_Wir = b.In_Wir
+		and a.id = b.id;
+
+	update b set
+		b.Amortizations = isnull(a.Amortizations,0)
+	from @CurrentRows2 as a
+	join [dbo].[POSITION_KEEPING_Last] as b on
+		a.InvestorId = b.InvestorId
+		and a.ContractId = b.ContractId
+		and a.ShareId = b.ShareId
+		and b.Fifo_Date = @Cur_Date
+		and a.In_Wir = b.In_Wir
+		and a.id = b.id;
+
+
+	-- переход на следующий день
+
+	set @BufDate = NULL;
+	set @BufDate2 = NULL;
+
+	
+	select top 1
+		@BufDate = a.Fifo_Date
+	from [dbo].[POSITION_KEEPING] as a with(nolock)
+	where a.InvestorId = @InvestorId and a.ContractId = @ContractId
+	and a.ShareId = @PaperId
+	and a.Fifo_Date > @Cur_Date
+	order by a.Fifo_Date
+
+	select top 1
+		@BufDate2 = a.Fifo_Date
+	from [dbo].[POSITION_KEEPING] as a with(nolock)
+	where a.InvestorId = @InvestorId and a.ContractId = @ContractId
+	and a.ShareId = @PaperId
+	and a.Fifo_Date > @Cur_Date
+	order by a.Fifo_Date
+
+	if @BufDate is null and @BufDate2 is not null set @BufDate = @BufDate2;
+	if @BufDate2 is null and @BufDate is not null set @BufDate2 = @BufDate;
+
+	if @BufDate is null return;
+	if @BufDate2 is null return;
+
+	select
+		@BufDate = min([date])
+	from
+	(
+		select [date] = @BufDate
+		union
+		select [date] = @BufDate2
+	) as d
+
+	set @Prev_Date = @Cur_Date;
+	set @Cur_Date  = @BufDate;
+	
+
+	-- цикл +1 день -- выход, когда записи кончатся
+	goto startprocess
+END
+GO
 CREATE OR ALTER PROCEDURE [dbo].[app_FillPortFolio_Daily_Before]
 (
 	@InvestorId INT,
@@ -2066,7 +2465,13 @@ AS BEGIN
 						@InvestorId = @InvestorIdC,
 						@ContractId = @ContractIdC,
 						@PaperId = @PaperId2,
-						@StartDate = @WIRDATE2
+						@StartDate = @WIRDATE2;
+
+				EXEC [dbo].[Calc_Amortization]
+						@InvestorId = @InvestorIdC,
+						@ContractId = @ContractIdC,
+						@PaperId = @PaperId2,
+						@StartDate = @WIRDATE2;
 		
 				fetch next from mycur2 into @PaperId2, @WIRDATE2
 			end
