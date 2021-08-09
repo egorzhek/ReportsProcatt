@@ -23,6 +23,20 @@ AS BEGIN
         set @Inc = -1;
     end
     
+    -- Выходной, смещение 0 - сразу выход - возвращаем выходной
+    if @InDays = 0
+    begin
+        if exists
+        (
+            select top 1 1
+            from [dbo].[OD_CALENDAR] nolock
+            where H_DATE = @RetDate
+        )
+        begin
+            return @RetDate;
+        end
+    end
+    
     -- если текущий день праздничный, то нужно привести его к следующему рабочему дню и считать уже от него
     while exists
     (
@@ -1228,11 +1242,17 @@ AS BEGIN
 				J.OUT_WIR,
 				OW.WIRDATE as OUT_DATE,  
 				OD.ID as OD_ID,
-				OC.NAME as OC_NAME,      
+				OC.NAME as OC_NAME,
 				OL.NUM as OL_NUM,        
 				OL.ID as OUT_DOL,
-				O_R.PRICE as OutPrice,
-				O_R.PRICE * ROUND(J.AMOUNT,2) as OUT_SUMMA_F,
+				case
+					when OC.NAME = 'Вывод ЦБ' then OW.K_SUMMA / OW.K_AMOUNT
+					else O_R.PRICE
+					end as Out_Price,
+				case 
+					when OC.NAME = 'Вывод ЦБ' then OW.K_SUMMA / OW.K_AMOUNT * ROUND(J.AMOUNT,2)
+					else O_R.PRICE * ROUND(J.AMOUNT,2)
+					end as OUT_SUMMA_F,
 				J.OUT_EQ as OUT_EQ_F
 			FROM [BAL_DATA_STD].[dbo].TMP_FIFO_JOURNAL AS J WITH(NOLOCK)
 			left join [BAL_DATA_STD].[dbo].OD_WIRING AS IW WITH(NOLOCK) on IW.ID = J.IN_WIR
@@ -1255,7 +1275,7 @@ AS BEGIN
 			left join [BAL_DATA_STD].[dbo].OD_DOCS AS OD WITH(NOLOCK)    on OD.ID = (case when OL.DOC is null then OE.DOC else OL.DOC end)
 			left join [BAL_DATA_STD].[dbo].OD_DOC_CATS AS OC WITH(NOLOCK) on OC.ID = OD.D_CAT
 			left join [BAL_DATA_STD].[dbo].D_B_REESTR AS O_R WITH(NOLOCK) on O_R.DOL = OL.ID
-			where J.APPL_ID = @ApplId;
+			where J.APPL_ID = @ApplId and J.Amount > 0;
 
 		select @practitionerId = min(ShareId) from @FinInstruments where ShareId > @practitionerId
 	end
@@ -1868,7 +1888,7 @@ startprocess:
 
 	select top 1
 		@BufDate2 = a.Fifo_Date
-	from [dbo].[POSITION_KEEPING] as a with(nolock)
+	from [dbo].[POSITION_KEEPING_Last] as a with(nolock)
 	where a.InvestorId = @InvestorId and a.ContractId = @ContractId
 	and a.ShareId = @PaperId
 	and a.Fifo_Date > @Cur_Date
@@ -2267,7 +2287,7 @@ startprocess:
 
 	select top 1
 		@BufDate2 = a.Fifo_Date
-	from [dbo].[POSITION_KEEPING] as a with(nolock)
+	from [dbo].[POSITION_KEEPING_Last] as a with(nolock)
 	where a.InvestorId = @InvestorId and a.ContractId = @ContractId
 	and a.ShareId = @PaperId
 	and a.Fifo_Date > @Cur_Date
@@ -2295,6 +2315,434 @@ startprocess:
 	-- цикл +1 день -- выход, когда записи кончатся
 	goto startprocess
 END
+GO
+CREATE OR ALTER PROCEDURE [dbo].[Calc_Dividents]
+(
+	@InvestorId Int = 2149652, -- обязательно
+	@ContractId Int = 2257804, -- обязательно
+	@PaperId Int = 18699272, -- обязательно
+	@StartDate Date = NULL -- дата с которой происходит перерасчёт - если не указано, то будет проводиться поиск данной даты
+)
+as begin
+	set nocount on;
+	declare @BufDate Date, @BufDate2 Date;
+
+	if @StartDate is null
+	begin
+		select
+			@StartDate = min([Date])
+		from
+		(
+			select [Date]
+			from Operations_History_Contracts with(nolock)
+			where 
+			InvestorId = @InvestorId and ContractId = @ContractId
+			and PaperId = @PaperId
+			and T_Name = 'Выплата дивидендов'
+			UNION ALL
+			select [Date]
+			from Operations_History_Contracts_Last with(nolock)
+			where 
+			InvestorId = @InvestorId and ContractId = @ContractId
+			and PaperId = @PaperId
+			and T_Name = 'Выплата дивидендов'
+	) as d
+	end
+
+	-- начальная дата не указана или не найдена - выход
+	if @StartDate is null return;
+
+	declare @Cur_Date Date, @Prev_Date Date, @DateX Date, @Value_Nom numeric(30, 10), @R_DATE Date,
+		@A_CLASS smallint, @SumAMOUNT numeric(30, 10), @PriceAMOUNT numeric(30, 10);
+
+	set @Cur_Date = @StartDate;
+	set @Prev_Date = DateAdd(DAY, -1, @StartDate);
+
+	declare @Invir table
+	(
+		In_Wir int,
+		AMOUNT decimal(30, 10)
+	);
+
+	declare @CurrentRows table
+	(
+		[id] BigInt,
+		[IsActive] [bit] NULL,
+		[InvestorId] [int] NOT NULL,
+		[ContractId] [int] NOT NULL,
+		[ShareId] [int] NOT NULL,
+		[AMOUNT] [decimal](30, 7) NULL,
+		[In_Wir] [int] NULL,
+		[Dividends] [decimal](30, 7) NULL,
+		[PrevDividends] [decimal](30, 7) NULL
+	);
+
+	declare @CurrentRows2 table
+	(
+		[id] BigInt,
+		[IsActive] [bit] NULL,
+		[InvestorId] [int] NOT NULL,
+		[ContractId] [int] NOT NULL,
+		[ShareId] [int] NOT NULL,
+		[AMOUNT] [decimal](30, 7) NULL,
+		[In_Wir] [int] NULL,
+		[Dividends] [decimal](30, 7) NULL,
+		[PrevDividends] [decimal](30, 7) NULL
+	);
+
+
+startprocess:
+	set @DateX = NULL;
+	set @R_DATE = NULL;
+	set @A_CLASS = NULL;
+	set @SumAMOUNT = NULL;
+	set @PriceAMOUNT = NULL;
+
+	delete from @Invir;
+	delete from @CurrentRows;
+	delete from @CurrentRows2;
+
+	-- в истории есть выплата дивидендов по бумаге
+	set @Value_Nom = 0;
+
+	select
+		@Value_Nom = sum(Value_Nom)
+	from
+	(
+		select Value_Nom
+		from Operations_History_Contracts with(nolock)
+		where 
+		InvestorId = @InvestorId and ContractId = @ContractId
+		and PaperId = @PaperId
+		and T_Name = 'Выплата дивидендов'
+		and cast([Date] as Date) = @Cur_Date
+		UNION ALL
+		select Value_Nom
+		from Operations_History_Contracts_Last with(nolock)
+		where 
+		InvestorId = @InvestorId and ContractId = @ContractId
+		and PaperId = @PaperId
+		and T_Name = 'Выплата дивидендов'
+		and cast([Date] as Date) = @Cur_Date
+	) as res
+
+	-- поиск даты X, если в истории есть выплата дивидендов по бумаге
+	if @Value_Nom > 0
+	begin
+		select top 1
+			@R_DATE = R_DATE,
+			@A_CLASS = A_CLASS
+		from SHARES_DIVIDENDS nolock
+		where ID = @PaperId
+		and R_DATE <= @Cur_Date
+		order by R_DATE desc;
+
+		if @R_DATE is not null
+		begin
+			if @A_CLASS = 10
+			begin
+				set @DateX = @R_DATE
+			end
+			else
+			begin
+				set @DateX = [dbo].[f_GetWorkerDay](@R_DATE, -2) -- минус два рабочих дня
+			end
+			
+			if @DateX is not null
+			begin
+				
+				insert into @Invir
+				(
+					In_Wir,
+					AMOUNT
+				)
+				select
+					res.In_Wir, AMOUNT = sum(res.AMOUNT)
+				From
+				(
+					select
+						a.In_Wir, A.AMOUNT
+					from [dbo].[POSITION_KEEPING] as a with(nolock)
+					where a.InvestorId = @InvestorId and a.ContractId = @ContractId
+					and a.ShareId = @PaperId
+					and a.Fifo_Date = @DateX
+					and a.IsActive = 1
+					union all
+					select
+						a.In_Wir, A.AMOUNT
+					from [dbo].[POSITION_KEEPING_Last] as a with(nolock)
+					where a.InvestorId = @InvestorId and a.ContractId = @ContractId
+					and a.ShareId = @PaperId
+					and a.Fifo_Date = @DateX
+					and a.IsActive = 1
+				) as res
+				group by res.In_Wir
+
+				if exists
+				(
+					select top 1 1
+					from @Invir
+				)
+				begin
+					select
+						@SumAMOUNT = sum(AMOUNT)
+					from @Invir
+
+					if @SumAMOUNT > 0
+					begin
+						set @PriceAMOUNT = @Value_Nom/@SumAMOUNT;
+					end
+				end
+			end
+		end
+	end
+
+	if @PriceAMOUNT > 0
+	begin
+		insert into @CurrentRows
+		(
+			[id],
+			[IsActive],
+			[InvestorId],
+			[ContractId],
+			[ShareId],
+			[AMOUNT],
+			[In_Wir]
+		)
+		select
+			[id],
+			[IsActive],
+			[InvestorId],
+			[ContractId],
+			[ShareId],
+			[AMOUNT],
+			[In_Wir]
+		from
+		(
+			select
+				a.Id, a.IsActive, a.InvestorId, a.ContractId, a.ShareId, A.AMOUNT, a.In_Wir, a.Out_Date
+			from [dbo].[POSITION_KEEPING] as a with(nolock)
+			where a.InvestorId = @InvestorId and a.ContractId = @ContractId
+			and a.ShareId = @PaperId
+			and a.Fifo_Date = @Cur_Date
+			and a.In_Wir in
+			(
+				select In_Wir from @Invir
+			)
+			and (a.IsActive = 1 or (a.IsActive = 0 and a.Out_Date > @DateX))
+			union all
+			select
+				a.Id, a.IsActive, a.InvestorId, a.ContractId, a.ShareId, A.AMOUNT, a.In_Wir, a.Out_Date
+			from [dbo].[POSITION_KEEPING_Last] as a with(nolock)
+			where a.InvestorId = @InvestorId and a.ContractId = @ContractId
+			and a.ShareId = @PaperId
+			and a.Fifo_Date = @Cur_Date
+			and a.In_Wir in
+			(
+				select In_Wir from @Invir
+			)
+			and (a.IsActive = 1 or (a.IsActive = 0 and a.Out_Date > @DateX))
+		)
+		as res;
+
+		-- дивиденды текущие
+		update a set
+			a.Dividends = a.AMOUNT * @PriceAMOUNT
+		from @CurrentRows as a
+
+		-- дивиденды вчерашнего дня
+		update a set
+			PrevDividends = b.Cval * a.AMOUNT
+		from @CurrentRows as a
+		left join
+		(
+			-- дивиденды предыдущего дня
+			select
+				In_Wir, Cval = sum(Dividends) / nullif(sum(AMOUNT),0)
+			from
+			(
+				select
+					a.In_Wir, a.Dividends, A.AMOUNT
+				from [dbo].[POSITION_KEEPING] as a with(nolock)
+				where a.InvestorId = @InvestorId and a.ContractId = @ContractId
+				and a.ShareId = @PaperId
+				and a.Fifo_Date = @Prev_Date
+				union all
+				select
+					a.In_Wir, a.Dividends, A.AMOUNT
+				from [dbo].[POSITION_KEEPING_Last] as a with(nolock)
+				where a.InvestorId = @InvestorId and a.ContractId = @ContractId
+				and a.ShareId = @PaperId
+				and a.Fifo_Date = @Prev_Date
+			) as r
+			group by r.In_Wir
+		) as b on a.In_Wir = b.In_Wir;
+
+		-- сливаем в БД рассчёт за день
+		update b set
+			b.Dividends = isnull(a.Dividends,0) + isnull(a.PrevDividends,0)
+		from @CurrentRows as a
+		join [dbo].[POSITION_KEEPING] as b on
+			a.InvestorId = b.InvestorId
+			and a.ContractId = b.ContractId
+			and a.ShareId = b.ShareId
+			and b.Fifo_Date = @Cur_Date
+			and a.In_Wir = b.In_Wir
+			and a.id = b.id;
+
+		update b set
+			b.Dividends = isnull(a.Dividends,0) + isnull(a.PrevDividends,0)
+		from @CurrentRows as a
+		join [dbo].[POSITION_KEEPING_Last] as b on
+			a.InvestorId = b.InvestorId
+			and a.ContractId = b.ContractId
+			and a.ShareId = b.ShareId
+			and b.Fifo_Date = @Cur_Date
+			and a.In_Wir = b.In_Wir
+			and a.id = b.id;
+	end
+
+
+	
+
+	-- обработка остальных
+	delete from @CurrentRows2;
+
+	insert into @CurrentRows2
+	(
+		[id],
+		[IsActive],
+		[InvestorId],
+		[ContractId],
+		[ShareId],
+		[AMOUNT],
+		[In_Wir]
+	)
+	select
+		[id],
+		[IsActive],
+		[InvestorId],
+		[ContractId],
+		[ShareId],
+		[AMOUNT],
+		[In_Wir]
+	from
+	(
+		select
+			a.Id, a.IsActive, a.InvestorId, a.ContractId, a.ShareId, A.AMOUNT, a.In_Wir
+		from [dbo].[POSITION_KEEPING] as a with(nolock)
+		where a.InvestorId = @InvestorId and a.ContractId = @ContractId
+		and a.ShareId = @PaperId
+		and a.Fifo_Date = @Cur_Date
+		union all
+		select
+			a.Id, a.IsActive, a.InvestorId, a.ContractId, a.ShareId, A.AMOUNT, a.In_Wir
+		from [dbo].[POSITION_KEEPING_Last] as a with(nolock)
+		where a.InvestorId = @InvestorId and a.ContractId = @ContractId
+		and a.ShareId = @PaperId
+		and a.Fifo_Date = @Cur_Date
+	)
+	as res
+	where id not in (select Id from @CurrentRows);
+
+
+	-- дивиденды вчерашнего дня
+	update a set
+		PrevDividends = b.Cval * a.AMOUNT
+	from @CurrentRows2 as a
+	left join
+	(
+		-- дивиденды предыдущего дня
+		select
+			In_Wir, Cval = sum(Dividends) / nullif(sum(AMOUNT),0)
+		from
+		(
+			select
+				a.In_Wir, a.Dividends, A.AMOUNT
+			from [dbo].[POSITION_KEEPING] as a with(nolock)
+			where a.InvestorId = @InvestorId and a.ContractId = @ContractId
+			and a.ShareId = @PaperId
+			and a.Fifo_Date = @Prev_Date
+			union all
+			select
+				a.In_Wir, a.Dividends, A.AMOUNT
+			from [dbo].[POSITION_KEEPING_Last] as a with(nolock)
+			where a.InvestorId = @InvestorId and a.ContractId = @ContractId
+			and a.ShareId = @PaperId
+			and a.Fifo_Date = @Prev_Date
+		) as r
+		group by r.In_Wir
+	) as b on a.In_Wir = b.In_Wir;
+
+
+	-- сливаем в БД рассчёт за день
+	update b set
+		b.Dividends = isnull(a.Dividends,0) + isnull(a.PrevDividends,0)
+	from @CurrentRows2 as a
+	join [dbo].[POSITION_KEEPING] as b on
+		a.InvestorId = b.InvestorId
+		and a.ContractId = b.ContractId
+		and a.ShareId = b.ShareId
+		and b.Fifo_Date = @Cur_Date
+		and a.In_Wir = b.In_Wir
+		and a.id = b.id;
+
+	update b set
+		b.Dividends = isnull(a.Dividends,0) + isnull(a.PrevDividends,0)
+	from @CurrentRows2 as a
+	join [dbo].[POSITION_KEEPING_Last] as b on
+		a.InvestorId = b.InvestorId
+		and a.ContractId = b.ContractId
+		and a.ShareId = b.ShareId
+		and b.Fifo_Date = @Cur_Date
+		and a.In_Wir = b.In_Wir
+		and a.id = b.id;
+
+
+	-- переход на следующий день
+
+	set @BufDate = NULL;
+	set @BufDate2 = NULL;
+
+	
+	select top 1
+		@BufDate = a.Fifo_Date
+	from [dbo].[POSITION_KEEPING] as a with(nolock)
+	where a.InvestorId = @InvestorId and a.ContractId = @ContractId
+	and a.ShareId = @PaperId
+	and a.Fifo_Date > @Cur_Date
+	order by a.Fifo_Date
+
+	select top 1
+		@BufDate2 = a.Fifo_Date
+	from [dbo].[POSITION_KEEPING_Last] as a with(nolock)
+	where a.InvestorId = @InvestorId and a.ContractId = @ContractId
+	and a.ShareId = @PaperId
+	and a.Fifo_Date > @Cur_Date
+	order by a.Fifo_Date
+
+	if @BufDate is null and @BufDate2 is not null set @BufDate = @BufDate2;
+	if @BufDate2 is null and @BufDate is not null set @BufDate2 = @BufDate;
+
+	if @BufDate is null return;
+	if @BufDate2 is null return;
+
+	select
+		@BufDate = min([date])
+	from
+	(
+		select [date] = @BufDate
+		union
+		select [date] = @BufDate2
+	) as d
+
+	set @Prev_Date = @Cur_Date;
+	set @Cur_Date  = @BufDate;
+	
+
+	-- цикл +1 день -- выход, когда записи кончатся
+	goto startprocess
+end
 GO
 CREATE OR ALTER PROCEDURE [dbo].[app_FillPortFolio_Daily_Before]
 (
@@ -2488,6 +2936,7 @@ AS BEGIN
 	fetch next from mycur into @InvestorIdC, @ContractIdC, @WIRDATE
 	while @@FETCH_STATUS = 0
 	begin
+			-- первый курсор
 			declare mycur2 cursor fast_forward for
 				select
 					PaperId, [Date] = min([Date])
@@ -2521,6 +2970,45 @@ AS BEGIN
 						@StartDate = @WIRDATE2;
 
 				EXEC [dbo].[Calc_Amortization]
+						@InvestorId = @InvestorIdC,
+						@ContractId = @ContractIdC,
+						@PaperId = @PaperId2,
+						@StartDate = @WIRDATE2;
+		
+				fetch next from mycur2 into @PaperId2, @WIRDATE2
+			end
+			close mycur2
+			deallocate mycur2;
+
+
+			-- второй курсор
+			declare mycur2 cursor fast_forward for
+				select
+					PaperId, [Date] = min([Date])
+				from
+				(
+					select
+						PaperId, [Date] = cast([Date] as Date)
+					from Operations_History_Contracts with(nolock)
+					where T_Name = 'Выплата дивидендов'
+					and InvestorId = @InvestorIdC and ContractId = @ContractIdC
+					and cast([Date] as Date) >= @WIRDATE
+					and PaperId is not null
+					Union
+					select
+						PaperId, [Date] = cast([Date] as Date)
+					from Operations_History_Contracts_Last with(nolock)
+					where T_Name = 'Выплата дивидендов'
+					and InvestorId = @InvestorIdC and ContractId = @ContractIdC
+					and cast([Date] as Date) >= @WIRDATE
+					and PaperId is not null
+				) as d
+				group by PaperId
+			open mycur2
+			fetch next from mycur2 into @PaperId2, @WIRDATE2
+			while @@FETCH_STATUS = 0
+			begin
+				EXEC [dbo].[Calc_Dividents]
 						@InvestorId = @InvestorIdC,
 						@ContractId = @ContractIdC,
 						@PaperId = @PaperId2,
