@@ -1,5 +1,58 @@
 USE [CacheDB]
 GO
+CREATE OR ALTER FUNCTION [dbo].[f_GetWorkerDay]
+(
+    @IN_DATE Datetime, @InDays Int
+)
+RETURNS Date
+AS BEGIN
+   declare @DTD Date = @IN_DATE;
+    
+    declare @RetDate Date, @CountDays Int, @Inc Int;
+    
+    set @RetDate = @DTD;
+    
+    if @InDays >= 0
+    begin
+        set @CountDays = @InDays;
+        set @Inc = 1;
+    end
+    else
+    begin
+        set @CountDays = -@InDays;
+        set @Inc = -1;
+    end
+    
+    -- если текущий день праздничный, то нужно привести его к следующему рабочему дню и считать уже от него
+    while exists
+    (
+        select top 1 1
+        from [dbo].[OD_CALENDAR] nolock
+        where H_DATE = @RetDate
+    )
+    begin
+        set @RetDate = DATEADD(Day, @Inc, @RetDate);
+    end
+    
+    while @CountDays > 0
+    begin
+        set @RetDate = DATEADD(Day, @Inc, @RetDate);
+    
+        -- пропускаем день, если он выходной
+        if not exists
+        (
+            select top 1 1
+            from [dbo].[OD_CALENDAR] nolock
+            where H_DATE = @RetDate
+        )
+        begin
+            set @CountDays -= 1;
+        end
+    end
+    
+    return @RetDate;
+END
+GO
 CREATE OR ALTER FUNCTION [dbo].[f_AsDate]
 (
 	@d_str varchar(255)
