@@ -1122,8 +1122,8 @@ AS BEGIN
 	order by  B.WALK, V.NAME;
 	--option(loop join,force order)
 
-	-- Теперь самое интересное 
-	declare @ApplId int = 123654789 --ид для идентификации выборки из временой таблицы (произвольный)
+	-- Теперь самое интересное
+	declare @ApplId int = -500 --ид для идентификации выборки из временой таблицы (произвольный)
 
 	declare @practitionerId int
 
