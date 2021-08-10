@@ -425,10 +425,348 @@ inner join [CacheDB].[dbo].[InvestmentIds] as i on a.InvestmentId = i.Id
 left join  [CacheDB].[dbo].[Currencies] as cr on a.CUR_ID = cr.id
 
 
+
+
+
+
+begin try
+	drop table #POSITION_KEEPING_EndDate;
+end try
+begin catch
+end catch
+
+begin try
+	drop table #POSITION_KEEPING_StartDate;
+end try
+begin catch
+end catch
+
+
+CREATE TABLE #POSITION_KEEPING_EndDate
+(
+	[InvestorId] [int] NOT NULL,
+	[ContractId] [int] NOT NULL,
+	[ShareId] [int] NOT NULL,
+	[Fifo_Date] [date] NOT NULL,
+	[Id] [bigint] NOT NULL,
+	[ISIN] [nvarchar](12) NULL,
+	[Class] [int] NULL,
+	[InstrumentId] [bigint] NOT NULL,
+	[CUR_ID] [int] NULL,
+	[Oblig_Date_end] [date] NULL,
+	[Oferta_Date] [date] NULL,
+	[Oferta_Type] [nvarchar](300) NULL,
+	[IsActive] [bit] NULL,
+	[In_Wir] [int] NULL,
+	[In_Date] [date] NULL,
+	[Ic_NameId] [bigint] NULL,
+	[Il_Num] [int] NULL,
+	[In_Dol] [int] NULL,
+	[Ir_Trans] [nvarchar](300) NULL,
+	[Amount] [decimal](20, 7) NULL,
+	[In_Summa] [decimal](20, 7) NULL,
+	[In_Eq] [decimal](20, 7) NULL,
+	[In_Comm] [decimal](20, 7) NULL,
+	[In_Price] [decimal](20, 7) NULL,
+	[In_Price_eq] [decimal](20, 7) NULL,
+	[IN_PRICE_UKD] [decimal](20, 7) NULL,
+	[Today_PRICE] [decimal](20, 7) NULL,
+	[Value_NOM] [decimal](20, 7) NULL,
+	[Dividends] [decimal](20, 7) NULL,
+	[UKD] [decimal](20, 7) NULL,
+	[NKD] [decimal](20, 7) NULL,
+	[Amortizations] [decimal](20, 7) NULL,
+	[Coupons] [decimal](30, 9) NULL,
+	[Out_Wir] [int] NULL,
+	[Out_Date] [datetime] NULL,
+	[Od_Id] [int] NULL,
+	[Oc_NameId] [bigint] NULL,
+	[Ol_Num] [int] NULL,
+	[Out_Dol] [int] NULL,
+	[Out_Summa] [decimal](20, 7) NULL,
+	[Out_Eq] [decimal](20, 7) NULL,
+	[RecordDate] [datetime2](7) NULL,
+	[OutPrice] [decimal](20, 7) NULL,
+	[FinRes] [decimal](28, 10) NULL,
+	[FinResProcent] [decimal](28, 10) NULL
+);
+
+CREATE TABLE #POSITION_KEEPING_StartDate
+(
+	[InvestorId] [int] NOT NULL,
+	[ContractId] [int] NOT NULL,
+	[ShareId] [int] NOT NULL,
+	[Fifo_Date] [date] NOT NULL,
+	[Id] [bigint] NOT NULL,
+	[ISIN] [nvarchar](12) NULL,
+	[Class] [int] NULL,
+	[InstrumentId] [bigint] NOT NULL,
+	[CUR_ID] [int] NULL,
+	[Oblig_Date_end] [date] NULL,
+	[Oferta_Date] [date] NULL,
+	[Oferta_Type] [nvarchar](300) NULL,
+	[IsActive] [bit] NULL,
+	[In_Wir] [int] NULL,
+	[In_Date] [date] NULL,
+	[Ic_NameId] [bigint] NULL,
+	[Il_Num] [int] NULL,
+	[In_Dol] [int] NULL,
+	[Ir_Trans] [nvarchar](300) NULL,
+	[Amount] [decimal](20, 7) NULL,
+	[In_Summa] [decimal](20, 7) NULL,
+	[In_Eq] [decimal](20, 7) NULL,
+	[In_Comm] [decimal](20, 7) NULL,
+	[In_Price] [decimal](20, 7) NULL,
+	[In_Price_eq] [decimal](20, 7) NULL,
+	[IN_PRICE_UKD] [decimal](20, 7) NULL,
+	[Today_PRICE] [decimal](20, 7) NULL,
+	[Value_NOM] [decimal](20, 7) NULL,
+	[Dividends] [decimal](20, 7) NULL,
+	[UKD] [decimal](20, 7) NULL,
+	[NKD] [decimal](20, 7) NULL,
+	[Amortizations] [decimal](20, 7) NULL,
+	[Coupons] [decimal](30, 9) NULL,
+	[Out_Wir] [int] NULL,
+	[Out_Date] [datetime] NULL,
+	[Od_Id] [int] NULL,
+	[Oc_NameId] [bigint] NULL,
+	[Ol_Num] [int] NULL,
+	[Out_Dol] [int] NULL,
+	[Out_Summa] [decimal](20, 7) NULL,
+	[Out_Eq] [decimal](20, 7) NULL,
+	[RecordDate] [datetime2](7) NULL,
+	[OutPrice] [decimal](20, 7) NULL
+);
+
+INSERT INTO #POSITION_KEEPING_EndDate
+(
+	[InvestorId], [ContractId], [ShareId], [Fifo_Date],
+	[Id], [ISIN], [Class], [InstrumentId],
+	[CUR_ID], [Oblig_Date_end], [Oferta_Date], [Oferta_Type],
+	[IsActive], [In_Wir], [In_Date], [Ic_NameId],
+	[Il_Num], [In_Dol], [Ir_Trans], [Amount],
+	[In_Summa], [In_Eq], [In_Comm], [In_Price],
+	[In_Price_eq], [IN_PRICE_UKD], [Today_PRICE], [Value_NOM],
+	[Dividends], [UKD], [NKD], [Amortizations],
+	[Coupons], [Out_Wir], [Out_Date], [Od_Id],
+	[Oc_NameId], [Ol_Num], [Out_Dol], [Out_Summa],
+	[Out_Eq], [RecordDate], [OutPrice]
+)
+select
+	[InvestorId], [ContractId], [ShareId], [Fifo_Date],
+	[Id], [ISIN], [Class], [InstrumentId],
+	[CUR_ID], [Oblig_Date_end], [Oferta_Date], [Oferta_Type],
+	[IsActive], [In_Wir], [In_Date], [Ic_NameId],
+	[Il_Num], [In_Dol], [Ir_Trans], [Amount],
+	[In_Summa], [In_Eq], [In_Comm], [In_Price],
+	[In_Price_eq], [IN_PRICE_UKD], [Today_PRICE], [Value_NOM],
+	[Dividends], [UKD], [NKD], [Amortizations],
+	[Coupons], [Out_Wir], [Out_Date], [Od_Id],
+	[Oc_NameId], [Ol_Num], [Out_Dol], [Out_Summa],
+	[Out_Eq], [RecordDate], [OutPrice]
+from
+(
+	select * 
+	from [CacheDB].[dbo].[POSITION_KEEPING] as a with(nolock)
+	where a.InvestorId = @InvestorId and a.ContractId = @ContractId
+	and Fifo_Date = @EndDate
+	union all
+	select * 
+	from [CacheDB].[dbo].[POSITION_KEEPING_Last] as a with(nolock)
+	where a.InvestorId = @InvestorId and a.ContractId = @ContractId
+	and Fifo_Date = @EndDate
+) as r
+
+
+INSERT INTO #POSITION_KEEPING_StartDate
+(
+	[InvestorId], [ContractId], [ShareId], [Fifo_Date],
+	[Id], [ISIN], [Class], [InstrumentId],
+	[CUR_ID], [Oblig_Date_end], [Oferta_Date], [Oferta_Type],
+	[IsActive], [In_Wir], [In_Date], [Ic_NameId],
+	[Il_Num], [In_Dol], [Ir_Trans], [Amount],
+	[In_Summa], [In_Eq], [In_Comm], [In_Price],
+	[In_Price_eq], [IN_PRICE_UKD], [Today_PRICE], [Value_NOM],
+	[Dividends], [UKD], [NKD], [Amortizations],
+	[Coupons], [Out_Wir], [Out_Date], [Od_Id],
+	[Oc_NameId], [Ol_Num], [Out_Dol], [Out_Summa],
+	[Out_Eq], [RecordDate], [OutPrice]
+)
+select
+	[InvestorId], [ContractId], [ShareId], [Fifo_Date],
+	[Id], [ISIN], [Class], [InstrumentId],
+	[CUR_ID], [Oblig_Date_end], [Oferta_Date], [Oferta_Type],
+	[IsActive], [In_Wir], [In_Date], [Ic_NameId],
+	[Il_Num], [In_Dol], [Ir_Trans], [Amount],
+	[In_Summa], [In_Eq], [In_Comm], [In_Price],
+	[In_Price_eq], [IN_PRICE_UKD], [Today_PRICE], [Value_NOM],
+	[Dividends], [UKD], [NKD], [Amortizations],
+	[Coupons], [Out_Wir], [Out_Date], [Od_Id],
+	[Oc_NameId], [Ol_Num], [Out_Dol], [Out_Summa],
+	[Out_Eq], [RecordDate], [OutPrice]
+from
+(
+	select * 
+	from [CacheDB].[dbo].[POSITION_KEEPING] as a with(nolock)
+	where a.InvestorId = @InvestorId and a.ContractId = @ContractId
+	and Fifo_Date = @StartDate
+	union all
+	select * 
+	from [CacheDB].[dbo].[POSITION_KEEPING_Last] as a with(nolock)
+	where a.InvestorId = @InvestorId and a.ContractId = @ContractId
+	and Fifo_Date = @StartDate
+) as r
+
+update a
+	set FinRes =
+	case
+		when Class in (1,7,10)
+			then isnull(Out_Summa,0) + isnull(Dividends,0) - isnull(In_Summa,0)
+		when Class in (2)
+			then isnull(Out_Summa,0) + isnull(a.Amortizations,0)  + isnull(a.Coupons,0) + isnull(a.NKD,0) - isnull(a.In_Summa,0) - isnull(a.UKD,0)
+		else 0
+	end,
+	FinResProcent =
+	case
+		when Class in (1,7,10)
+			then isnull(Out_Summa,0) + isnull(Dividends,0) - isnull(In_Summa,0)
+		when Class in (2)
+			then isnull(Out_Summa,0) + isnull(a.Amortizations,0)  + isnull(a.Coupons,0) + isnull(a.NKD,0) - isnull(a.In_Summa,0) - isnull(a.UKD,0)
+		else 0
+	end
+	/
+	nullif(
+	case
+		when Class in (1,7,10)
+			then isnull(In_Summa,0)
+		when Class in (2)
+			then isnull(Out_Summa,0) + isnull(a.UKD,0)
+		else NULL
+	end, 0)
+from #POSITION_KEEPING_EndDate as a
+where IsActive = 0;
+
+update a
+	set
+	FinRes = 
+	case
+		when b.id is not null and a.Class in (1,7,10) then
+			isnull(a.Value_NOM,0)
+			+ isnull(a.Dividends,0)
+				- isnull(isnull(b.Value_NOM,0) / nullif(b.Amount,0),0) * isnull(a.Amount,0)
+				- isnull(isnull(b.Dividends,0) / nullif(b.Amount,0),0) * isnull(a.Amount,0)
+
+		when b.id is null     and a.Class in (1,7,10) then
+			isnull(a.Value_NOM,0) + isnull(a.Dividends,0) - isnull(a.In_Summa,0)
+
+
+		when b.id is not null and a.Class in (2) then
+			isnull(a.Value_NOM,0)
+			+ isnull(a.Amortizations,0)
+			+ isnull(a.Coupons,0)
+			+ isnull(a.NKD,0)
+				- isnull(isnull(b.Value_NOM,0) / nullif(b.Amount,0),0) * isnull(a.Amount,0)
+				- isnull(isnull(b.Amortizations,0) / nullif(b.Amount,0),0) * isnull(a.Amount,0)
+				- isnull(isnull(b.Coupons,0) / nullif(b.Amount,0),0) * isnull(a.Amount,0)
+				- isnull(isnull(b.NKD,0) / nullif(b.Amount,0),0) * isnull(a.Amount,0)
+		
+		when b.id is null     and a.Class in (2) then
+			isnull(a.Value_NOM,0)
+			+ isnull(a.Amortizations,0)
+			+ isnull(a.Coupons,0)
+			+ isnull(a.NKD,0)
+				- isnull(a.In_Summa,0)
+				- isnull(a.UKD,0)
+
+		else 0
+	end,
+	FinResProcent =
+	case
+		when b.id is not null and a.Class in (1,7,10) then
+			isnull(a.Value_NOM,0)
+			+ isnull(a.Dividends,0)
+				- isnull(isnull(b.Value_NOM,0) / nullif(b.Amount,0),0) * isnull(a.Amount,0)
+				- isnull(isnull(b.Dividends,0) / nullif(b.Amount,0),0) * isnull(a.Amount,0)
+
+		when b.id is null     and a.Class in (1,7,10) then
+			isnull(a.Value_NOM,0) + isnull(a.Dividends,0) - isnull(a.In_Summa,0)
+
+
+		when b.id is not null and a.Class in (2) then
+			isnull(a.Value_NOM,0)
+			+ isnull(a.Amortizations,0)
+			+ isnull(a.Coupons,0)
+			+ isnull(a.NKD,0)
+				- isnull(isnull(b.Value_NOM,0) / nullif(b.Amount,0),0) * isnull(a.Amount,0)
+				- isnull(isnull(b.Amortizations,0) / nullif(b.Amount,0),0) * isnull(a.Amount,0)
+				- isnull(isnull(b.Coupons,0) / nullif(b.Amount,0),0) * isnull(a.Amount,0)
+				- isnull(isnull(b.NKD,0) / nullif(b.Amount,0),0) * isnull(a.Amount,0)
+		
+		when b.id is null     and a.Class in (2) then
+			isnull(a.Value_NOM,0)
+			+ isnull(a.Amortizations,0)
+			+ isnull(a.Coupons,0)
+			+ isnull(a.NKD,0)
+				- isnull(a.In_Summa,0)
+				- isnull(a.UKD,0)
+
+		else 0
+	end
+	/
+	nullif(
+	case
+		when b.id is not null and a.Class in (1,7,10) then
+			isnull(isnull(b.Value_NOM,0) / nullif(b.Amount,0),0) * isnull(a.Amount,0)
+			+ isnull(isnull(b.Dividends,0) / nullif(b.Amount,0),0) * isnull(a.Amount,0)
+
+		when b.id is null     and a.Class in (1,7,10) then
+			isnull(a.In_Summa,0)
+
+
+		when b.id is not null and a.Class in (2) then
+			isnull(isnull(b.Value_NOM,0) / nullif(b.Amount,0),0) * isnull(a.Amount,0)
+			+ isnull(isnull(b.Amortizations,0) / nullif(b.Amount,0),0) * isnull(a.Amount,0)
+			+ isnull(isnull(b.Coupons,0) / nullif(b.Amount,0),0) * isnull(a.Amount,0)
+			+ isnull(isnull(b.NKD,0) / nullif(b.Amount,0),0) * isnull(a.Amount,0)
+
+		when b.id is null     and a.Class in (2) then
+			isnull(a.In_Summa,0) + isnull(a.UKD,0)
+
+		else NULL
+	end, 0)
+from #POSITION_KEEPING_EndDate as a
+outer apply
+(
+	select top 1 *
+	From #POSITION_KEEPING_StartDate as bb
+	where bb.IsActive = 1
+	and bb.In_Wir = a.In_Wir
+) as b
+where a.IsActive = 1;
+
+-- округление
+update a set
+	a.FinRes = dbo.f_Round(a.FinRes, 2),
+	a.FinResProcent = dbo.f_Round(a.FinResProcent, 2)
+from #POSITION_KEEPING_EndDate as a;
+
+select
+	Child2Id = a.Id,
+	ChildId = b.InvestmentId,
+	Child2Name = i.Investment,
+	PriceName = CAST(CAST(Round(a.VALUE_NOM,2) as Decimal(30,2)) as Nvarchar(30)) + N' ' + isnull(c.Symbol,N'?'),
+	Ammount =  FORMAT(a.Amount, '0.######') + ' шт.',
+	Detail =   FORMAT(a.FinRes, '0.######') + N' ' + isnull(c.Symbol,N'?') + ' (' + FORMAT(a.FinResProcent, '0.######') + '%)'
+from #POSITION_KEEPING_EndDate as a with(nolock)
+inner join #TrustTree as b with(nolock) on a.ShareId = b.VALUE_ID
+inner join [CacheDB].[dbo].[InvestmentIds] as i with(nolock) on b.InvestmentId = i.Id
+left join [CacheDB].[dbo].[Currencies] as c with(nolock) on a.CUR_ID = c.Id
+
+
 -- tree4 -- потом доделать - четвёртый уровень
-select Child2Id = cast(1 as BigInt), ChildId = cast(4 as BigInt), Child2Name = 'ОФЗ, 26257', PriceName = N'125,22 ₽', Ammount = '5 шт.', Detail = N'-15,48 ₽ (-11,2%)'
-union
-select Child2Id = cast(2 as BigInt), ChildId = cast(4 as BigInt), Child2Name = 'ОФЗ, 26257', PriceName = N'125,22 ₽', Ammount = '1 шт.', Detail = N'-15,48 ₽ (-11,2%)'
+--select Child2Id = cast(1 as BigInt), ChildId = cast(4 as BigInt), Child2Name = 'ОФЗ, 26257', PriceName = N'125,22 ₽', Ammount = '5 шт.', Detail = N'-15,48 ₽ (-11,2%)'
+--union
+--select Child2Id = cast(2 as BigInt), ChildId = cast(4 as BigInt), Child2Name = 'ОФЗ, 26257', PriceName = N'125,22 ₽', Ammount = '1 шт.', Detail = N'-15,48 ₽ (-11,2%)'
 
 BEGIN TRY
 	drop table #TrustTree;
@@ -441,3 +779,15 @@ BEGIN TRY
 END TRY
 BEGIN CATCH
 END CATCH;
+
+begin try
+	drop table #POSITION_KEEPING_EndDate;
+end try
+begin catch
+end catch
+
+begin try
+	drop table #POSITION_KEEPING_StartDate;
+end try
+begin catch
+end catch

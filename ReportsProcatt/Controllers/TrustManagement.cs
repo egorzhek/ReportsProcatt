@@ -66,6 +66,7 @@ namespace ReportsProcatt.Controllers
 
                     SqlCommand command1 = new SqlCommand(queryString1, connection);
                     command1.CommandType = CommandType.Text;
+                    command1.CommandTimeout = 600;
 
                     if (DateTo == null)
                     {
@@ -184,16 +185,18 @@ namespace ReportsProcatt.Controllers
                             double[] xs2 = dates2.Select(x => x.ToOADate()).ToArray();
 
                             // две колонки рядом
-                            var br1 = plt2.AddBar(valuesA, xs2);
-                            br1.BarWidth = br1.BarWidth / 4;
-                            br1.PositionOffset = -br1.BarWidth/2;
-                            br1.FillColor = ColorTranslator.FromHtml(vDataSet.Tables[3].Rows[1]["Color"].ToString());
+                            if (xs2.Length > 0)
+                            {
+                                var br1 = plt2.AddBar(valuesA, xs2);
+                                br1.BarWidth = br1.BarWidth / 4;
+                                br1.PositionOffset = -br1.BarWidth/2;
+                                br1.FillColor = ColorTranslator.FromHtml(vDataSet.Tables[3].Rows[1]["Color"].ToString());
 
-                            var br2 = plt2.AddBar(valuesB, xs2);
-                            br2.BarWidth = br2.BarWidth / 4;
-                            br2.PositionOffset = br2.BarWidth/2;
-                            br2.FillColor = ColorTranslator.FromHtml(vDataSet.Tables[3].Rows[2]["Color"].ToString());
-
+                                var br2 = plt2.AddBar(valuesB, xs2);
+                                br2.BarWidth = br2.BarWidth / 4;
+                                br2.PositionOffset = br2.BarWidth/2;
+                                br2.FillColor = ColorTranslator.FromHtml(vDataSet.Tables[3].Rows[2]["Color"].ToString());
+                            }
 
                             plt2.YAxis.TickLabelNotation(offset: false, multiplier: false);
                             plt2.YAxis.TickLabelFormat(".", false);

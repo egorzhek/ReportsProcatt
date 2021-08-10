@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Report ScriptLanguage="CSharp" DoublePass="true" TextQuality="Regular" ReportInfo.Name="Simple List" ReportInfo.Author="Fast Reports Inc" ReportInfo.Description="Демонстрация простого листа" ReportInfo.Created="01/17/2008 03:05:57" ReportInfo.Modified="08/02/2021 18:44:14" ReportInfo.CreatorVersion="2021.3.0.0">
+<Report ScriptLanguage="CSharp" DoublePass="true" TextQuality="Regular" ReportInfo.Name="Simple List" ReportInfo.Author="Fast Reports Inc" ReportInfo.Description="Демонстрация простого листа" ReportInfo.Created="01/17/2008 03:05:57" ReportInfo.Modified="08/10/2021 17:56:53" ReportInfo.CreatorVersion="2021.3.0.0">
   <ScriptText>using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -221,10 +221,10 @@ namespace FastReport
             <TextObject Name="Text4008" Left="56.7" Top="18.9" Width="113.4" Height="18.9" Text="[tree3.Ammount]" VertAlign="Center" Font="Tahoma, 8pt"/>
             <TextObject Name="Text4009" Left="576.45" Top="18.9" Width="113.4" Height="18.9" Text="[tree3.Detail]" VertAlign="Center" Font="Tahoma, 8pt"/>
             <DataBand Name="Data4014" Top="1305.53" Width="718.2" Height="37.8" Fill.Color="WhiteSmoke" EvenStyle="EvenRows" DataSource="tree4">
-              <TextObject Name="Text4016" Left="75.6" Width="491.4" Height="18.9" Text="[tree4.Child2Name]" VertAlign="Center" Font="Tahoma, 8pt"/>
-              <TextObject Name="Text4017" Left="585.9" Width="113.4" Height="18.9" Text="[tree4.PriceName]" VertAlign="Center" Font="Tahoma, 10pt, style=Bold"/>
+              <TextObject Name="Text4016" Left="75.6" Width="444.15" Height="18.9" Text="[tree4.Child2Name]" VertAlign="Center" Font="Tahoma, 8pt"/>
+              <TextObject Name="Text4017" Left="529.2" Width="170.1" Height="18.9" Text="[tree4.PriceName]" HorzAlign="Right" VertAlign="Center" Font="Tahoma, 10pt, style=Bold"/>
               <TextObject Name="Text4018" Left="75.6" Top="18.9" Width="113.4" Height="18.9" Text="[tree4.Ammount]" VertAlign="Center" Font="Tahoma, 8pt"/>
-              <TextObject Name="Text4019" Left="585.9" Top="18.9" Width="113.4" Height="18.9" Text="[tree4.Detail]" VertAlign="Center" Font="Tahoma, 8pt"/>
+              <TextObject Name="Text4019" Left="529.2" Top="18.9" Width="170.1" Height="18.9" Text="[tree4.Detail]" HorzAlign="Right" VertAlign="Center" Font="Tahoma, 8pt"/>
             </DataBand>
           </DataBand>
         </DataBand>

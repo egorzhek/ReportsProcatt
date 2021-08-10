@@ -1246,11 +1246,11 @@ AS BEGIN
 				OL.NUM as OL_NUM,        
 				OL.ID as OUT_DOL,
 				case
-					when OC.NAME = 'Вывод ЦБ' then OW.K_SUMMA / OW.K_AMOUNT
+					when OC.NAME in ('Вывод ЦБ', 'Погашение ценной бумаги', 'Операция по сделке (движение ЦБ)' ) then OW.K_SUMMA / OW.K_AMOUNT
 					else O_R.PRICE
 					end as Out_Price,
 				case 
-					when OC.NAME = 'Вывод ЦБ' then OW.K_SUMMA / OW.K_AMOUNT * ROUND(J.AMOUNT,2)
+					when OC.NAME in ('Вывод ЦБ', 'Погашение ценной бумаги', 'Операция по сделке (движение ЦБ)' ) then OW.K_SUMMA / OW.K_AMOUNT * ROUND(J.AMOUNT,2)
 					else O_R.PRICE * ROUND(J.AMOUNT,2)
 					end as OUT_SUMMA_F,
 				J.OUT_EQ as OUT_EQ_F
@@ -1354,7 +1354,7 @@ AS BEGIN
 		Ic_NameId = c.Id, --
 		Il_Num, In_Dol, Ir_Trans, Amount,
 		In_Summa, In_Eq, In_Comm, In_Price,
-		In_Price_eq, IN_PRICE_UKD, rr.RATE, rr.RATE * a.Amount,
+		In_Price_eq, IN_PRICE_UKD, rr.RATE * (1.0000000/isnull(VB.RATE,1.000000)), rr.RATE * (1.0000000/isnull(VB.RATE,1.000000)) * a.Amount,
 		Dividends,
 		UKD = CL.Val * a.Amount,
 		NKD = CV.VAL * a.AMOUNT,
@@ -1364,6 +1364,18 @@ AS BEGIN
 		Ol_Num, Out_Dol, a.OutPrice, Out_Summa,
 		Out_Eq
 		from @Partition as a
+		outer apply
+		(
+			SELECT TOP 1
+				RT.[RATE]
+			FROM [BAL_DATA_STD].[dbo].[OD_VALUES_RATES] AS RT
+			WHERE RT.[VALUE_ID] = a.CUR_ID -- курс валюты
+			AND RT.[E_DATE] >= a.Fifo_Date and RT.[OFICDATE] < a.Fifo_Date
+			ORDER BY
+				case when DATEPART(YEAR,RT.[E_DATE]) = 9999 then 1 else 0 end ASC,
+				RT.[E_DATE] DESC,
+				RT.[OFICDATE] DESC
+		) AS VB
 		join [dbo].[InvestmentIds] as b on a.Instrument = b.Investment
 		outer apply
 		(
@@ -1467,7 +1479,7 @@ AS BEGIN
 		Ic_NameId = c.Id, --
 		Il_Num, In_Dol, Ir_Trans, Amount,
 		In_Summa, In_Eq, In_Comm, In_Price,
-		In_Price_eq, IN_PRICE_UKD, rr.RATE, rr.RATE * a.Amount,
+		In_Price_eq, IN_PRICE_UKD, rr.RATE * (1.0000000/isnull(VB.RATE,1.000000)), rr.RATE * (1.0000000/isnull(VB.RATE,1.000000)) * a.Amount,
 		Dividends,
 		UKD = CL.Val * a.Amount,
 		NKD = CV.VAL * a.AMOUNT,
@@ -1478,6 +1490,18 @@ AS BEGIN
 		Out_Eq
 		from @Partition as a
 		join [dbo].[InvestmentIds] as b on a.Instrument = b.Investment
+		outer apply
+		(
+			SELECT TOP 1
+				RT.[RATE]
+			FROM [BAL_DATA_STD].[dbo].[OD_VALUES_RATES] AS RT
+			WHERE RT.[VALUE_ID] = a.CUR_ID -- курс валюты
+			AND RT.[E_DATE] >= a.Fifo_Date and RT.[OFICDATE] < a.Fifo_Date
+			ORDER BY
+				case when DATEPART(YEAR,RT.[E_DATE]) = 9999 then 1 else 0 end ASC,
+				RT.[E_DATE] DESC,
+				RT.[OFICDATE] DESC
+		) AS VB
 		outer apply
 		(
 			select top 1 RATE
