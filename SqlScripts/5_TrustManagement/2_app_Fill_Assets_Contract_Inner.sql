@@ -1346,7 +1346,7 @@ AS BEGIN
 		)
 		select
 		InvestorId, ContractId, ShareId, Fifo_Date,
-		ISIN, Class,
+		ISIN, sh.CLASS,
 		InstrumentId = b.Id, --
 		--CUR, -- название валюты не надо
 		CUR_ID, Oblig_Date_end, Oferta_Date, Oferta_Type,
@@ -1370,6 +1370,12 @@ AS BEGIN
 			select top 1 RATE
 			from [BAL_DATA_STD].[dbo].[PR_GET_RATE]( a.ShareId, a.Fifo_Date, null, null)
 		) as rr
+		outer apply
+		(
+			select top 1 S.CLASS
+			from [BAL_DATA_STD].[dbo].OD_SHARES AS S WITH(NOLOCK)
+			where S.SELF_ID = a.ShareId
+		) as sh
 		outer apply
 		(
 			select Val = Sum(VAL)
@@ -1453,7 +1459,7 @@ AS BEGIN
 		)
 		select
 		InvestorId, ContractId, ShareId, Fifo_Date,
-		ISIN, Class,
+		ISIN, sh.CLASS,
 		InstrumentId = b.Id, --
 		--CUR, -- название валюты не надо
 		CUR_ID, Oblig_Date_end, Oferta_Date, Oferta_Type,
@@ -1477,6 +1483,12 @@ AS BEGIN
 			select top 1 RATE
 			from [BAL_DATA_STD].[dbo].[PR_GET_RATE]( a.ShareId, a.Fifo_Date, null, null)
 		) as rr
+		outer apply
+		(
+			select top 1 S.CLASS
+			from [BAL_DATA_STD].[dbo].OD_SHARES AS S WITH(NOLOCK)
+			where S.SELF_ID = a.ShareId
+		) as sh
 		outer apply
 		(
 			select Val = Sum(VAL)
