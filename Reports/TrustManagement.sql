@@ -744,10 +744,10 @@ outer apply
 ) as b
 where a.IsActive = 1;
 
--- округление
+-- округление и процентирование
 update a set
 	a.FinRes = dbo.f_Round(a.FinRes, 2),
-	a.FinResProcent = dbo.f_Round(a.FinResProcent, 2)
+	a.FinResProcent = dbo.f_Round(a.FinResProcent * 100.000, 2)
 from #POSITION_KEEPING_EndDate as a;
 
 select
