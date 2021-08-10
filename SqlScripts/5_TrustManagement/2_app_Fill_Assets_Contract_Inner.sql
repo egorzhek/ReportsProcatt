@@ -1354,7 +1354,7 @@ AS BEGIN
 		Ic_NameId = c.Id, --
 		Il_Num, In_Dol, Ir_Trans, Amount,
 		In_Summa, In_Eq, In_Comm, In_Price,
-		In_Price_eq, IN_PRICE_UKD, Today_PRICE, Value_NOM,
+		In_Price_eq, IN_PRICE_UKD, rr.RATE, rr.RATE * a.Amount,
 		Dividends,
 		UKD = CL.Val * a.Amount,
 		NKD = CV.VAL * a.AMOUNT,
@@ -1365,6 +1365,11 @@ AS BEGIN
 		Out_Eq
 		from @Partition as a
 		join [dbo].[InvestmentIds] as b on a.Instrument = b.Investment
+		outer apply
+		(
+			select top 1 RATE
+			from [BAL_DATA_STD].[dbo].[PR_GET_RATE]( a.ShareId, a.Fifo_Date, null, null)
+		) as rr
 		outer apply
 		(
 			select Val = Sum(VAL)
@@ -1456,7 +1461,7 @@ AS BEGIN
 		Ic_NameId = c.Id, --
 		Il_Num, In_Dol, Ir_Trans, Amount,
 		In_Summa, In_Eq, In_Comm, In_Price,
-		In_Price_eq, IN_PRICE_UKD, Today_PRICE, Value_NOM,
+		In_Price_eq, IN_PRICE_UKD, rr.RATE, rr.RATE * a.Amount,
 		Dividends,
 		UKD = CL.Val * a.Amount,
 		NKD = CV.VAL * a.AMOUNT,
@@ -1467,6 +1472,11 @@ AS BEGIN
 		Out_Eq
 		from @Partition as a
 		join [dbo].[InvestmentIds] as b on a.Instrument = b.Investment
+		outer apply
+		(
+			select top 1 RATE
+			from [BAL_DATA_STD].[dbo].[PR_GET_RATE]( a.ShareId, a.Fifo_Date, null, null)
+		) as rr
 		outer apply
 		(
 			select Val = Sum(VAL)
