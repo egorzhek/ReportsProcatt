@@ -1354,10 +1354,10 @@ AS BEGIN
 		Ic_NameId = c.Id, --
 		Il_Num, In_Dol, Ir_Trans, Amount,
 		In_Summa, In_Eq, In_Comm, In_Price,
-		In_Price_eq, IN_PRICE_UKD, rr.RATE * (1.0000000/isnull(VB.RATE,1.000000)), rr.RATE * (1.0000000/isnull(VB.RATE,1.000000)) * a.Amount,
+		In_Price_eq, IN_PRICE_UKD, rr.RATE, rr.RATE * a.Amount,
 		Dividends,
 		UKD = CL.Val * a.Amount,
-		NKD = CV.VAL * a.AMOUNT,
+		NKD = nullif(isnull(CV.VAL * a.AMOUNT,0) + isnull(NKM.NKD * a.AMOUNT,0),0),
 		Amortizations,
 		Coupons, Out_Wir, Out_Date, Od_Id,
 		Oc_NameId = d.Id, --
@@ -1377,11 +1377,11 @@ AS BEGIN
 				RT.[OFICDATE] DESC
 		) AS VB
 		join [dbo].[InvestmentIds] as b on a.Instrument = b.Investment
-		outer apply
+		/*outer apply
 		(
 			select top 1 RATE
 			from [BAL_DATA_STD].[dbo].[PR_GET_RATE]( a.ShareId, a.Fifo_Date, null, null)
-		) as rr
+		) as rr*/
 		outer apply
 		(
 			select top 1 S.CLASS
@@ -1420,12 +1420,12 @@ AS BEGIN
 						from [dbo].[PortFolio_Daily] as NN with(nolock)
 						where NN.InvestorId = C.InvestorId and NN.ContractId = C.ContractId
 						and NN.PortfolioDate = C.PortfolioDate and NN.VALUE_ID = c.VALUE_ID
-						and NN.BAL_ACC <> 2782
+						and NN.BAL_ACC not in (2782, 2804)
 						and NN.AMOUNT > 0
 				) as NN2
 				where C.InvestorId = a.InvestorId and C.ContractId = a.ContractId
 				and C.PortfolioDate = a.Fifo_Date and c.VALUE_ID = a.ShareId
-				and C.BAL_ACC = 2782
+				and C.BAL_ACC in (2782, 2804)
 
 				UNION ALL
 
@@ -1439,14 +1439,60 @@ AS BEGIN
 						from [dbo].[PortFolio_Daily_Last] as NN with(nolock)
 						where NN.InvestorId = C.InvestorId and NN.ContractId = C.ContractId
 						and NN.PortfolioDate = C.PortfolioDate and NN.VALUE_ID = c.VALUE_ID
-						and NN.BAL_ACC <> 2782
+						and NN.BAL_ACC not in (2782, 2804)
 						and NN.AMOUNT > 0
 				) as NN2
 				where C.InvestorId = a.InvestorId and C.ContractId = a.ContractId
 				and C.PortfolioDate = a.Fifo_Date and c.VALUE_ID = a.ShareId
-				and C.BAL_ACC = 2782
+				and C.BAL_ACC in (2782, 2804)
 			) as R
 		) as CV
+		outer apply
+		(
+			select
+				NKD = sum(NKD) / nullif(sum(Amount),0)
+			from
+			(
+				select NKD, Amount
+				From [dbo].[POSITION_KEEPING] as nk with(nolock)
+				where nk.InvestorId = a.InvestorId and nk.ContractId = a.ContractId and nk.ShareId = a.ShareId
+				--and nk.In_Wir = a.In_Wir
+				and nk.Fifo_Date = dateadd(DAY, -1, a.Fifo_Date) -- минус день
+				and isnull(CV.VAL, 0) = 0
+
+				union all
+
+				select NKD, Amount
+				From [dbo].[POSITION_KEEPING_Last] as nk with(nolock)
+				where nk.InvestorId = a.InvestorId and nk.ContractId = a.ContractId and nk.ShareId = a.ShareId
+				--and nk.In_Wir = a.In_Wir
+				and nk.Fifo_Date = dateadd(DAY, -1, a.Fifo_Date) -- минус день
+				and isnull(CV.VAL, 0) = 0
+			) as nk2
+		) as NKM
+		outer apply
+		(
+			select top 1
+				RATE = Nom_Price
+			from
+			(
+				select
+					fg.Nom_Price
+				from Portfolio_Daily as fg with(nolock)
+				where fg.InvestorId = a.InvestorId
+				and fg.ContractId = a.ContractId
+				and fg.VALUE_ID = a.ShareId
+				and fg.PortfolioDate = a.Fifo_Date
+				union all
+				select
+					fg.Nom_Price
+				from PortFolio_Daily_Last as fg with(nolock)
+				where fg.InvestorId = a.InvestorId
+				and fg.ContractId = a.ContractId
+				and fg.VALUE_ID = a.ShareId
+				and fg.PortfolioDate = a.Fifo_Date
+			) as df
+		) as rr
 		left join [dbo].[InvestmentIds] as c on a.Ic_Name = c.Investment
 		left join [dbo].[InvestmentIds] as d on a.Oc_Name = d.Investment
 	END
@@ -1479,10 +1525,10 @@ AS BEGIN
 		Ic_NameId = c.Id, --
 		Il_Num, In_Dol, Ir_Trans, Amount,
 		In_Summa, In_Eq, In_Comm, In_Price,
-		In_Price_eq, IN_PRICE_UKD, rr.RATE * (1.0000000/isnull(VB.RATE,1.000000)), rr.RATE * (1.0000000/isnull(VB.RATE,1.000000)) * a.Amount,
+		In_Price_eq, IN_PRICE_UKD, rr.RATE, rr.RATE * a.Amount,
 		Dividends,
 		UKD = CL.Val * a.Amount,
-		NKD = CV.VAL * a.AMOUNT,
+		NKD = nullif(isnull(CV.VAL * a.AMOUNT,0) + isnull(NKM.NKD * a.AMOUNT,0),0),
 		Amortizations,
 		Coupons, Out_Wir, Out_Date, Od_Id,
 		Oc_NameId = d.Id, --
@@ -1502,11 +1548,11 @@ AS BEGIN
 				RT.[E_DATE] DESC,
 				RT.[OFICDATE] DESC
 		) AS VB
-		outer apply
+		/*outer apply
 		(
 			select top 1 RATE
 			from [BAL_DATA_STD].[dbo].[PR_GET_RATE]( a.ShareId, a.Fifo_Date, null, null)
-		) as rr
+		) as rr*/
 		outer apply
 		(
 			select top 1 S.CLASS
@@ -1545,12 +1591,12 @@ AS BEGIN
 						from [dbo].[PortFolio_Daily] as NN with(nolock)
 						where NN.InvestorId = C.InvestorId and NN.ContractId = C.ContractId
 						and NN.PortfolioDate = C.PortfolioDate and NN.VALUE_ID = c.VALUE_ID
-						and NN.BAL_ACC <> 2782
+						and NN.BAL_ACC not in (2782, 2804)
 						and NN.AMOUNT > 0
 				) as NN2
 				where C.InvestorId = a.InvestorId and C.ContractId = a.ContractId
 				and C.PortfolioDate = a.Fifo_Date and c.VALUE_ID = a.ShareId
-				and C.BAL_ACC = 2782
+				and C.BAL_ACC in (2782, 2804)
 
 				UNION ALL
 
@@ -1564,14 +1610,60 @@ AS BEGIN
 						from [dbo].[PortFolio_Daily_Last] as NN with(nolock)
 						where NN.InvestorId = C.InvestorId and NN.ContractId = C.ContractId
 						and NN.PortfolioDate = C.PortfolioDate and NN.VALUE_ID = c.VALUE_ID
-						and NN.BAL_ACC <> 2782
+						and NN.BAL_ACC not in (2782, 2804)
 						and NN.AMOUNT > 0
 				) as NN2
 				where C.InvestorId = a.InvestorId and C.ContractId = a.ContractId
 				and C.PortfolioDate = a.Fifo_Date and c.VALUE_ID = a.ShareId
-				and C.BAL_ACC = 2782
+				and C.BAL_ACC in (2782, 2804)
 			) as R
 		) as CV
+		outer apply
+		(
+			select
+				NKD = sum(NKD) / nullif(sum(Amount),0)
+			from
+			(
+				select NKD, Amount
+				From [dbo].[POSITION_KEEPING] as nk with(nolock)
+				where nk.InvestorId = a.InvestorId and nk.ContractId = a.ContractId and nk.ShareId = a.ShareId
+				--and nk.In_Wir = a.In_Wir
+				and nk.Fifo_Date = dateadd(DAY, -1, a.Fifo_Date) -- минус день
+				and isnull(CV.VAL, 0) = 0
+
+				union all
+
+				select NKD, Amount
+				From [dbo].[POSITION_KEEPING_Last] as nk with(nolock)
+				where nk.InvestorId = a.InvestorId and nk.ContractId = a.ContractId and nk.ShareId = a.ShareId
+				--and nk.In_Wir = a.In_Wir
+				and nk.Fifo_Date = dateadd(DAY, -1, a.Fifo_Date) -- минус день
+				and isnull(CV.VAL, 0) = 0
+			) as nk2
+		) as NKM
+		outer apply
+		(
+			select top 1
+				RATE = Nom_Price
+			from
+			(
+				select
+					fg.Nom_Price
+				from Portfolio_Daily as fg with(nolock)
+				where fg.InvestorId = a.InvestorId
+				and fg.ContractId = a.ContractId
+				and fg.VALUE_ID = a.ShareId
+				and fg.PortfolioDate = a.Fifo_Date
+				union all
+				select
+					fg.Nom_Price
+				from PortFolio_Daily_Last as fg with(nolock)
+				where fg.InvestorId = a.InvestorId
+				and fg.ContractId = a.ContractId
+				and fg.VALUE_ID = a.ShareId
+				and fg.PortfolioDate = a.Fifo_Date
+			) as df
+		) as rr
 		left join [dbo].[InvestmentIds] as c on a.Ic_Name = c.Investment
 		left join [dbo].[InvestmentIds] as d on a.Oc_Name = d.Investment
 	END
@@ -2919,6 +3011,8 @@ AS BEGIN
 		from #ForUpd
 		group by
 			InvestorId, ContractId, WIRDATE
+		order by
+			InvestorId, ContractId, WIRDATE -- последовательная по датам обработка
 	open mycur
 	fetch next from mycur into @InvestorIdC, @ContractIdC, @WIRDATEC
 	while @@FETCH_STATUS = 0
