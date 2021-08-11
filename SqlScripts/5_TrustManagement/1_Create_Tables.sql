@@ -368,20 +368,57 @@ CREATE TABLE [dbo].[Currencies]
 	Id Int NOT NULL,
 	CurrencyName Nvarchar(50) NOT NULL,
 	Symbol Nvarchar(10) NOT NULL,
+	ShortName Nvarchar(10) NOT NULL,
 CONSTRAINT [PK_Currencies] PRIMARY KEY CLUSTERED
 (
 	[Id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-INSERT INTO [dbo].[Currencies] (Id, CurrencyName, Symbol)
-VALUES (1, N'Российский рубль', N'₽')
+INSERT INTO [dbo].[Currencies] (Id, CurrencyName, Symbol, ShortName)
+VALUES (1, N'Российский рубль', N'₽', N'RUB')
 GO
-INSERT INTO [dbo].[Currencies] (Id, CurrencyName, Symbol)
-VALUES (2, N'Доллар', N'$')
+INSERT INTO [dbo].[Currencies] (Id, CurrencyName, Symbol, ShortName)
+VALUES (2, N'Доллар', N'$', N'USD')
 GO
-INSERT INTO [dbo].[Currencies] (Id, CurrencyName, Symbol)
-VALUES (5, N'Евро', N'€')
+INSERT INTO [dbo].[Currencies] (Id, CurrencyName, Symbol, ShortName)
+VALUES (5, N'Евро', N'€', N'EUR')
+GO
+INSERT INTO [dbo].[Currencies] (Id, CurrencyName, Symbol, ShortName)
+VALUES (6, N'Фунт стерлингов', N'£', N'GBP')
+GO
+INSERT INTO [dbo].[Currencies] (Id, CurrencyName, Symbol, ShortName)
+VALUES (10, N'Канадский доллар', N'С$', N'CAD')
+GO
+INSERT INTO [dbo].[Currencies] (Id, CurrencyName, Symbol, ShortName)
+VALUES (15, N'Йена', N'¥', N'JPY')
+GO
+INSERT INTO [dbo].[Currencies] (Id, CurrencyName, Symbol, ShortName)
+VALUES (17, N'Норвежская крона', N'kr', N'NOK')
+GO
+INSERT INTO [dbo].[Currencies] (Id, CurrencyName, Symbol, ShortName)
+VALUES (18, N'Шведская крона', N'SEK', N'SEK')
+GO
+INSERT INTO [dbo].[Currencies] (Id, CurrencyName, Symbol, ShortName)
+VALUES (19, N'Швейцарский франк', N'₣', N'CHF')
+GO
+INSERT INTO [dbo].[Currencies] (Id, CurrencyName, Symbol, ShortName)
+VALUES (2464116, N'Гонконгский доллар', N'HK$', N'HKD')
+GO
+INSERT INTO [dbo].[Currencies] (Id, CurrencyName, Symbol, ShortName)
+VALUES (13376767, N'Австралийский доллар', N'A$', N'AUD')
+GO
+INSERT INTO [dbo].[Currencies] (Id, CurrencyName, Symbol, ShortName)
+VALUES (13657213, N'Белорусский рубль', N'Br', N'BYN')
+GO
+INSERT INTO [dbo].[Currencies] (Id, CurrencyName, Symbol, ShortName)
+VALUES (13912287, N'Китайский Юань', N'元', N'CNY')
+GO
+INSERT INTO [dbo].[Currencies] (Id, CurrencyName, Symbol, ShortName)
+VALUES (24609515, N'Новый израильский шекель', N'₪', N'ILS')
+GO
+INSERT INTO [dbo].[Currencies] (Id, CurrencyName, Symbol, ShortName)
+VALUES (24646045, N'Новый тайваньский доллар', N'NT$', N'TWD')
 GO
 CREATE TABLE [dbo].[POSITION_KEEPING]
 (
