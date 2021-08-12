@@ -2948,6 +2948,114 @@ AS BEGIN
 		[Value] [numeric](38, 10) NULL
 	);
 
+	begin try
+		drop table #Source;
+	end try
+	begin catch
+	end catch
+
+	begin try
+		drop table #SDates;
+	end try
+	begin catch
+	end catch
+
+
+	CREATE TABLE #SDates
+	(
+		[WIRDATE] Date NULL
+	);
+
+
+	CREATE TABLE #Source
+	(
+		[InvestorId] [int] NULL,
+		[ContractId] [int] NULL,
+		[WIRING_ID] [int] NOT NULL,
+		[WIRDATE] [date] NULL,
+		[S_DATE] [datetime] NULL,
+		[NUM] [varchar](100) NULL,
+		[Value] [numeric](28, 9) NULL
+	);
+
+	insert into #Source
+	(
+		[InvestorId],
+		[ContractId],
+		[WIRING_ID],
+		[WIRDATE],
+		[S_DATE],
+		[NUM],
+		[Value]
+	)
+	SELECT
+		InvestorId = @InvestorId,
+		ContractId = RE.REG_1,
+		WIRING_ID = W.ID,
+		WIRDATE = cast(W.WIRDATE as Date),
+		S_DATE = cast(FORMAT(S_DATE,'dd-MM-yyyy HH:mm:ss') as datetime),
+		D.NUM,
+		TU.VALUE_ * TU.TYPE_ as [Value]
+	FROM [BAL_DATA_STD].[dbo].OD_WIRING AS W WITH(NOLOCK)
+	INNER JOIN [BAL_DATA_STD].[dbo].OD_STEPS AS ST WITH(NOLOCK) ON ST.ID = W.O_STEP
+	INNER JOIN [BAL_DATA_STD].[dbo].OD_TURNS AS TU WITH(NOLOCK) ON W.ID = TU.WIRING
+	INNER JOIN [BAL_DATA_STD].[dbo].OD_RESTS AS RE WITH(NOLOCK) ON TU.REST = RE.ID
+	INNER JOIN [BAL_DATA_STD].[dbo].OD_BALANCES AS BA WITH(NOLOCK) ON RE.BAL_ACC = BA.ID AND BA.SYS_NAME = 'ЧАПИФ'
+	INNER JOIN [BAL_DATA_STD].[dbo].OD_ACC_PLANS AS AP WITH(NOLOCK) ON BA.ACC_PLAN = Ap.ID AND AP.SYS_NAME = 'PROFIT'
+	INNER JOIN [BAL_DATA_STD].[dbo].OD_DOCS AS D WITH(NOLOCK) ON RE.REG_1 = D.ID
+	WHERE RE.REG_1 = @ContractId
+
+	declare @SourceMinDate Date, @SourceMaxDate date
+
+	select
+		@SourceMinDate = min(WIRDATE),
+		@SourceMaxDate = max(WIRDATE)
+	from #Source;
+
+	while @SourceMinDate <= @SourceMaxDate
+	begin
+		insert into #SDates ([WIRDATE]) values (@SourceMinDate);
+
+		set @SourceMinDate = DATEADD(DAY, 1, @SourceMinDate);
+	end
+
+	-- закрываем дыры в датах
+	insert into #Source
+	(
+		[InvestorId],
+		[ContractId],
+		[WIRING_ID],
+		[WIRDATE],
+		[S_DATE],
+		[NUM],
+		[Value]
+	)
+	select
+		fg.InvestorId,
+		fg.ContractId,
+		fg.WIRING_ID,
+		a.WIRDATE,
+		fg.S_DATE,
+		fg.NUM,
+		fg.[Value]
+	from #SDates as a
+	left join #Source as b on a.[WIRDATE] = b.WIRDATE
+	cross apply
+	(
+		select top 1
+			ff.InvestorId,
+			ff.ContractId,
+			ff.WIRING_ID,
+			ff.S_DATE,
+			ff.NUM,
+			ff.[Value]
+		from #Source as ff
+		where ff.WIRDATE <= a.[WIRDATE]
+		order by ff.WIRDATE desc
+	) as fg
+	where b.WIRDATE is null
+	order by a.[WIRDATE];
+
 
 	-- получаем новые или изменённые записи
 	INSERT INTO #ForUpd
@@ -2971,22 +3079,9 @@ AS BEGIN
 	from
 	(
 		SELECT
-			InvestorId = @InvestorId,
-			ContractId = RE.REG_1,
-			WIRING_ID = W.ID,
-			WIRDATE = cast(W.WIRDATE as Date),
-			S_DATE = cast(FORMAT(S_DATE,'dd-MM-yyyy HH:mm:ss') as datetime),
-			D.NUM,
-			TU.VALUE_ * TU.TYPE_ as [Value]
-		--INTO GGG
-		FROM [BAL_DATA_STD].[dbo].OD_WIRING AS W WITH(NOLOCK)
-		INNER JOIN [BAL_DATA_STD].[dbo].OD_STEPS AS ST WITH(NOLOCK) ON ST.ID = W.O_STEP 
-		INNER JOIN [BAL_DATA_STD].[dbo].OD_TURNS AS TU WITH(NOLOCK) ON W.ID = TU.WIRING
-		INNER JOIN [BAL_DATA_STD].[dbo].OD_RESTS AS RE WITH(NOLOCK) ON TU.REST = RE.ID
-		INNER JOIN [BAL_DATA_STD].[dbo].OD_BALANCES AS BA WITH(NOLOCK) ON RE.BAL_ACC = BA.ID AND BA.SYS_NAME = 'ЧАПИФ'
-		INNER JOIN [BAL_DATA_STD].[dbo].OD_ACC_PLANS AS AP WITH(NOLOCK) ON BA.ACC_PLAN = Ap.ID AND AP.SYS_NAME = 'PROFIT'
-		INNER JOIN [BAL_DATA_STD].[dbo].OD_DOCS AS D WITH(NOLOCK) ON RE.REG_1 = D.ID
-		WHERE RE.REG_1 = @ContractId
+		[InvestorId], [ContractId], [WIRING_ID],
+		[WIRDATE], [S_DATE], [NUM], [Value]
+		from #Source
 	) as A
 	LEFT JOIN 
 	(
@@ -3222,6 +3317,18 @@ AS BEGIN
 	END TRY
 	BEGIN CATCH
 	END CATCH;
+
+	begin try
+		drop table #Source;
+	end try
+	begin catch
+	end catch;
+
+	begin try
+		drop table #SDates;
+	end try
+	begin catch
+	end catch;
 
 	-- возвращаем DateFormat
 	if @CurrentDateFormat = N'mdy'
