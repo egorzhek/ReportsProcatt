@@ -1420,12 +1420,12 @@ AS BEGIN
 						from [dbo].[PortFolio_Daily] as NN with(nolock)
 						where NN.InvestorId = C.InvestorId and NN.ContractId = C.ContractId
 						and NN.PortfolioDate = C.PortfolioDate and NN.VALUE_ID = c.VALUE_ID
-						and NN.BAL_ACC not in (2782, 2804)
+						and NN.BAL_ACC not in (2782)
 						and NN.AMOUNT > 0
 				) as NN2
 				where C.InvestorId = a.InvestorId and C.ContractId = a.ContractId
 				and C.PortfolioDate = a.Fifo_Date and c.VALUE_ID = a.ShareId
-				and C.BAL_ACC in (2782, 2804)
+				and C.BAL_ACC in (2782)
 
 				UNION ALL
 
@@ -1439,12 +1439,12 @@ AS BEGIN
 						from [dbo].[PortFolio_Daily_Last] as NN with(nolock)
 						where NN.InvestorId = C.InvestorId and NN.ContractId = C.ContractId
 						and NN.PortfolioDate = C.PortfolioDate and NN.VALUE_ID = c.VALUE_ID
-						and NN.BAL_ACC not in (2782, 2804)
+						and NN.BAL_ACC not in (2782)
 						and NN.AMOUNT > 0
 				) as NN2
 				where C.InvestorId = a.InvestorId and C.ContractId = a.ContractId
 				and C.PortfolioDate = a.Fifo_Date and c.VALUE_ID = a.ShareId
-				and C.BAL_ACC in (2782, 2804)
+				and C.BAL_ACC in (2782)
 			) as R
 		) as CV
 		outer apply
@@ -1591,12 +1591,12 @@ AS BEGIN
 						from [dbo].[PortFolio_Daily] as NN with(nolock)
 						where NN.InvestorId = C.InvestorId and NN.ContractId = C.ContractId
 						and NN.PortfolioDate = C.PortfolioDate and NN.VALUE_ID = c.VALUE_ID
-						and NN.BAL_ACC not in (2782, 2804)
+						and NN.BAL_ACC not in (2782)
 						and NN.AMOUNT > 0
 				) as NN2
 				where C.InvestorId = a.InvestorId and C.ContractId = a.ContractId
 				and C.PortfolioDate = a.Fifo_Date and c.VALUE_ID = a.ShareId
-				and C.BAL_ACC in (2782, 2804)
+				and C.BAL_ACC in (2782)
 
 				UNION ALL
 
@@ -1610,12 +1610,12 @@ AS BEGIN
 						from [dbo].[PortFolio_Daily_Last] as NN with(nolock)
 						where NN.InvestorId = C.InvestorId and NN.ContractId = C.ContractId
 						and NN.PortfolioDate = C.PortfolioDate and NN.VALUE_ID = c.VALUE_ID
-						and NN.BAL_ACC not in (2782, 2804)
+						and NN.BAL_ACC not in (2782)
 						and NN.AMOUNT > 0
 				) as NN2
 				where C.InvestorId = a.InvestorId and C.ContractId = a.ContractId
 				and C.PortfolioDate = a.Fifo_Date and c.VALUE_ID = a.ShareId
-				and C.BAL_ACC in (2782, 2804)
+				and C.BAL_ACC in (2782)
 			) as R
 		) as CV
 		outer apply
