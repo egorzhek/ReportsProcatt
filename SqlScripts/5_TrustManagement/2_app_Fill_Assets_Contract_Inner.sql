@@ -449,9 +449,9 @@ AS BEGIN
 				w.NAME as T_Name,-- Наименование операции
 				sv.ISIN as ISIN, --ISIN ценной бумаги
 				sv.NAME as Investment, --Название инструмента
-				null as Price, --Цена одной бумаги  -------------------------Высчитываем сумму в валюте номинала (по курсу) а потом делим на Amount 
+				w.D_Summa / nullif(w.D_AMOUNT - w.K_AMOUNT,0) as Price, --Цена одной бумаги  -------------------------Высчитываем сумму в валюте номинала (по курсу) а потом делим на Amount 
 				w.D_AMOUNT - w.K_AMOUNT as Amount, --Количество бумаг
-				dbo.f_Round(-T.EQ_ * T.TYPE_, 2) * case when sh.NOM_VAL = 1 then 1 else (1/VV.RATE) end as Value_Nom, -- Сумма сделки в валюте номинала -найти курс валюты и пересчитать из рублей
+				w.D_Summa as Value_Nom, -- Сумма сделки в валюте номинала -найти курс валюты и пересчитать из рублей
 				sh.NOM_VAL as Currency, --код валюты
 				0 as Fee, --Комиссия
 				dbo.f_Round(-T.EQ_ * T.TYPE_, 2) as Value_RUR, -- Сумма сделки в рублях
@@ -483,7 +483,7 @@ AS BEGIN
 					RT.[RATE]
 				FROM [BAL_DATA_STD].[dbo].[OD_VALUES_RATES] AS RT
 				WHERE RT.[VALUE_ID] = sh.NOM_VAL -- валюта
-				AND RT.[E_DATE] >= T.WIRDATE and RT.[OFICDATE] < T.WIRDATE
+				AND RT.[E_DATE] >= cast(T.WIRDATE as date) and RT.[OFICDATE] < cast(T.WIRDATE as date)
 				ORDER BY
 					case when DATEPART(YEAR,RT.[E_DATE]) = 9999 then 1 else 0 end ASC,
 					RT.[E_DATE] DESC,
