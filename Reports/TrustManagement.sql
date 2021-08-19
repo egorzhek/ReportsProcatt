@@ -409,6 +409,424 @@ inner join [CacheDB].[dbo].[ClassCategories] as cc on a.CLASS = cc.ClassId
 inner join [CacheDB].[dbo].[Categories] as c on cc.CategoryId = c.Id
 group by c.id, c.CategoryName, a.CUR_ID
 
+
+
+--------------------------------
+--- расчёт уровня 3
+BEGIN TRY
+	DROP TABLE #StartDaily;
+END TRY
+BEGIN CATCH
+END CATCH
+
+BEGIN TRY
+	DROP TABLE #EndDaily;
+END TRY
+BEGIN CATCH
+END CATCH
+
+BEGIN TRY
+	DROP TABLE #StartPostions;
+END TRY
+BEGIN CATCH
+END CATCH
+
+BEGIN TRY
+	DROP TABLE #EndPostions;
+END TRY
+BEGIN CATCH
+END CATCH
+
+BEGIN TRY
+	DROP TABLE #SumStart;
+END TRY
+BEGIN CATCH
+END CATCH
+
+BEGIN TRY
+	DROP TABLE #ShareDates;
+END TRY
+BEGIN CATCH
+END CATCH
+
+CREATE TABLE #ShareDates
+(
+	InvestorId Int,
+	ContractId Int,
+	ShareId Int,
+	[Date] Date,
+	In_Summa decimal(28,10),
+	Out_Summa decimal(28,10)
+)
+
+
+
+-- начальная дата
+select *
+into #StartDaily
+from
+(
+	select *
+	from PortFolio_Daily as df with(nolock)
+	where
+	df.InvestorId = @InvestorId
+	and df.ContractId = @ContractId
+	and df.PortfolioDate = @StartDate
+	union all
+	select *
+	from PortFolio_Daily_Last as df with(nolock)
+	where
+	df.InvestorId = @InvestorId
+	and df.ContractId = @ContractId
+	and df.PortfolioDate = @StartDate
+) as res
+
+
+-- конечная дата
+select *
+into #EndDaily
+from
+(
+	select *
+	from PortFolio_Daily as df with(nolock)
+	where
+	df.InvestorId = @InvestorId
+	and df.ContractId = @ContractId
+	and df.PortfolioDate = @EndDate
+	union all
+	select *
+	from PortFolio_Daily_Last as df with(nolock)
+	where
+	df.InvestorId = @InvestorId
+	and df.ContractId = @ContractId
+	and df.PortfolioDate = @EndDate
+) as res
+
+
+-- позиции на начало
+select *
+into #StartPostions
+from
+(
+	select *
+	from POSITION_KEEPING as df with(nolock)
+	where
+	df.InvestorId = @InvestorId
+	and df.ContractId = @ContractId
+	and df.Fifo_Date = @StartDate
+	union all
+	select *
+	from POSITION_KEEPING_Last as df with(nolock)
+	where
+	df.InvestorId = @InvestorId
+	and df.ContractId = @ContractId
+	and df.Fifo_Date = @StartDate
+) as res
+
+
+-- позиции на конец
+select *, RowNumber = ROW_NUMBER() over( order by Id)
+into #EndPostions
+from
+(
+	select *
+	from POSITION_KEEPING as df with(nolock)
+	where
+	df.InvestorId = @InvestorId
+	and df.ContractId = @ContractId
+	and df.Fifo_Date = @EndDate
+	union all
+	select *
+	from POSITION_KEEPING_Last as df with(nolock)
+	where
+	df.InvestorId = @InvestorId
+	and df.ContractId = @ContractId
+	and df.Fifo_Date = @EndDate
+) as res
+
+
+CREATE TABLE #SumStart
+(
+	[RowNumber] Int NULL,
+	[IsActive] [bit] NULL,
+	[In_Wir] [int] NULL,
+	[InvestorId] [int] NOT NULL,
+	[ContractId] [int] NOT NULL,
+	[ShareId] [int] NOT NULL,
+	[StartDate] [date] NULL,
+	[In_Date] [date] NULL,
+	[IsIndate] [int] NOT NULL,
+	[SumStart] [numeric](38, 10) NULL,
+	[Amount] [decimal](38, 10) NULL,
+	[SumEnd] [decimal](38, 10) NULL,
+	[SumInput] [decimal](38, 10) NULL,
+	[SumOutput] [decimal](38, 10) NULL,
+	[InvestResult] [decimal](38, 10) NULL,
+	[ResutSumForProcent] [decimal](38, 10) NULL,
+	[InvestResultProcent] [decimal](38, 10) NULL
+);
+
+-- список бумаг на конец периода
+insert into #SumStart
+(
+	[IsActive], [In_Wir], [InvestorId], [ContractId],
+	[ShareId], [StartDate], [In_Date], [IsIndate],
+	[SumStart], [Amount], RowNumber
+)
+select
+	IsActive = 1,
+	In_Wir = NULL,
+	aa.InvestorId,
+	aa.ContractId,
+	ShareId = aa.VALUE_ID,
+	StartDate = NULL,
+	In_Date = NULL,
+	IsIndate = 0,
+	SumStart = NULL,
+	Amount = NULL,
+	RowNumber = ROW_NUMBER() over( order by Id)
+from #EndDaily as aa
+cross apply
+(
+	select top 1
+		ShareId
+	from #EndPostions as bb
+	where bb.ShareId = aa.VALUE_ID
+) as cc
+where aa.AMOUNT > 0;
+
+--select *
+update a set
+	SumStart = isnull(b.VALUE_NOM,0) + isnull(bb.VALUE_NOM,0),
+	Amount = isnull(b.AMOUNT,0) + isnull(bb.AMOUNT,0)
+from #SumStart as a
+outer apply
+(
+	select
+		VALUE_NOM = sum(n.VALUE_NOM),
+		AMOUNT = sum(n.AMOUNT)
+	from #StartDaily as n
+	where n.VALUE_ID = a.ShareId
+) as b
+outer apply
+(
+	select
+		VALUE_NOM = sum(nn.VALUE_NOM),
+		AMOUNT = sum(nn.AMOUNT)
+	from #EndPostions as nn
+	where nn.ShareId = a.ShareId
+	and nn.In_Date = @StartDate
+) as bb;
+
+
+update a
+	set a.SumEnd = isnull(c.VALUE_NOM,0)
+from #SumStart as a
+outer apply
+(
+	select
+		VALUE_NOM = sum(b.VALUE_NOM)
+	from #EndDaily as b
+	where b.AMOUNT > 0
+	and b.InvestorId = a.InvestorId
+	and b.ContractId = a.ContractId
+	and b.VALUE_ID = a.ShareId
+) as c;
+
+update a set
+	SumInput = isnull(b.SumInput, 0)
+from #SumStart as a
+outer apply
+(
+	select
+		SumInput = sum(bb.In_Summa)
+	from #EndPostions as bb
+	where
+	bb.InvestorId = a.InvestorId
+	and bb.ContractId = a.ContractId
+	and bb.ShareId = a.ShareId
+	and bb.In_Date > @StartDate
+	and bb.In_Date <= @EndDate
+) as b;
+
+update a set
+	SumOutput = isnull(b.SumOutput,0)
+from #SumStart as a
+outer apply
+(
+	select
+		SumOutput = isnull(sum(bb.Out_Summa),0) - isnull(sum(bb.Amortizations),0)
+	from #EndPostions as bb
+	where
+	bb.InvestorId = a.InvestorId
+	and bb.ContractId = a.ContractId
+	and bb.ShareId = a.ShareId
+	and bb.Out_Date >= @StartDate
+	and bb.Out_Date <= @EndDate
+) as b;
+
+-- посчитали SumInput
+update a set 
+	InvestResult = (SumEnd + SumOutput) - (SumStart + SumInput)
+from #SumStart as a;
+
+
+-- посчитали InvestResult
+
+insert into #ShareDates
+(
+	InvestorId,
+	ContractId,
+	ShareId,
+	[Date],
+	In_Summa,
+	Out_Summa
+)
+select
+	InvestorId = isnull(aa.InvestorId, bb.InvestorId),
+	ContractId = isnull(aa.ContractId, bb.ContractId),
+	ShareId = isnull(aa.ShareId, bb.ShareId),
+	[Date] = isnull(aa.[Date], bb.[Date]),
+	In_Summa = isnull(aa.In_Summa, 0),
+	Out_Summa = isnull(bb.Out_Summa, 0)
+from
+(
+	select
+		InvestorId, ContractId, ShareId, [Date] = In_Date, In_Summa = sum(In_Summa)
+	from
+	(
+		select InvestorId, ContractId, ShareId, In_Date, Out_Date = cast(Out_Date as Date), In_Summa = sum(In_Summa), Out_Summa = sum(Out_Summa)
+		from #EndPostions
+		group by InvestorId, ContractId, ShareId, In_Date, cast(Out_Date as Date)
+	) as a
+	group by InvestorId, ContractId, ShareId, In_Date
+) as aa
+full join
+(
+	select
+		InvestorId, ContractId, ShareId, [Date] = Out_Date, Out_Summa = sum(Out_Summa)
+	from
+	(
+		select InvestorId, ContractId, ShareId, In_Date, Out_Date = cast(Out_Date as Date), In_Summa = sum(In_Summa), Out_Summa = sum(Out_Summa)
+		from #EndPostions
+		group by InvestorId, ContractId, ShareId, In_Date, cast(Out_Date as Date)
+	) as a
+	group by InvestorId, ContractId, ShareId, Out_Date
+) as bb
+	on aa.InvestorId = bb.InvestorId and aa.ContractId = bb.ContractId and aa.ShareId = bb.ShareId and aa.[Date] = bb.[Date]
+where aa.In_Summa > 0 or bb.Out_Summa > 0;
+
+
+	declare @ShareId Int, @Snach2 numeric(28,10),
+		@AmountDayPlus numeric(28,10), @AmountDayMinus numeric(28,10), @DateCCur date, @DateCCur2 date,
+		@Countter Int, @LastDDate date, @TT Int, @ResutSSum numeric(28,10), @SumAmountDDay numeric(28,10),
+		@SumTT numeric(28,10)
+	
+	declare share_cur cursor local fast_forward for
+        -- 
+        select ShareId from #SumStart
+
+    open share_cur
+    fetch next from share_cur into
+        @ShareId
+    while(@@fetch_status = 0)
+    begin
+			set @Snach2 = NULL;
+
+			select
+				@Snach2 = SumStart
+			from #SumStart
+			where ShareId = @ShareId;
+
+			if @Snach2 is null set @Snach2 = 0;
+
+			set @LastDDate = @StartDate;
+
+			set @Countter = 0;
+			set @ResutSSum = 0;
+			set @SumAmountDDay = 0;
+			set @SumTT = 0;
+			set @DateCCur2 = NULL;
+
+			declare obj_cur cursor local fast_forward for
+				SELECT
+					[Date], In_Summa, -Out_Summa
+				FROM #ShareDates
+				where ShareId = @ShareId
+				and [Date] > @StartDate and [Date] <= @EndDate
+				order by [Date]
+			open obj_cur
+			fetch next from obj_cur into
+				@DateCCur, @AmountDayPlus, @AmountDayMinus
+			while(@@fetch_status = 0)
+			begin
+				set @DateCCur2 = @DateCCur;
+
+				set @Countter += 1;
+        
+				-- начальную дату пропускаем
+				if @DateCCur = @StartDate
+				begin
+					set @LastDDate = @DateCCur
+				end
+				else
+				begin
+					-- со второй записи определ¤ем период
+					set @TT = DATEDIFF(DAY, @LastDDate, @DateCCur);
+					if @DateCCur = @EndDate set @TT = @TT + 1;
+            
+					set @ResutSSum += @TT * (@Snach2 + @SumAmountDDay)
+            
+					set @LastDDate = @DateCCur
+					set @SumAmountDDay = @SumAmountDDay + @AmountDayPlus + @AmountDayMinus
+            
+					set @SumTT += @TT;
+				end
+        
+				fetch next from obj_cur into
+					@DateCCur, @AmountDayPlus, @AmountDayMinus
+			end
+			close obj_cur
+			deallocate obj_cur
+
+			-- фиксация до последнего дня
+			if @DateCCur2 is not null
+			begin
+				if @DateCCur2 < @EndDate
+				begin
+					set @TT = DATEDIFF(DAY, @DateCCur2, @EndDate);
+					set @TT = @TT + 1;
+            
+					set @ResutSSum += @TT * (@Snach2 + @SumAmountDDay)
+
+					set @SumTT += @TT;
+				end
+			end
+    
+			set @ResutSSum = @ResutSSum/nullif(@SumTT,0)
+
+
+			update a set
+				ResutSumForProcent = isnull(@ResutSSum,0),
+				InvestResultProcent = isnull(InvestResult/nullif(@ResutSSum,0),0) * 100.000
+			from #SumStart as a
+			where a.ShareId = @ShareId
+
+
+
+        
+        fetch next from share_cur into
+            @ShareId
+    end
+    close share_cur
+    deallocate share_cur
+
+	-- результат
+	--select * from #SumStart
+--- расчёт уровня 3
+--------------------------------
+
+
 -- tree3
 select
 	ChildId = cast(a.InvestmentId as BigInt),
@@ -417,13 +835,14 @@ select
 	ValutaId = cast(a.CUR_ID as BigInt),
 	PriceName =  CAST(CAST(Round(a.[VALUE_NOM],2) as Decimal(30,2)) as Nvarchar(50)) + ' ' + IsNull(cr.[Symbol], N'?'),
 	Ammount = case when c.Id <> 4 then CAST(CAST(Round(a.[AMOUNT],2) as Decimal(30,2)) as Nvarchar(50)) + N' шт.' else N'' end,
-	Detail = N'' -- потом доделать +5,43 ₽ (+4,7%)
+	Detail = CAST(CAST(Round(rst.InvestResult,2) as Decimal(30,2)) as Nvarchar(50)) + ' ' + IsNull(cr.[Symbol], N'?')
+		+ ' (' + CAST(CAST(Round(rst.InvestResultProcent,2) as Decimal(30,2)) as Nvarchar(50)) + '%)'
 from #TrustTree as a
 inner join [CacheDB].[dbo].[ClassCategories] as cc on a.CLASS = cc.ClassId
 inner join [CacheDB].[dbo].[Categories] as c on cc.CategoryId = c.Id
 inner join [CacheDB].[dbo].[InvestmentIds] as i on a.InvestmentId = i.Id
 left join  [CacheDB].[dbo].[Currencies] as cr on a.CUR_ID = cr.id
-
+left join #SumStart as rst on a.VALUE_ID = rst.ShareId
 
 
 
@@ -791,3 +1210,42 @@ begin try
 end try
 begin catch
 end catch
+
+
+
+
+BEGIN TRY
+	DROP TABLE #StartDaily;
+END TRY
+BEGIN CATCH
+END CATCH
+
+BEGIN TRY
+	DROP TABLE #EndDaily;
+END TRY
+BEGIN CATCH
+END CATCH
+
+BEGIN TRY
+	DROP TABLE #StartPostions;
+END TRY
+BEGIN CATCH
+END CATCH
+
+BEGIN TRY
+	DROP TABLE #EndPostions;
+END TRY
+BEGIN CATCH
+END CATCH
+
+BEGIN TRY
+	DROP TABLE #SumStart;
+END TRY
+BEGIN CATCH
+END CATCH
+
+BEGIN TRY
+	DROP TABLE #ShareDates;
+END TRY
+BEGIN CATCH
+END CATCH
