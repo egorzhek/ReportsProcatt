@@ -300,9 +300,9 @@ from [CacheDB].[dbo].[Assets_Info] NOLOCK
 where [InvestorId] = @InvestorId; --and [ContractId] = @ContractId;
 */
 select
-	ActiveDateToName = 'Активы на ' + FORMAT(@EndDate,'dd.MM.yyyy'),
+	ActiveDateToName = N'Сумма активов на дату окончания периода',
 	ActiveDateToValue =  CAST(Round(@SItog,2) as Decimal(30,2)),
-	ProfitName = 'Доход за период ' + FORMAT(@StartDate,'dd.MM.yyyy') + ' - ' + FORMAT(@EndDate,'dd.MM.yyyy'),
+	ProfitName = N'ОТЧЁТ ПО ПОРТФЕЛЮ / ' + FORMAT(@StartDate,'dd.MM.yyyy') + ' - ' + FORMAT(@EndDate,'dd.MM.yyyy'),
 	ProfitValue = CAST(Round(@InvestResult,2) as Decimal(30,2)),
 	ProfitProcentValue = CAST(Round(@InvestResult/@ResutSum * 100,2) as Decimal(38,2)),
 	--OpenDate = FORMAT(@DATE_OPEN,'dd.MM.yyyy'),
@@ -314,8 +314,12 @@ select
 	Fee = 99.99,
 	--ContractOpenDate = FORMAT(@DATE_OPEN,'dd.MM.yyyy'),
 	SuccessFee = 99.99,
-	DateFromName = FORMAT(@StartDate,'dd.MM.yyyy')
+	DateFromName = FORMAT(@StartDate,'dd.MM.yyyy'),
+	DateToName = FORMAT(@EndDate,'dd.MM.yyyy'),
+	Comment1 = N'Сумма дохода',
+	Comment2 = N'Относительная доходность'
 
+/*
 select ActiveName = 'Активы на ' + FORMAT(@StartDate,'dd.MM.yyyy') , ActiveValue = CAST(Round(@Snach,2) as Decimal(38,2)), Sort = 1
 union
 select 'Пополнения', CAST(Round(@Sum_INPUT_VALUE_RUR,2) as Decimal(30,2)), 2
@@ -326,6 +330,14 @@ select 'Дивиденды', @Sum_INPUT_DIVIDENTS_RUR, 4
 union
 select 'Купоны', @Sum_INPUT_COUPONS_RUR, 5
 order by 3;
+*/
+
+select
+	Snach = CAST(Round(@Snach,2) as Decimal(38,2)),
+	InVal = CAST(Round(@Sum_INPUT_VALUE_RUR,2) as Decimal(30,2)),
+	OutVal = CAST(Round(@Sum_OUTPUT_VALUE_RUR,2) as Decimal(30,2)),
+	Dividents = CAST(Round(@Sum_INPUT_DIVIDENTS_RUR,2) as Decimal(30,2)),
+	Coupons = CAST(Round(@Sum_INPUT_COUPONS_RUR,2) as Decimal(30,2))
 
 
 /*
