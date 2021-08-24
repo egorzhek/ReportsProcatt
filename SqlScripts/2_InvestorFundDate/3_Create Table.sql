@@ -30,6 +30,15 @@ CONSTRAINT [PK_InvestorFundDate] PRIMARY KEY CLUSTERED
 )ON YEAR_Partition_Scheme ([Date])
 )
 GO
+CREATE NONCLUSTERED INDEX [IX_InvestorFundDate_FundId_Date] ON [dbo].[InvestorFundDate]
+(
+	[FundId] ASC,
+	[Date] ASC
+)
+GO
+CREATE NONCLUSTERED INDEX [IX_InvestorFundDate_ID]
+ON [dbo].[InvestorFundDate] ([Investor],[Date])
+GO
 CREATE TABLE [dbo].[InvestorFundDateLast]
 (
 	[Investor] [int] NOT NULL,
@@ -59,6 +68,15 @@ CONSTRAINT [PK_InvestorFundDateLast] PRIMARY KEY CLUSTERED
 	[Date] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_InvestorFundDate_FundId_DateLast] ON [dbo].[InvestorFundDateLast]
+(
+	[FundId] ASC,
+	[Date] ASC
+)
+GO
+CREATE NONCLUSTERED INDEX [IX_InvestorFundDateLast_ID]
+ON [dbo].[InvestorFundDateLast] ([Investor],[Date])
 GO
 CREATE TABLE [dbo].[FundNames]
 (

@@ -374,8 +374,12 @@ order by CategoryId
 -- Надпись внутри пайчарта
 select DonutLabel1 = N'6 405 ₽', DonutLabel2 = N'4 актива'
 
-
-
+    -- Fifth
+	-- Выдаёт Список ПИФОВ
+	EXEC [dbo].[GetInvestorFunds]
+		@Investor = @InvestorId,
+		@StartDate = @StartDate,
+		@EndDate = @EndDate
 
 
 BEGIN TRY

@@ -150,6 +150,9 @@ namespace ReportsProcatt.Controllers
 
                             vDataSet.Tables[3].TableName = "Forth";
                             report.RegisterData(vDataSet.Tables[3], "Forth");
+
+                            vDataSet.Tables[4].TableName = "Fifth";
+                            report.RegisterData(vDataSet.Tables[4], "Fifth");
                         }
                     }
                 }

@@ -18,7 +18,7 @@ AS BEGIN
 
     DECLARE @R_RATER INT = null;                -- Котировщик, используем данные из договора (портфеля);
     DECLARE @R_MODE INT = null;             -- Способ взятия котировки (null - используется способ указанный в договоре (портфеле));
-    DECLARE @P_FLAGS INT = (2+8+16+32);
+    DECLARE @P_FLAGS INT = (2+8);
 
     -- чистка обоих кэшей
     DELETE FROM [dbo].[FundStructure_Last]

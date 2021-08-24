@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Report ScriptLanguage="CSharp" DoublePass="true" TextQuality="Regular" ReportInfo.Name="Simple List" ReportInfo.Author="Fast Reports Inc" ReportInfo.Description="Демонстрация простого листа" ReportInfo.Created="01/17/2008 03:05:57" ReportInfo.Modified="08/23/2021 23:18:16" ReportInfo.CreatorVersion="2021.3.0.0">
+<Report ScriptLanguage="CSharp" DoublePass="true" TextQuality="Regular" ReportInfo.Name="Simple List" ReportInfo.Author="Fast Reports Inc" ReportInfo.Description="Демонстрация простого листа" ReportInfo.Created="01/17/2008 03:05:57" ReportInfo.Modified="08/24/2021 23:39:14" ReportInfo.CreatorVersion="2021.3.0.0">
   <ScriptText>using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -32,6 +32,8 @@ namespace FastReport
     <TableDataSource Name="First" ReferenceName="First" DataType="System.Int32" Enabled="true">
       <Column Name="ActiveDateToName" DataType="System.String"/>
       <Column Name="ProfitName" DataType="System.String"/>
+      <Column Name="DateFromName" DataType="System.String"/>
+      <Column Name="DateToName" DataType="System.String"/>
       <Column Name="ProfitValue" DataType="System.Decimal"/>
       <Column Name="ProfitProcentValue" DataType="System.Decimal"/>
       <Column Name="ActiveDateToValue" DataType="System.Decimal"/>
@@ -49,6 +51,13 @@ namespace FastReport
     <TableDataSource Name="Forth" ReferenceName="Forth" DataType="System.Int32" Enabled="true">
       <Column Name="DonutLabel1" DataType="System.String"/>
       <Column Name="DonutLabel2" DataType="System.String"/>
+    </TableDataSource>
+    <TableDataSource Name="Fifth" ReferenceName="Fifth" DataType="System.Int32" Enabled="true">
+      <Column Name="FundName" DataType="System.String"/>
+      <Column Name="ProfitValue" DataType="System.Decimal"/>
+      <Column Name="ProfitProcentValue" DataType="System.Decimal"/>
+      <Column Name="BeginValue" DataType="System.Decimal"/>
+      <Column Name="Valuta" DataType="System.String"/>
     </TableDataSource>
   </Dictionary>
   <ReportPage Name="Page1" Watermark.Font="Arial, 60pt">
@@ -112,17 +121,17 @@ namespace FastReport
       <TextObject Name="Text64" Left="141.75" Top="126.63" Width="56.7" Height="20.79" Text="[Second.OutVal]" HorzAlign="Center" VertAlign="Center" Font="Times New Roman, 6pt, style=Bold"/>
       <ShapeObject Name="Shape23" Left="646.38" Top="103.95" Width="68.04" Height="47.25" Border.Shadow="true" Border.ShadowWidth="7" Border.ShadowColor="RosyBrown" Border.Color="DarkGray" Shape="RoundRectangle"/>
       <TextObject Name="Text65" Left="652.05" Top="103.95" Width="56.7" Height="18.9" Text="В конце периода" HorzAlign="Center" Font="Times New Roman, 6pt, style=Bold" TextFill.Color="DarkGray"/>
-      <TextObject Name="Text66" Left="652.05" Top="126.63" Width="56.7" Height="20.79" Text="---" HorzAlign="Center" VertAlign="Center" Font="Times New Roman, 6pt, style=Bold"/>
+      <TextObject Name="Text66" Left="652.05" Top="126.63" Width="56.7" Height="20.79" Text="[First.ActiveDateToValue]" HorzAlign="Center" VertAlign="Center" Font="Times New Roman, 6pt, style=Bold"/>
     </DataBand>
-    <DataBand Name="Data8" Top="408.9" Width="718.2" Height="37.8" CanGrow="true" DataSource="Third">
+    <DataBand Name="Data8" Top="408.9" Width="718.2" Height="37.8" CanGrow="true" DataSource="Fifth">
       <TableObject Name="Table103" Width="718.33" Height="37.8">
         <TableColumn Name="Column108" Width="325.71"/>
         <TableColumn Name="Column109" Width="216.09"/>
         <TableColumn Name="Column117" Width="176.53"/>
         <TableRow Name="Row6" Height="37.8">
-          <TableCell Name="Cell110" Border.Lines="All" Text="[Third.CategoryName]" VertAlign="Center" Font="Arial, 10pt"/>
-          <TableCell Name="Cell111" Border.Lines="All" Text="[Third.CategoryName]" VertAlign="Center" Font="Arial, 10pt"/>
-          <TableCell Name="Cell118" Border.Lines="All" Text="[Third.CategoryName]" VertAlign="Center" Font="Arial, 10pt"/>
+          <TableCell Name="Cell110" Text="[Fifth.FundName]" VertAlign="Center" Font="Arial, 10pt"/>
+          <TableCell Name="Cell111" Text="[Fifth.BeginValue] [Fifth.Valuta]" VertAlign="Center" Font="Arial, 10pt"/>
+          <TableCell Name="Cell118" Text="[Fifth.ProfitValue] [Fifth.Valuta] ([Fifth.ProfitProcentValue]%)" VertAlign="Center" Font="Arial, 10pt"/>
         </TableRow>
       </TableObject>
       <DataHeaderBand Name="DataHeader100" Top="367.1" Width="718.2" Height="37.8">
@@ -131,9 +140,9 @@ namespace FastReport
           <TableColumn Name="Column112" Width="216.09"/>
           <TableColumn Name="Column115" Width="176.4"/>
           <TableRow Name="Row5" Height="37.8">
-            <TableCell Name="Cell113" Border.Lines="All" Fill.Color="WhiteSmoke" Text="ПИФЫ" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
-            <TableCell Name="Cell114" Border.Lines="All" Fill.Color="WhiteSmoke" Text="АКТИВЫ НА" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
-            <TableCell Name="Cell116" Border.Lines="All" Fill.Color="WhiteSmoke" Text="РЕЗУЛЬТАТЫ ЗА" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+            <TableCell Name="Cell113" Fill.Color="LightCyan" Text="ПИФЫ" VertAlign="Center" Font="Arial, 9pt, style=Bold"/>
+            <TableCell Name="Cell114" Fill.Color="LightCyan" Text="АКТИВЫ НА [First.DateFromName]" VertAlign="Center" Font="Arial, 9pt, style=Bold"/>
+            <TableCell Name="Cell116" Fill.Color="LightCyan" Text="РЕЗУЛЬТАТЫ ЗА&#13;&#10;[First.DateFromName] - [First.DateToName]" HorzAlign="Right" VertAlign="Center" Font="Arial, 9pt, style=Bold"/>
           </TableRow>
         </TableObject>
       </DataHeaderBand>
@@ -155,9 +164,9 @@ namespace FastReport
           <TableColumn Name="Column1121" Width="216.09"/>
           <TableColumn Name="Column1151" Width="176.4"/>
           <TableRow Name="Row1005" Height="37.8">
-            <TableCell Name="Cell1113" Border.Lines="All" Fill.Color="WhiteSmoke" Text="ДОВЕРИТЕЛЬНОЕ УПРАВЛЕНИЕ" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
-            <TableCell Name="Cell1114" Border.Lines="All" Fill.Color="WhiteSmoke" Text="АКТИВЫ НА" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
-            <TableCell Name="Cell1116" Border.Lines="All" Fill.Color="WhiteSmoke" Text="РЕЗУЛЬТАТЫ ЗА [First.ProfitName]" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+            <TableCell Name="Cell1113" Border.Lines="All" Fill.Color="WhiteSmoke" Text="ДОВЕРИТЕЛЬНОЕ УПРАВЛЕНИЕ" VertAlign="Center" Font="Arial, 9pt, style=Bold"/>
+            <TableCell Name="Cell1114" Border.Lines="All" Fill.Color="WhiteSmoke" Text="АКТИВЫ НА [First.DateFromName]" VertAlign="Center" Font="Arial, 9pt, style=Bold"/>
+            <TableCell Name="Cell1116" Border.Lines="All" Fill.Color="WhiteSmoke" Text="РЕЗУЛЬТАТЫ ЗА&#13;&#10;[First.DateFromName] - [First.DateToName]" HorzAlign="Right" VertAlign="Center" Font="Arial, 9pt, style=Bold"/>
           </TableRow>
         </TableObject>
       </DataHeaderBand>
