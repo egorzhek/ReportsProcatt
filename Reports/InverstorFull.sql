@@ -381,6 +381,13 @@ select DonutLabel1 = N'6 405 ₽', DonutLabel2 = N'4 актива'
 		@StartDate = @StartDate,
 		@EndDate = @EndDate
 
+	-- Sixth
+	-- выдаёт список ДУ
+	EXEC [dbo].[GetInvestorContracts]
+		@InvestorId = @InvestorId,
+		@StartDate = @StartDate,
+		@EndDate = @EndDate
+
 
 BEGIN TRY
 	DROP TABLE #ResInvAssets
