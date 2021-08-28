@@ -23,8 +23,8 @@ from
         where ContractId = @Contract_Id and [PortfolioDate] = @Date
     ) as res
     join [dbo].[InvestmentIds] as Inv on res.InvestmentId = Inv.Id
-    left join [dbo].[ClassCategories] as cs on res.CLASS = cs.ClassId
-    left join [dbo].[Categories] as c on cs.CategoryId = c.Id
+    join [dbo].[ClassCategories] as cs on res.CLASS = cs.ClassId
+    join [dbo].[Categories] as c on cs.CategoryId = c.Id
 ) as res2
 where VALUE_RUR > 0
 group by CategoryName, AllSum;

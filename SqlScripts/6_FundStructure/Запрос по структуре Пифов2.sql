@@ -20,8 +20,8 @@ select
 from
 (
     select
-        Inv.Investment,
-        res.VALUE_ID,
+		Investment = case when c.Id = 4 then c.CategoryName else Inv.Investment end,
+        VALUE_ID = case when c.Id = 4 then c.Id else res.VALUE_ID end,
         res.VALUE_RUR,
         AllSum = sum(res.VALUE_RUR) over()
     from
@@ -37,8 +37,8 @@ from
         where Contract_Id = @Contract_Id and PortfolioDate = @Date
     ) as res
     join [dbo].[InvestmentIds] as Inv on res.Investment_id = Inv.Id
-    left join [dbo].[ClassCategories] as cs on res.CLASS = cs.ClassId
-    left join [dbo].[Categories] as c on cs.CategoryId = c.Id
+    join [dbo].[ClassCategories] as cs on res.CLASS = cs.ClassId
+    join [dbo].[Categories] as c on cs.CategoryId = c.Id
 ) as res2
 where VALUE_RUR > 0
 group by Investment, VALUE_ID, AllSum;
