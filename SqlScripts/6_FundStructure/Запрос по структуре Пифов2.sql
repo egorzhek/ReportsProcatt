@@ -4,7 +4,7 @@ Declare
 
 
 select
-    Investment, VALUE_ID, VALUE_RUR = sum(VALUE_RUR), Result = sum(VALUE_RUR)/AllSum
+    Investment, VALUE_ID, VALUE_RUR = sum(VALUE_RUR), AllSum, Result = sum(VALUE_RUR)/AllSum
 from
 (
     select
