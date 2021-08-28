@@ -8,31 +8,18 @@ select
 from
 (
     select
-        --res.Contract_Id, res.PortfolioDate, res.Investor_Id,
-        --Inv.Investment,
-        --res.VALUE_ID,
-        --res.CLASS,
-        --cs.CategoryId,
         c.CategoryName,
         res.VALUE_RUR,
         AllSum = sum(res.VALUE_RUR) over()
     from
     (
         select
-            Contract_Id, PortfolioDate, Investor_Id, Investment_id,
-            VALUE_ID, BAL_ACC, CLASS, AMOUNT,
-            BAL_SUMMA_RUR, Bal_Delta, NOMINAL, RUR_PRICE,
-            Nom_Price, VALUE_RUR, VALUE_NOM, CUR_ID,
-            RATE, RATE_DATE, RecordDate
+            Contract_Id, VALUE_RUR, Investment_id, CLASS
         from [dbo].[FundStructure] nolock
         where Contract_Id = @Contract_Id and PortfolioDate = @Date
         union all
         select
-            Contract_Id, PortfolioDate, Investor_Id, Investment_id,
-            VALUE_ID, BAL_ACC, CLASS, AMOUNT,
-            BAL_SUMMA_RUR, Bal_Delta, NOMINAL, RUR_PRICE,
-            Nom_Price, VALUE_RUR, VALUE_NOM, CUR_ID,
-            RATE, RATE_DATE, RecordDate
+            Contract_Id, VALUE_RUR, Investment_id, CLASS
         from [dbo].[FundStructure_Last] nolock
         where Contract_Id = @Contract_Id and PortfolioDate = @Date
     ) as res
@@ -41,4 +28,4 @@ from
     left join [dbo].[Categories] as c on cs.CategoryId = c.Id
 ) as res2
 where VALUE_RUR > 0
-group by CategoryName, AllSum
+group by CategoryName, AllSum;
