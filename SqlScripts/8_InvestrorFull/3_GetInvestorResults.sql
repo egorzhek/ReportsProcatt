@@ -170,7 +170,6 @@ AS BEGIN
 
 
 
-
     -----------------------------------------------
     -- преобразование на начальную и последнюю дату
 
@@ -186,7 +185,7 @@ AS BEGIN
 
     -- посчитать последний день обратно
     update a set 
-    VALUE_RUR = VALUE_RUR, -- - DailyIncrement_RUR - DailyDecrement_RUR,
+    VALUE_RUR = VALUE_RUR - OUTPUT_VALUE_RUR,
     VALUE_USD = VALUE_USD, -- - DailyIncrement_USD - DailyDecrement_USD,
     VALUE_EURO = VALUE_EURO, -- - DailyIncrement_EURO - DailyDecrement_EURO,
 
@@ -216,7 +215,13 @@ AS BEGIN
     FROM #ResInvAssets
     where [Date] = @StartDate
 
+    declare @IsNoStart Int = 0;
 
+    if @Snach is null
+    begin
+        set @IsNoStart = 1;
+        set @Snach = 0;
+    end
 
     -- сумма всех выводов средств
     SELECT
@@ -234,22 +239,54 @@ AS BEGIN
 
 
         declare @DateCur date, @AmountDayPlus_RURCur numeric(30,10), @AmountDayMinus_RURCur numeric(30,10), @LastDate date,
-            @SumAmountDay_RUR numeric(30,10) = 0, @Counter Int = 0, @T Int, @SumT numeric(30,10) = 0, @ResutSum numeric(30,10) = 0
+            @SumAmountDay_RUR numeric(30,10) = 0, @Counter Int = 0, @T Int, @SumT numeric(30,10) = 0, @ResutSum numeric(30,10) = 0,
+            @MinutT Int = 0
+
+        declare @tmpt table
+        (
+            [Date] date,
+            [AmountDayPlus_RUR] decimal(28,8),
+            [AmountDayMinus_RUR] decimal(28,8)
+        );
+
+        if @IsNoStart = 1
+        begin
+            insert into @tmpt
+            (
+                [Date],
+                [AmountDayPlus_RUR],
+                [AmountDayMinus_RUR]
+            )
+            select @StartDate, 0, 0;
+        end
+
+        insert into @tmpt
+        (
+            [Date],
+            [AmountDayPlus_RUR],
+            [AmountDayMinus_RUR]
+        )
+        SELECT
+            [Date],
+            [AmountDayPlus_RUR] = INPUT_VALUE_RUR + INPUT_DIVIDENTS_RUR + INPUT_COUPONS_RUR,
+            [AmountDayMinus_RUR] = OUTPUT_VALUE_RUR
+        FROM #ResInvAssets
+        where (
+            [Date] in (@StartDate, @EndDate) or
+            (
+                INPUT_VALUE_RUR <> 0 or OUTPUT_VALUE_RUR <> 0 or
+                INPUT_DIVIDENTS_RUR <> 0 or INPUT_COUPONS_RUR <> 0
+            )
+        );
+        
 
         declare obj_cur cursor local fast_forward for
             -- 
             SELECT
                 [Date],
-                [AmountDayPlus_RUR] = INPUT_VALUE_RUR + INPUT_DIVIDENTS_RUR + INPUT_COUPONS_RUR,
-                [AmountDayMinus_RUR] = OUTPUT_VALUE_RUR
-            FROM #ResInvAssets
-            where (
-                [Date] in (@StartDate, @EndDate) or
-                (
-                    INPUT_VALUE_RUR <> 0 or OUTPUT_VALUE_RUR <> 0 or
-                    INPUT_DIVIDENTS_RUR <> 0 or INPUT_COUPONS_RUR <> 0
-                )
-            )
+                [AmountDayPlus_RUR],
+                [AmountDayMinus_RUR]
+            FROM @tmpt
             order by [Date]
         open obj_cur
         fetch next from obj_cur into
@@ -269,6 +306,13 @@ AS BEGIN
                 set @T = DATEDIFF(DAY, @LastDate, @DateCur);
                 if @DateCur = @EndDate set @T = @T + 1;
 
+                if @Snach = 0.000 and @Counter = 2
+                begin
+                    set @MinutT = @T;
+                end
+
+                
+
                 set @ResutSum += @T * (@Snach + @SumAmountDay_RUR)
 
                 set @LastDate = @DateCur
@@ -286,7 +330,7 @@ AS BEGIN
 
         if @SumT > 0
         begin
-            set @ResutSum = @ResutSum/@SumT
+            set @ResutSum = @ResutSum/(@SumT - @MinutT)
         end
 
         if @ResutSum = 0 set @ResutSum = NULL
@@ -312,7 +356,7 @@ END
 GO
 CREATE OR ALTER PROCEDURE [dbo].[GetInvestorContractResults]
 (
-    @InvestorId int = 2149652,
+    @InvestorId int = 19865873,
     @StartDate Date = NULL,
     @EndDate Date = NULL
 )
@@ -339,6 +383,7 @@ AS BEGIN
         SELECT [Date]
         FROM [CacheDB].[dbo].[InvestorFundDateLast] NOLOCK
         WHERE Investor = @InvestorId
+        
         UNION
         */
         SELECT [Date]
@@ -433,6 +478,7 @@ AS BEGIN
                 INPUT_COUPONS_EURO = 0.0000000000
             from InvestorFundDateLast nolock
             where Investor = @InvestorId and [Date] >= @StartDate and [Date] <= @EndDate
+            
             union all
             */
             select
@@ -482,7 +528,6 @@ AS BEGIN
 
 
 
-
     -----------------------------------------------
     -- преобразование на начальную и последнюю дату
 
@@ -498,7 +543,7 @@ AS BEGIN
 
     -- посчитать последний день обратно
     update a set 
-    VALUE_RUR = VALUE_RUR, -- - DailyIncrement_RUR - DailyDecrement_RUR,
+    VALUE_RUR = VALUE_RUR - OUTPUT_VALUE_RUR,
     VALUE_USD = VALUE_USD, -- - DailyIncrement_USD - DailyDecrement_USD,
     VALUE_EURO = VALUE_EURO, -- - DailyIncrement_EURO - DailyDecrement_EURO,
 
@@ -510,6 +555,7 @@ AS BEGIN
     from #ResInvAssets as a
     where [Date] = @EndDate
     and (OUTPUT_VALUE_RUR <> 0 or INPUT_VALUE_RUR <> 0 or INPUT_COUPONS_RUR <> 0 or INPUT_DIVIDENTS_RUR <> 0) -- вводы и выводы были в этот день
+
 
     -- преобразование на начальную и последнюю дату
     -----------------------------------------------
@@ -528,7 +574,13 @@ AS BEGIN
     FROM #ResInvAssets
     where [Date] = @StartDate
 
+    declare @IsNoStart Int = 0;
 
+    if @Snach is null
+    begin
+        set @IsNoStart = 1;
+        set @Snach = 0;
+    end
 
     -- сумма всех выводов средств
     SELECT
@@ -545,23 +597,56 @@ AS BEGIN
     - (@Snach + @AmountDayPlus_RUR) --as 'Результат инвестиций'
 
 
+
         declare @DateCur date, @AmountDayPlus_RURCur numeric(30,10), @AmountDayMinus_RURCur numeric(30,10), @LastDate date,
-            @SumAmountDay_RUR numeric(30,10) = 0, @Counter Int = 0, @T Int, @SumT numeric(30,10) = 0, @ResutSum numeric(30,10) = 0
+            @SumAmountDay_RUR numeric(30,10) = 0, @Counter Int = 0, @T Int, @SumT numeric(30,10) = 0, @ResutSum numeric(30,10) = 0,
+            @MinutT Int = 0
+
+        declare @tmpt table
+        (
+            [Date] date,
+            [AmountDayPlus_RUR] decimal(28,8),
+            [AmountDayMinus_RUR] decimal(28,8)
+        );
+
+        if @IsNoStart = 1
+        begin
+            insert into @tmpt
+            (
+                [Date],
+                [AmountDayPlus_RUR],
+                [AmountDayMinus_RUR]
+            )
+            select @StartDate, 0, 0;
+        end
+
+        insert into @tmpt
+        (
+            [Date],
+            [AmountDayPlus_RUR],
+            [AmountDayMinus_RUR]
+        )
+        SELECT
+            [Date],
+            [AmountDayPlus_RUR] = INPUT_VALUE_RUR + INPUT_DIVIDENTS_RUR + INPUT_COUPONS_RUR,
+            [AmountDayMinus_RUR] = OUTPUT_VALUE_RUR
+        FROM #ResInvAssets
+        where (
+            [Date] in (@StartDate, @EndDate) or
+            (
+                INPUT_VALUE_RUR <> 0 or OUTPUT_VALUE_RUR <> 0 or
+                INPUT_DIVIDENTS_RUR <> 0 or INPUT_COUPONS_RUR <> 0
+            )
+        );
+        
 
         declare obj_cur cursor local fast_forward for
             -- 
             SELECT
                 [Date],
-                [AmountDayPlus_RUR] = INPUT_VALUE_RUR + INPUT_DIVIDENTS_RUR + INPUT_COUPONS_RUR,
-                [AmountDayMinus_RUR] = OUTPUT_VALUE_RUR
-            FROM #ResInvAssets
-            where (
-                [Date] in (@StartDate, @EndDate) or
-                (
-                    INPUT_VALUE_RUR <> 0 or OUTPUT_VALUE_RUR <> 0 or
-                    INPUT_DIVIDENTS_RUR <> 0 or INPUT_COUPONS_RUR <> 0
-                )
-            )
+                [AmountDayPlus_RUR],
+                [AmountDayMinus_RUR]
+            FROM @tmpt
             order by [Date]
         open obj_cur
         fetch next from obj_cur into
@@ -581,6 +666,13 @@ AS BEGIN
                 set @T = DATEDIFF(DAY, @LastDate, @DateCur);
                 if @DateCur = @EndDate set @T = @T + 1;
 
+                if @Snach = 0.000 and @Counter = 2
+                begin
+                    set @MinutT = @T;
+                end
+
+                
+
                 set @ResutSum += @T * (@Snach + @SumAmountDay_RUR)
 
                 set @LastDate = @DateCur
@@ -598,7 +690,7 @@ AS BEGIN
 
         if @SumT > 0
         begin
-            set @ResutSum = @ResutSum/@SumT
+            set @ResutSum = @ResutSum/(@SumT - @MinutT)
         end
 
         if @ResutSum = 0 set @ResutSum = NULL
