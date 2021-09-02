@@ -30,7 +30,7 @@ EXEC @ReturnCode = msdb.dbo.sp_add_jobstep @job_id=@jobId, @step_name=N'Step1',
 		@retry_attempts=0, 
 		@retry_interval=0, 
 		@os_run_priority=0, @subsystem=N'TSQL', 
-		@command=N'EXEC [CacheDB].[dbo].[dbo].[app_FillInvestorDateAssets] @ParamINVESTOR = NULL', 
+		@command=N'EXEC [CacheDB].[dbo].[app_FillInvestorDateAssets] @ParamINVESTOR = NULL', 
 		@database_name=N'CacheDB', 
 		@flags=0
 IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback
