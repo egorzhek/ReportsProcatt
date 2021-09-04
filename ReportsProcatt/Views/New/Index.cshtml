@@ -1,0 +1,1163 @@
+﻿@model ReportsProcatt.Models.Report
+@*@Model.rootStr*@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <link rel="stylesheet" href="@Model.rootStr/css/style.css">
+</head>
+<body>
+
+    <img class="bg-slpash-1" src="@Model.rootStr/img/bg-splash-1.png">
+    <img class="bg-slpash-2" src="@Model.rootStr/img/bg-splash-2.png">
+    <img class="bg-slpash-3" src="@Model.rootStr/img/bg-splash-3.png">
+
+    <table class="section header">
+        <tr>
+            <td>
+
+                <table class="section-wrapper">
+                    <tbody>
+                        <tr>
+
+                            <td class="left-td">
+                                <a href="/">
+                                    <img src="@Model.rootStr/img/logo.svg">
+                                </a>
+                            </td>
+
+                            <td class="right-td">
+                                <span>ОТЧЕТ ПО ПОРТФЕЛЮ / 01.01.2021 – 12.07.2021</span>
+                            </td>
+
+                        </tr>
+                    </tbody>
+                </table>
+
+            </td>
+        </tr>
+    </table>
+
+    <table class="section assets-section">
+        <tr>
+            <td>
+
+                <table class="section-wrapper">
+                    <tbody>
+                        <tr>
+
+                            <td class="asset-block">
+                                <p>Сумма активов на дату окончания периода</p>
+
+                                <span>160 723 ₽</span>
+                            </td>
+                            <td width="20px"></td>
+                            <td class="second-asset-block">
+                                <p>Сумма дохода</p>
+
+                                <span>60 723 ₽</span>
+                            </td>
+                            <td width="20px"></td>
+                            <td class="second-asset-block">
+                                <p>Относительная доходность (1,5%)</p>
+
+                                <span>+12,07%</span>
+                            </td>
+
+                            <td width="220px"></td>
+
+                            <td valign="top">
+                                <table class="asset-additional-table">
+                                    <tr>
+                                        <td class="second-asset-block asset-end-block">
+                                            <p>Период</p>
+
+                                            <span>21.08.21 - 21.08.21</span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+
+                        </tr>
+                    </tbody>
+                </table>
+
+            </td>
+        </tr>
+    </table>
+
+    <table class="section block-heading">
+        <tr>
+            <td>
+
+                <table class="section-wrapper">
+                    <tbody>
+                        <tr>
+
+                            <td class="left-td heading-td">
+                                <span>Изменение активов за период</span>
+                            </td>
+
+                            <td class="right-td heading-td">
+                                <span>Валюта: RUB</span>
+                            </td>
+
+                        </tr>
+                    </tbody>
+                </table>
+
+            </td>
+        </tr>
+    </table>
+
+    <table class="section graph-section">
+        <tr>
+            <td>
+
+                <table class="section-wrapper">
+                    <tbody>
+                        <tr>
+
+                            <td class="progression-graph">
+
+                                <div class="progression-wrap">
+                                    <div class="hl"></div>
+
+                                    <div class="progression-item">
+                                        <div class="progression-item-text">
+                                            <p>В начале периода</p>
+                                            <span>1 233 833</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="progression-item progression-top">
+                                        <div class="progression-item-text">
+                                            <p>Зачисления</p>
+                                            <span>+3 431</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="progression-item">
+                                        <div class="progression-item-text">
+                                            <p>Выводы</p>
+                                            <span>0</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="progression-item progression-top">
+                                        <div class="progression-item-text">
+                                            <p>Дивиденды</p>
+                                            <span>+13 119</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="progression-item progression-top">
+                                        <div class="progression-item-text">
+                                            <p>Купоны</p>
+                                            <span>+14 184</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="progression-item progression-top">
+                                        <div class="progression-item-text">
+                                            <p>Переоценка</p>
+                                            <span>+133 421</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="progression-item progression-top">
+                                        <div class="progression-item-text">
+                                            <p>Пополнение</p>
+                                            <span>+ 9 534</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="progression-item progression-minus">
+                                        <div class="progression-item-text">
+                                            <p>Налогов</p>
+                                            <span>-3 508</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="progression-item progression-minus">
+                                        <div class="progression-item-text">
+                                            <p>Комиссия</p>
+                                            <span>-282</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="progression-item">
+                                        <div class="progression-item-text">
+                                            <p>В конце периода</p>
+                                            <span>1 393 648</span>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+
+
+                            </td>
+
+                        </tr>
+                    </tbody>
+                </table>
+
+            </td>
+        </tr>
+    </table>
+
+
+    <table class="section block-heading">
+        <tr>
+            <td>
+
+                <table class="section-wrapper">
+                    <tbody>
+                        <tr>
+
+                            <td class="left-td heading-td">
+                            </td>
+
+                            <td class="right-td heading-td">
+                                <span>Период: 21.08.21 - 21.08.21</span>
+                            </td>
+
+                        </tr>
+                    </tbody>
+                </table>
+
+            </td>
+        </tr>
+    </table>
+
+    <table class="section info-table-section">
+        <tr>
+            <td>
+
+                <table class="section-wrapper">
+                    <tbody>
+                        <tr>
+
+                            <td class="info-table-wrap-td">
+
+                                <table class="info-table">
+                                    <tr class="heading-row">
+                                        <th width="520px">
+                                            Пифы
+                                        </th>
+
+                                        <th>
+                                            Активы на 03.08.2021
+                                        </th>
+
+                                        <th>
+                                            Результаты за <br> 03.08.2020 - 03.09.2020
+                                        </th>
+                                    </tr>
+
+                                    <tr class="body-row">
+
+                                        <td>
+                                            ОПИФ “Консервативный!
+                                        </td>
+
+                                        <td>
+                                            7 581
+                                        </td>
+
+                                        <td>
+                                            69 780,22 ₽ (16,04%)
+                                        </td>
+
+                                    </tr>
+
+                                    <tr class="body-row">
+
+                                        <td>
+                                            ОПИФ “Консервативный!
+                                        </td>
+
+                                        <td>
+                                            7 581
+                                        </td>
+
+                                        <td>
+                                            69 780,22 ₽ (16,04%)
+                                        </td>
+
+                                    </tr>
+
+
+                                </table>
+
+                            </td>
+
+                        </tr>
+                    </tbody>
+                </table>
+
+            </td>
+        </tr>
+    </table>
+
+    <table class="section info-table-section">
+        <tr>
+            <td>
+
+                <table class="section-wrapper">
+                    <tbody>
+                        <tr>
+
+                            <td class="info-table-wrap-td">
+
+                                <table class="info-table">
+                                    <tr class="heading-row">
+                                        <th width="520px">
+                                            Доверительное управление
+                                        </th>
+
+                                        <th>
+                                            Активы на 03.08.2021
+                                        </th>
+
+                                        <th>
+                                            Результаты за <br> 03.08.2020 - 03.09.2020
+                                        </th>
+                                    </tr>
+
+                                    <tr class="body-row">
+
+                                        <td>
+                                            Агрессивный портфель
+                                        </td>
+
+                                        <td>
+                                            7 581
+                                        </td>
+
+                                        <td>
+                                            69 780,22 ₽ (16,04%)
+                                        </td>
+
+                                    </tr>
+
+                                    <tr class="body-row">
+
+                                        <td>
+                                            Передовые технологии
+                                        </td>
+
+                                        <td>
+                                            7 581
+                                        </td>
+
+                                        <td>
+                                            69 780,22 ₽ (16,04%)
+                                        </td>
+
+                                    </tr>
+
+
+                                </table>
+
+                            </td>
+
+                        </tr>
+                    </tbody>
+                </table>
+
+            </td>
+        </tr>
+    </table>
+
+    @*<div style="page-break-before: always;"></div>*@
+    <table class="section block-heading">
+        <tr>
+            <td>
+
+                <table class="section-wrapper">
+                    <tbody>
+                        <tr>
+
+                            <td class="left-td heading-td">
+                                <span>Все активы</span>
+                            </td>
+
+                            <td class="right-td heading-td">
+                                <span>Счет №0000000</span>
+                            </td>
+
+                        </tr>
+                    </tbody>
+                </table>
+
+            </td>
+        </tr>
+    </table>
+
+    <table class="section info-table-section assets-info-table">
+        <tr>
+            <td>
+
+                <table class="section-wrapper">
+                    <tbody>
+                        <tr>
+
+                            <td class="info-table-wrap-td">
+
+                                <table class="info-table">
+                                    <tr class="heading-row">
+
+                                        <th width="220">
+                                            Продукт
+                                        </th>
+
+                                        <th>
+                                            Активы <br> на начало периода
+                                        </th>
+
+                                        <th>
+                                            Пополнение
+                                        </th>
+
+                                        <th>
+                                            Вывод <br> средств
+                                        </th>
+
+                                        <th>
+                                            Дивиденды
+                                        </th>
+
+                                        <th>
+                                            Купоны
+                                        </th>
+
+                                        <th>
+                                            активы на <br> конец периода
+                                        </th>
+
+                                        <th>
+                                            доход <br> в валюте
+                                        </th>
+
+                                        <th>
+                                            Доход в %
+                                        </th>
+                                    </tr>
+
+                                    <tr class="body-row">
+
+                                        <td width="220">
+                                            ПИФы
+                                        </td>
+
+                                        <td>
+                                            7 581
+                                        </td>
+
+                                        <td>
+                                            7 581
+                                        </td>
+
+                                        <td>
+                                            7 581
+                                        </td>
+
+                                        <td>
+                                            7 581
+                                        </td>
+
+                                        <td>
+                                            7 581
+                                        </td>
+
+                                        <td>
+                                            7 581
+                                        </td>
+
+                                        <td>
+                                            7 581
+                                        </td>
+
+                                        <td>
+                                            7 581
+                                        </td>
+                                    </tr>
+
+                                    <tr class="body-row">
+
+                                        <td width="220">
+                                            ДУ
+                                        </td>
+
+                                        <td>
+                                            7 581
+                                        </td>
+
+                                        <td>
+                                            7 581
+                                        </td>
+
+                                        <td>
+                                            7 581
+                                        </td>
+
+                                        <td>
+                                            7 581
+                                        </td>
+
+                                        <td>
+                                            7 581
+                                        </td>
+
+                                        <td>
+                                            7 581
+                                        </td>
+
+                                        <td>
+                                            7 581
+                                        </td>
+
+                                        <td>
+                                            7 581
+                                        </td>
+                                    </tr>
+
+
+                                </table>
+
+                            </td>
+
+                        </tr>
+                    </tbody>
+                </table>
+
+            </td>
+        </tr>
+    </table>
+
+
+    <table class="section block-heading">
+        <tr>
+            <td>
+
+                <table class="section-wrapper">
+                    <tbody>
+                        <tr>
+
+                            <td class="left-td heading-td">
+                                <span>Дивиденды и купоны</span>
+                            </td>
+
+                            <td class="right-td heading-td">
+                                <span>Счет №0000000</span>
+                            </td>
+
+                        </tr>
+                    </tbody>
+                </table>
+
+            </td>
+        </tr>
+    </table>
+
+    <table class="section info-table-section">
+        <tr>
+            <td>
+
+                <table class="section-wrapper">
+                    <tbody>
+                        <tr>
+
+                            <td class="info-table-wrap-td">
+
+                                <table class="info-table">
+                                    <tr class="heading-row">
+                                        <th>
+                                            Продукт
+                                        </th>
+
+                                        <th>
+                                            дивиденды
+                                        </th>
+
+                                        <th>
+                                            купоны
+                                        </th>
+
+                                        <th>
+                                            Сумма
+                                        </th>
+                                    </tr>
+
+                                    <tr class="body-row">
+
+                                        <td>
+                                            ДУ
+                                        </td>
+
+                                        <td>
+                                            7 581
+                                        </td>
+
+                                        <td>
+                                            7 581
+                                        </td>
+
+                                        <td>
+                                            7 581
+                                        </td>
+
+                                    </tr>
+
+                                </table>
+
+                            </td>
+
+                        </tr>
+                    </tbody>
+                </table>
+
+            </td>
+        </tr>
+    </table>
+
+    <table class="section block-heading">
+        <tr>
+            <td>
+
+                <table class="section-wrapper">
+                    <tbody>
+                        <tr>
+
+                            <td class="left-td heading-td">
+                                <span>Фактические и прогнозные выплаты до конца года</span>
+                            </td>
+
+                            <td class="right-td heading-td">
+                            </td>
+
+                        </tr>
+                    </tbody>
+                </table>
+
+            </td>
+        </tr>
+    </table>
+
+    <table class="section graph-section projected-payments-section">
+        <tr>
+            <td>
+
+                <table class="section-wrapper">
+                    <tbody>
+                        <tr>
+
+                            <td class="graph-td" valign="center" height="237px">
+                                <img src="@Model.rootStr/img/projected-payments.jpg">
+                            </td>
+
+                        </tr>
+                    </tbody>
+                </table>
+
+            </td>
+        </tr>
+    </table>
+
+    <table class="section block-heading">
+        <tr>
+            <td>
+
+                <table class="section-wrapper">
+                    <tbody>
+                        <tr>
+
+                            <td class="left-td heading-td">
+                                <span>Детализация купонов и дивидендов</span>
+                            </td>
+
+                            <td class="right-td heading-td">
+                            </td>
+
+                        </tr>
+                    </tbody>
+                </table>
+
+            </td>
+        </tr>
+    </table>
+
+    <table class="section info-table-section">
+        <tr>
+            <td>
+
+                <table class="section-wrapper">
+                    <tbody>
+                        <tr>
+
+                            <td class="info-table-wrap-td">
+
+                                <table class="info-table">
+                                    <tr class="heading-row">
+                                        <th>
+                                            Дата
+                                        </th>
+
+                                        <th width="320px">
+                                            инструмент
+                                        </th>
+
+                                        <th width="150px">
+                                            тип выплаты
+                                        </th>
+
+                                        <th>
+                                            Название договора
+                                        </th>
+
+                                        <th width="150px">
+                                            сумма в валюте выплаты
+                                        </th>
+                                    </tr>
+
+                                    <tr class="body-row">
+
+                                        <td>
+                                            28.04.2021
+                                        </td>
+
+                                        <td>
+                                            QIWI PLC
+                                        </td>
+
+                                        <td>
+                                            Дивиденды
+                                        </td>
+
+                                        <td>
+                                            Стратегия ДУ “Агрессивная”
+                                        </td>
+
+                                        <td>
+                                            50,50 $
+                                        </td>
+                                    </tr>
+
+                                    <tr class="body-row">
+
+                                        <td>
+                                            30.04.2021
+                                        </td>
+
+                                        <td>
+                                            НК ЛУКОЙЛ
+                                        </td>
+
+                                        <td>
+                                            Дивиденды
+                                        </td>
+
+                                        <td>
+                                            Стратегия ДУ “Агрессивная”
+                                        </td>
+
+                                        <td>
+                                            7,00 $
+                                        </td>
+                                    </tr>
+
+                                    <tr class="body-row">
+
+                                        <td>
+                                            28.04.2021
+                                        </td>
+
+                                        <td>
+                                            QIWI PLC
+                                        </td>
+
+                                        <td>
+                                            Дивиденды
+                                        </td>
+
+                                        <td>
+                                            Стратегия ДУ “Агрессивная”
+                                        </td>
+
+                                        <td>
+                                            3 740,00 ₽
+                                        </td>
+                                    </tr>
+                                    <tr class="body-row">
+
+                                        <td>
+                                            28.04.2021
+                                        </td>
+
+                                        <td>
+                                            QIWI PLC
+                                        </td>
+
+                                        <td>
+                                            Дивиденды
+                                        </td>
+
+                                        <td>
+                                            Стратегия ДУ “Агрессивная”
+                                        </td>
+
+                                        <td>
+                                            50,50 $
+                                        </td>
+                                    </tr>
+
+                                    <tr class="body-row">
+
+                                        <td>
+                                            28.04.2021
+                                        </td>
+
+                                        <td>
+                                            QIWI PLC
+                                        </td>
+
+                                        <td>
+                                            Дивиденды
+                                        </td>
+
+                                        <td>
+                                            Стратегия ДУ “Агрессивная”
+                                        </td>
+
+                                        <td>
+                                            50,50 $
+                                        </td>
+                                    </tr>
+
+                                    <tr class="body-row">
+
+                                        <td>
+                                            30.04.2021
+                                        </td>
+
+                                        <td>
+                                            НК ЛУКОЙЛ
+                                        </td>
+
+                                        <td>
+                                            Дивиденды
+                                        </td>
+
+                                        <td>
+                                            Стратегия ДУ “Агрессивная”
+                                        </td>
+
+                                        <td>
+                                            7,00 $
+                                        </td>
+                                    </tr>
+
+                                    <tr class="body-row">
+
+                                        <td>
+                                            28.04.2021
+                                        </td>
+
+                                        <td>
+                                            QIWI PLC
+                                        </td>
+
+                                        <td>
+                                            Дивиденды
+                                        </td>
+
+                                        <td>
+                                            Стратегия ДУ “Агрессивная”
+                                        </td>
+
+                                        <td>
+                                            3 740,00 ₽
+                                        </td>
+                                    </tr>
+                                    <tr class="body-row">
+
+                                        <td>
+                                            28.04.2021
+                                        </td>
+
+                                        <td>
+                                            QIWI PLC
+                                        </td>
+
+                                        <td>
+                                            Дивиденды
+                                        </td>
+
+                                        <td>
+                                            Стратегия ДУ “Агрессивная”
+                                        </td>
+
+                                        <td>
+                                            50,50 $
+                                        </td>
+                                    </tr>
+
+                                    <tr class="body-row">
+
+                                        <td>
+                                            30.04.2021
+                                        </td>
+
+                                        <td>
+                                            НК ЛУКОЙЛ
+                                        </td>
+
+                                        <td>
+                                            Дивиденды
+                                        </td>
+
+                                        <td>
+                                            Стратегия ДУ “Агрессивная”
+                                        </td>
+
+                                        <td>
+                                            7,00 $
+                                        </td>
+                                    </tr>
+
+                                    <tr class="body-row">
+
+                                        <td>
+                                            28.04.2021
+                                        </td>
+
+                                        <td>
+                                            QIWI PLC
+                                        </td>
+
+                                        <td>
+                                            Дивиденды
+                                        </td>
+
+                                        <td>
+                                            Стратегия ДУ “Агрессивная”
+                                        </td>
+
+                                        <td>
+                                            3 740,00 ₽
+                                        </td>
+                                    </tr>
+
+                                </table>
+
+                            </td>
+
+                        </tr>
+                    </tbody>
+                </table>
+
+                <table class="section block-heading">
+                    <tr>
+                        <td>
+
+                            <table class="section-wrapper">
+                                <tbody>
+                                    <tr>
+
+                                        <td class="left-td heading-td">
+                                            <span>Структура активов по портфелю</span>
+                                        </td>
+
+                                        <td class="right-td heading-td">
+                                        </td>
+
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                        </td>
+                    </tr>
+                </table>
+
+                <table class="section graph-section projected-payments-section" style="height: 712px">
+                    <tr>
+                        <td>
+
+                            <table class="section-wrapper">
+                                <tbody>
+                                    <tr>
+
+                                        <td class="graph-td assets-structure-graph" valign="center" height="712px">
+                                            <img src="@Model.rootStr/img/assets-structure.jpg">
+                                        </td>
+
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                        </td>
+                    </tr>
+                </table>
+
+
+                <table class="section block-heading">
+                    <tr>
+                        <td>
+
+                            <table class="section-wrapper">
+                                <tbody>
+                                    <tr>
+
+                                        <td class="left-td heading-td">
+                                            <span>ОПИФ “Консервативный”</span>
+                                        </td>
+
+                                        <td class="right-td heading-td">
+                                        </td>
+
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                        </td>
+                    </tr>
+                </table>
+
+                <table class="section assets-section second-assets-section">
+                    <tr>
+                        <td>
+
+                            <table class="section-wrapper">
+                                <tbody>
+                                    <tr>
+
+                                        <td class="asset-block">
+                                            <p>Сумма активов на дату окончания периода</p>
+
+                                            <span>160 723 ₽</span>
+                                        </td>
+                                        <td width="20px"></td>
+                                        <td class="second-asset-block">
+                                            <p>Сумма дохода</p>
+
+                                            <span>60 723 ₽</span>
+                                        </td>
+                                        <td width="20px"></td>
+                                        <td class="second-asset-block">
+                                            <p>Относительная доходность (1,5%)</p>
+
+                                            <span>+12,07%</span>
+                                        </td>
+
+                                        <td width="220px"></td>
+
+                                        <td valign="top">
+                                            <table class="asset-additional-table">
+                                                <tr>
+                                                    <td class="second-asset-block asset-end-block">
+                                                        <p>Период</p>
+
+                                                        <span>21.08.21 - 21.08.21</span>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </td>
+
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                        </td>
+                    </tr>
+                </table>
+
+
+                <table class="section block-heading">
+                    <tr>
+                        <td>
+
+                            <table class="section-wrapper">
+                                <tbody>
+                                    <tr>
+
+                                        <td class="left-td heading-td">
+                                        </td>
+
+                                        <td class="right-td heading-td">
+                                        </td>
+
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                        </td>
+                    </tr>
+                </table>
+
+                <table class="section graph-section">
+                    <tr>
+                        <td>
+
+                            <table class="section-wrapper">
+                                <tbody>
+                                    <tr>
+
+                                        <td class="progression-graph">
+
+                                            <div class="progression-wrap">
+                                                <div class="hl"></div>
+
+                                                <div class="progression-item">
+                                                    <div class="progression-item-text">
+                                                        <p>В начале периода</p>
+                                                        <span>1 233 833</span>
+                                                    </div>
+                                                </div>
+
+                                                <div class="progression-item progression-top">
+                                                    <div class="progression-item-text">
+                                                        <p>Пополнения</p>
+                                                        <span>+ 5 000,45</span>
+                                                    </div>
+                                                </div>
+
+
+                                                <div class="progression-item">
+                                                    <div class="progression-item-text">
+                                                        <p>Выводы</p>
+                                                        <span>1 000,45</span>
+                                                    </div>
+                                                </div>
+
+                                                <div class="progression-item">
+                                                    <div class="progression-item-text">
+                                                        <p>В конце периода</p>
+                                                        <span>1 393 648</span>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+
+                                        </td>
+
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                        </td>
+                    </tr>
+                </table>
+
+
+            </td>
+        </tr>
+    </table>
+
+
+</body>
+</html>

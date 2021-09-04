@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Wkhtmltopdf.NetCore;
 
 namespace ReportsProcatt
 {
@@ -25,6 +26,7 @@ namespace ReportsProcatt
         {
             //services.AddRazorPages();
             services.AddControllers();
+            services.AddWkhtmltopdf();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
