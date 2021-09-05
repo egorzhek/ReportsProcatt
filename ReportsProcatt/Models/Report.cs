@@ -49,7 +49,7 @@ namespace ReportsProcatt.Models
         private SQLData _data;
         private DataSet _invFullDS => _data.DataSet_InvestorFull;
         #endregion
-        public Report(int InvestorId, DateTime DateFrom, DateTime DateTo)
+        public Report(int InvestorId, DateTime? DateFrom, DateTime? DateTo)
         {
             _data = new SQLData(InvestorId, DateFrom, DateTo);
 
@@ -87,10 +87,11 @@ namespace ReportsProcatt.Models
 
             PIFsTotals.Ths = new List<ViewElementAttr>
             {
-                new ViewElementAttr{ColumnName = PIFsTotalColumns.PIFs, DisplayName = "ПИФЫ", AttrRow = @"width=""520px""", SortOrder = 1},
+                new ViewElementAttr{ColumnName = PIFsTotalColumns.PIFs, DisplayName = "ПИФЫ", SortOrder = 1},
                 new ViewElementAttr{ColumnName = PIFsTotalColumns.AssetsToEnd, DisplayName = $"АКТИВЫ НА {Dto.ToString("dd.MM.yyyy")}", SortOrder = 2 },
                 new ViewElementAttr{ColumnName = PIFsTotalColumns.Result, DisplayName = $"РЕЗУЛЬТАТЫ ЗА {Period}", SortOrder = 3 }
             };
+            PIFsTotals.Ths.Where(t => t.ColumnName == PIFsTotalColumns.PIFs).First().AttrRow.Add("width", "520px");
 
             foreach (DataRow dr in _invFullDS.Tables[4].Rows)
             {
@@ -116,10 +117,11 @@ namespace ReportsProcatt.Models
 
             DUsTotals.Ths = new List<ViewElementAttr>
             {
-                new ViewElementAttr{ColumnName = DUsTotalColumns.DUs, DisplayName = "ДОВЕРИТЕЛЬНОЕ УПРАВЛЕНИЕ", AttrRow = @"width=""520px""", SortOrder = 1},
+                new ViewElementAttr{ColumnName = DUsTotalColumns.DUs, DisplayName = "ДОВЕРИТЕЛЬНОЕ УПРАВЛЕНИЕ", SortOrder = 1},
                 new ViewElementAttr{ColumnName = DUsTotalColumns.AssetsToEnd, DisplayName = $"АКТИВЫ НА {Dto.ToString("dd.MM.yyyy")}", SortOrder = 2 },
                 new ViewElementAttr{ColumnName = DUsTotalColumns.Result, DisplayName = $"РЕЗУЛЬТАТЫ ЗА {Period}", SortOrder = 3 }
             };
+            DUsTotals.Ths.Where(t => t.ColumnName == DUsTotalColumns.DUs).First().AttrRow.Add("width", "520px");
 
             foreach (DataRow dr in _invFullDS.Tables[5].Rows)
             {
@@ -149,10 +151,9 @@ namespace ReportsProcatt.Models
             AllAssets.Table.Columns.Add(AllAssetsColumns.CurrencyProfit);
             AllAssets.Table.Columns.Add(AllAssetsColumns.ProfitPercent);
 
-
             AllAssets.Ths = new List<ViewElementAttr>
             {
-                new ViewElementAttr{ColumnName = AllAssetsColumns.Product, DisplayName = "ПРОДУКТ", AttrRow = @"width=""520px""", SortOrder = 1},
+                new ViewElementAttr{ColumnName = AllAssetsColumns.Product, DisplayName = "ПРОДУКТ", SortOrder = 1},
                 new ViewElementAttr{ColumnName = AllAssetsColumns.BeginAssets, DisplayName = "АКТИВЫ НА НАЧАЛО ПЕРИОДА", SortOrder = 2},
                 new ViewElementAttr{ColumnName = AllAssetsColumns.InVal, DisplayName = "ПОПОЛНЕНИЕ", SortOrder = 3},
                 new ViewElementAttr{ColumnName = AllAssetsColumns.OutVal, DisplayName = "ВЫВОД", SortOrder = 4},
@@ -162,6 +163,7 @@ namespace ReportsProcatt.Models
                 new ViewElementAttr{ColumnName = AllAssetsColumns.CurrencyProfit, DisplayName = "ДОХОД В ВАЛЮТЕ", SortOrder = 8},
                 new ViewElementAttr{ColumnName = AllAssetsColumns.ProfitPercent, DisplayName = "ДОХОД В %", SortOrder = 9},
             };
+            AllAssets.Ths.Where(t => t.ColumnName == AllAssetsColumns.Product).First().AttrRow.Add("width", "520px");
 
             foreach (DataRow dr in _invFullDS.Tables[6].Rows)
             {
@@ -244,6 +246,10 @@ namespace ReportsProcatt.Models
         public int SortOrder { get; set; }
         public string ColumnName { get; set; }
         public string DisplayName { get; set; }
-        public string AttrRow { get; set; }
+        public Dictionary<string,string> AttrRow = new Dictionary<string, string>();
+        public ViewElementAttr()
+        {
+            AttrRow = new Dictionary<string, string>();
+        }
     }
 }

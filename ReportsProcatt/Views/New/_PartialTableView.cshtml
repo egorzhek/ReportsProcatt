@@ -16,7 +16,7 @@
                                 <tr class="heading-row">
                                     @foreach (var th in Model.Ths)
                                     {
-                                    <th @th.AttrRow>
+                                    <th @String.Join(" ", th.AttrRow.ToList().Select(k => $"{k.Key}=\"{k.Value}\" ").ToArray())>
                                         @th.DisplayName
                                     </th>
                                     }
