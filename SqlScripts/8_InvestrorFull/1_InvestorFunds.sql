@@ -8,7 +8,8 @@ CREATE OR ALTER PROCEDURE [dbo].[app_CulcFundProfit]
     @EndDate Date,
     @ProfitValue decimal(28,10) = NULL output,
     @ProfitProcentValue decimal(28,10) = NULL output,
-    @BeginValue decimal(28,10) = NULL output
+    @BeginValue decimal(28,10) = NULL output,
+    @EndValue decimal(28,10) = NULL output
 )
 AS BEGIN
     SET @ProfitValue = NULL;
@@ -188,6 +189,7 @@ AS BEGIN
     SET @ProfitValue = @InvestResult;
     SET @ProfitProcentValue = case when @ResutSum = 0.00 then 0 else [dbo].f_Round(@InvestResult/@ResutSum * 100.000, 2) end;
     SET @BeginValue = @Snach;
+	SET @EndValue = @EndSumAmount;
 
     BEGIN TRY
         DROP TABLE #ResInv
@@ -210,7 +212,8 @@ AS BEGIN
         VAL decimal(28,10) NULL,
         ProfitValue decimal(28,10) NULL,
         ProfitProcentValue decimal(28,10) NULL,
-        BeginValue decimal(28,10) NULL
+        BeginValue decimal(28,10) NULL,
+		EndValue decimal(28,10) NULL
     );
 
     insert into @ReSult
@@ -246,7 +249,7 @@ AS BEGIN
     left join FundNames as fn on sd.FundId = fn.Id;
 
 
-    declare @FundId Int, @ProfitValue decimal(28,10), @ProfitProcentValue decimal(28,10), @BeginValue decimal(28,10);
+    declare @FundId Int, @ProfitValue decimal(28,10), @ProfitProcentValue decimal(28,10), @BeginValue decimal(28,10), @EndValue decimal(28,10);
 
 
     declare obj_cur cursor local fast_forward for
@@ -264,10 +267,11 @@ AS BEGIN
             @EndDate = @EndDate,
             @ProfitValue = @ProfitValue output,
             @ProfitProcentValue = @ProfitProcentValue output,
-            @BeginValue = @BeginValue output;
+            @BeginValue = @BeginValue output,
+			@EndValue = @EndValue output;
 
         update @ReSult
-            set ProfitValue = @ProfitValue, ProfitProcentValue = @ProfitProcentValue, BeginValue = @BeginValue
+            set ProfitValue = @ProfitValue, ProfitProcentValue = @ProfitProcentValue, BeginValue = @BeginValue, EndValue = @EndValue
         where FundId = @FundId
         
         fetch next from obj_cur into
@@ -283,6 +287,7 @@ AS BEGIN
         ProfitValue = CAST([dbo].f_Round(ProfitValue, 2) AS DECIMAL(30,2)),
         ProfitProcentValue = CAST([dbo].f_Round(ProfitProcentValue, 2) AS DECIMAL(30,2)),
         BeginValue = CAST([dbo].f_Round(BeginValue, 2) AS DECIMAL(30,2)),
+		EndValue = CAST([dbo].f_Round(EndValue, 2) AS DECIMAL(30,2)),
         Valuta = N'₽'
     from @ReSult
     order by FundName;

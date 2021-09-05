@@ -8,7 +8,8 @@ CREATE OR ALTER PROCEDURE [dbo].[app_CulcContractProfit]
     @EndDate Date,
     @ProfitValue decimal(28,10) = NULL output,
     @ProfitProcentValue decimal(28,10) = NULL output,
-    @BeginValue decimal(28,10) = NULL output
+    @BeginValue decimal(28,10) = NULL output,
+    @EndValue decimal(28,10) = NULL output
 )
 AS BEGIN
     declare @MinDate date, @MaxDate date
@@ -182,6 +183,7 @@ AS BEGIN
     SET @ProfitValue = @InvestResult;
     SET @ProfitProcentValue = @InvestResult/@ResutSum;
     SET @BeginValue = @Snach;
+	SET @EndValue = @SItog;
 
     BEGIN TRY
         DROP TABLE #ResInvAssets5
@@ -203,7 +205,8 @@ AS BEGIN
         ContractName NVarchar(300) NULL,
         ProfitValue decimal(28,10) NULL,
         ProfitProcentValue decimal(28,10) NULL,
-        BeginValue decimal(28,10) NULL
+        BeginValue decimal(28,10) NULL,
+		EndValue decimal(28,10) NULL
     );
 
     insert into @ReSult
@@ -234,7 +237,7 @@ AS BEGIN
 
     
     
-    declare @ContractId Int, @ProfitValue decimal(28,10), @ProfitProcentValue decimal(28,10), @BeginValue decimal(28,10);
+    declare @ContractId Int, @ProfitValue decimal(28,10), @ProfitProcentValue decimal(28,10), @BeginValue decimal(28,10), @EndValue decimal(28,10);
 
 
     declare obj_cur cursor local fast_forward for
@@ -252,10 +255,11 @@ AS BEGIN
             @EndDate = @EndDate,
             @ProfitValue = @ProfitValue output,
             @ProfitProcentValue = @ProfitProcentValue output,
-            @BeginValue = @BeginValue output;
+            @BeginValue = @BeginValue output,
+			@EndValue = @EndValue output
 
         update @ReSult
-            set ProfitValue = @ProfitValue, ProfitProcentValue = @ProfitProcentValue, BeginValue = @BeginValue
+            set ProfitValue = @ProfitValue, ProfitProcentValue = @ProfitProcentValue, BeginValue = @BeginValue, EndValue = @EndValue
         where ContractId = @ContractId
         
         fetch next from obj_cur into
@@ -269,6 +273,7 @@ AS BEGIN
         ProfitValue = CAST([dbo].f_Round(ProfitValue, 2) AS DECIMAL(30,2)),
         ProfitProcentValue = CAST([dbo].f_Round(ProfitProcentValue, 2) AS DECIMAL(30,2)),
         BeginValue = CAST([dbo].f_Round(BeginValue, 2) AS DECIMAL(30,2)),
+		EndValue = CAST([dbo].f_Round(EndValue, 2) AS DECIMAL(30,2)),
         Valuta = N'₽'
     from @ReSult
     order by ContractName;
