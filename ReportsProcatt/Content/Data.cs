@@ -30,7 +30,7 @@ namespace ReportsProcatt.Content
                 connection.Open();
 
                 //string queryString1 = File.ReadAllText(@"c:\Users\D\source\Ingos\ReportsProcatt\Reports\InverstorFull.sql");
-                string queryString1 = File.ReadAllText(Path.Combine(ReportPath, @"Reports\InverstorFull.sql"));
+                string queryString1 = File.ReadAllText(Path.Combine(ReportPath, "InverstorFull.sql"));
 
                 SqlCommand command1 = new SqlCommand(queryString1, connection);
                 command1.CommandType = CommandType.Text;
