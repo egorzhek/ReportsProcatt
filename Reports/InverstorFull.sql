@@ -392,6 +392,17 @@ select DonutLabel1 = N'6 405 ₽', DonutLabel2 = N'4 актива'
 		@StartDate = @StartDate,
 		@EndDate = @EndDate
 
+  -- Результаты по ПИФам
+  EXEC dbo.GetInvestorFundResults 
+      @InvestorId = @InvestorId,
+  		@StartDate = @StartDate,
+  		@EndDate = @EndDate
+
+  -- Результаты по ДУ
+  EXEC dbo.GetInvestorContractResults
+      @InvestorId = @InvestorId,
+  		@StartDate = @StartDate,
+  		@EndDate = @EndDate
 
 BEGIN TRY
 	DROP TABLE #ResInvAssets

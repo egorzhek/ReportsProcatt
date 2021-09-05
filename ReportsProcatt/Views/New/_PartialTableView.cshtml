@@ -1,0 +1,48 @@
+﻿@using System.Data
+@model ReportsProcatt.Models.TableView
+
+<table class="section info-table-section">
+    <tr>
+        <td>
+
+            <table class="section-wrapper">
+                <tbody>
+                    <tr>
+
+                        <td class="info-table-wrap-td">
+
+                            <table class="info-table">
+                                
+                                <tr class="heading-row">
+                                    @foreach (var th in Model.Ths)
+                                    {
+                                    <th @th.AttrRow>
+                                        @th.DisplayName
+                                    </th>
+                                    }
+                                </tr>
+
+                                @foreach (DataRow tr in Model.Table.Rows)
+                                {
+                                <tr class="body-row">
+                                    @foreach (var th in Model.Ths)
+                                    {
+                                    <td>
+                                        @tr[th.ColumnName].ToString()
+                                    </td>
+                                    }
+
+                                </tr>
+                                }
+
+                            </table>
+
+                        </td>
+
+                    </tr>
+                </tbody>
+            </table>
+
+        </td>
+    </tr>
+</table>

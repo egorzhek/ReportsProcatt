@@ -1,5 +1,4 @@
 ﻿@model ReportsProcatt.Models.Report
-@*@Model.rootStr*@
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18,7 +17,6 @@
     <table class="section header">
         <tr>
             <td>
-
                 <table class="section-wrapper">
                     <tbody>
                         <tr>
@@ -30,7 +28,7 @@
                             </td>
 
                             <td class="right-td">
-                                <span>ОТЧЕТ ПО ПОРТФЕЛЮ / 01.01.2021 – 12.07.2021</span>
+                                <span>ОТЧЕТ ПО ПОРТФЕЛЮ / @Model.Period</span>
                             </td>
 
                         </tr>
@@ -52,19 +50,19 @@
                             <td class="asset-block">
                                 <p>Сумма активов на дату окончания периода</p>
 
-                                <span>160 723 ₽</span>
+                                <span>@Model.MainHeader.TotalSum</span>
                             </td>
                             <td width="20px"></td>
                             <td class="second-asset-block">
                                 <p>Сумма дохода</p>
 
-                                <span>60 723 ₽</span>
+                                <span>@Model.MainHeader.ProfitSum</span>
                             </td>
                             <td width="20px"></td>
                             <td class="second-asset-block">
-                                <p>Относительная доходность (1,5%)</p>
+                                <p>Относительная доходность</p>
 
-                                <span>+12,07%</span>
+                                <span>@Model.MainHeader.Return</span>
                             </td>
 
                             <td width="220px"></td>
@@ -75,7 +73,7 @@
                                         <td class="second-asset-block asset-end-block">
                                             <p>Период</p>
 
-                                            <span>21.08.21 - 21.08.21</span>
+                                            <span>@Model.Period</span>
                                         </td>
                                     </tr>
                                 </table>
@@ -102,7 +100,7 @@
                             </td>
 
                             <td class="right-td heading-td">
-                                <span>Валюта: RUB</span>
+                                <span>Валюта: @Model.ReportCurrency</span>
                             </td>
 
                         </tr>
@@ -113,102 +111,7 @@
         </tr>
     </table>
 
-    <table class="section graph-section">
-        <tr>
-            <td>
-
-                <table class="section-wrapper">
-                    <tbody>
-                        <tr>
-
-                            <td class="progression-graph">
-
-                                <div class="progression-wrap">
-                                    <div class="hl"></div>
-
-                                    <div class="progression-item">
-                                        <div class="progression-item-text">
-                                            <p>В начале периода</p>
-                                            <span>1 233 833</span>
-                                        </div>
-                                    </div>
-
-                                    <div class="progression-item progression-top">
-                                        <div class="progression-item-text">
-                                            <p>Зачисления</p>
-                                            <span>+3 431</span>
-                                        </div>
-                                    </div>
-
-                                    <div class="progression-item">
-                                        <div class="progression-item-text">
-                                            <p>Выводы</p>
-                                            <span>0</span>
-                                        </div>
-                                    </div>
-
-                                    <div class="progression-item progression-top">
-                                        <div class="progression-item-text">
-                                            <p>Дивиденды</p>
-                                            <span>+13 119</span>
-                                        </div>
-                                    </div>
-
-                                    <div class="progression-item progression-top">
-                                        <div class="progression-item-text">
-                                            <p>Купоны</p>
-                                            <span>+14 184</span>
-                                        </div>
-                                    </div>
-
-                                    <div class="progression-item progression-top">
-                                        <div class="progression-item-text">
-                                            <p>Переоценка</p>
-                                            <span>+133 421</span>
-                                        </div>
-                                    </div>
-
-                                    <div class="progression-item progression-top">
-                                        <div class="progression-item-text">
-                                            <p>Пополнение</p>
-                                            <span>+ 9 534</span>
-                                        </div>
-                                    </div>
-
-                                    <div class="progression-item progression-minus">
-                                        <div class="progression-item-text">
-                                            <p>Налогов</p>
-                                            <span>-3 508</span>
-                                        </div>
-                                    </div>
-
-                                    <div class="progression-item progression-minus">
-                                        <div class="progression-item-text">
-                                            <p>Комиссия</p>
-                                            <span>-282</span>
-                                        </div>
-                                    </div>
-
-                                    <div class="progression-item">
-                                        <div class="progression-item-text">
-                                            <p>В конце периода</p>
-                                            <span>1 393 648</span>
-                                        </div>
-                                    </div>
-
-                                </div>
-
-
-
-                            </td>
-
-                        </tr>
-                    </tbody>
-                </table>
-
-            </td>
-        </tr>
-    </table>
+    @Html.Partial("_PartialMainDiagram", Model.MainDiagram)
 
 
     <table class="section block-heading">
@@ -223,7 +126,7 @@
                             </td>
 
                             <td class="right-td heading-td">
-                                <span>Период: 21.08.21 - 21.08.21</span>
+                                <span>Период: @Model.Period</span>
                             </td>
 
                         </tr>
@@ -234,145 +137,10 @@
         </tr>
     </table>
 
-    <table class="section info-table-section">
-        <tr>
-            <td>
 
-                <table class="section-wrapper">
-                    <tbody>
-                        <tr>
+    @Html.Partial("_PartialTableView", Model.PIFsTotals)
 
-                            <td class="info-table-wrap-td">
-
-                                <table class="info-table">
-                                    <tr class="heading-row">
-                                        <th width="520px">
-                                            Пифы
-                                        </th>
-
-                                        <th>
-                                            Активы на 03.08.2021
-                                        </th>
-
-                                        <th>
-                                            Результаты за <br> 03.08.2020 - 03.09.2020
-                                        </th>
-                                    </tr>
-
-                                    <tr class="body-row">
-
-                                        <td>
-                                            ОПИФ “Консервативный!
-                                        </td>
-
-                                        <td>
-                                            7 581
-                                        </td>
-
-                                        <td>
-                                            69 780,22 ₽ (16,04%)
-                                        </td>
-
-                                    </tr>
-
-                                    <tr class="body-row">
-
-                                        <td>
-                                            ОПИФ “Консервативный!
-                                        </td>
-
-                                        <td>
-                                            7 581
-                                        </td>
-
-                                        <td>
-                                            69 780,22 ₽ (16,04%)
-                                        </td>
-
-                                    </tr>
-
-
-                                </table>
-
-                            </td>
-
-                        </tr>
-                    </tbody>
-                </table>
-
-            </td>
-        </tr>
-    </table>
-
-    <table class="section info-table-section">
-        <tr>
-            <td>
-
-                <table class="section-wrapper">
-                    <tbody>
-                        <tr>
-
-                            <td class="info-table-wrap-td">
-
-                                <table class="info-table">
-                                    <tr class="heading-row">
-                                        <th width="520px">
-                                            Доверительное управление
-                                        </th>
-
-                                        <th>
-                                            Активы на 03.08.2021
-                                        </th>
-
-                                        <th>
-                                            Результаты за <br> 03.08.2020 - 03.09.2020
-                                        </th>
-                                    </tr>
-
-                                    <tr class="body-row">
-
-                                        <td>
-                                            Агрессивный портфель
-                                        </td>
-
-                                        <td>
-                                            7 581
-                                        </td>
-
-                                        <td>
-                                            69 780,22 ₽ (16,04%)
-                                        </td>
-
-                                    </tr>
-
-                                    <tr class="body-row">
-
-                                        <td>
-                                            Передовые технологии
-                                        </td>
-
-                                        <td>
-                                            7 581
-                                        </td>
-
-                                        <td>
-                                            69 780,22 ₽ (16,04%)
-                                        </td>
-
-                                    </tr>
-
-
-                                </table>
-
-                            </td>
-
-                        </tr>
-                    </tbody>
-                </table>
-
-            </td>
-        </tr>
-    </table>
+    @Html.Partial("_PartialTableView", Model.DUsTotals)
 
     @*<div style="page-break-before: always;"></div>*@
     <table class="section block-heading">
@@ -399,146 +167,7 @@
         </tr>
     </table>
 
-    <table class="section info-table-section assets-info-table">
-        <tr>
-            <td>
-
-                <table class="section-wrapper">
-                    <tbody>
-                        <tr>
-
-                            <td class="info-table-wrap-td">
-
-                                <table class="info-table">
-                                    <tr class="heading-row">
-
-                                        <th width="220">
-                                            Продукт
-                                        </th>
-
-                                        <th>
-                                            Активы <br> на начало периода
-                                        </th>
-
-                                        <th>
-                                            Пополнение
-                                        </th>
-
-                                        <th>
-                                            Вывод <br> средств
-                                        </th>
-
-                                        <th>
-                                            Дивиденды
-                                        </th>
-
-                                        <th>
-                                            Купоны
-                                        </th>
-
-                                        <th>
-                                            активы на <br> конец периода
-                                        </th>
-
-                                        <th>
-                                            доход <br> в валюте
-                                        </th>
-
-                                        <th>
-                                            Доход в %
-                                        </th>
-                                    </tr>
-
-                                    <tr class="body-row">
-
-                                        <td width="220">
-                                            ПИФы
-                                        </td>
-
-                                        <td>
-                                            7 581
-                                        </td>
-
-                                        <td>
-                                            7 581
-                                        </td>
-
-                                        <td>
-                                            7 581
-                                        </td>
-
-                                        <td>
-                                            7 581
-                                        </td>
-
-                                        <td>
-                                            7 581
-                                        </td>
-
-                                        <td>
-                                            7 581
-                                        </td>
-
-                                        <td>
-                                            7 581
-                                        </td>
-
-                                        <td>
-                                            7 581
-                                        </td>
-                                    </tr>
-
-                                    <tr class="body-row">
-
-                                        <td width="220">
-                                            ДУ
-                                        </td>
-
-                                        <td>
-                                            7 581
-                                        </td>
-
-                                        <td>
-                                            7 581
-                                        </td>
-
-                                        <td>
-                                            7 581
-                                        </td>
-
-                                        <td>
-                                            7 581
-                                        </td>
-
-                                        <td>
-                                            7 581
-                                        </td>
-
-                                        <td>
-                                            7 581
-                                        </td>
-
-                                        <td>
-                                            7 581
-                                        </td>
-
-                                        <td>
-                                            7 581
-                                        </td>
-                                    </tr>
-
-
-                                </table>
-
-                            </td>
-
-                        </tr>
-                    </tbody>
-                </table>
-
-            </td>
-        </tr>
-    </table>
+    @Html.Partial("_PartialTableView", Model.AllAssets)
 
 
     <table class="section block-heading">

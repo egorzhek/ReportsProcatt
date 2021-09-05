@@ -1,0 +1,90 @@
+﻿@using ReportsProcatt.Models;
+@model Dictionary<string, string>;
+
+<table class="section graph-section">
+    <tr>
+        <td>
+
+            <table class="section-wrapper">
+                <tbody>
+                    <tr>
+
+                        <td class="progression-graph">
+
+                            <div class="progression-wrap">
+                                <div class="hl"></div>
+
+                                <div class="progression-item">
+                                    <div class="progression-item-text">
+                                        <p>В начале периода</p>
+                                        <span>@Model[MainDiagramParams.Begin]</span>
+                                    </div>
+                                </div>
+
+                                <div class="progression-item progression-top">
+                                    <div class="progression-item-text">
+                                        <p>Зачисления</p>
+                                        <span>@Model[MainDiagramParams.InVal]</span>
+                                    </div>
+                                </div>
+
+                                <div class="progression-item">
+                                    <div class="progression-item-text">
+                                        <p>Выводы</p>
+                                        <span>@Model[MainDiagramParams.OutVal]</span>
+                                    </div>
+                                </div>
+
+                                <div class="progression-item progression-top">
+                                    <div class="progression-item-text">
+                                        <p>Дивиденды</p>
+                                        <span>@Model[MainDiagramParams.Dividents]</span>
+                                    </div>
+                                </div>
+
+                                <div class="progression-item progression-top">
+                                    <div class="progression-item-text">
+                                        <p>Купоны</p>
+                                        <span>@Model[MainDiagramParams.Coupons]</span>
+                                    </div>
+                                </div>
+
+                                <div class="progression-item progression-top">
+                                    <div class="progression-item-text">
+                                        <p>Переоценка</p>
+                                        <span>@Model[MainDiagramParams.ReVal]</span>
+                                    </div>
+                                </div>
+
+                                <div class="progression-item progression-minus">
+                                    <div class="progression-item-text">
+                                        <p>Налогов</p>
+                                        <span>@Model[MainDiagramParams.Taxes]</span>
+                                    </div>
+                                </div>
+
+                                <div class="progression-item progression-minus">
+                                    <div class="progression-item-text">
+                                        <p>Комиссия</p>
+                                        <span>@Model[MainDiagramParams.Fee]</span>
+                                    </div>
+                                </div>
+
+                                <div class="progression-item">
+                                    <div class="progression-item-text">
+                                        <p>В конце периода</p>
+                                        <span>@Model[MainDiagramParams.End]</span>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+                </tbody>
+            </table>
+
+        </td>
+    </tr>
+</table>

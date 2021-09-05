@@ -3,7 +3,6 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <CopyRefAssembliesToPublishDirectory>false</CopyRefAssembliesToPublishDirectory>
-<RazorCompileOnBuild>false</RazorCompileOnBuild>
     <UserSecretsId>737f6cd7-022f-4652-b822-c1a6ed6cc921</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileRunEnvironmentFiles>Dockerfile.env</DockerfileRunEnvironmentFiles>
