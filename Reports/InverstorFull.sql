@@ -290,6 +290,8 @@ set @InvestResult =
 		set @ResutSum = @ResutSum/@SumT
 	end
 
+	if @ResutSum = 0 set @ResutSum = NULL;
+
 /*
 Declare @DATE_OPEN date, @NUM Nvarchar(100);
 
