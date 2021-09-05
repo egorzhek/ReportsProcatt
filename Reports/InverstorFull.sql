@@ -1,4 +1,4 @@
-DECLARE @ToDateStr     Nvarchar(50) = @DateToSharp;
+﻿DECLARE @ToDateStr     Nvarchar(50) = @DateToSharp;
 DECLARE @FromDateStr   Nvarchar(50) = @DateFromSharp;
 DECLARE @InvestorIdStr Nvarchar(50) = @InvestorIdSharp;
 --DECLARE @ContractIdStr Nvarchar(50) = @ContractIdSharp;
@@ -319,7 +319,9 @@ select
 	DateFromName = FORMAT(@StartDate,'dd.MM.yyyy'),
 	DateToName = FORMAT(@EndDate,'dd.MM.yyyy'),
 	Comment1 = N'Сумма дохода',
-	Comment2 = N'Относительная доходность'
+	Comment2 = N'Относительная доходность',
+  StartDate = @StartDate,
+  EndDate = @EndDate
 
 /*
 select ActiveName = 'Активы на ' + FORMAT(@StartDate,'dd.MM.yyyy') , ActiveValue = CAST(Round(@Snach,2) as Decimal(38,2)), Sort = 1
