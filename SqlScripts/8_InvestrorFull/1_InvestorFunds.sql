@@ -283,11 +283,11 @@ AS BEGIN
 
     select
         FundName,
-        VAL = CAST([dbo].f_Round(VAL, 2) AS DECIMAL(30,2)),
+        --VAL = CAST([dbo].f_Round(VAL, 2) AS DECIMAL(30,2)),
         ProfitValue = CAST([dbo].f_Round(ProfitValue, 2) AS DECIMAL(30,2)),
         ProfitProcentValue = CAST([dbo].f_Round(ProfitProcentValue, 2) AS DECIMAL(30,2)),
         BeginValue = CAST([dbo].f_Round(BeginValue, 2) AS DECIMAL(30,2)),
-		EndValue = CAST([dbo].f_Round(EndValue, 2) AS DECIMAL(30,2)),
+		EndValue = CAST([dbo].f_Round(VAL, 2) AS DECIMAL(30,2)),
         Valuta = N'₽'
     from @ReSult
     order by FundName;

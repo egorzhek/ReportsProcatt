@@ -202,6 +202,7 @@ AS BEGIN
     declare @ReSult table
     (
         ContractId Int NULL,
+		VAL decimal(28,10) NULL,
         ContractName NVarchar(300) NULL,
         ProfitValue decimal(28,10) NULL,
         ProfitProcentValue decimal(28,10) NULL,
@@ -212,6 +213,7 @@ AS BEGIN
     insert into @ReSult
     (
         ContractId,
+		VAL,
         ContractName,
         ProfitValue,
         ProfitProcentValue,
@@ -219,17 +221,22 @@ AS BEGIN
     )
     select
         sd.ContractId,
+		sd.VAL,
         ContractName = fn.NUM,
         ProfitValue = NULL,
         ProfitProcentValue = NULL,
         BeginValue = NULL
     from
     (
-        SELECT *
+        SELECT
+			ContractId,
+            VAL = VALUE_RUR - DailyIncrement_RUR - DailyDecrement_RUR
         FROM [CacheDB].[dbo].[Assets_Contracts] nolock
         where InvestorId = @InvestorId and [Date] = @EndDate
         union all
-        SELECT *
+        SELECT
+			ContractId,
+            VAL = VALUE_RUR - DailyIncrement_RUR - DailyDecrement_RUR
         FROM [CacheDB].[dbo].[Assets_ContractsLast] nolock
         where InvestorId = @InvestorId and [Date] = @EndDate
     ) as sd
@@ -273,7 +280,7 @@ AS BEGIN
         ProfitValue = CAST([dbo].f_Round(ProfitValue, 2) AS DECIMAL(30,2)),
         ProfitProcentValue = CAST([dbo].f_Round(ProfitProcentValue, 2) AS DECIMAL(30,2)),
         BeginValue = CAST([dbo].f_Round(BeginValue, 2) AS DECIMAL(30,2)),
-		EndValue = CAST([dbo].f_Round(EndValue, 2) AS DECIMAL(30,2)),
+		EndValue = CAST([dbo].f_Round(VAL, 2) AS DECIMAL(30,2)),
         Valuta = N'₽'
     from @ReSult
     order by ContractName;
