@@ -32,8 +32,8 @@ namespace ReportsProcatt.Controllers
         {
             try
             {
-                //var data = new Report(InvestorId, DateFrom, DateTo)
-                var data = new Report(2149652, new DateTime(2019,05,17), new DateTime(2021,05,29))
+                var data = new Report(InvestorId, DateFrom, DateTo)
+                //var data = new Report(2149652, new DateTime(2019,05,17), new DateTime(2021,05,29))
                 {
                     rootStr = "/app/wwwroot"
                 };
@@ -86,8 +86,8 @@ namespace ReportsProcatt.Controllers
             [FromQuery] DateTime DateTo
         )
         {
-            //var data = new Report(InvestorId, DateFrom, DateTo)
-            var data = new Report(2149652, new DateTime(2019, 05, 17), new DateTime(2021, 05, 29))
+            var data = new Report(InvestorId, DateFrom, DateTo)
+            //var data = new Report(2149652, new DateTime(2019, 05, 17), new DateTime(2021, 05, 29))
             {
                 
             };
