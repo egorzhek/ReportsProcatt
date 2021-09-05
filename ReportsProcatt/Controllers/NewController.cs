@@ -26,8 +26,8 @@ namespace ReportsProcatt.Controllers
         public async Task<IActionResult> Report
         (
             [FromQuery] int InvestorId,
-            [FromQuery] DateTime DateFrom,
-            [FromQuery] DateTime DateTo
+            [FromQuery] DateTime? DateFrom,
+            [FromQuery] DateTime? DateTo
         )
         {
             try
@@ -82,8 +82,8 @@ namespace ReportsProcatt.Controllers
         public IActionResult Index
         (
             [FromQuery] int InvestorId,
-            [FromQuery] DateTime DateFrom,
-            [FromQuery] DateTime DateTo
+            [FromQuery] DateTime? DateFrom,
+            [FromQuery] DateTime? DateTo
         )
         {
             var data = new Report(InvestorId, DateFrom, DateTo)
