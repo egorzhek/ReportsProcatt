@@ -19,3 +19,14 @@ https://localhost:49183/InverstorFull?InvestorId=2250624
 https://localhost:49183/InverstorFull?InvestorId=2250624&DateFrom=19.09.2003
 https://localhost:49183/InverstorFull?InvestorId=2250624&DateTo=20.12.2018
 https://localhost:49183/InverstorFull?InvestorId=2250624&DateFrom=19.09.2003&DateTo=20.12.2018
+
+
+https://localhost:49279/new/?InvestorId=2149652
+https://localhost:49279/new/?InvestorId=2149652&DateFrom=2019-05-17
+https://localhost:49279/new/?InvestorId=2149652&DateTo=2021-05-29
+https://localhost:49279/new/?InvestorId=2149652&DateFrom=2019-05-17&DateTo=2021-05-29
+
+https://localhost:49279/new/report/?InvestorId=2149652
+https://localhost:49279/new/report/?InvestorId=2149652&DateFrom=2019-05-17
+https://localhost:49279/new/report/?InvestorId=2149652&DateTo=2021-05-29
+https://localhost:49279/new/report/?InvestorId=2149652&DateFrom=2019-05-17&DateTo=2021-05-29
