@@ -1,0 +1,192 @@
+﻿<table class="section doughnut-section info-table-section">
+    <tbody>
+        <tr>
+            <td>
+
+                <table class="section-wrapper">
+                    <tbody>
+                        <tr>
+                            <td class="canvas-td">
+                                <div class="canvas-wrap">
+
+                                    <div class="canvas-holder">
+                                        <iframe class="chartjs-hidden-iframe" tabindex="-1" style="display: block; overflow: hidden; border: 0px; margin: 0px; inset: 0px; height: 100%; width: 100%; position: absolute; pointer-events: none; z-index: -1;"></iframe>
+                                        <canvas id="chart1" width="173" height="300" style="display: block; height: 300px; width: 520px;"></canvas>
+
+                                        <div class="label-text">
+                                            <span>6 405 ₽</span>
+                                            4 актива
+                                        </div>
+                                    </div>
+
+                                    <div class="canvas-holder">
+                                        <iframe class="chartjs-hidden-iframe" tabindex="-1" style="display: block; overflow: hidden; border: 0px; margin: 0px; inset: 0px; height: 100%; width: 100%; position: absolute; pointer-events: none; z-index: -1;"></iframe>
+                                        <canvas id="chart2" width="173" height="300" style="display: block; height: 300px; width: 520px;"></canvas>.
+                                        <div class="label-text">
+                                            <span>6 405 ₽</span>
+                                            27 компаний
+                                        </div>
+                                    </div>
+
+                                    <div class="canvas-holder">
+                                        <iframe class="chartjs-hidden-iframe" tabindex="-1" style="display: block; overflow: hidden; border: 0px; margin: 0px; inset: 0px; height: 100%; width: 100%; position: absolute; pointer-events: none; z-index: -1;"></iframe>
+                                        <canvas id="chart3" width="173" height="300" style="display: block; height: 300px; width: 520px;"></canvas>.
+                                        <div class="label-text">
+                                            USD
+                                            <span>6 405 ₽</span>
+                                            33,14%
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<script type="text/javascript">
+    const charData1 = {
+        type: 'doughnut',
+        data: {
+            labels: ["Акции", "Облигации", "Валюта", "Фонды"],
+            datasets: [{
+                label: "Test",
+                data: [59.77, 38.31, 1.86, 0.06],
+                backgroundColor: [
+                    '#09669A',
+                    '#00A0D0',
+                    '#9DD0E6',
+                    '#AEBDC3'
+                ],
+                borderColor: [
+                    '#09669A',
+                    '#00A0D0',
+                    '#9DD0E6',
+                    '#AEBDC3'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            cutoutPercentage: 68,
+            animation: {
+                animateScale: true,
+                animateRotate: true
+            },
+            responsive: true,
+            maintainAspectRatio: false,
+            legend: {
+                position: 'right',
+                align: 'center',
+                labels: {
+                    boxWidth: 10,
+                    padding: 20
+                }
+            },
+        }
+    };
+
+    const charData2 = {
+        type: 'doughnut',
+        data: {
+            labels: ["Сегежа", "НМТП", "Нафтатранс Плюс", "Mail.ru", "ЧЗПСН ао", "Alteryx", "OZON"],
+            datasets: [{
+                label: "Test",
+                data: [7.47, 7.23, 7.16, 6.45, 5.03, 4.99, 4.99],
+                backgroundColor: [
+                    '#099A80',
+                    '#29B49B',
+                    '#6FC3B4',
+                    '#034F4F',
+                    '#65D6C2',
+                    '#056F58',
+                    '#BBB9B9',
+                ],
+                borderColor: [
+                    '#099A80',
+                    '#29B49B',
+                    '#6FC3B4',
+                    '#034F4F',
+                    '#65D6C2',
+                    '#056F58',
+                    '#BBB9B9',
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            cutoutPercentage: 68,
+            animation: {
+                animateScale: true,
+                animateRotate: true
+            },
+            responsive: true,
+            maintainAspectRatio: false,
+            legend: {
+                position: 'right',
+                align: 'center',
+                labels: {
+                    boxWidth: 10,
+                    padding: 20
+                }
+            },
+        }
+    };
+
+    const charData3 = {
+        type: 'doughnut',
+        data: {
+            labels: ["RUB", "USD"],
+            datasets: [{
+                label: "Test",
+                data: [66.86, 33.14],
+                backgroundColor: [
+                    '#9668D1',
+                    '#B82EFA',
+                ],
+                borderColor: [
+                    '#9668D1',
+                    '#B82EFA',
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            cutoutPercentage: 68,
+            animation: {
+                animateScale: true,
+                animateRotate: true
+            },
+            responsive: true,
+            maintainAspectRatio: false,
+            legend: {
+                position: 'right',
+                align: 'center',
+                labels: {
+                    boxWidth: 10,
+                    padding: 20
+                }
+            },
+        }
+    };
+
+
+    function createChart(chartId, chartData) {
+        const ctx = document.getElementById(chartId);
+        const myChart = new Chart(ctx, {
+            type: chartData.type,
+            data: chartData.data,
+            options: chartData.options,
+        });
+    };
+
+    createChart('chart1', charData1);
+    createChart('chart2', charData2);
+    createChart('chart3', charData3);
+
+</script>

@@ -25,7 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Update="Views\New\Index.cshtml">
+    <Content Update="Pages\New\Index.cshtml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Update="wwwroot\css\style.css">
