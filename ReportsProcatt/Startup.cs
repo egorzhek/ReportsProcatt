@@ -19,8 +19,10 @@ namespace ReportsProcatt
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddRazorPages();
-            services.AddControllers();
+            services.AddControllersWithViews(mvcOtions =>
+            {
+                mvcOtions.EnableEndpointRouting = false;
+            });
             services.AddWkhtmltopdf();
         }
 
@@ -41,15 +43,17 @@ namespace ReportsProcatt
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
-            app.UseRouting();
-
             app.UseAuthorization();
-
-            app.UseEndpoints(endpoints =>
+            
+            app.UseMvcWithDefaultRoute();
+            app.UseMvc(routes =>
             {
-                endpoints.MapRazorPages();
-                endpoints.MapControllers();
+                routes.MapRoute(
+                    name: "default",
+                    template: "{controller}/{action}/{id?}",
+                    defaults: new { controller = "New", action = "Index" });
             });
+
         }
     }
 }

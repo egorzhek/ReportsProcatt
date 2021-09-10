@@ -32,8 +32,8 @@ namespace ReportsProcatt.Controllers
         {
             try
             {
-                var data = new Report(InvestorId, DateFrom, DateTo)
-                //var data = new Report(2149652, new DateTime(2019,05,17), new DateTime(2021,05,29))
+                //var data = new Report(InvestorId, DateFrom, DateTo)
+                var data = new Report(2149652, new DateTime(2019,05,17), new DateTime(2021,05,29))
                 {
                     rootStr = "/app/wwwroot"
                 };
@@ -70,12 +70,27 @@ namespace ReportsProcatt.Controllers
             [FromQuery] DateTime DateTo
         )
         {
-            var data = new Report(InvestorId, DateFrom, DateTo)
-            {
-                rootStr = "file:///c:/Users/D/source/Ingos/ReportsProcatt/ReportsProcatt/ReportsProcatt/wwwroot"
+            //var data = new Report(InvestorId, DateFrom, DateTo)
+            var data = new Report(2149652, new DateTime(2019, 05, 17), new DateTime(2021, 05, 29))
+            {//C:\Users\D\source\Ingos\ReportsProcatt\ReportsProcatt\wwwroot\css\style.css
+                rootStr = "file:///c:/Users/D/source/Ingos/ReportsProcatt/ReportsProcatt/wwwroot"
             };
 
             return await _generatePdf.GetPdf("Views/New/Index.cshtml", data);
+        }
+
+        [HttpGet]
+        [Route("Test_Report")]
+        public async Task<IActionResult> Test_Report()
+        {
+            return await _generatePdf.GetPdf("Views/New/Test.cshtml");
+        }
+
+        [HttpGet]
+        [Route("Test")]
+        public IActionResult Test()
+        {
+            return View("Test");
         }
 
         [HttpGet]
@@ -86,8 +101,8 @@ namespace ReportsProcatt.Controllers
             [FromQuery] DateTime? DateTo
         )
         {
-            var data = new Report(InvestorId, DateFrom, DateTo)
-            //var data = new Report(2149652, new DateTime(2019, 05, 17), new DateTime(2021, 05, 29))
+            //var data = new Report(InvestorId, DateFrom, DateTo)
+            var data = new Report(2149652, new DateTime(2019, 05, 17), new DateTime(2021, 05, 29))
             {
                 
             };

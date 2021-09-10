@@ -9,7 +9,7 @@
                             <td class="canvas-td">
                                 <div class="canvas-wrap">
 
-                                    <div class="canvas-holder">
+                                    <div class="canvas-holder" style="display: block; height: 300px; width: 520px;">
                                         <iframe class="chartjs-hidden-iframe" tabindex="-1" style="display: block; overflow: hidden; border: 0px; margin: 0px; inset: 0px; height: 100%; width: 100%; position: absolute; pointer-events: none; z-index: -1;"></iframe>
                                         <canvas id="chart1" width="173" height="300" style="display: block; height: 300px; width: 520px;"></canvas>
 
@@ -19,7 +19,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="canvas-holder">
+                                    <div class="canvas-holder" style="display: block; height: 300px; width: 520px;">
                                         <iframe class="chartjs-hidden-iframe" tabindex="-1" style="display: block; overflow: hidden; border: 0px; margin: 0px; inset: 0px; height: 100%; width: 100%; position: absolute; pointer-events: none; z-index: -1;"></iframe>
                                         <canvas id="chart2" width="173" height="300" style="display: block; height: 300px; width: 520px;"></canvas>.
                                         <div class="label-text">
@@ -28,7 +28,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="canvas-holder">
+                                    <div class="canvas-holder" style="display: block; height: 300px; width: 520px;">
                                         <iframe class="chartjs-hidden-iframe" tabindex="-1" style="display: block; overflow: hidden; border: 0px; margin: 0px; inset: 0px; height: 100%; width: 100%; position: absolute; pointer-events: none; z-index: -1;"></iframe>
                                         <canvas id="chart3" width="173" height="300" style="display: block; height: 300px; width: 520px;"></canvas>.
                                         <div class="label-text">
@@ -159,8 +159,8 @@
         options: {
             cutoutPercentage: 68,
             animation: {
-                animateScale: true,
-                animateRotate: true
+                animateScale: false,
+                animateRotate: false
             },
             responsive: true,
             maintainAspectRatio: false,

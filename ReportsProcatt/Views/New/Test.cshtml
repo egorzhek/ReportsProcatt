@@ -1,0 +1,80 @@
+﻿<!DOCTYPE html>
+@{ }
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js"></script>
+    <style>
+        .reportGraph {
+            height: 300px;
+            width: 520px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="reportGraph"><canvas id="canvas"></canvas></div>
+
+    <script type="text/javascript">
+// wkhtmltopdf 0.12.5 crash fix.
+// https://github.com/wkhtmltopdf/wkhtmltopdf/issues/3242#issuecomment-518099192
+'use strict';
+(function(setLineDash) {
+    CanvasRenderingContext2D.prototype.setLineDash = function() {
+        if(!arguments[0].length){
+            arguments[0] = [1,0];
+        }
+        // Now, call the original method
+        return setLineDash.apply(this, arguments);
+    };
+})(CanvasRenderingContext2D.prototype.setLineDash);
+Function.prototype.bind = Function.prototype.bind || function (thisp) {
+    var fn = this;
+    return function () {
+        return fn.apply(thisp, arguments);
+    };
+};
+
+function drawGraphs() {
+    new Chart(
+        document.getElementById("canvas"), {
+            "responsive": true,
+            "type":"doughnut",
+            "data": {
+                "labels": ["RUB", "USD"],
+                "datasets": [
+                    {
+                        "label": "My First Dataset",
+                        "data": [66.86, 33.14],
+                        "backgroundColor": ['#9668D1','#B82EFA'],
+                        "fill": true,
+                        "borderColor": ['#9668D1','#B82EFA'],
+                        "lineTension": 0.1
+                    }]
+            },
+            "options": {
+                "cutoutPercentage": 68,
+                "animation": {
+                    "animateScale": false,
+                    "animateRotate": false
+                },
+                "responsive": true,
+                "maintainAspectRatio": false,
+                "legend": {
+                    position: 'right',
+                    align: 'center',
+                    labels: {
+                        boxWidth: 10,
+                        padding: 20
+                    }
+                }
+            }
+        }
+    );
+}
+window.onload = function() {
+    drawGraphs();
+};
+    </script>
+</body>
+</html>
