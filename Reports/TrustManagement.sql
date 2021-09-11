@@ -2,6 +2,9 @@
 DECLARE @FromDateStr   Nvarchar(50) = @DateFromSharp;
 DECLARE @InvestorIdStr Nvarchar(50) = @InvestorIdSharp;
 DECLARE @ContractIdStr Nvarchar(50) = @ContractIdSharp;
+DECLARE @Valuta        Nvarchar(10) = NULL;
+
+if @Valuta is null set @Valuta = 'RUB';
 
 DECLARE
     @InvestorId int = CAST(@InvestorIdStr as Int),
@@ -51,11 +54,127 @@ SELECT *
 INTO #ResInvAssets
 FROM
 (
-	SELECT *
+	SELECT
+		InvestorId, ContractId, Date,
+		USDRATE, EURORATE,
+		VALUE_RUR =
+		case
+			when @Valuta = 'RUB' then VALUE_RUR
+			when @Valuta = 'USD' then VALUE_USD
+			when @Valuta = 'EUR' then VALUE_EURO
+			else VALUE_RUR
+		end,
+			VALUE_USD, VALUE_EURO,
+		DailyIncrement_RUR =
+		case
+			when @Valuta = 'RUB' then DailyIncrement_RUR
+			when @Valuta = 'USD' then DailyIncrement_USD
+			when @Valuta = 'EUR' then DailyIncrement_EURO
+			else DailyIncrement_RUR
+		end,
+			DailyIncrement_USD, DailyIncrement_EURO,
+		DailyDecrement_RUR =
+		case
+			when @Valuta = 'RUB' then DailyDecrement_RUR
+			when @Valuta = 'USD' then DailyDecrement_USD
+			when @Valuta = 'EUR' then DailyDecrement_EURO
+			else DailyDecrement_RUR
+		end,
+			DailyDecrement_USD, DailyDecrement_EURO,
+		INPUT_DIVIDENTS_RUR =
+		case
+			when @Valuta = 'RUB' then INPUT_DIVIDENTS_RUR
+			when @Valuta = 'USD' then INPUT_DIVIDENTS_USD
+			when @Valuta = 'EUR' then INPUT_DIVIDENTS_EURO
+			else INPUT_DIVIDENTS_RUR
+		end,
+			INPUT_DIVIDENTS_USD, INPUT_DIVIDENTS_EURO,
+		INPUT_COUPONS_RUR =
+		case
+			when @Valuta = 'RUB' then INPUT_COUPONS_RUR
+			when @Valuta = 'USD' then INPUT_COUPONS_USD
+			when @Valuta = 'EUR' then INPUT_COUPONS_EURO
+			else INPUT_COUPONS_RUR
+		end,
+			INPUT_COUPONS_USD, INPUT_COUPONS_EURO,
+		INPUT_VALUE_RUR =
+		case
+			when @Valuta = 'RUB' then INPUT_VALUE_RUR
+			when @Valuta = 'USD' then INPUT_VALUE_USD
+			when @Valuta = 'EUR' then INPUT_VALUE_EURO
+			else INPUT_VALUE_RUR
+		end,
+			INPUT_VALUE_USD, INPUT_VALUE_EURO,
+		OUTPUT_VALUE_RUR =
+		case
+			when @Valuta = 'RUB' then OUTPUT_VALUE_RUR
+			when @Valuta = 'USD' then OUTPUT_VALUE_USD
+			when @Valuta = 'EUR' then OUTPUT_VALUE_EURO
+			else OUTPUT_VALUE_RUR
+		end,
+			OUTPUT_VALUE_USD, OUTPUT_VALUE_EURO
 	FROM [CacheDB].[dbo].[Assets_Contracts] NOLOCK
 	WHERE InvestorId = @InvestorId and ContractId = @ContractId
 	UNION
-	SELECT *
+	SELECT
+		InvestorId, ContractId, Date,
+		USDRATE, EURORATE,
+		VALUE_RUR =
+		case
+			when @Valuta = 'RUB' then VALUE_RUR
+			when @Valuta = 'USD' then VALUE_USD
+			when @Valuta = 'EUR' then VALUE_EURO
+			else VALUE_RUR
+		end,
+			VALUE_USD, VALUE_EURO,
+		DailyIncrement_RUR =
+		case
+			when @Valuta = 'RUB' then DailyIncrement_RUR
+			when @Valuta = 'USD' then DailyIncrement_USD
+			when @Valuta = 'EUR' then DailyIncrement_EURO
+			else DailyIncrement_RUR
+		end,
+			DailyIncrement_USD, DailyIncrement_EURO,
+		DailyDecrement_RUR =
+		case
+			when @Valuta = 'RUB' then DailyDecrement_RUR
+			when @Valuta = 'USD' then DailyDecrement_USD
+			when @Valuta = 'EUR' then DailyDecrement_EURO
+			else DailyDecrement_RUR
+		end,
+			DailyDecrement_USD, DailyDecrement_EURO,
+		INPUT_DIVIDENTS_RUR =
+		case
+			when @Valuta = 'RUB' then INPUT_DIVIDENTS_RUR
+			when @Valuta = 'USD' then INPUT_DIVIDENTS_USD
+			when @Valuta = 'EUR' then INPUT_DIVIDENTS_EURO
+			else INPUT_DIVIDENTS_RUR
+		end,
+			INPUT_DIVIDENTS_USD, INPUT_DIVIDENTS_EURO,
+		INPUT_COUPONS_RUR =
+		case
+			when @Valuta = 'RUB' then INPUT_COUPONS_RUR
+			when @Valuta = 'USD' then INPUT_COUPONS_USD
+			when @Valuta = 'EUR' then INPUT_COUPONS_EURO
+			else INPUT_COUPONS_RUR
+		end,
+			INPUT_COUPONS_USD, INPUT_COUPONS_EURO,
+		INPUT_VALUE_RUR =
+		case
+			when @Valuta = 'RUB' then INPUT_VALUE_RUR
+			when @Valuta = 'USD' then INPUT_VALUE_USD
+			when @Valuta = 'EUR' then INPUT_VALUE_EURO
+			else INPUT_VALUE_RUR
+		end,
+			INPUT_VALUE_USD, INPUT_VALUE_EURO,
+		OUTPUT_VALUE_RUR =
+		case
+			when @Valuta = 'RUB' then OUTPUT_VALUE_RUR
+			when @Valuta = 'USD' then OUTPUT_VALUE_USD
+			when @Valuta = 'EUR' then OUTPUT_VALUE_EURO
+			else OUTPUT_VALUE_RUR
+		end,
+			OUTPUT_VALUE_USD, OUTPUT_VALUE_EURO
 	FROM [CacheDB].[dbo].[Assets_ContractsLast] NOLOCK
 	WHERE InvestorId = @InvestorId and ContractId = @ContractId
 ) AS R
@@ -236,7 +355,8 @@ select
 	Fee = 99.99,
 	ContractOpenDate = FORMAT(@DATE_OPEN,'dd.MM.yyyy'),
 	SuccessFee = 99.99,
-	DateFromName = FORMAT(@StartDate,'dd.MM.yyyy')
+	DateFromName = FORMAT(@StartDate,'dd.MM.yyyy'),
+	ParamValuta = @Valuta;
 
 select ActiveName = 'Активы на ' + FORMAT(@StartDate,'dd.MM.yyyy') , ActiveValue = CAST(Round(@Snach,2) as Decimal(38,2)), Sort = 1
 union
