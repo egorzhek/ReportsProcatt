@@ -282,6 +282,7 @@ AS BEGIN
 
 
     select
+		FundId,
         FundName,
         --VAL = CAST([dbo].f_Round(VAL, 2) AS DECIMAL(30,2)),
         ProfitValue = CAST([dbo].f_Round(ProfitValue, 2) AS DECIMAL(30,2)),

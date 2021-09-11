@@ -276,6 +276,7 @@ AS BEGIN
     deallocate obj_cur
 
     select
+		ContractId,
         ContractName,
         ProfitValue = CAST([dbo].f_Round(ProfitValue, 2) AS DECIMAL(30,2)),
         ProfitProcentValue = CAST([dbo].f_Round(ProfitProcentValue, 2) AS DECIMAL(30,2)),
