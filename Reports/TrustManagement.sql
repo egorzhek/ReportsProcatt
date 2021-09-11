@@ -1169,6 +1169,7 @@ update a set
 	a.FinResProcent = dbo.f_Round(a.FinResProcent * 100.000, 2)
 from #POSITION_KEEPING_EndDate as a;
 
+-- tree4
 select
 	Child2Id = a.Id,
 	ChildId = b.InvestmentId,
@@ -1181,11 +1182,72 @@ inner join #TrustTree as b with(nolock) on a.ShareId = b.VALUE_ID
 inner join [CacheDB].[dbo].[InvestmentIds] as i with(nolock) on b.InvestmentId = i.Id
 left join [CacheDB].[dbo].[Currencies] as c with(nolock) on a.CUR_ID = c.Id
 
+declare @CategoryId Int, @IsActive Int
 
--- tree4 -- потом доделать - четвёртый уровень
---select Child2Id = cast(1 as BigInt), ChildId = cast(4 as BigInt), Child2Name = 'ОФЗ, 26257', PriceName = N'125,22 ₽', Ammount = '5 шт.', Detail = N'-15,48 ₽ (-11,2%)'
---union
---select Child2Id = cast(2 as BigInt), ChildId = cast(4 as BigInt), Child2Name = 'ОФЗ, 26257', PriceName = N'125,22 ₽', Ammount = '1 шт.', Detail = N'-15,48 ₽ (-11,2%)'
+
+declare obj_cur cursor local fast_forward for
+	select Id, IsActive = 0
+	from Categories nolock
+	union all
+	select Id, IsActive = 1
+	from Categories nolock
+	order by Id, IsActive desc
+open obj_cur
+fetch next from obj_cur into
+	@CategoryId, @IsActive
+while(@@fetch_status = 0)
+begin
+
+	select
+		cc.CategoryId,
+		cg.CategoryName,
+		a.IsActive,
+		InvestmentId = b.InvestmentId,
+		Investment = i.Investment,
+		PriceName = CAST(CAST(Round(a.VALUE_NOM,2) as Decimal(30,2)) as Nvarchar(30)) + N' ' + isnull(c.Symbol,N'?'),
+		a.Amount,
+		Ammount2 =  FORMAT(a.Amount, '0.######') + ' шт.',
+		Detail =   FORMAT(a.FinRes, '0.######') + N' ' + isnull(c.Symbol,N'?') + ' (' + FORMAT(a.FinResProcent, '0.######') + '%)',
+		Valuta = isnull(c.Symbol,N'?'),
+		a.ShareId,
+		a.InvestorId,
+		a.ContractId,
+		a.Fifo_Date,
+		a.ISIN,
+		a.In_Wir,
+		a.In_Date,
+		a.Ic_NameId,
+		a.In_Dol,
+		a.Ir_Trans,
+		a.In_Summa,
+		a.In_Eq,
+		a.In_Comm,
+		a.In_Price,
+		a.Il_Num,
+		a.In_Price_eq,
+		a.Today_PRICE,
+		a.Value_NOM,
+		a.Dividends,
+		a.FinRes,
+		a.FinResProcent,
+		a.CUR_ID
+	from #POSITION_KEEPING_EndDate as a with(nolock)
+	inner join #TrustTree as b with(nolock) on a.ShareId = b.VALUE_ID
+	inner join [CacheDB].[dbo].[InvestmentIds] as i with(nolock) on b.InvestmentId = i.Id
+	inner join [dbo].[ClassCategories] as cc with(nolock) on a.Class = cc.ClassId and cc.CategoryId = @CategoryId
+	inner join [dbo].[Categories] as cg on cc.CategoryId = cg.Id
+	left join [CacheDB].[dbo].[Currencies] as c with(nolock) on a.CUR_ID = c.Id
+	where isnull(a.IsActive,0) = @IsActive
+	
+	fetch next from obj_cur into
+		@CategoryId, @IsActive
+end
+close obj_cur
+deallocate obj_cur
+
+
+
+
 
 BEGIN TRY
 	drop table #TrustTree;
