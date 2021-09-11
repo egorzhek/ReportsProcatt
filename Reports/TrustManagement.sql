@@ -1,4 +1,4 @@
-DECLARE @ToDateStr     Nvarchar(50) = @DateToSharp;
+﻿DECLARE @ToDateStr     Nvarchar(50) = @DateToSharp;
 DECLARE @FromDateStr   Nvarchar(50) = @DateFromSharp;
 DECLARE @InvestorIdStr Nvarchar(50) = @InvestorIdSharp;
 DECLARE @ContractIdStr Nvarchar(50) = @ContractIdSharp;
@@ -1201,7 +1201,7 @@ begin
 	select
 		cc.CategoryId,
 		cg.CategoryName,
-		a.IsActive,
+		[IsActive] = isnull(a.IsActive,0),
 		InvestmentId = b.InvestmentId,
 		Investment = i.Investment,
 		PriceName = CAST(CAST(Round(a.VALUE_NOM,2) as Decimal(30,2)) as Nvarchar(30)) + N' ' + isnull(c.Symbol,N'?'),
