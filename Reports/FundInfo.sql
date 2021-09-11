@@ -2,6 +2,9 @@ DECLARE @ToDateStr     Nvarchar(50) = @DateToSharp;
 DECLARE @FromDateStr   Nvarchar(50) = @DateFromSharp;
 DECLARE @InvestorIdStr Nvarchar(50) = @InvestorIdSharp;
 DECLARE @FundIdStr     Nvarchar(50) = @FundIdSharp;
+DECLARE @Valuta        Nvarchar(10) = NULL;
+
+if @Valuta is null set @Valuta = 'RUB';
 
 DECLARE
     @Investor int = CAST(@InvestorIdStr as Int),
@@ -58,11 +61,73 @@ SELECT *
 INTO #ResInv
 FROM
 (
-    SELECT *
+    SELECT
+		Investor, FundId, Date, AmountDay, SumAmount,
+		RATE, USDRATE, EVRORATE,
+		VALUE_RUR =
+		case
+			when @Valuta = 'RUB' then VALUE_RUR
+			when @Valuta = 'USD' then VALUE_USD
+			when @Valuta = 'EUR' then VALUE_EVRO
+			else AmountDayPlus_RUR
+		end,
+		VALUE_USD, VALUE_EVRO,
+		AmountDayPlus,
+		AmountDayPlus_RUR = 
+		case
+			when @Valuta = 'RUB' then AmountDayPlus_RUR
+			when @Valuta = 'USD' then AmountDayPlus_USD
+			when @Valuta = 'EUR' then AmountDayPlus_EVRO
+			else AmountDayPlus_RUR
+		end
+		,
+			AmountDayPlus_USD, AmountDayPlus_EVRO,
+		AmountDayMinus,
+		AmountDayMinus_RUR =
+		case
+			when @Valuta = 'RUB' then AmountDayMinus_RUR
+			when @Valuta = 'USD' then AmountDayMinus_USD
+			when @Valuta = 'EUR' then AmountDayMinus_EVRO
+			else AmountDayMinus_RUR
+		end
+		,
+			AmountDayMinus_USD, AmountDayMinus_EVRO,
+		LS_NUM
     FROM [CacheDB].[dbo].[InvestorFundDate] NOLOCK
     WHERE Investor = @Investor and FundId = @FundId
     UNION
-    SELECT *
+    SELECT
+		Investor, FundId, Date, AmountDay, SumAmount,
+		RATE, USDRATE, EVRORATE,
+		VALUE_RUR =
+		case
+			when @Valuta = 'RUB' then VALUE_RUR
+			when @Valuta = 'USD' then VALUE_USD
+			when @Valuta = 'EUR' then VALUE_EVRO
+			else AmountDayPlus_RUR
+		end,
+		VALUE_USD, VALUE_EVRO,
+		AmountDayPlus,
+		AmountDayPlus_RUR = 
+		case
+			when @Valuta = 'RUB' then AmountDayPlus_RUR
+			when @Valuta = 'USD' then AmountDayPlus_USD
+			when @Valuta = 'EUR' then AmountDayPlus_EVRO
+			else AmountDayPlus_RUR
+		end
+		,
+			AmountDayPlus_USD, AmountDayPlus_EVRO,
+		AmountDayMinus,
+		AmountDayMinus_RUR =
+		case
+			when @Valuta = 'RUB' then AmountDayMinus_RUR
+			when @Valuta = 'USD' then AmountDayMinus_USD
+			when @Valuta = 'EUR' then AmountDayMinus_EVRO
+			else AmountDayMinus_RUR
+		end
+		,
+			AmountDayMinus_USD, AmountDayMinus_EVRO,
+		LS_NUM
     FROM [CacheDB].[dbo].[InvestorFundDateLast] NOLOCK
     WHERE Investor = @Investor and FundId = @FundId
 ) AS R
@@ -202,7 +267,8 @@ set @AllMinus_RUR = @AmountDayMinus_RUR;
     [LS_NUM] = @LS_NUM,
     [EndSumAmount] = @EndSumAmount,
     [FundName] = @FundName,
-    [InvestorName] = @InvestorName;
+    [InvestorName] = @InvestorName,
+	[ParamValuta] = @Valuta;
     
     select
         [ActiveName] = 'Активы на ' + Replace(CONVERT(NVarchar(50), @StartDate, 103),'/','.'),
@@ -239,7 +305,13 @@ set @AllMinus_RUR = @AmountDayMinus_RUR;
     ORDER BY B.[W_Date];
 
     select
-        [Date], [RATE]
+        [Date], [RATE] =
+		case
+			when @Valuta = 'RUB' then RATE
+			when @Valuta = 'USD' then USDRATE
+			when @Valuta = 'EUR' then EVRORATE
+			else AmountDayMinus_RUR
+		end
     from #ResInv
     order by [Date];
     
