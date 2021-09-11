@@ -69,7 +69,7 @@ FROM
 			when @Valuta = 'RUB' then VALUE_RUR
 			when @Valuta = 'USD' then VALUE_USD
 			when @Valuta = 'EUR' then VALUE_EVRO
-			else AmountDayPlus_RUR
+			else VALUE_RUR
 		end,
 		VALUE_USD, VALUE_EVRO,
 		AmountDayPlus,

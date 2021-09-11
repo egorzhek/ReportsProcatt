@@ -9,9 +9,12 @@ CREATE OR ALTER PROCEDURE [dbo].[app_CulcContractProfit]
     @ProfitValue decimal(28,10) = NULL output,
     @ProfitProcentValue decimal(28,10) = NULL output,
     @BeginValue decimal(28,10) = NULL output,
-    @EndValue decimal(28,10) = NULL output
+    @EndValue decimal(28,10) = NULL output,
+	@Valuta Nvarchar(10) = NULL
 )
 AS BEGIN
+	if @Valuta is null set @Valuta = 'RUB';
+
     declare @MinDate date, @MaxDate date
 
     Declare @SItog numeric(30,10), @AmountDayMinus_RUR numeric(30,10), @Snach numeric(30,10), @AmountDayPlus_RUR numeric(30,10),
@@ -53,11 +56,139 @@ AS BEGIN
     INTO #ResInvAssets5
     FROM
     (
-        SELECT *
+        SELECT
+			InvestorId, ContractId, [Date], USDRATE, EURORATE,
+
+			VALUE_RUR =
+			case
+				when @Valuta = 'RUB' then VALUE_RUR
+				when @Valuta = 'USD' then VALUE_USD
+				when @Valuta = 'EUR' then VALUE_EURO
+				else VALUE_RUR
+			end,
+				VALUE_USD, VALUE_EURO,
+
+			DailyIncrement_RUR =
+			case
+				when @Valuta = 'RUB' then DailyIncrement_RUR
+				when @Valuta = 'USD' then DailyIncrement_USD
+				when @Valuta = 'EUR' then DailyIncrement_EURO
+				else DailyIncrement_RUR
+			end,
+				DailyIncrement_USD, DailyIncrement_EURO,
+
+			DailyDecrement_RUR =
+			case
+				when @Valuta = 'RUB' then DailyDecrement_RUR
+				when @Valuta = 'USD' then DailyDecrement_USD
+				when @Valuta = 'EUR' then DailyDecrement_EURO
+				else DailyDecrement_RUR
+			end,
+				DailyDecrement_USD, DailyDecrement_EURO,
+
+			INPUT_DIVIDENTS_RUR =
+			case
+				when @Valuta = 'RUB' then INPUT_DIVIDENTS_RUR
+				when @Valuta = 'USD' then INPUT_DIVIDENTS_USD
+				when @Valuta = 'EUR' then INPUT_DIVIDENTS_EURO
+				else INPUT_DIVIDENTS_RUR
+			end,
+				INPUT_DIVIDENTS_USD, INPUT_DIVIDENTS_EURO,
+
+			INPUT_COUPONS_RUR =
+			case
+				when @Valuta = 'RUB' then INPUT_COUPONS_RUR
+				when @Valuta = 'USD' then INPUT_COUPONS_USD
+				when @Valuta = 'EUR' then INPUT_COUPONS_EURO
+				else INPUT_COUPONS_RUR
+			end,
+				INPUT_COUPONS_USD, INPUT_COUPONS_EURO,
+
+			INPUT_VALUE_RUR =
+			case
+				when @Valuta = 'RUB' then INPUT_VALUE_RUR
+				when @Valuta = 'USD' then INPUT_VALUE_USD
+				when @Valuta = 'EUR' then INPUT_VALUE_EURO
+				else INPUT_VALUE_RUR
+			end,
+				INPUT_VALUE_USD, INPUT_VALUE_EURO,
+
+			OUTPUT_VALUE_RUR =
+			case
+				when @Valuta = 'RUB' then OUTPUT_VALUE_RUR
+				when @Valuta = 'USD' then OUTPUT_VALUE_USD
+				when @Valuta = 'EUR' then OUTPUT_VALUE_EURO
+				else OUTPUT_VALUE_RUR
+			end,
+				OUTPUT_VALUE_USD, OUTPUT_VALUE_EURO
         FROM [CacheDB].[dbo].[Assets_Contracts] NOLOCK
         WHERE InvestorId = @InvestorId and ContractId = @ContractId
         UNION
-        SELECT *
+        SELECT
+			InvestorId, ContractId, [Date], USDRATE, EURORATE,
+
+			VALUE_RUR =
+			case
+				when @Valuta = 'RUB' then VALUE_RUR
+				when @Valuta = 'USD' then VALUE_USD
+				when @Valuta = 'EUR' then VALUE_EURO
+				else VALUE_RUR
+			end,
+				VALUE_USD, VALUE_EURO,
+
+			DailyIncrement_RUR =
+			case
+				when @Valuta = 'RUB' then DailyIncrement_RUR
+				when @Valuta = 'USD' then DailyIncrement_USD
+				when @Valuta = 'EUR' then DailyIncrement_EURO
+				else DailyIncrement_RUR
+			end,
+				DailyIncrement_USD, DailyIncrement_EURO,
+
+			DailyDecrement_RUR =
+			case
+				when @Valuta = 'RUB' then DailyDecrement_RUR
+				when @Valuta = 'USD' then DailyDecrement_USD
+				when @Valuta = 'EUR' then DailyDecrement_EURO
+				else DailyDecrement_RUR
+			end,
+				DailyDecrement_USD, DailyDecrement_EURO,
+
+			INPUT_DIVIDENTS_RUR =
+			case
+				when @Valuta = 'RUB' then INPUT_DIVIDENTS_RUR
+				when @Valuta = 'USD' then INPUT_DIVIDENTS_USD
+				when @Valuta = 'EUR' then INPUT_DIVIDENTS_EURO
+				else INPUT_DIVIDENTS_RUR
+			end,
+				INPUT_DIVIDENTS_USD, INPUT_DIVIDENTS_EURO,
+
+			INPUT_COUPONS_RUR =
+			case
+				when @Valuta = 'RUB' then INPUT_COUPONS_RUR
+				when @Valuta = 'USD' then INPUT_COUPONS_USD
+				when @Valuta = 'EUR' then INPUT_COUPONS_EURO
+				else INPUT_COUPONS_RUR
+			end,
+				INPUT_COUPONS_USD, INPUT_COUPONS_EURO,
+
+			INPUT_VALUE_RUR =
+			case
+				when @Valuta = 'RUB' then INPUT_VALUE_RUR
+				when @Valuta = 'USD' then INPUT_VALUE_USD
+				when @Valuta = 'EUR' then INPUT_VALUE_EURO
+				else INPUT_VALUE_RUR
+			end,
+				INPUT_VALUE_USD, INPUT_VALUE_EURO,
+
+			OUTPUT_VALUE_RUR =
+			case
+				when @Valuta = 'RUB' then OUTPUT_VALUE_RUR
+				when @Valuta = 'USD' then OUTPUT_VALUE_USD
+				when @Valuta = 'EUR' then OUTPUT_VALUE_EURO
+				else OUTPUT_VALUE_RUR
+			end,
+				OUTPUT_VALUE_USD, OUTPUT_VALUE_EURO
         FROM [CacheDB].[dbo].[Assets_ContractsLast] NOLOCK
         WHERE InvestorId = @InvestorId and ContractId = @ContractId
     ) AS R
@@ -196,9 +327,12 @@ CREATE OR ALTER PROCEDURE [dbo].[GetInvestorContracts]
 (
     @InvestorId int,
     @StartDate Date,
-    @EndDate Date
+    @EndDate Date,
+	@Valuta Nvarchar(10) = NULL
 )
 AS BEGIN
+	if @Valuta is null set @Valuta = 'RUB';
+
     declare @ReSult table
     (
         ContractId Int NULL,
@@ -230,13 +364,25 @@ AS BEGIN
     (
         SELECT
 			ContractId,
-            VAL = VALUE_RUR - DailyIncrement_RUR - DailyDecrement_RUR
+            VAL =
+			case
+				when @Valuta = 'RUB' then VALUE_RUR - DailyIncrement_RUR - DailyDecrement_RUR
+				when @Valuta = 'USD' then VALUE_USD - DailyIncrement_USD - DailyDecrement_USD
+				when @Valuta = 'EUR' then VALUE_EURO - DailyIncrement_EURO - DailyDecrement_EURO
+				else VALUE_RUR - DailyIncrement_RUR - DailyDecrement_RUR
+			end
         FROM [CacheDB].[dbo].[Assets_Contracts] nolock
         where InvestorId = @InvestorId and [Date] = @EndDate
         union all
         SELECT
 			ContractId,
-            VAL = VALUE_RUR - DailyIncrement_RUR - DailyDecrement_RUR
+            VAL =
+			case
+				when @Valuta = 'RUB' then VALUE_RUR - DailyIncrement_RUR - DailyDecrement_RUR
+				when @Valuta = 'USD' then VALUE_USD - DailyIncrement_USD - DailyDecrement_USD
+				when @Valuta = 'EUR' then VALUE_EURO - DailyIncrement_EURO - DailyDecrement_EURO
+				else VALUE_RUR - DailyIncrement_RUR - DailyDecrement_RUR
+			end
         FROM [CacheDB].[dbo].[Assets_ContractsLast] nolock
         where InvestorId = @InvestorId and [Date] = @EndDate
     ) as sd
@@ -263,7 +409,8 @@ AS BEGIN
             @ProfitValue = @ProfitValue output,
             @ProfitProcentValue = @ProfitProcentValue output,
             @BeginValue = @BeginValue output,
-			@EndValue = @EndValue output
+			@EndValue = @EndValue output,
+			@Valuta = @Valuta
 
         update @ReSult
             set ProfitValue = @ProfitValue, ProfitProcentValue = @ProfitProcentValue, BeginValue = @BeginValue, EndValue = @EndValue
@@ -275,6 +422,13 @@ AS BEGIN
     close obj_cur
     deallocate obj_cur
 
+	declare @Symbol Nvarchar(10)
+
+	select
+		@Symbol = Symbol
+	from Currencies nolock
+	where ShortName = @Valuta
+
     select
 		ContractId,
         ContractName,
@@ -282,7 +436,7 @@ AS BEGIN
         ProfitProcentValue = CAST([dbo].f_Round(ProfitProcentValue, 2) AS DECIMAL(30,2)),
         BeginValue = CAST([dbo].f_Round(BeginValue, 2) AS DECIMAL(30,2)),
 		EndValue = CAST([dbo].f_Round(VAL, 2) AS DECIMAL(30,2)),
-        Valuta = N'₽'
+        Valuta = @Symbol
     from @ReSult
     order by ContractName;
 END

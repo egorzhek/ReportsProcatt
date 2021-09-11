@@ -9,9 +9,12 @@ CREATE OR ALTER PROCEDURE [dbo].[app_CulcFundProfit]
     @ProfitValue decimal(28,10) = NULL output,
     @ProfitProcentValue decimal(28,10) = NULL output,
     @BeginValue decimal(28,10) = NULL output,
-    @EndValue decimal(28,10) = NULL output
+    @EndValue decimal(28,10) = NULL output,
+	@Valuta Nvarchar(10) = NULL
 )
 AS BEGIN
+	if @Valuta is null set @Valuta = 'RUB';
+
     SET @ProfitValue = NULL;
     SET @ProfitProcentValue = NULL;
 
@@ -63,11 +66,71 @@ AS BEGIN
     INTO #ResInv
     FROM
     (
-        SELECT *
+        SELECT
+			Investor, FundId, [Date], AmountDay, SumAmount, RATE, USDRATE, EVRORATE,
+			VALUE_RUR =
+			case
+				when @Valuta = 'RUB' then VALUE_RUR
+				when @Valuta = 'USD' then VALUE_USD
+				when @Valuta = 'EUR' then VALUE_EVRO
+				else VALUE_RUR
+			end,
+				VALUE_USD, VALUE_EVRO,
+			AmountDayPlus,
+
+			AmountDayPlus_RUR =
+			case
+				when @Valuta = 'RUB' then AmountDayPlus_RUR
+				when @Valuta = 'USD' then AmountDayPlus_USD
+				when @Valuta = 'EUR' then AmountDayPlus_EVRO
+				else AmountDayPlus_RUR
+			end,
+				AmountDayPlus_USD, AmountDayPlus_EVRO,
+			AmountDayMinus,
+
+			AmountDayMinus_RUR =
+			case
+				when @Valuta = 'RUB' then AmountDayMinus_RUR
+				when @Valuta = 'USD' then AmountDayMinus_USD
+				when @Valuta = 'EUR' then AmountDayMinus_EVRO
+				else AmountDayMinus_RUR
+			end,
+				AmountDayMinus_USD, AmountDayMinus_EVRO,
+			LS_NUM
         FROM [CacheDB].[dbo].[InvestorFundDate] NOLOCK
         WHERE Investor = @Investor and FundId = @FundId
         UNION
-        SELECT *
+        SELECT
+			Investor, FundId, [Date], AmountDay, SumAmount, RATE, USDRATE, EVRORATE,
+			VALUE_RUR =
+			case
+				when @Valuta = 'RUB' then VALUE_RUR
+				when @Valuta = 'USD' then VALUE_USD
+				when @Valuta = 'EUR' then VALUE_EVRO
+				else VALUE_RUR
+			end,
+				VALUE_USD, VALUE_EVRO,
+			AmountDayPlus,
+
+			AmountDayPlus_RUR =
+			case
+				when @Valuta = 'RUB' then AmountDayPlus_RUR
+				when @Valuta = 'USD' then AmountDayPlus_USD
+				when @Valuta = 'EUR' then AmountDayPlus_EVRO
+				else AmountDayPlus_RUR
+			end,
+				AmountDayPlus_USD, AmountDayPlus_EVRO,
+			AmountDayMinus,
+
+			AmountDayMinus_RUR =
+			case
+				when @Valuta = 'RUB' then AmountDayMinus_RUR
+				when @Valuta = 'USD' then AmountDayMinus_USD
+				when @Valuta = 'EUR' then AmountDayMinus_EVRO
+				else AmountDayMinus_RUR
+			end,
+				AmountDayMinus_USD, AmountDayMinus_EVRO,
+			LS_NUM
         FROM [CacheDB].[dbo].[InvestorFundDateLast] NOLOCK
         WHERE Investor = @Investor and FundId = @FundId
     ) AS R
@@ -202,9 +265,12 @@ CREATE OR ALTER PROCEDURE [dbo].[GetInvestorFunds]
 (
     @Investor int,
     @StartDate Date,
-    @EndDate Date
+    @EndDate Date,
+	@Valuta Nvarchar(10) = NULL
 )
 AS BEGIN
+	if @Valuta is null set @Valuta = 'RUB';
+
     declare @ReSult table
     (
         FundId Int NULL,
@@ -236,13 +302,25 @@ AS BEGIN
     (
         select
             FundId,
-            VAL = (SumAmount - AmountDay) * RATE
+            VAL =
+			case
+				when @Valuta = 'RUB' then (SumAmount - AmountDay) * RATE
+				when @Valuta = 'USD' then (SumAmount - AmountDay) * RATE * 1.000/USDRATE
+				when @Valuta = 'EUR' then (SumAmount - AmountDay) * RATE * 1.000/EVRORATE
+				else (SumAmount - AmountDay) * RATE
+			end
         From [dbo].[InvestorFundDate]
         where Investor = @Investor and [Date] = @EndDate
         union all
         select
             FundId,
-            VAL = (SumAmount - AmountDay) * RATE
+            VAL =
+			case
+				when @Valuta = 'RUB' then (SumAmount - AmountDay) * RATE
+				when @Valuta = 'USD' then (SumAmount - AmountDay) * RATE * 1.000/USDRATE
+				when @Valuta = 'EUR' then (SumAmount - AmountDay) * RATE * 1.000/EVRORATE
+				else (SumAmount - AmountDay) * RATE
+			end
         From [dbo].[InvestorFundDateLast]
         where Investor = @Investor and [Date] = @EndDate
     ) as sd
@@ -268,7 +346,8 @@ AS BEGIN
             @ProfitValue = @ProfitValue output,
             @ProfitProcentValue = @ProfitProcentValue output,
             @BeginValue = @BeginValue output,
-			@EndValue = @EndValue output;
+			@EndValue = @EndValue output,
+			@Valuta = @Valuta;
 
         update @ReSult
             set ProfitValue = @ProfitValue, ProfitProcentValue = @ProfitProcentValue, BeginValue = @BeginValue, EndValue = @EndValue
@@ -280,6 +359,12 @@ AS BEGIN
     close obj_cur
     deallocate obj_cur
 
+	declare @Symbol Nvarchar(10)
+
+	select
+		@Symbol = Symbol
+	from Currencies nolock
+	where ShortName = @Valuta
 
     select
 		FundId,
@@ -289,7 +374,7 @@ AS BEGIN
         ProfitProcentValue = CAST([dbo].f_Round(ProfitProcentValue, 2) AS DECIMAL(30,2)),
         BeginValue = CAST([dbo].f_Round(BeginValue, 2) AS DECIMAL(30,2)),
 		EndValue = CAST([dbo].f_Round(VAL, 2) AS DECIMAL(30,2)),
-        Valuta = N'₽'
+        Valuta = @Symbol
     from @ReSult
     order by FundName;
 END

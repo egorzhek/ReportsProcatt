@@ -2,6 +2,9 @@
 DECLARE @FromDateStr   Nvarchar(50) = @DateFromSharp;
 DECLARE @InvestorIdStr Nvarchar(50) = @InvestorIdSharp;
 --DECLARE @ContractIdStr Nvarchar(50) = @ContractIdSharp;
+DECLARE @Valuta        Nvarchar(10) = NULL;
+
+if @Valuta is null set @Valuta = 'RUB';
 
 DECLARE
     @InvestorId int = CAST(@InvestorIdStr as Int);
@@ -89,18 +92,34 @@ FROM
 			ContractId = Investor,
 			[Date], USDRATE, EURORATE = EVRORATE, VALUE_RUR,
 			VALUE_USD, VALUE_EURO = VALUE_EVRO,
-			INPUT_VALUE_RUR = AmountDayPlus_RUR,
+
+			INPUT_VALUE_RUR =
+			case
+				when @Valuta = 'RUB' then AmountDayPlus_RUR
+				when @Valuta = 'USD' then AmountDayPlus_USD
+				when @Valuta = 'EUR' then AmountDayPlus_EVRO
+				else AmountDayPlus_RUR
+			end,
 			INPUT_VALUE_USD = AmountDayPlus_USD,
 			INPUT_VALUE_EURO = AmountDayPlus_EVRO,
-			OUTPUT_VALUE_RUR = AmountDayMinus_RUR,
+
+			OUTPUT_VALUE_RUR =
+			case
+				when @Valuta = 'RUB' then AmountDayMinus_RUR
+				when @Valuta = 'USD' then AmountDayMinus_USD
+				when @Valuta = 'EUR' then AmountDayMinus_EVRO
+				else AmountDayMinus_RUR
+			end,
 			OUTPUT_VALUE_USD = AmountDayMinus_USD,
 			OUTPUT_VALUE_EURO = AmountDayMinus_EVRO,
+
+
 			INPUT_DIVIDENTS_RUR = 0.0000000000,
 			INPUT_DIVIDENTS_USD = 0.0000000000,
 			INPUT_DIVIDENTS_EURO = 0.0000000000,
 			INPUT_COUPONS_RUR = 0.0000000000,
 			INPUT_COUPONS_USD = 0.0000000000,
-			INPUT_COUPONS_EURO = 0.0000000000 						
+			INPUT_COUPONS_EURO = 0.0000000000
 		from InvestorFundDate nolock
 		where Investor = @InvestorId and [Date] >= @StartDate and [Date] <= @EndDate
 		union all
@@ -109,36 +128,89 @@ FROM
 			ContractId = Investor,
 			[Date], USDRATE, EURORATE = EVRORATE, VALUE_RUR,
 			VALUE_USD, VALUE_EURO = VALUE_EVRO,
-			INPUT_VALUE_RUR = AmountDayPlus_RUR,
+
+			INPUT_VALUE_RUR =
+			case
+				when @Valuta = 'RUB' then AmountDayPlus_RUR
+				when @Valuta = 'USD' then AmountDayPlus_USD
+				when @Valuta = 'EUR' then AmountDayPlus_EVRO
+				else AmountDayPlus_RUR
+			end,
 			INPUT_VALUE_USD = AmountDayPlus_USD,
 			INPUT_VALUE_EURO = AmountDayPlus_EVRO,
-			OUTPUT_VALUE_RUR = AmountDayMinus_RUR,
+
+			OUTPUT_VALUE_RUR =
+			case
+				when @Valuta = 'RUB' then AmountDayMinus_RUR
+				when @Valuta = 'USD' then AmountDayMinus_USD
+				when @Valuta = 'EUR' then AmountDayMinus_EVRO
+				else AmountDayMinus_RUR
+			end,
 			OUTPUT_VALUE_USD = AmountDayMinus_USD,
 			OUTPUT_VALUE_EURO = AmountDayMinus_EVRO,
+
+
 			INPUT_DIVIDENTS_RUR = 0.0000000000,
 			INPUT_DIVIDENTS_USD = 0.0000000000,
 			INPUT_DIVIDENTS_EURO = 0.0000000000,
 			INPUT_COUPONS_RUR = 0.0000000000,
 			INPUT_COUPONS_USD = 0.0000000000,
-			INPUT_COUPONS_EURO = 0.0000000000 						
+			INPUT_COUPONS_EURO = 0.0000000000
 		from InvestorFundDateLast nolock
 		where Investor = @InvestorId and [Date] >= @StartDate and [Date] <= @EndDate
 		union all
 		select
 			InvestorId,
 			ContractId = InvestorId,
-			[Date], USDRATE, EURORATE, VALUE_RUR,
-			VALUE_USD, VALUE_EURO,
-			INPUT_VALUE_RUR,
+			[Date], USDRATE, EURORATE,
+
+			VALUE_RUR =
+			case
+				when @Valuta = 'RUB' then VALUE_RUR
+				when @Valuta = 'USD' then VALUE_USD
+				when @Valuta = 'EUR' then VALUE_EURO
+				else VALUE_RUR
+			end,
+			VALUE_USD,
+			VALUE_EURO,
+
+			INPUT_VALUE_RUR =
+			case
+				when @Valuta = 'RUB' then INPUT_VALUE_RUR
+				when @Valuta = 'USD' then INPUT_VALUE_USD
+				when @Valuta = 'EUR' then INPUT_VALUE_EURO
+				else INPUT_VALUE_RUR
+			end,
 			INPUT_VALUE_USD,
 			INPUT_VALUE_EURO,
-			OUTPUT_VALUE_RUR,
+
+			OUTPUT_VALUE_RUR =
+			case
+				when @Valuta = 'RUB' then OUTPUT_VALUE_RUR
+				when @Valuta = 'USD' then OUTPUT_VALUE_USD
+				when @Valuta = 'EUR' then OUTPUT_VALUE_EURO
+				else OUTPUT_VALUE_RUR
+			end,
 			OUTPUT_VALUE_USD,
 			OUTPUT_VALUE_EURO,
-			INPUT_DIVIDENTS_RUR,
+
+			INPUT_DIVIDENTS_RUR =
+			case
+				when @Valuta = 'RUB' then INPUT_DIVIDENTS_RUR
+				when @Valuta = 'USD' then INPUT_DIVIDENTS_USD
+				when @Valuta = 'EUR' then INPUT_DIVIDENTS_EURO
+				else INPUT_DIVIDENTS_RUR
+			end,
 			INPUT_DIVIDENTS_USD,
 			INPUT_DIVIDENTS_EURO,
-			INPUT_COUPONS_RUR,
+
+			INPUT_COUPONS_RUR =
+			case
+				when @Valuta = 'RUB' then INPUT_COUPONS_RUR
+				when @Valuta = 'USD' then INPUT_COUPONS_USD
+				when @Valuta = 'EUR' then INPUT_COUPONS_EURO
+				else INPUT_COUPONS_RUR
+			end,
 			INPUT_COUPONS_USD,
 			INPUT_COUPONS_EURO
 		from Assets_Contracts nolock
@@ -147,18 +219,55 @@ FROM
 		select
 			InvestorId,
 			ContractId = InvestorId,
-			[Date], USDRATE, EURORATE, VALUE_RUR,
-			VALUE_USD, VALUE_EURO,
-			INPUT_VALUE_RUR,
+			[Date], USDRATE, EURORATE,
+
+			VALUE_RUR =
+			case
+				when @Valuta = 'RUB' then VALUE_RUR
+				when @Valuta = 'USD' then VALUE_USD
+				when @Valuta = 'EUR' then VALUE_EURO
+				else VALUE_RUR
+			end,
+			VALUE_USD,
+			VALUE_EURO,
+
+			INPUT_VALUE_RUR =
+			case
+				when @Valuta = 'RUB' then INPUT_VALUE_RUR
+				when @Valuta = 'USD' then INPUT_VALUE_USD
+				when @Valuta = 'EUR' then INPUT_VALUE_EURO
+				else INPUT_VALUE_RUR
+			end,
 			INPUT_VALUE_USD,
 			INPUT_VALUE_EURO,
-			OUTPUT_VALUE_RUR,
+
+			OUTPUT_VALUE_RUR =
+			case
+				when @Valuta = 'RUB' then OUTPUT_VALUE_RUR
+				when @Valuta = 'USD' then OUTPUT_VALUE_USD
+				when @Valuta = 'EUR' then OUTPUT_VALUE_EURO
+				else OUTPUT_VALUE_RUR
+			end,
 			OUTPUT_VALUE_USD,
 			OUTPUT_VALUE_EURO,
-			INPUT_DIVIDENTS_RUR,
+
+			INPUT_DIVIDENTS_RUR =
+			case
+				when @Valuta = 'RUB' then INPUT_DIVIDENTS_RUR
+				when @Valuta = 'USD' then INPUT_DIVIDENTS_USD
+				when @Valuta = 'EUR' then INPUT_DIVIDENTS_EURO
+				else INPUT_DIVIDENTS_RUR
+			end,
 			INPUT_DIVIDENTS_USD,
 			INPUT_DIVIDENTS_EURO,
-			INPUT_COUPONS_RUR,
+
+			INPUT_COUPONS_RUR =
+			case
+				when @Valuta = 'RUB' then INPUT_COUPONS_RUR
+				when @Valuta = 'USD' then INPUT_COUPONS_USD
+				when @Valuta = 'EUR' then INPUT_COUPONS_EURO
+				else INPUT_COUPONS_RUR
+			end,
 			INPUT_COUPONS_USD,
 			INPUT_COUPONS_EURO
 		from Assets_ContractsLast nolock
@@ -320,8 +429,9 @@ select
 	DateToName = FORMAT(@EndDate,'dd.MM.yyyy'),
 	Comment1 = N'Сумма дохода',
 	Comment2 = N'Относительная доходность',
-  StartDate = @StartDate,
-  EndDate = @EndDate
+	StartDate = @StartDate,
+	EndDate = @EndDate,
+	Valuta = @Valuta
 
 /*
 select ActiveName = 'Активы на ' + FORMAT(@StartDate,'dd.MM.yyyy') , ActiveValue = CAST(Round(@Snach,2) as Decimal(38,2)), Sort = 1
@@ -383,26 +493,30 @@ select DonutLabel1 = N'6 405 ₽', DonutLabel2 = N'4 актива'
 	EXEC [dbo].[GetInvestorFunds]
 		@Investor = @InvestorId,
 		@StartDate = @StartDate,
-		@EndDate = @EndDate
+		@EndDate = @EndDate,
+		@Valuta = @Valuta
 
 	-- Sixth
 	-- выдаёт список ДУ
 	EXEC [dbo].[GetInvestorContracts]
 		@InvestorId = @InvestorId,
 		@StartDate = @StartDate,
-		@EndDate = @EndDate
+		@EndDate = @EndDate,
+		@Valuta = @Valuta
 
   -- Результаты по ПИФам
-  EXEC dbo.GetInvestorFundResults 
-      @InvestorId = @InvestorId,
+  EXEC [dbo].[GetInvestorFundResults]
+		@InvestorId = @InvestorId,
   		@StartDate = @StartDate,
-  		@EndDate = @EndDate
+  		@EndDate = @EndDate,
+		@Valuta = @Valuta
 
   -- Результаты по ДУ
-  EXEC dbo.GetInvestorContractResults
-      @InvestorId = @InvestorId,
+  EXEC [dbo].[GetInvestorContractResults]
+		@InvestorId = @InvestorId,
   		@StartDate = @StartDate,
-  		@EndDate = @EndDate
+  		@EndDate = @EndDate,
+		@Valuta = @Valuta
 
 BEGIN TRY
 	DROP TABLE #ResInvAssets
