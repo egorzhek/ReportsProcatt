@@ -1,5 +1,5 @@
 Declare
-    @Date Date = DateToSharp, 
+    @Date Date = @DateToSharp, 
     @Contract_Id Int = @ContractIdSharp;
 
 --Declare
