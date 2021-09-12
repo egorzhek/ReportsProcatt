@@ -13,7 +13,7 @@ Declare
 
     declare @FundAllSum decimal(28,10), @AllSum decimal(28,10);
     
-    -- пифы на дату окончания
+    -- РїРёС„С‹ РЅР° РґР°С‚Сѓ РѕРєРѕРЅС‡Р°РЅРёСЏ
     insert into @Funds (FundId)
     select
         Contract_Id
@@ -61,7 +61,7 @@ Declare
 
     if @FundAllSum is null set @FundAllSum = 0;
 
-    -- вся эта сумма пойдёт в фонды
+    -- РІСЃСЏ СЌС‚Р° СЃСѓРјРјР° РїРѕР№РґС‘С‚ РІ С„РѕРЅРґС‹
     --select @FundAllSum;
 
     insert into @Contracts(ContractId)
@@ -143,7 +143,7 @@ Declare
         else
         begin
             insert into @Result (CategoryName, VALUE_RUR, AllSum, CategoryId)
-            select N'‘онды', @FundAllSum, @AllSum, 5;
+            select N'вЂРѕРЅРґС‹', @FundAllSum, @AllSum, 5;
 
             update @Result
                 set Result = VALUE_RUR/AllSum
@@ -161,7 +161,7 @@ Declare
         from @Result
     end
 
-    -- результаты
+    -- СЂРµР·СѓР»СЊС‚Р°С‚С‹
     select * from @Result;
 
     select CountRows = Count(1), AllSum = @AllSum from @Result;

@@ -21,7 +21,7 @@ declare @Result2 table
 declare @AllSum decimal(28,10);
 
 
--- пифы на дату окончания
+-- РїРёС„С‹ РЅР° РґР°С‚Сѓ РѕРєРѕРЅС‡Р°РЅРёСЏ
 insert into @Funds (FundId)
 select
     Contract_Id
@@ -73,7 +73,7 @@ from
 where VALUE_RUR > 0
 group by CurrencyName;
 
--- Добавили Пифы
+-- Р”РѕР±Р°РІРёР»Рё РџРёС„С‹
 --select * from @Result;
 
 insert into @Contracts(ContractId)
@@ -125,7 +125,7 @@ from
 where VALUE_RUR > 0
 group by CurrencyName;
 
--- Общее по ПИФам и ДУ
+-- РћР±С‰РµРµ РїРѕ РџРР¤Р°Рј Рё Р”РЈ
 insert into @Result
 (
     CurrencyName, VALUE_RUR
@@ -143,7 +143,7 @@ update @Result set AllSum = @AllSum;
 
 update @Result set Result = VALUE_RUR/AllSum;
 
--- Результаты
+-- Р РµР·СѓР»СЊС‚Р°С‚С‹
 select * from @Result;
 
 select CountRows = Count(1), AllSum = @AllSum from @Result;

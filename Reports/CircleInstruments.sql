@@ -23,7 +23,7 @@ declare @Result table
 declare @AllSum decimal(28,10);
 
 
--- ïèôû íà äàòó îêîí÷àíèÿ
+-- Ğ¿Ğ¸Ñ„Ñ‹ Ğ½Ğ° Ğ´Ğ°Ñ‚Ñƒ Ğ¾ĞºĞ¾Ğ½Ñ‡Ğ°Ğ½Ğ¸Ñ
 insert into @Funds (FundId)
 select
     Contract_Id
@@ -83,19 +83,19 @@ insert into @Result
 )
 select
     Investment = 
-    case when right(rtrim(s.Investment), 5) = '; ÍÊÄ'
+    case when right(rtrim(s.Investment), 5) = '; ĞĞšĞ”'
         then left( ltrim(rtrim(s.Investment)), len (ltrim(rtrim(s.Investment))) - 5)
         else s.Investment
     end,
     s.VALUE_ID, VALUE_RUR = sum(s.VALUE_RUR)
 from @Tmp as s
 group by s.VALUE_ID,
-    case when right(rtrim(s.Investment), 5) = '; ÍÊÄ'
+    case when right(rtrim(s.Investment), 5) = '; ĞĞšĞ”'
         then left( ltrim(rtrim(s.Investment)), len (ltrim(rtrim(s.Investment))) - 5)
         else s.Investment
     end
 
--- Äîáàâèëè Ïèôû
+-- Ğ”Ğ¾Ğ±Ğ°Ğ²Ğ¸Ğ»Ğ¸ ĞŸĞ¸Ñ„Ñ‹
 --select * from @Result;
 
 delete from @Tmp;
@@ -161,14 +161,14 @@ insert into @Result
 )
 select
     Investment = 
-    case when right(rtrim(s.Investment), 5) = '; ÍÊÄ'
+    case when right(rtrim(s.Investment), 5) = '; ĞĞšĞ”'
         then left( ltrim(rtrim(s.Investment)), len (ltrim(rtrim(s.Investment))) - 5)
         else s.Investment
     end,
     s.VALUE_ID, VALUE_RUR = sum(s.VALUE_RUR)
 from @Tmp as s
 group by s.VALUE_ID,
-    case when right(rtrim(s.Investment), 5) = '; ÍÊÄ'
+    case when right(rtrim(s.Investment), 5) = '; ĞĞšĞ”'
         then left( ltrim(rtrim(s.Investment)), len (ltrim(rtrim(s.Investment))) - 5)
         else s.Investment
     end
@@ -182,7 +182,7 @@ update @Result set AllSum = @AllSum;
 
 update @Result set Result = VALUE_RUR/AllSum;
 
--- Ğåçóëüòàòû
+-- Ğ ĞµĞ·ÑƒĞ»ÑŒÑ‚Ğ°Ñ‚Ñ‹
 select * from @Result;
 
 select CountRows = Count(1), AllSum = @AllSum from @Result;
