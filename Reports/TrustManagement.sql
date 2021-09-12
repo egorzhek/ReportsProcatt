@@ -1350,7 +1350,17 @@ begin
 		a.Dividends,
 		a.FinRes,
 		a.FinResProcent,
-		a.CUR_ID
+		a.CUR_ID,
+		a.Oferta_Date,
+		a.Oblig_Date_end,
+		a.Oferta_Type,
+		a.UKD,
+		a.NKD,
+		a.Amortizations,
+		a.Coupons,
+		a.Out_Date,
+		a.Out_Summa,
+		a.OutPrice
 	from #POSITION_KEEPING_EndDate as a with(nolock)
 	inner join #TrustTree as b with(nolock) on a.ShareId = b.VALUE_ID
 	inner join [CacheDB].[dbo].[InvestmentIds] as i with(nolock) on b.InvestmentId = i.Id
