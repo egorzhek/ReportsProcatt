@@ -2,7 +2,7 @@
 DECLARE @FromDateStr   Nvarchar(50) = @DateFromSharp;
 DECLARE @InvestorIdStr Nvarchar(50) = @InvestorIdSharp;
 DECLARE @ContractIdStr Nvarchar(50) = @ContractIdSharp;
-DECLARE @Valuta        Nvarchar(10) = NULL;
+DECLARE @Valuta        Nvarchar(10) = @ValutaSharp;
 
 if @Valuta is null set @Valuta = 'RUB';
 

@@ -1,6 +1,6 @@
 Declare
     @Date Date = DateToSharp, 
-    @Investor_Id Int = InvestorIdSharp;
+    @Contract_Id Int = @ContractIdSharp;
 
 --Declare
 --    @Date Date = CONVERT(Date, '01.04.2018', 103),

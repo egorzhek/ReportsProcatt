@@ -1,6 +1,6 @@
-п»їDeclare
-    @Date Date = DateToSharp, 
-    @Investor_Id Int = InvestorIdSharp;
+Declare
+    @Date Date = @DateToSharp, 
+    @Investor_Id Int = @InvestorIdSharp;
 
 --Declare
 --   set @Date = CONVERT(Date, '01.04.2019', 103); set @Investor_Id = 2149652;
@@ -21,7 +21,7 @@ declare @Result2 table
 declare @AllSum decimal(28,10);
 
 
--- РїРёС„С‹ РЅР° РґР°С‚Сѓ РѕРєРѕРЅС‡Р°РЅРёСЏ
+-- пифы на дату окончания
 insert into @Funds (FundId)
 select
     Contract_Id
@@ -73,7 +73,7 @@ from
 where VALUE_RUR > 0
 group by CurrencyName;
 
--- Р”РѕР±Р°РІРёР»Рё РџРёС„С‹
+-- Добавили Пифы
 --select * from @Result;
 
 insert into @Contracts(ContractId)
@@ -125,7 +125,7 @@ from
 where VALUE_RUR > 0
 group by CurrencyName;
 
--- РћР±С‰РµРµ РїРѕ РџРР¤Р°Рј Рё Р”РЈ
+-- Общее по ПИФам и ДУ
 insert into @Result
 (
     CurrencyName, VALUE_RUR
@@ -143,7 +143,7 @@ update @Result set AllSum = @AllSum;
 
 update @Result set Result = VALUE_RUR/AllSum;
 
--- Р РµР·СѓР»СЊС‚Р°С‚С‹
+-- Результаты
 select * from @Result;
 
 select CountRows = Count(1), AllSum = @AllSum from @Result;
