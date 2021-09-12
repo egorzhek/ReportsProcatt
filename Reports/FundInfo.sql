@@ -251,11 +251,13 @@ set @AllMinus_RUR = @AmountDayMinus_RUR;
     FROM [CacheDB].[dbo].[FundNames]
     WHERE [Id] = @FundId;
     
+	/*
     SELECT TOP 1
         @InvestorName = FF.[NAME]
     FROM [BAL_DATA_STD].[dbo].D_B_CONTRACTS AS CC
     INNER JOIN [BAL_DATA_STD].[dbo].OD_FACES AS FF ON FF.SELF_ID = CC.INVESTOR  AND FF.LAST_FLAG = 1
     WHERE CC.INVESTOR = @Investor;
+	*/
     
     SELECT
     [ActiveDateToName] = 'Активы на ' + Replace(CONVERT(NVarchar(50), @EndDate, 103),'/','.'),
