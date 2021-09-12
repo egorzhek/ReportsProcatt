@@ -1,8 +1,8 @@
-DECLARE @ToDateStr     Nvarchar(50) = @DateToSharp;
+﻿DECLARE @ToDateStr     Nvarchar(50) = @DateToSharp;
 DECLARE @FromDateStr   Nvarchar(50) = @DateFromSharp;
 DECLARE @InvestorIdStr Nvarchar(50) = @InvestorIdSharp;
 DECLARE @FundIdStr     Nvarchar(50) = @FundIdSharp;
-DECLARE @Valuta        Nvarchar(10) = NULL;
+DECLARE @Valuta        Nvarchar(10) = @ValutaSharp;
 
 if @Valuta is null set @Valuta = 'RUB';
 

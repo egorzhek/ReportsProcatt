@@ -1,6 +1,6 @@
-п»їDeclare
-    @Date Date = DateToSharp, 
-    @Investor_Id Int = InvestorIdSharp;
+Declare
+    @EndDate Date = @DateToSharp, 
+    @Investor_Id Int = @InvestorIdSharp;
 --    set @Investor_Id = 2149652; set @EndDate = CONVERT(Date, '01.04.2018', 103);
 
     declare @Funds table ( FundId int);
@@ -13,7 +13,7 @@
 
     declare @FundAllSum decimal(28,10), @AllSum decimal(28,10);
     
-    -- РїРёС„С‹ РЅР° РґР°С‚Сѓ РѕРєРѕРЅС‡Р°РЅРёСЏ
+    -- пифы на дату окончания
     insert into @Funds (FundId)
     select
         Contract_Id
@@ -61,7 +61,7 @@
 
     if @FundAllSum is null set @FundAllSum = 0;
 
-    -- РІСЃСЏ СЌС‚Р° СЃСѓРјРјР° РїРѕР№РґС‘С‚ РІ С„РѕРЅРґС‹
+    -- вся эта сумма пойдёт в фонды
     --select @FundAllSum;
 
     insert into @Contracts(ContractId)
@@ -143,7 +143,7 @@
         else
         begin
             insert into @Result (CategoryName, VALUE_RUR, AllSum, CategoryId)
-            select N'вЂРѕРЅРґС‹', @FundAllSum, @AllSum, 5;
+            select N'‘онды', @FundAllSum, @AllSum, 5;
 
             update @Result
                 set Result = VALUE_RUR/AllSum
@@ -161,7 +161,7 @@
         from @Result
     end
 
-    -- СЂРµР·СѓР»СЊС‚Р°С‚С‹
+    -- результаты
     select * from @Result;
 
     select CountRows = Count(1), AllSum = @AllSum from @Result;

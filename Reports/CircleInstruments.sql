@@ -1,9 +1,9 @@
-ï»¿Declare
-    @Date Date = DateToSharp, 
-    @Investor_Id Int = InvestorIdSharp;
+Declare
+    @Date Date = @DateToSharp, 
+    @Investor_Id Int = @InvestorIdSharp;
 
 --Declare
---   set @Date = CONVERT(Date, '01.04.2019', 103); set @Investor_Id = 2149652;
+--   @Date date = CONVERT(Date, '01.04.2019', 103), @Investor_Id INT = 2149652;
     
 declare @Funds table ( FundId int);
 declare @Contracts table ( ContractId int);
@@ -23,7 +23,7 @@ declare @Result table
 declare @AllSum decimal(28,10);
 
 
--- Ğ¿Ğ¸Ñ„Ñ‹ Ğ½Ğ° Ğ´Ğ°Ñ‚Ñƒ Ğ¾ĞºĞ¾Ğ½Ñ‡Ğ°Ğ½Ğ¸Ñ
+-- ïèôû íà äàòó îêîí÷àíèÿ
 insert into @Funds (FundId)
 select
     Contract_Id
@@ -83,19 +83,19 @@ insert into @Result
 )
 select
     Investment = 
-    case when right(rtrim(s.Investment), 5) = '; ĞĞšĞ”'
+    case when right(rtrim(s.Investment), 5) = '; ÍÊÄ'
         then left( ltrim(rtrim(s.Investment)), len (ltrim(rtrim(s.Investment))) - 5)
         else s.Investment
     end,
     s.VALUE_ID, VALUE_RUR = sum(s.VALUE_RUR)
 from @Tmp as s
 group by s.VALUE_ID,
-    case when right(rtrim(s.Investment), 5) = '; ĞĞšĞ”'
+    case when right(rtrim(s.Investment), 5) = '; ÍÊÄ'
         then left( ltrim(rtrim(s.Investment)), len (ltrim(rtrim(s.Investment))) - 5)
         else s.Investment
     end
 
--- Ğ”Ğ¾Ğ±Ğ°Ğ²Ğ¸Ğ»Ğ¸ ĞŸĞ¸Ñ„Ñ‹
+-- Äîáàâèëè Ïèôû
 --select * from @Result;
 
 delete from @Tmp;
@@ -161,14 +161,14 @@ insert into @Result
 )
 select
     Investment = 
-    case when right(rtrim(s.Investment), 5) = '; ĞĞšĞ”'
+    case when right(rtrim(s.Investment), 5) = '; ÍÊÄ'
         then left( ltrim(rtrim(s.Investment)), len (ltrim(rtrim(s.Investment))) - 5)
         else s.Investment
     end,
     s.VALUE_ID, VALUE_RUR = sum(s.VALUE_RUR)
 from @Tmp as s
 group by s.VALUE_ID,
-    case when right(rtrim(s.Investment), 5) = '; ĞĞšĞ”'
+    case when right(rtrim(s.Investment), 5) = '; ÍÊÄ'
         then left( ltrim(rtrim(s.Investment)), len (ltrim(rtrim(s.Investment))) - 5)
         else s.Investment
     end
@@ -182,7 +182,7 @@ update @Result set AllSum = @AllSum;
 
 update @Result set Result = VALUE_RUR/AllSum;
 
--- Ğ ĞµĞ·ÑƒĞ»ÑŒÑ‚Ğ°Ñ‚Ñ‹
+-- Ğåçóëüòàòû
 select * from @Result;
 
 select CountRows = Count(1), AllSum = @AllSum from @Result;
