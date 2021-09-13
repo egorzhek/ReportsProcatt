@@ -28,7 +28,7 @@ namespace ReportsProcatt.Models
         public TableView DivsNCouponsDetails { get; set; }
         public CircleDiagram Assets { get; set; }
         public CircleDiagram Instruments { get; set; }
-        public CircleDiagram Currency { get; set; }
+        public CircleDiagram Currencies { get; set; }
         public List<PIF> PIFs { get; set; }
         public List<DU> DUs { get; set; }
         #endregion
@@ -43,9 +43,6 @@ namespace ReportsProcatt.Models
         #endregion
         public Report(int aInvestorId, DateTime? aDateFrom, DateTime? aDateTo)
         {
-            InvestorId = aInvestorId;
-            _data = new SQLData(aInvestorId, aDateFrom, aDateTo, connectionString, ReportPath);
-
             ReportCurrency = new CurrencyClass
             {
                 Code = "RUB",
@@ -53,16 +50,24 @@ namespace ReportsProcatt.Models
                 Name = "Рубли"
             };
 
+            InvestorId = aInvestorId;
+            _data = new SQLData(ReportCurrency.Code ,aInvestorId, aDateFrom, aDateTo, connectionString, ReportPath);
+
             MainHeader = new Headers
             {
                 TotalSum = $"{_invFullDS.DecimalToStr(InvestFullTables.MainResultDT, "ActiveDateToValue", "#,##0")} {CurrChar}",
                 ProfitSum = $"{_invFullDS.DecimalToStr(InvestFullTables.MainResultDT, "ProfitValue", "#,##0")} {CurrChar}",
-                Return = $"{_invFullDS.DecimalToStr(InvestFullTables.MainResultDT, "ProfitProcentValue", aWithSign: true)}%"
+                Return = $"{_invFullDS.DecimalToStr(InvestFullTables.MainResultDT, "ProfitProcentValue","#0.00", aWithSign: true)}%"
             };
             InitMainDiagram();
             InitPIFsTotalTable();
             InitDUsTotalTable();
             InitAllAssetsTable();
+            InitAssets();
+            InitInstruments();
+            InitCurrencies();
+            InitPIFs();
+            InitDUs();
         }
         #region Методы
         public void InitMainDiagram()
@@ -196,36 +201,174 @@ namespace ReportsProcatt.Models
                 AllAssets.Table.Rows.Add(row);
             }
         }
+        public void InitAssets()
+        {
+            int i = 1;
+            Assets = new CircleDiagram("MainAssetsCircle")
+            {
+                MainText = $"{_circleAssetsDS.DecimalToStr(1, "AllSum", "#,##0")} {ReportCurrency.Char}",
+                Footer = $"{_circleAssetsDS.DecimalToStr(1, "CountRows", "#,##0")} АКТИВА(ов)",
+                Data = _circleAssetsDS.Tables[0].Rows.Cast<DataRow>().ToList()
+                    .OrderByDescending(r => (decimal)r["Result"])
+                    .Take(7)
+                    .Select(r => 
+                    {
+                        var el = new CircleDiagram.DataClass
+                        {
+                            lable = $"{r["CategoryName"]} {((decimal)r["Result"] * 100).DecimalToStr("#,##0.00")}%",
+                            data = (decimal)r["VALUE_RUR"],
+                            backgroundColor = CircleDiagramsColorCodes.MainAssetsCircle[i],
+                            borderColor = CircleDiagramsColorCodes.MainAssetsCircle[i]
+                        };
+                        i++;
+                        return el;
+                    }).ToList(),
+                Type= "doughnut"
+                
+            };
+
+            if (_circleAssetsDS.Tables[0].Rows.Count > 7)
+            {
+                decimal otherPerent = 100 -
+                    _circleAssetsDS.Tables[0].Rows.Cast<DataRow>().ToList()
+                        .OrderByDescending(r => (double)r["Result"])
+                        .Skip(6)
+                        .Sum(r => (decimal)r["Result"]) * 100;
+
+                Assets.Data.RemoveAt(Assets.Data.Count - 1);
+
+                Assets.Data.Add(new CircleDiagram.DataClass
+                {
+                    lable = @$"Прочее {otherPerent.DecimalToStr("#,##0")}%",
+                    data = _circleAssetsDS.Tables[0].Rows.Cast<DataRow>().ToList()
+                        .OrderByDescending(r => (decimal)r["Result"])
+                        .Skip(6)
+                        .Sum(r => (decimal)r["VALUE_RUR"]),
+                    backgroundColor = CircleDiagramsColorCodes.MainAssetsCircle[7],
+                    borderColor = CircleDiagramsColorCodes.MainAssetsCircle[7]
+                });
+            }
+        }
+        public void InitInstruments()
+        {
+            int i = 1;
+            Instruments = new CircleDiagram("MainInstrumentsCircle")
+            {
+                MainText = $"{_circleInstrumentsDS.DecimalToStr(1, "AllSum", "#,##0")} {ReportCurrency.Char}",
+                Footer = $"{_circleInstrumentsDS.DecimalToStr(1, "CountRows", "#,##0")} инструментов",
+                Data = _circleInstrumentsDS.Tables[0].Rows.Cast<DataRow>().ToList()
+                    .OrderByDescending(r => (decimal)r["Result"])
+                    .Take(7)
+                    .Select(r =>
+                    {
+                        var el = new CircleDiagram.DataClass
+                        {
+                            lable = $"{r["Investment"]} {((decimal)r["Result"] * 100).DecimalToStr("#,##0.00")}%",
+                            data = (decimal)r["VALUE_RUR"],
+                            backgroundColor = CircleDiagramsColorCodes.MainInstrumentsCircle[i],
+                            borderColor = CircleDiagramsColorCodes.MainInstrumentsCircle[i]
+                        };
+                        i++;
+                        return el;
+                    }).ToList(),
+                Type = "doughnut"
+
+            };
+
+            if (_circleInstrumentsDS.Tables[0].Rows.Count > 7)
+            {
+                decimal otherPerent = 100 -
+                    _circleInstrumentsDS.Tables[0].Rows.Cast<DataRow>().ToList()
+                        .OrderByDescending(r => (decimal)r["Result"])
+                        .Skip(6)
+                        .Sum(r => (decimal)r["Result"]) * 100;
+
+                Instruments.Data.RemoveAt(Instruments.Data.Count - 1);
+
+                Instruments.Data.Add(new CircleDiagram.DataClass
+                {
+                    lable = @$"Прочее {otherPerent.DecimalToStr("#,##0")}%",
+                    data = _circleInstrumentsDS.Tables[0].Rows.Cast<DataRow>().ToList()
+                        .OrderByDescending(r => (decimal)r["Result"])
+                        .Skip(6)
+                        .Sum(r => (decimal)r["VALUE_RUR"]),
+                    backgroundColor = CircleDiagramsColorCodes.MainInstrumentsCircle[7],
+                    borderColor = CircleDiagramsColorCodes.MainInstrumentsCircle[7]
+                });
+            }
+        }
+
+        public void InitCurrencies()
+        {
+            int i = 1;
+            Currencies = new CircleDiagram("MainCurrenciesCircle")
+            {
+                MainText = $"{_circleCurrenciesDS.DecimalToStr(1, "AllSum", "#,##0")} {ReportCurrency.Char}",
+                Data = _circleCurrenciesDS.Tables[0].Rows.Cast<DataRow>().ToList()
+                    .OrderByDescending(r => (decimal)r["Result"])
+                    .Take(7)
+                    .Select(r =>
+                    {
+                        var el = new CircleDiagram.DataClass
+                        {
+                            lable = $"{r["CurrencyName"]} {((decimal)r["Result"] * 100).DecimalToStr("#,##0.00")}%",
+                            data = (decimal)r["VALUE_RUR"],
+                            backgroundColor = CircleDiagramsColorCodes.MainCurrenciesCircle[i],
+                            borderColor = CircleDiagramsColorCodes.MainCurrenciesCircle[i]
+                        };
+                        i++;
+                        return el;
+                    }).ToList(),
+                Type = "doughnut"
+
+            };
+
+            if (_circleCurrenciesDS.Tables[0].Rows.Count > 7)
+            {
+                decimal otherPerent = 100 -
+                    _circleCurrenciesDS.Tables[0].Rows.Cast<DataRow>().ToList()
+                        .OrderByDescending(r => (double)r["Result"])
+                        .Skip(6)
+                        .Sum(r => (decimal)r["Result"]) * 100;
+
+                Currencies.Data.RemoveAt(Currencies.Data.Count - 1);
+
+                Currencies.Data.Add(new CircleDiagram.DataClass
+                {
+                    lable = @$"Прочее {otherPerent.DecimalToStr("#,##0")}%",
+                    data = _circleCurrenciesDS.Tables[0].Rows.Cast<DataRow>().ToList()
+                        .OrderByDescending(r => (decimal)r["Result"])
+                        .Skip(6)
+                        .Sum(r => (decimal)r["VALUE_RUR"]),
+                    backgroundColor = CircleDiagramsColorCodes.MainCurrenciesCircle[7],
+                    borderColor = CircleDiagramsColorCodes.MainCurrenciesCircle[7]
+                });
+            }
+        }
+
         public void InitPIFs()
         {
-            using (SqlConnection cnn = new SqlConnection(connectionString))
-            {
-                Task.WaitAll
-                (
-                    _invFullDS.Tables[InvestFullTables.FundsDt].Rows.Cast<DataRow>().ToList()
-                    .Select(r => Task.Run(() =>
-                    {
-                        PIFs.Add(new PIF(Dfrom, Dto, ReportCurrency, (int)r["FundId"], InvestorId, cnn));
-                    })).ToArray()
-                );
-            }
+            PIFs = new List<PIF>();
+            Task.WaitAll
+            (
+                _invFullDS.Tables[InvestFullTables.FundsDt].Rows.Cast<DataRow>().ToList()
+                .Select(r => Task.Run(() =>
+                {
+                    PIFs.Add(new PIF(r["FundName"].ToString(), Dfrom, Dto, ReportCurrency, (int)r["FundId"], InvestorId, connectionString, ReportPath));
+                })).ToArray()
+            );
         }
         public void InitDUs()
         {
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                using (SqlConnection cnn = new SqlConnection(connectionString))
+            DUs = new List<DU>();
+            Task.WaitAll
+            (
+                _invFullDS.Tables[InvestFullTables.DUsDt].Rows.Cast<DataRow>().ToList()
+                .Select(r => Task.Run(() =>
                 {
-                    Task.WaitAll
-                    (
-                        _invFullDS.Tables[InvestFullTables.DUsDt].Rows.Cast<DataRow>().ToList()
-                        .Select(r => Task.Run(() =>
-                        {
-                            DUs.Add(new DU(Dfrom, Dto, ReportCurrency, (int)r["ContractId"], InvestorId, cnn));
-                        })).ToArray()
-                    );
-                }
-            }
+                    DUs.Add(new DU(r["ContractName"].ToString(), Dfrom, Dto, ReportCurrency, (int)r["ContractId"], InvestorId, connectionString, ReportPath));
+                })).ToArray()
+            );
         }
         #endregion
     }

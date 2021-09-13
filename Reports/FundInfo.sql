@@ -273,12 +273,10 @@ set @AllMinus_RUR = @AmountDayMinus_RUR;
 	[ParamValuta] = @Valuta;
     
     select
-        [ActiveName] = 'Активы на ' + Replace(CONVERT(NVarchar(50), @StartDate, 103),'/','.'),
-        [ActiveValue] = CAST([dbo].f_Round(@Snach, 2) AS DECIMAL(30,2))
-    union all
-    select 'Пополнения', CAST([dbo].f_Round(@AllPlus_RUR, 2) AS DECIMAL(30,2))
-    union all
-    select 'Выводы', CAST([dbo].f_Round(-@AllMinus_RUR, 2) AS DECIMAL(30,2));
+        [ActiveName]  = 'Активы на ' + Replace(CONVERT(NVarchar(50), @StartDate, 103),'/','.'),
+        [ActiveValue] = CAST([dbo].f_Round(@Snach, 2) AS DECIMAL(30,2)),
+        [Пополнения]  = CAST([dbo].f_Round(@AllPlus_RUR, 2) AS DECIMAL(30,2)),
+        [Выводы]      = CAST([dbo].f_Round(-@AllMinus_RUR, 2) AS DECIMAL(30,2)); 
     
     SELECT 
         B.[W_ID],

@@ -1,0 +1,55 @@
+﻿@model ReportsProcatt.Models.CircleDiagram
+
+<div class="canvas-holder">
+    <canvas id="@Model.ElementName" style="margin-left: 140px; display: block; height: 300px; width: 520px;"></canvas>
+
+    <div class="label-text">
+        <span>@Html.Raw(Model.MainText)</span>
+        @Html.Raw(Model.Footer)
+    </div>
+</div>
+<script type="text/javascript">
+
+Charts.push(
+    function () {
+        new Chart(
+            document.getElementById("@Model.ElementName"), {
+            "responsive": true,
+            "type": "doughnut",
+            "data": {
+                "labels": [@Html.Raw(string.Join(",", Model.Data.Select(l => $"'{l.lable}'").ToArray()))],
+                "datasets": [
+                    {
+                        "label": "@Model.ElementName",
+                        "data": [@Html.Raw(string.Join(",", Model.Data.Select(l => l.data).ToArray()))],
+                        "backgroundColor": [@Html.Raw(string.Join(",", Model.Data.Select(l => $"'{l.backgroundColor}'").ToArray()))],
+                        "fill": true,
+                        "borderColor": [@Html.Raw(string.Join(",", Model.Data.Select(l => $"'{l.borderColor}'").ToArray()))],
+                        "lineTension": 0.1
+                    }]
+            },
+            "options": {
+                "cutoutPercentage": 68,
+                "animation": {
+                    "animateScale": false,
+                    "animateRotate": false
+                },
+                "responsive": true,
+                "maintainAspectRatio": false,
+                "legend": {
+                    position: 'right',
+                    align: 'center',
+                    labels: {
+                        boxWidth: 10,
+                        padding: 20
+                    }
+                }
+            }
+        }
+        );
+    }
+)
+//window.onload = function() {
+//    drawGraphs();
+//};
+</script>

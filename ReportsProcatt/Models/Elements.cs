@@ -29,15 +29,28 @@ namespace ReportsProcatt.Models
     }
     public class CircleDiagram
     {
+        public string ElementName { get; private set; }
+        public string Header { get; set; }
+        public string MainText { get; set; }
+        public string Footer { get; set; }
         public string Type { get; set; }
         public List<DataClass> Data { get; set; }
         public class DataClass
         {
             public string lable { get; set; }
-            public double data { get; set; }
+            public decimal data { get; set; }
             public string backgroundColor { get; set; }
             public string borderColor { get; set; }
         }
+        public CircleDiagram(string aElementName)
+        {
+            ElementName = aElementName;
+        }
+    }
+    public class CircleDiagramGammaElement
+    {
+        public int SortIndex { get; set; }
+        public string ColorCode { get; set; }
     }
     public class CurrencyClass
     {
