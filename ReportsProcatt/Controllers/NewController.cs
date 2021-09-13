@@ -33,7 +33,7 @@ namespace ReportsProcatt.Controllers
             try
             {
                 //var data = new Report(InvestorId, DateFrom, DateTo)
-                var data = new Report(2149652, new DateTime(2019,05,17), new DateTime(2021,05,29))
+                var data = new Report(2149652, new DateTime(2001,05,17), new DateTime(2021,05,29))
                 {
                     rootStr = "/app/wwwroot"
                 };
@@ -71,7 +71,7 @@ namespace ReportsProcatt.Controllers
         )
         {
             //var data = new Report(InvestorId, DateFrom, DateTo)
-            var data = new Report(2149652, new DateTime(2019, 05, 17), new DateTime(2021, 05, 29))
+            var data = new Report(2149652, new DateTime(2001, 05, 17), new DateTime(2021, 05, 29))
             {//C:\Users\D\source\Ingos\ReportsProcatt\ReportsProcatt\wwwroot\css\style.css
                 rootStr = "file:///c:/Users/D/source/Ingos/ReportsProcatt/ReportsProcatt/wwwroot"
             };
@@ -102,7 +102,7 @@ namespace ReportsProcatt.Controllers
         )
         {
             //var data = new Report(InvestorId, DateFrom, DateTo)
-            var data = new Report(2149652, new DateTime(2019, 05, 17), new DateTime(2021, 05, 29))
+            var data = new Report(2149652, new DateTime(2001, 05, 17), new DateTime(2021, 05, 29))
             {
                 
             };

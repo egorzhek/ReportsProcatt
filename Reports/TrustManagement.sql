@@ -346,7 +346,7 @@ select
 	ProfitName = 'Доход за период ' + FORMAT(@StartDate,'dd.MM.yyyy') + ' - ' + FORMAT(@EndDate,'dd.MM.yyyy'),
 	ProfitValue = CAST(Round(@InvestResult,2) as Decimal(30,2)),
 	ProfitProcentValue = CAST(Round(@InvestResult/@ResutSum * 100,2) as Decimal(38,2)),
-	OpenDate = FORMAT(@DATE_OPEN,'dd.MM.yyyy'),
+	OpenDate = @DATE_OPEN,
 	LS_NUM = '2940000083',
 	EndSumAmount = 99999.99,
 	FundName = @NUM,

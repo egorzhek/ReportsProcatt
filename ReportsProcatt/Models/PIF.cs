@@ -191,12 +191,13 @@ namespace ReportsProcatt.Models
             foreach (DataRow dr in _FundInfoDS.Tables[PifTables.OperationsHistory].Rows)
             {
                 DataRow row = OperationsHistory.Table.NewRow();
-                row[OperationsHistoryColumns.Wdate] = dr["Wdate"];
-                row[OperationsHistoryColumns.Btype] = dr["Btype"];
-                row[OperationsHistoryColumns.Rate_rur] = dr["Rate_rur"];
+                row[OperationsHistoryColumns.Wdate] = dr["W_Date"];
+                row[OperationsHistoryColumns.Btype] = dr["OperName"];
+                row[OperationsHistoryColumns.Rate_rur] = dr["RATE_RUR"];
                 row[OperationsHistoryColumns.Amount] = dr["Amount"];
-                row[OperationsHistoryColumns.Value_rur] = dr["Value rur"];
-                row[OperationsHistoryColumns.Fee_rur] = dr["Fee_rur"];
+                row[OperationsHistoryColumns.Value_rur] = dr["VALUE_RUR"];
+                row[OperationsHistoryColumns.Fee_rur] = dr["FEE_RUR"];
+                OperationsHistory.Table.Rows.Add(row);
             }
 
         }

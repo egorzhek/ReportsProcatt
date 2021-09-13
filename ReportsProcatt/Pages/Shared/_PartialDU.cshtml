@@ -1,0 +1,632 @@
+﻿@using ReportsProcatt.Models
+@model ReportsProcatt.Models.DU
+
+<table class="section block-heading">
+    <tbody>
+        <tr>
+            <td>
+
+                <table class="section-wrapper">
+                    <tbody>
+                        <tr>
+
+                            <td class="left-td heading-td">
+                                <span>@Model.Name</span>
+                            </td>
+
+                            <td class="right-td heading-td">
+                            </td>
+
+                        </tr>
+                    </tbody>
+                </table>
+
+            </td>
+        </tr>
+    </tbody>
+</table>
+<table class="section assets-section second-assets-section">
+    <tbody>
+        <tr>
+            <td>
+
+                <table class="section-wrapper">
+                    <tbody>
+                        <tr>
+
+                            <td class="asset-block">
+                                <p>Сумма активов на дату окончания периода</p>
+
+                                <span>@Model.DuHeader.TotalSum</span>
+                            </td>
+                            <td width="20px"></td>
+                            <td class="second-asset-block">
+                                <p>Сумма дохода</p>
+
+                                <span>@Model.DuHeader.ProfitSum</span>
+                            </td>
+                            <td width="20px"></td>
+                            <td class="second-asset-block">
+                                <p>Относительная доходность</p>
+
+                                <span>@Model.DuHeader.Return</span>
+                            </td>
+
+                            <td width="220px"></td>
+
+                            <td valign="top">
+                                <table class="asset-additional-table">
+                                    <tbody>
+                                        <tr>
+                                            <td class="second-asset-block asset-end-block">
+                                                <p>Период</p>
+
+                                                <span>@Model.Period</span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </td>
+
+                        </tr>
+                    </tbody>
+                </table>
+
+            </td>
+        </tr>
+    </tbody>
+</table>
+<table class="section block-heading">
+    <tbody>
+        <tr>
+            <td>
+
+                <table class="section-wrapper">
+                    <tbody>
+                        <tr>
+
+                            <td class="left-td heading-td">
+                            </td>
+
+                            <td class="right-td heading-td">
+                            </td>
+
+                        </tr>
+                    </tbody>
+                </table>
+
+            </td>
+        </tr>
+    </tbody>
+</table>
+<table class="section graph-section">
+    <tbody>
+        <tr>
+            <td>
+
+                <table class="section-wrapper">
+                    <tbody>
+                        <tr>
+
+                            <td class="progression-graph">
+
+                                <div class="progression-wrap">
+                                    <div class="hl"></div>
+
+                                    <div class="progression-item">
+                                        <div class="progression-item-text">
+                                            <p>@DuDiagramColumns.Begin</p>
+                                            <span>@Model.Diagram[DuDiagramColumns.Begin]</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="progression-item progression-top">
+                                        <div class="progression-item-text">
+                                            <p>@DuDiagramColumns.InVal</p>
+                                            <span>@Model.Diagram[DuDiagramColumns.InVal]</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="progression-item progression-top">
+                                        <div class="progression-item-text">
+                                            <p>@DuDiagramColumns.Dividents</p>
+                                            <span>@Model.Diagram[DuDiagramColumns.Dividents]</span>
+                                        </div>
+                                    </div>
+                                    <div class="progression-item progression-top">
+                                        <div class="progression-item-text">
+                                            <p>@DuDiagramColumns.Coupons</p>
+                                            <span>@Model.Diagram[DuDiagramColumns.Coupons]</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="progression-item">
+                                        <div class="progression-item-text">
+                                            <p>@DuDiagramColumns.OutVal</p>
+                                            <span>@Model.Diagram[DuDiagramColumns.OutVal]</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="progression-item">
+                                        <div class="progression-item-text">
+                                            <p>@DuDiagramColumns.End</p>
+                                            <span>@Model.Diagram[DuDiagramColumns.End]</span>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+                    </tbody>
+                </table>
+
+            </td>
+        </tr>
+    </tbody>
+</table>
+<table class="section block-heading">
+    <tbody>
+        <tr>
+            <td>
+
+                <table class="section-wrapper">
+                    <tbody>
+                        <tr>
+
+                            <td class="left-td heading-td">
+                                <span>Детализация купонов и дивидендов</span>
+                            </td>
+
+                            <td class="right-td heading-td">
+                            </td>
+
+                        </tr>
+                    </tbody>
+                </table>
+
+            </td>
+        </tr>
+    </tbody>
+</table>
+@*Детализация купонов и дивидендов*@
+<table class="section block-heading">
+    <tbody>
+        <tr>
+            <td>
+
+                <table class="section-wrapper">
+                    <tbody>
+                        <tr>
+
+                            <td class="left-td heading-td">
+                                <span>Информация по договору</span>
+                            </td>
+
+                            <td class="right-td heading-td">
+                            </td>
+
+                        </tr>
+                    </tbody>
+                </table>
+
+            </td>
+        </tr>
+    </tbody>
+</table>
+<table class="section details-section">
+    <tbody>
+        <tr>
+            <td>
+
+                <table class="section-wrapper">
+                    <tbody>
+                        <tr class="details-container">
+
+                            <td>
+
+                                <div class="details-wrap">
+                                    <div class="detail-item">
+                                        <span>Номер лицензионного счета</span>
+                                        <p>@Model.ContractNumber</p>
+                                    </div>
+
+                                    <div class="detail-item">
+                                        <span>Дата открытия</span>
+                                        <p>@Model.OpenDate</p>
+                                    </div>
+
+                                    <div class="detail-item">
+                                        <span>Комиссия за управление</span>
+                                        <p>@Model.ManagementFee</p>
+                                    </div>
+
+                                    <div class="detail-item">
+                                        <span>Комиссия за успех</span>
+                                        <p>@Model.SuccessFee</p>
+                                        <small>комиссия действует на ваш доход, превышающий 5%</small>
+                                    </div>
+
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+    </tbody>
+</table>
+<table class="section block-heading">
+    <tbody>
+        <tr>
+            <td>
+
+                <table class="section-wrapper">
+                    <tbody>
+                        <tr>
+
+                            <td class="left-td heading-td">
+                                <span>Текущие позиции по валютам</span>
+                            </td>
+
+                            <td class="right-td heading-td">
+                            </td>
+
+                        </tr>
+                    </tbody>
+                </table>
+
+            </td>
+        </tr>
+    </tbody>
+</table>
+@*Текущие позиции по валютам*@
+@if (Model.CurrentShares.Table.Rows.Count > 0)
+{
+    <table class="section block-heading">
+        <tbody>
+            <tr>
+                <td>
+
+                    <table class="section-wrapper">
+                        <tbody>
+                            <tr>
+
+                                <td class="left-td heading-td">
+                                    <span>Акции</span>
+                                </td>
+
+                                <td class="right-td heading-td">
+                                    Текущие позиции в периоде
+                                </td>
+
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    @Html.Partial("_PartialTableView", Model.CurrentShares)
+}
+@if (Model.CurrentBonds.Table.Rows.Count > 0)
+{
+    <table class="section block-heading">
+        <tbody>
+            <tr>
+                <td>
+
+                    <table class="section-wrapper">
+                        <tbody>
+                            <tr>
+
+                                <td class="left-td heading-td">
+                                    <span>Облигации</span>
+                                </td>
+
+                                <td class="right-td heading-td">
+                                    Текущие позиции в периоде
+                                </td>
+
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    @Html.Partial("_PartialTableView", Model.CurrentBonds)
+}
+@if (Model.CurrentFunds.Table.Rows.Count > 0)
+{
+    <table class="section block-heading">
+        <tbody>
+            <tr>
+                <td>
+
+                    <table class="section-wrapper">
+                        <tbody>
+                            <tr>
+
+                                <td class="left-td heading-td">
+                                    <span>ПИФ</span>
+                                </td>
+
+                                <td class="right-td heading-td">
+                                    Текущие позиции в периоде
+                                </td>
+
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    @Html.Partial("_PartialTableView", Model.CurrentFunds)
+}
+@if (Model.CurrentBills.Table.Rows.Count > 0)
+{
+    <table class="section block-heading">
+        <tbody>
+            <tr>
+                <td>
+
+                    <table class="section-wrapper">
+                        <tbody>
+                            <tr>
+
+                                <td class="left-td heading-td">
+                                    <span>Векселя</span>
+                                </td>
+
+                                <td class="right-td heading-td">
+                                    Текущие позиции в периоде
+                                </td>
+
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    @Html.Partial("_PartialTableView", Model.CurrentBills)
+}
+@if (Model.CurrentDerivatives.Table.Rows.Count > 0)
+{
+    <table class="section block-heading">
+        <tbody>
+            <tr>
+                <td>
+
+                    <table class="section-wrapper">
+                        <tbody>
+                            <tr>
+
+                                <td class="left-td heading-td">
+                                    <span>Деривативы</span>
+                                </td>
+
+                                <td class="right-td heading-td">
+                                    Текущие позиции в периоде
+                                </td>
+
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    @Html.Partial("_PartialTableView", Model.CurrentDerivatives)
+}
+@if (Model.CurrentCash.Table.Rows.Count > 0)
+{
+    <table class="section block-heading">
+        <tbody>
+            <tr>
+                <td>
+
+                    <table class="section-wrapper">
+                        <tbody>
+                            <tr>
+
+                                <td class="left-td heading-td">
+                                    <span>Деньги</span>
+                                </td>
+
+                                <td class="right-td heading-td">
+                                    Текущие позиции в периоде
+                                </td>
+
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    @Html.Partial("_PartialTableView", Model.CurrentCash)
+}
+@if (Model.ClosedShares.Table.Rows.Count > 0)
+{
+    <table class="section block-heading">
+        <tbody>
+            <tr>
+                <td>
+
+                    <table class="section-wrapper">
+                        <tbody>
+                            <tr>
+
+                                <td class="left-td heading-td">
+                                    <span>Акции</span>
+                                </td>
+
+                                <td class="right-td heading-td">
+                                    Закрытые позиции в периоде
+                                </td>
+
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    @Html.Partial("_PartialTableView", Model.ClosedShares)
+}
+@if (Model.ClosedBonds.Table.Rows.Count > 0)
+{
+    <table class="section block-heading">
+        <tbody>
+            <tr>
+                <td>
+
+                    <table class="section-wrapper">
+                        <tbody>
+                            <tr>
+
+                                <td class="left-td heading-td">
+                                    <span>Облигации</span>
+                                </td>
+
+                                <td class="right-td heading-td">
+                                    Закрытые позиции в периоде
+                                </td>
+
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    @Html.Partial("_PartialTableView", Model.ClosedBonds)
+}
+@if (Model.ClosedFunds.Table.Rows.Count > 0)
+{
+    <table class="section block-heading">
+        <tbody>
+            <tr>
+                <td>
+
+                    <table class="section-wrapper">
+                        <tbody>
+                            <tr>
+
+                                <td class="left-td heading-td">
+                                    <span>ПИФ</span>
+                                </td>
+
+                                <td class="right-td heading-td">
+                                    Закрытые позиции в периоде
+                                </td>
+
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    @Html.Partial("_PartialTableView", Model.ClosedFunds)
+}
+@if (Model.ClosedBills.Table.Rows.Count > 0)
+{
+    <table class="section block-heading">
+        <tbody>
+            <tr>
+                <td>
+
+                    <table class="section-wrapper">
+                        <tbody>
+                            <tr>
+
+                                <td class="left-td heading-td">
+                                    <span>Векселя</span>
+                                </td>
+
+                                <td class="right-td heading-td">
+                                    Закрытые позиции в периоде
+                                </td>
+
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    @Html.Partial("_PartialTableView", Model.ClosedBills)
+}
+@if (Model.ClosedDerivatives.Table.Rows.Count > 0)
+{
+    <table class="section block-heading">
+        <tbody>
+            <tr>
+                <td>
+
+                    <table class="section-wrapper">
+                        <tbody>
+                            <tr>
+
+                                <td class="left-td heading-td">
+                                    <span>Деривативы</span>
+                                </td>
+
+                                <td class="right-td heading-td">
+                                    Закрытые позиции в периоде
+                                </td>
+
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    @Html.Partial("_PartialTableView", Model.ClosedDerivatives)
+}
+@if (Model.ClosedCash.Table.Rows.Count > 0)
+{
+    <table class="section block-heading">
+        <tbody>
+            <tr>
+                <td>
+
+                    <table class="section-wrapper">
+                        <tbody>
+                            <tr>
+
+                                <td class="left-td heading-td">
+                                    <span>Деньги</span>
+                                </td>
+
+                                <td class="right-td heading-td">
+                                    Закрытые позиции в периоде
+                                </td>
+
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    @Html.Partial("_PartialTableView", Model.ClosedCash)
+}

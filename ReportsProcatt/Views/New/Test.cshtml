@@ -13,7 +13,7 @@
 </head>
 <body>
 
-    <div class="reportGraph"><canvas id="canvas"></canvas></div>
+    <div class="reportGraph"><canvas id="canvas" style="height: 300px; width: 520px;"></canvas></div>
 
     <script type="text/javascript">
 // wkhtmltopdf 0.12.5 crash fix.
@@ -39,7 +39,7 @@ function drawGraphs() {
     new Chart(
         document.getElementById("canvas"), {
             "responsive": true,
-            "type":"bar",
+            "type":"doughnut",
             "data": {
                 "labels": ["RUB", "USD"],
                 "datasets": [

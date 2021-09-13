@@ -90,9 +90,9 @@ namespace ReportsProcatt.Models
             Diagram = new Dictionary<string, string>
             {
                 { DuDiagramColumns.Begin, _TrustManagementDS.DecimalToStr(DuTables.DiagramDT, "ActiveValue", "#,##0") },
-                { DuDiagramColumns.InVal, _TrustManagementDS.DecimalToStr(DuTables.DiagramDT, "InVal", "#,##0") },
-                { DuDiagramColumns.OutVal, _TrustManagementDS.DecimalToStr(DuTables.DiagramDT, "Outval", "#,##0") },
-                { DuDiagramColumns.Coupons, _TrustManagementDS.DecimalToStr(DuTables.DiagramDT, "Coupons", "#,##0") },
+                { DuDiagramColumns.InVal, _TrustManagementDS.DecimalToStr(DuTables.DiagramDT, "InVal", "#,##0", true) },
+                { DuDiagramColumns.OutVal, _TrustManagementDS.DecimalToStr(DuTables.DiagramDT, "Outval", "#,##0", true) },
+                { DuDiagramColumns.Coupons, _TrustManagementDS.DecimalToStr(DuTables.DiagramDT, "Coupons", "#,##0", true) },
                 { DuDiagramColumns.Dividents, _TrustManagementDS.DecimalToStr(DuTables.DiagramDT, "Dividends", "#,##0") },
                 { DuDiagramColumns.End, _TrustManagementDS.DecimalToStr(DuTables.MainResultDT, "ActiveDateToValue", "#,##0") }
             };
@@ -265,6 +265,7 @@ namespace ReportsProcatt.Models
                 row[ClosedSharesColumns.Out_Summa] = dr["Out_Summa"].DecimalToStr();
                 row[ClosedSharesColumns.FinRes] = dr["FinRes"].DecimalToStr();
                 row[ClosedSharesColumns.FinResProcent] = $"{dr["FinResProcent"].DecimalToStr("#0.00")}%";
+                ClosedShares.Table.Rows.Add(row);
             }
         }
 
@@ -331,6 +332,7 @@ namespace ReportsProcatt.Models
                 row[ClosedBondsColumns.Out_Summa] = dr["Out_Summa"].DecimalToStr();
                 row[ClosedBondsColumns.FinRes] = dr["FinRes"].DecimalToStr();
                 row[ClosedBondsColumns.FinResProcent] = $"{dr["FinResProcent"].DecimalToStr("#0.00")}%";
+                ClosedBonds.Table.Rows.Add(row);
             }
         }
         private void InitClosedFunds() 
@@ -375,6 +377,7 @@ namespace ReportsProcatt.Models
                 row[ClosedFundsColumns.Out_Summa] = dr["Out_Summa"].DecimalToStr();
                 row[ClosedFundsColumns.FinRes] = dr["FinRes"].DecimalToStr();
                 row[ClosedFundsColumns.FinResProcent] = $"{dr["FinResProcent"].DecimalToStr("#0.00")}%";
+                ClosedFunds.Table.Rows.Add(row);
             }
         }
         private void InitClosedDerivatives() 
@@ -425,6 +428,7 @@ namespace ReportsProcatt.Models
                 row[ClosedDerivativesColumns.Out_Summa] = dr["Out_Summa"].DecimalToStr();
                 row[ClosedDerivativesColumns.FinRes] = dr["FinRes"].DecimalToStr();
                 row[ClosedDerivativesColumns.FinResProcent] = $"{dr["FinResProcent"].DecimalToStr("#0.00")}%";
+                ClosedDerivatives.Table.Rows.Add(row);
             }
         }
         private void InitClosedBills() 
@@ -490,6 +494,7 @@ namespace ReportsProcatt.Models
                 row[ClosedBillsColumns.Out_Summa] = dr["Out_Summa"].DecimalToStr();
                 row[ClosedBillsColumns.FinRes] = dr["FinRes"].DecimalToStr();
                 row[ClosedBillsColumns.FinResProcent] = $"{dr["FinResProcent"].DecimalToStr("#0.00")}%";
+                ClosedBills.Table.Rows.Add(row);
             }
         }
         private void InitClosedCash() 
@@ -534,6 +539,7 @@ namespace ReportsProcatt.Models
                 row[ClosedCashColumns.Out_Summa] = dr["Out_Summa"].DecimalToStr();
                 row[ClosedCashColumns.FinRes] = dr["FinRes"].DecimalToStr();
                 row[ClosedCashColumns.FinResProcent] = $"{dr["FinResProcent"].DecimalToStr("#0.00")}%";
+                ClosedCash.Table.Rows.Add(row);
             }
 
         }
@@ -580,6 +586,7 @@ namespace ReportsProcatt.Models
                 row[CurrentSharesColumns.Value_NOM] = dr["Value_NOM"];
                 row[CurrentSharesColumns.FinRes] = dr["FinRes"].DecimalToStr();
                 row[CurrentSharesColumns.FinResProcent] = $"{dr["FinResProcent"].DecimalToStr("#0.00")}%";
+                CurrentShares.Table.Rows.Add(row);
             }
         }
         private void InitCurrentBonds() {
@@ -638,9 +645,8 @@ namespace ReportsProcatt.Models
                 row[CurrentBondsColumns.Value_Nom] = dr["Value_Nom"];
                 row[CurrentBondsColumns.FinRes] = dr["FinRes"].DecimalToStr();
                 row[CurrentBondsColumns.FinResProcent] = $"{dr["FinResProcent"].DecimalToStr("#0.00")}%";
+                CurrentBonds.Table.Rows.Add(row);
             }
-
-
         }
         private void InitCurrentBills() {
             CurrentBills = new TableView();
@@ -700,6 +706,7 @@ namespace ReportsProcatt.Models
                 row[CurrentBillsColumns.Value_Nom] = dr["Value_Nom"];
                 row[CurrentBillsColumns.FinRes] = dr["FinRes"].DecimalToStr();
                 row[CurrentBillsColumns.FinResProcent] = $"{dr["FinResProcent"].DecimalToStr("#0.00")}%";
+                CurrentBills.Table.Rows.Add(row);
             }
         }
         private void InitCurrentCash() {
@@ -739,6 +746,7 @@ namespace ReportsProcatt.Models
                 row[CurrentCashColumns.Value_NOM] = dr["Value_NOM"];
                 row[CurrentCashColumns.FinRes] = dr["FinRes"].DecimalToStr();
                 row[CurrentCashColumns.FinResProcent] = $"{dr["FinResProcent"].DecimalToStr("#0.00")}%";
+                CurrentCash.Table.Rows.Add(row);
             }
 
 
@@ -780,6 +788,7 @@ namespace ReportsProcatt.Models
                 row[CurrentFundsColumns.Value_NOM] = dr["Value_NOM"];
                 row[CurrentFundsColumns.FinRes] = dr["FinRes"].DecimalToStr();
                 row[CurrentFundsColumns.FinResProcent] = $"{dr["FinResProcent"].DecimalToStr("#0.00")}%";
+                CurrentFunds.Table.Rows.Add(row);
             }
         }
         private void InitCurrentDerivatives() {
@@ -825,6 +834,7 @@ namespace ReportsProcatt.Models
                 row[CurrentDerivativesColumns.Value_NOM] = dr["Value_NOM"];
                 row[CurrentDerivativesColumns.FinRes] = dr["FinRes"].DecimalToStr();
                 row[CurrentDerivativesColumns.FinResProcent] = $"{dr["FinResProcent"].DecimalToStr("#0.00")}%";
+                CurrentDerivatives.Table.Rows.Add(row);
             }
 
         }

@@ -28,7 +28,7 @@
                                     @foreach (var th in Model.Ths)
                                     {
                                     <td>
-                                        @tr[th.ColumnName].ToString()
+                                        @tr[th.ColumnName]?.ToString()
                                     </td>
                                     }
 

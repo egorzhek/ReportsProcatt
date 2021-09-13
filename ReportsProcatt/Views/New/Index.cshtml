@@ -15,7 +15,25 @@
     <img class="bg-slpash-3" src="@Model.rootStr/img/bg-splash-3.png">
     @*<script src="@Model.rootStr/js/Chart.min.js"></script>*@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js"></script>
-    
+    <script type="text/javascript">
+        var Charts = [];
+        (function (setLineDash) {
+            CanvasRenderingContext2D.prototype.setLineDash = function () {
+                if (!arguments[0].length) {
+                    arguments[0] = [1, 0];
+                }
+                // Now, call the original method
+                return setLineDash.apply(this, arguments);
+            };
+        })(CanvasRenderingContext2D.prototype.setLineDash);
+        Function.prototype.bind = Function.prototype.bind || function (thisp) {
+            var fn = this;
+            return function () {
+                return fn.apply(thisp, arguments);
+            };
+        };
+    </script>
+
     <table class="section header">
         <tr>
             <td>
@@ -195,7 +213,7 @@
             </td>
         </tr>
     </table>
-
+    @*Дививденды*@
     <table class="section info-table-section">
         <tr>
             <td>
@@ -594,7 +612,7 @@
                             </tr>
                         </tbody>
                     </table>
-
+                    <div style="page-break-before: always;"></div>
                     <table class="section block-heading">
                         <tbody>
                             <tr>
@@ -620,13 +638,51 @@
                         </tbody>
                     </table>
 
-                    @Html.Partial("_PartialMainAssetsCircles", Model.AllAssets)
+                    <table class="section doughnut-section info-table-section">
+                        <tr>
+                            <td>
+
+                                <table class="section-wrapper">
+                                    <tbody>
+                                        <tr>
+                                            <td class="canvas-td">
+                                                <div class="canvas-wrap">
+
+                                                    @Html.Partial("_PartialCircleDiagram", Model.Assets)
+
+                                                    @Html.Partial("_PartialCircleDiagram", Model.Instruments)
+
+                                                    @Html.Partial("_PartialCircleDiagram", Model.Currencies)
+
+                                                    </div>
+
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                            </td>
+                        </tr>
+                    </table>
                     <!-- 				</td>
-                    </tr>
-                    </table> -->
+    </tr>
+    </table> -->
                 </td>
             </tr>
         </tbody>
     </table>
+
+    @foreach(var du in Model.DUs)
+    {
+        @Html.Partial("_PartialDU", du)
+    }
+
+    <script type="text/javascript">
+        window.onload = function () {
+            for (i = 0; i < Charts.length; i++) {
+                Charts[i]();
+            }
+        };
+    </script>
 </body>
 </html>
