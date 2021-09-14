@@ -52,6 +52,8 @@ AS BEGIN
 	FROM [BAL_DATA_STD].[dbo].[D_B_CONTRACTS] AS C with(nolock)
 	WHERE ACCOUNT is null
 	and (INVESTOR = @ParamINVESTOR or @ParamINVESTOR is null)
+	and C.INVESTOR not in (16541, 17319, 17284, 17337)
+	and C.E_DATE > DateAdd(day, -3, getdate())
 	GROUP BY INVESTOR, DOC
 	ORDER BY INVESTOR, DOC
 
