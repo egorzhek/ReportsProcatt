@@ -1,11 +1,31 @@
 ﻿@model ReportsProcatt.Models.CircleDiagram
 
 <div class="canvas-holder">
-    <canvas id="@Model.ElementName" style="margin-left: 140px; display: block; height: 300px; width: 520px;"></canvas>
 
-    <div class="label-text">
-        <span>@Html.Raw(Model.MainText)</span>
-        @Html.Raw(Model.Footer)
+    <div class="dougnhutGraph-wrap">
+        <div class="reportGraph dougnhutGraph">
+            <canvas id="@Model.ElementName" style="width: 310px;height: 300px;" width="310" height="300"></canvas>
+        </div>
+
+        <div class="chart-legend">
+            <span>@Model.LegendName</span>
+
+            <ul class="legend-list">
+
+            @foreach (var data in Model.Data)
+            {
+                <li style="--theme-color:@data.backgroundColor">
+                    <span style="background-color:@data.backgroundColor">.....</span>@data.lable<small style="color:@data.backgroundColor">@data.result</small>
+                </li>
+            }
+            </ul>
+
+        </div>
+
+        <div class="label-text">
+            <span>@Html.Raw(Model.MainText)<br></span>
+            @Html.Raw(Model.Footer)
+        </div>
     </div>
 </div>
 <script type="text/javascript">
@@ -37,19 +57,11 @@ Charts.push(
                 "responsive": true,
                 "maintainAspectRatio": false,
                 "legend": {
-                    position: 'right',
-                    align: 'center',
-                    labels: {
-                        boxWidth: 10,
-                        padding: 20
-                    }
+                    display: false
                 }
             }
         }
         );
     }
 )
-//window.onload = function() {
-//    drawGraphs();
-//};
 </script>

@@ -613,7 +613,35 @@
                         </tbody>
                     </table>
                     <div style="page-break-before: always;"></div>
-                    <table class="section block-heading">
+
+                    @*<table class="section doughnut-section info-table-section">
+            <tr>
+                <td>
+
+                    <table class="section-wrapper">
+                        <tbody>
+                            <tr>
+                                <td class="canvas-td">
+                                    <div class="canvas-wrap">
+
+                                        @Html.Partial("_PartialCircleDiagram", Model.Assets)
+
+                                        @Html.Partial("_PartialCircleDiagram", Model.Instruments)
+
+                                        @Html.Partial("_PartialCircleDiagram", Model.Currencies)
+
+                                        </div>
+
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </td>
+            </tr>
+        </table>*@
+                <div class="keep-together">
+                    <table class="section block-heading print-pt50">
                         <tbody>
                             <tr>
                                 <td>
@@ -637,7 +665,6 @@
                             </tr>
                         </tbody>
                     </table>
-
                     <table class="section doughnut-section info-table-section">
                         <tr>
                             <td>
@@ -648,14 +675,27 @@
                                             <td class="canvas-td">
                                                 <div class="canvas-wrap">
 
-                                                    @Html.Partial("_PartialCircleDiagram", Model.Assets)
+                                                    <div class="canvas-row">
 
-                                                    @Html.Partial("_PartialCircleDiagram", Model.Instruments)
+                                                        @Html.Partial("_PartialCircleDiagram", Model.Assets)
 
-                                                    @Html.Partial("_PartialCircleDiagram", Model.Currencies)
+                                                        @Html.Partial("_PartialCircleDiagram", Model.Instruments)
 
                                                     </div>
 
+
+                                                    <div class="canvas-row">
+
+                                                        <div class="canvas-item">
+
+                                                            @Html.Partial("_PartialCircleDiagram", Model.Currencies)
+
+                                                        </div>
+
+                                                    </div>
+
+
+                                                </div>
                                             </td>
                                         </tr>
                                     </tbody>
@@ -664,6 +704,11 @@
                             </td>
                         </tr>
                     </table>
+                </div>
+
+
+                    <div class="break-after"></div>
+
                     <!-- 				</td>
     </tr>
     </table> -->

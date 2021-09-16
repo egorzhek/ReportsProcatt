@@ -72,6 +72,7 @@ namespace ReportsProcatt.Models
                 int i = 1;
                 AssetsStruct = new CircleDiagram($"Fund_{Id}_AssetsStructCircle")
                 {
+                    LegendName = "Активы",
                     MainText = $"{_PifDS.DecimalToStr(0, "AllSum", "#,##0")} {Currency.Char}",
                     Footer = $"{_PifDS.Tables[0].Rows.Count} АКТИВА(ов)",
                     Data = _PifDS.Tables[0].Rows.Cast<DataRow>().ToList()
@@ -81,10 +82,11 @@ namespace ReportsProcatt.Models
                         {
                             var el = new CircleDiagram.DataClass
                             {
-                                lable = $"{r["CurrencyName"]} {((decimal)r["Result"] * 100).DecimalToStr("#,##0.00")}%",
+                                lable = $"{r["CurrencyName"]}",
                                 data = (decimal)r["VALUE_RUR"],
                                 backgroundColor = CircleDiagramsColorCodes.MainCurrenciesCircle[i],
-                                borderColor = CircleDiagramsColorCodes.MainCurrenciesCircle[i]
+                                borderColor = CircleDiagramsColorCodes.MainCurrenciesCircle[i],
+                                result = $"{((decimal)r["Result"] * 100).DecimalToStr("#,##0.00")}%"
                             };
                             i++;
                             return el;
@@ -105,13 +107,14 @@ namespace ReportsProcatt.Models
 
                     AssetsStruct.Data.Add(new CircleDiagram.DataClass
                     {
-                        lable = @$"Прочее {otherPerent.DecimalToStr("#,##0")}%",
+                        lable = @$"Прочее",
                         data = _PifDS.Tables[0].Rows.Cast<DataRow>().ToList()
                             .OrderByDescending(r => (decimal)r["Result"])
                             .Skip(6)
                             .Sum(r => (decimal)r["VALUE_RUR"]),
                         backgroundColor = CircleDiagramsColorCodes.MainAssetsCircle[7],
-                        borderColor = CircleDiagramsColorCodes.MainAssetsCircle[7]
+                        borderColor = CircleDiagramsColorCodes.MainAssetsCircle[7],
+                        result = $"{otherPerent.DecimalToStr("#,##0")}%"
                     });
                 }
             }
@@ -123,6 +126,7 @@ namespace ReportsProcatt.Models
                 int i = 1;
                 FundStruct = new CircleDiagram($"Fund_{Id}_StructCircle")
                 {
+                    LegendName = "Инструменты",
                     MainText = $"{_Pif2DS.DecimalToStr(1, "AllSum", "#,##0")} {Currency.Char}",
                     Footer = $"{_Pif2DS.Tables[0].Rows.Count} инструментов",
                     Data = _Pif2DS.Tables[0].Rows.Cast<DataRow>().ToList()
@@ -132,10 +136,11 @@ namespace ReportsProcatt.Models
                         {
                             var el = new CircleDiagram.DataClass
                             {
-                                lable = $"{r["Investment"]} {((decimal)r["Result"] * 100).DecimalToStr("#,##0.00")}%",
+                                lable = $"{r["Investment"]}",
                                 data = (decimal)r["VALUE_RUR"],
                                 backgroundColor = CircleDiagramsColorCodes.MainInstrumentsCircle[i],
-                                borderColor = CircleDiagramsColorCodes.MainInstrumentsCircle[i]
+                                borderColor = CircleDiagramsColorCodes.MainInstrumentsCircle[i],
+                                result = $"{((decimal)r["Result"] * 100).DecimalToStr("#,##0.00")}%"
                             };
                             i++;
                             return el;
@@ -156,13 +161,14 @@ namespace ReportsProcatt.Models
 
                     FundStruct.Data.Add(new CircleDiagram.DataClass
                     {
-                        lable = @$"Прочее {otherPerent.DecimalToStr("#,##0")}%",
+                        lable = @$"Прочее",
                         data = _Pif2DS.Tables[0].Rows.Cast<DataRow>().ToList()
                             .OrderByDescending(r => (decimal)r["Result"])
                             .Skip(6)
                             .Sum(r => (decimal)r["VALUE_RUR"]),
                         backgroundColor = CircleDiagramsColorCodes.MainInstrumentsCircle[7],
-                        borderColor = CircleDiagramsColorCodes.MainInstrumentsCircle[7]
+                        borderColor = CircleDiagramsColorCodes.MainInstrumentsCircle[7],
+                        result = $"{otherPerent.DecimalToStr("#,##0")}%"
                     });
                 }
             }
