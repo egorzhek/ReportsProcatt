@@ -26,6 +26,8 @@ AS BEGIN
 		INNER JOIN [BAL_DATA_STD].[dbo].D_B_CONTRACTS AS C WITH(NOLOCK) ON C.DOC = R.REG_1
 		WHERE T.IS_PLAN = 'F' and R.BAL_ACC = 838
 		and (C.INVESTOR = @ParamINVESTOR OR @ParamINVESTOR IS NULL)
+		and C.INVESTOR not in (16541, 17319, 17284, 17337)
+		and C.E_DATE > DateAdd(day, -3, getdate())
 		GROUP BY R.REG_1
 		ORDER BY R.REG_1
 	open obj_cur

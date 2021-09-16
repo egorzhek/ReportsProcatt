@@ -33,6 +33,8 @@ AS BEGIN
 		and T.WIRING is not null
 		and B2.WALK > 0 -- проводка реализована.
 		and (R.REG_1 = @ParamINVESTOR OR @ParamINVESTOR IS NULL)
+		and C.INVESTOR not in (16541, 17319, 17284, 17337)
+		and C.E_DATE > DateAdd(day, -3, getdate())
 		GROUP BY R.REG_1, R.REG_2
 		ORDER BY R.REG_1, R.REG_2
 	open obj_cur
