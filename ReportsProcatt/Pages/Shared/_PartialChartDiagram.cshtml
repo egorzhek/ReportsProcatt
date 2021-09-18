@@ -1,0 +1,100 @@
+﻿@model ReportsProcatt.Models.ChartClass
+    <table class="section graph-section projected-payments-section">
+        <tr>
+            <td>
+
+                <table class="section-wrapper">
+                    <tbody>
+                        <tr>
+
+                            <td>
+                                <div class="line-chart-wrap">
+                                    <div class="reportGraph">
+                                        <canvas width="1156" height="237" id="@Model.ElementName"></canvas>
+                                    </div>
+                                </div>
+                            </td>
+
+                        </tr>
+                    </tbody>
+                </table>
+
+            </td>
+        </tr>
+    </table>
+    <script type="text/javascript">
+
+    Charts.push(
+        function () {
+            new Chart(document.getElementById("@Model.ElementName"), {
+                "type": 'bar',
+                "data": {
+                    "labels": [@Html.Raw(string.Join(",", Model.Lables.Select(l => $"'{l}'").ToArray()))],
+                    "datasets": [
+                        {
+                            "label": '@Html.Raw(Model.DataSets[0].lable)',
+                            "fill": false,
+                            "data": [@Html.Raw(string.Join(",",Model.DataSets[0].data.Select(d => d.value).ToArray()))],
+                            "backgroundColor": '@Model.DataSets[0].backgroundColor',
+                            "borderColor": [@Html.Raw(string.Join(",",Model.DataSets[0].data.Select(d => $"'{d.borderColor}'").ToArray()))],
+                            "borderWidth": 1
+                        },
+                        {
+                            "label": '@Html.Raw(Model.DataSets[1].lable)',
+                            "fill": false,
+                            "data": [@Html.Raw(string.Join(",",Model.DataSets[1].data.Select(d => d.value).ToArray()))],
+                            "backgroundColor": '@Model.DataSets[1].backgroundColor',
+                            "borderColor": [@Html.Raw(string.Join(",",Model.DataSets[1].data.Select(d => $"'{d.borderColor}'").ToArray()))],
+                            "borderWidth": 1
+                        },]
+                },
+                "options": {
+                    "scales": {
+                        "yAxes": [{
+                            "ticks": {
+                                "color": "#3E4E65",
+                                "fontSize": 12,
+                                "padding": 20,
+                                "fontStyle": 'bolder',
+                                "fontFamily": 'MuseoSans',
+                                "beginAtZero": true,
+                            },
+                            "gridLines": {
+                                "tickMarkLength": 18,
+                                "lineWidth": 2,
+                                "color": "#6BA3C2",
+                                "zeroLineColor": "#6BA3C2",
+                                "display": false
+                            }
+                        }],
+                        "xAxes": [{
+                            "ticks": {
+                                "color": "#3E4E65",
+                                "fontSize": 12,
+                                "padding": 20,
+                                "fontStyle": 'bolder',
+                                "fontFamily": 'MuseoSans',
+                                "beginAtZero": true,
+                            },
+                            "gridLines": {
+                                "tickMarkLength": 18,
+                                "lineWidth": 2,
+                                "color": "#6BA3C2",
+                                "zeroLineColor": "#6BA3C2",
+                                "display": false
+                            }
+                        }],
+                    },
+
+                    "title": {
+                        "display": false
+                    },
+                    "responsive": true,
+                    "legend": {
+                        "display": false
+                    }
+                }
+            });
+        }
+    );
+    </script>

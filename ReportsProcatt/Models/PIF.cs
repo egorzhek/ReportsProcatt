@@ -194,6 +194,14 @@ namespace ReportsProcatt.Models
                 new ViewElementAttr{ColumnName = OperationsHistoryColumns.Fee_rur, DisplayName = "Комиссия", SortOrder = 6}
             };
 
+            OperationsHistory.Ths.Where(t => t.ColumnName == OperationsHistoryColumns.Wdate).First().AttrRow.Add("width", "170px");
+            OperationsHistory.Ths.Where(t => t.ColumnName == OperationsHistoryColumns.Btype).First().AttrRow.Add("width", "300px");
+            OperationsHistory.Ths.Where(t => t.ColumnName == OperationsHistoryColumns.Rate_rur).First().AttrRow.Add("width", "130px");
+            OperationsHistory.Ths.Where(t => t.ColumnName == OperationsHistoryColumns.Amount).First().AttrRow.Add("width", "96px");
+            OperationsHistory.Ths.Where(t => t.ColumnName == OperationsHistoryColumns.Value_rur).First().AttrRow.Add("width", "145px");
+            OperationsHistory.Ths.Where(t => t.ColumnName == OperationsHistoryColumns.Fee_rur).First().AttrRow.Add("width", "117px");
+
+
             foreach (DataRow dr in _FundInfoDS.Tables[PifTables.OperationsHistory].Rows)
             {
                 DataRow row = OperationsHistory.Table.NewRow();

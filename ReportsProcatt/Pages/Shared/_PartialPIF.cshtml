@@ -1,1 +1,304 @@
-﻿@model ReportsProcatt.Models.PIF
+﻿@using ReportsProcatt.Models
+@model ReportsProcatt.Models.PIF
+
+<table class="section block-heading print-pt50">
+    <tbody>
+        <tr>
+            <td>
+
+                <table class="section-wrapper">
+                    <tbody>
+                        <tr>
+
+                            <td class="left-td heading-td">
+                                <span>@Model.Name</span>
+                            </td>
+
+                            <td class="right-td heading-td">
+                            </td>
+
+                        </tr>
+                    </tbody>
+                </table>
+
+            </td>
+        </tr>
+    </tbody>
+</table>
+<table class="section assets-section second-assets-section">
+    <tbody>
+        <tr>
+            <td>
+
+                <table class="section-wrapper">
+                    <tbody>
+                        <tr>
+
+                            <td class="asset-block">
+                                <p>Сумма активов на дату окончания периода</p>
+
+                                <span>@Model.PifHeader.TotalSum</span>
+                            </td>
+                            <td width="20px"></td>
+                            <td class="second-asset-block">
+                                <p>Сумма дохода</p>
+
+                                <span>@Model.PifHeader.ProfitSum</span>
+                            </td>
+                            <td width="20px"></td>
+                            <td class="second-asset-block">
+                                <p>Относительная доходность (1,5%)</p>
+
+                                <span>@Model.PifHeader.Return</span>
+                            </td>
+
+                            <td width="220px"></td>
+
+                            <td valign="top">
+                                <table class="asset-additional-table">
+                                    <tbody>
+                                        <tr>
+                                            <td class="second-asset-block asset-end-block">
+                                                <p>Период</p>
+
+                                                <span>@Model.Period</span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </td>
+
+                        </tr>
+                    </tbody>
+                </table>
+
+            </td>
+        </tr>
+    </tbody>
+</table>
+<table class="section block-heading">
+    <tbody>
+        <tr>
+            <td>
+
+                <table class="section-wrapper">
+                    <tbody>
+                        <tr>
+
+                            <td class="left-td heading-td">
+                            </td>
+
+                            <td class="right-td heading-td">
+                            </td>
+
+                        </tr>
+                    </tbody>
+                </table>
+
+            </td>
+        </tr>
+    </tbody>
+</table>
+<table class="section graph-section">
+    <tbody>
+        <tr>
+            <td>
+
+                <table class="section-wrapper">
+                    <tbody>
+                        <tr>
+
+                            <td class="progression-graph">
+
+                                <div class="progression-wrap">
+                                    <div class="hl"></div>
+
+                                    <div class="progression-item">
+                                        <div class="progression-item-text">
+                                            <p>@PifDiagramColumns.Begin</p>
+                                            <span>@Model.Diagram[PifDiagramColumns.Begin]</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="progression-item progression-top">
+                                        <div class="progression-item-text">
+                                            <p>@PifDiagramColumns.InVal</p>
+                                            <span>@Model.Diagram[PifDiagramColumns.InVal]</span>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="progression-item">
+                                        <div class="progression-item-text">
+                                            <p>@PifDiagramColumns.OutVal</p>
+                                            <span>@Model.Diagram[PifDiagramColumns.OutVal]</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="progression-item">
+                                        <div class="progression-item-text">
+                                            <p>@PifDiagramColumns.End</p>
+                                            <span>@Model.Diagram[PifDiagramColumns.End]</span>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+    </tbody>
+</table>
+<table class="section block-heading">
+    <tbody>
+        <tr>
+            <td>
+                <table class="section-wrapper">
+                    <tbody>
+                        <tr>
+
+                            <td class="left-td heading-td">
+                                <span>Детали счета</span>
+                            </td>
+
+                            <td class="right-td heading-td">
+                            </td>
+
+                        </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+    </tbody>
+</table>
+<table class="section details-section">
+    <tbody>
+        <tr>
+            <td>
+                <table class="section-wrapper">
+                    <tbody>
+                        <tr class="details-container">
+
+                            <td>
+
+                                <div class="details-wrap">
+                                    <div class="detail-item">
+                                        <span>Номер лицензионного счета</span>
+                                        <p>@Model.AccountNumber</p>
+                                    </div>
+
+                                    <div class="detail-item">
+                                        <span>Дата открытия счета</span>
+                                        <p>@Model.OpenDate</p>
+                                    </div>
+
+                                    <div class="detail-item">
+                                        <span>Количество паев</span>
+                                        <p>@Model.Amount</p>
+                                    </div>
+                                </div>
+
+                            </td>
+
+                        </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+    </tbody>
+</table>
+@if (Model.AssetsStruct != null || Model.FundStruct != null)
+{
+<div class="keep-together">
+
+    <table class="section block-heading ">
+        <tbody>
+            <tr>
+                <td>
+                    <table class="section-wrapper">
+                        <tbody>
+                            <tr>
+
+                                <td class="left-td heading-td">
+                                    <span>Состав фонда</span>
+                                </td>
+
+                                <td class="right-td heading-td">
+                                </td>
+
+                            </tr>
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <table class="section doughnut-section double-doughnut  info-table-section">
+        <tbody>
+            <tr>
+                <td>
+
+                    <table class="section-wrapper">
+                        <tbody>
+                            <tr>
+                                <td class="canvas-td">
+                                    <div class="canvas-wrap">
+
+                                        <div class="canvas-row">
+
+                                        @if (Model.AssetsStruct != null)
+                                        {
+                                            @Html.Partial("_PartialCircleDiagram", Model.AssetsStruct)
+                                        }
+
+                                        @if (Model.FundStruct != null)
+                                        {
+                                            @Html.Partial("_PartialCircleDiagram", Model.FundStruct)
+                                        }
+
+                                        </div>
+
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+}
+<div class="keep-together">
+
+    <table class="section block-heading print-pt50">
+        <tbody>
+            <tr>
+                <td>
+                    <table class="section-wrapper">
+                        <tbody>
+                            <tr>
+
+                                <td class="left-td heading-td">
+                                    <span>История операций</span>
+                                </td>
+
+                                <td class="right-td heading-td">
+                                </td>
+
+                            </tr>
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    @Html.Partial("_PartialTableView", Model.OperationsHistory)
+</div>

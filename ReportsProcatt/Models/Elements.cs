@@ -6,7 +6,28 @@ using System.Threading.Tasks;
 
 namespace ReportsProcatt.Models
 {
-    public class ChartClass { }
+    public class ChartClass 
+    {
+        public string ElementName { get; private set; }
+        public string Type { get; set; }
+        public List<DataSetClass> DataSets { get; set; }
+        public List<string> Lables { get; set; }
+        public class DataSetClass
+        {
+            public string lable { get; set; }
+            public List<DataClass> data { get; set; }
+            public string backgroundColor { get; set; }
+        }
+        public class DataClass
+        {
+            public decimal value { get; set; }
+            public string borderColor { get; set; }
+        }
+        public ChartClass(string aElementName)
+        {
+            ElementName = aElementName;
+        }
+    }
 
     public class TableView
     {
@@ -30,6 +51,7 @@ namespace ReportsProcatt.Models
     public class CircleDiagram
     {
         public string ElementName { get; private set; }
+        public string LegendName { get; set; }
         public string Header { get; set; }
         public string MainText { get; set; }
         public string Footer { get; set; }
@@ -41,6 +63,7 @@ namespace ReportsProcatt.Models
             public decimal data { get; set; }
             public string backgroundColor { get; set; }
             public string borderColor { get; set; }
+            public string result { get; set; }
         }
         public CircleDiagram(string aElementName)
         {

@@ -120,7 +120,7 @@
                             </td>
 
                             <td class="right-td heading-td">
-                                <span>Валюта: @Model.ReportCurrency</span>
+                                <span>Валюта: @Model.ReportCurrency.Code</span>
                             </td>
 
                         </tr>
@@ -614,112 +614,94 @@
                     </table>
                     <div style="page-break-before: always;"></div>
 
-                    @*<table class="section doughnut-section info-table-section">
-            <tr>
-                <td>
+                    <div class="keep-together">
+                        <table class="section block-heading print-pt50">
+                            <tbody>
+                                <tr>
+                                    <td>
 
-                    <table class="section-wrapper">
-                        <tbody>
-                            <tr>
-                                <td class="canvas-td">
-                                    <div class="canvas-wrap">
+                                        <table class="section-wrapper">
+                                            <tbody>
+                                                <tr>
 
-                                        @Html.Partial("_PartialCircleDiagram", Model.Assets)
+                                                    <td class="left-td heading-td">
+                                                        <span>Структура активов по портфелю</span>
+                                                    </td>
 
-                                        @Html.Partial("_PartialCircleDiagram", Model.Instruments)
+                                                    <td class="right-td heading-td">
+                                                    </td>
 
-                                        @Html.Partial("_PartialCircleDiagram", Model.Currencies)
+                                                </tr>
+                                            </tbody>
+                                        </table>
 
-                                        </div>
-
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-
-                </td>
-            </tr>
-        </table>*@
-                <div class="keep-together">
-                    <table class="section block-heading print-pt50">
-                        <tbody>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <table class="section doughnut-section info-table-section">
                             <tr>
                                 <td>
 
                                     <table class="section-wrapper">
                                         <tbody>
                                             <tr>
+                                                <td class="canvas-td">
+                                                    <div class="canvas-wrap">
 
-                                                <td class="left-td heading-td">
-                                                    <span>Структура активов по портфелю</span>
+                                                        <div class="canvas-row">
+
+                                                            @Html.Partial("_PartialCircleDiagram", Model.Assets)
+
+                                                            @Html.Partial("_PartialCircleDiagram", Model.Instruments)
+
+                                                        </div>
+
+
+                                                        <div class="canvas-row">
+
+                                                            <div class="canvas-item">
+
+                                                                @Html.Partial("_PartialCircleDiagram", Model.Currencies)
+
+                                                            </div>
+
+                                                        </div>
+
+
+                                                    </div>
                                                 </td>
-
-                                                <td class="right-td heading-td">
-                                                </td>
-
                                             </tr>
                                         </tbody>
                                     </table>
 
                                 </td>
                             </tr>
-                        </tbody>
-                    </table>
-                    <table class="section doughnut-section info-table-section">
-                        <tr>
-                            <td>
-
-                                <table class="section-wrapper">
-                                    <tbody>
-                                        <tr>
-                                            <td class="canvas-td">
-                                                <div class="canvas-wrap">
-
-                                                    <div class="canvas-row">
-
-                                                        @Html.Partial("_PartialCircleDiagram", Model.Assets)
-
-                                                        @Html.Partial("_PartialCircleDiagram", Model.Instruments)
-
-                                                    </div>
-
-
-                                                    <div class="canvas-row">
-
-                                                        <div class="canvas-item">
-
-                                                            @Html.Partial("_PartialCircleDiagram", Model.Currencies)
-
-                                                        </div>
-
-                                                    </div>
-
-
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-
-                            </td>
-                        </tr>
-                    </table>
-                </div>
+                        </table>
+                    </div>
 
 
                     <div class="break-after"></div>
 
                     <!-- 				</td>
-    </tr>
-    </table> -->
+                    </tr>
+                    </table> -->
                 </td>
             </tr>
         </tbody>
     </table>
+    <div style="page-break-before: always;"></div>
 
-    @foreach(var du in Model.DUs)
+    @foreach (var pif in Model.PIFs)
+    {
+        @Html.Partial("_PartialPIF", pif)
+        <div style="page-break-before: always;"></div>
+    }
+
+    @foreach (var du in Model.DUs)
     {
         @Html.Partial("_PartialDU", du)
+        <div style="page-break-before: always;"></div>
     }
 
     <script type="text/javascript">

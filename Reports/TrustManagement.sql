@@ -428,7 +428,7 @@ ORDER BY [DateFrom];
 
 -- Детализация купонов и дивидендов
 select
-	[Date] = FORMAT([PaymentDateTime],'dd.MM.yyyy'),
+	[Date] = [PaymentDateTime],
 	[ToolName] = [ShareName],
 	[PriceType] = case when [Type] = 1 then 'Купоны' else 'Дивиденды' end,
 	[ContractName] = [ShareName],

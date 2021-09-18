@@ -1,81 +1,86 @@
 ﻿@using ReportsProcatt.Models
 @model ReportsProcatt.Models.DU
 
-<table class="section block-heading">
-    <tbody>
-        <tr>
-            <td>
+<div class="keep-together">
 
-                <table class="section-wrapper">
-                    <tbody>
-                        <tr>
+    <table class="section block-heading">
+        <tbody>
+            <tr>
+                <td>
 
-                            <td class="left-td heading-td">
-                                <span>@Model.Name</span>
-                            </td>
+                    <table class="section-wrapper">
+                        <tbody>
+                            <tr>
 
-                            <td class="right-td heading-td">
-                            </td>
+                                <td class="left-td heading-td">
+                                    <span>@Model.Name</span>
+                                </td>
 
-                        </tr>
-                    </tbody>
-                </table>
+                                <td class="right-td heading-td">
+                                </td>
 
-            </td>
-        </tr>
-    </tbody>
-</table>
-<table class="section assets-section second-assets-section">
-    <tbody>
-        <tr>
-            <td>
+                            </tr>
+                        </tbody>
+                    </table>
 
-                <table class="section-wrapper">
-                    <tbody>
-                        <tr>
+                </td>
+            </tr>
+        </tbody>
+    </table>
 
-                            <td class="asset-block">
-                                <p>Сумма активов на дату окончания периода</p>
+    <table class="section assets-section second-assets-section">
+        <tbody>
+            <tr>
+                <td>
 
-                                <span>@Model.DuHeader.TotalSum</span>
-                            </td>
-                            <td width="20px"></td>
-                            <td class="second-asset-block">
-                                <p>Сумма дохода</p>
+                    <table class="section-wrapper">
+                        <tbody>
+                            <tr>
 
-                                <span>@Model.DuHeader.ProfitSum</span>
-                            </td>
-                            <td width="20px"></td>
-                            <td class="second-asset-block">
-                                <p>Относительная доходность</p>
+                                <td class="asset-block">
+                                    <p>Сумма активов на дату окончания периода</p>
 
-                                <span>@Model.DuHeader.Return</span>
-                            </td>
+                                    <span>@Model.DuHeader.TotalSum</span>
+                                </td>
+                                <td width="20px"></td>
+                                <td class="second-asset-block">
+                                    <p>Сумма дохода</p>
 
-                            <td width="220px"></td>
+                                    <span>@Model.DuHeader.ProfitSum</span>
+                                </td>
+                                <td width="20px"></td>
+                                <td class="second-asset-block">
+                                    <p>Относительная доходность (1,5%)</p>
 
-                            <td valign="top">
-                                <table class="asset-additional-table">
-                                    <tbody>
-                                        <tr>
-                                            <td class="second-asset-block asset-end-block">
-                                                <p>Период</p>
+                                    <span>@Model.DuHeader.Return</span>
+                                </td>
 
-                                                <span>@Model.Period</span>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </td>
+                                <td width="220px"></td>
 
-                        </tr>
-                    </tbody>
-                </table>
+                                <td valign="top">
+                                    <table class="asset-additional-table">
+                                        <tbody>
+                                            <tr>
+                                                <td class="second-asset-block asset-end-block">
+                                                    <p>Период</p>
 
-            </td>
-        </tr>
-    </tbody>
-</table>
+                                                    <span>@Model.Period</span>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </td>
+
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+</div>
 <table class="section block-heading">
     <tbody>
         <tr>
@@ -173,16 +178,36 @@
 
                 <table class="section-wrapper">
                     <tbody>
+
                         <tr>
 
                             <td class="left-td heading-td">
-                                <span>Детализация купонов и дивидендов</span>
+                                <span>Дивиденды и купоны</span>
                             </td>
 
                             <td class="right-td heading-td">
                             </td>
 
                         </tr>
+
+                        <tr class="coupons-tr">
+                            <td>
+                                <div class="coupons-wrap">
+                                    <div class="coupons-item">
+                                        Всего – 44 450 833 ₽
+                                    </div>
+
+                                    <div class="coupons-item" style="color:#3E4E65">
+                                        Дивиденды – 5 000,45 ₽
+                                    </div>
+
+                                    <div class="coupons-item" style="color:#09669A">
+                                        Купоны – 1 000,45 ₽
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+
                     </tbody>
                 </table>
 
@@ -191,6 +216,42 @@
     </tbody>
 </table>
 @*Детализация купонов и дивидендов*@
+@Html.Partial("_PartialChartDiagram", Model.DividedtsCouponsChart)
+
+@if (Model.DividedtsCoupons.Table.Rows.Count > 0)
+{
+<div class="keep-together">
+
+    <table class="section block-heading print-pt50">
+        <tbody>
+            <tr>
+                <td>
+
+                    <table class="section-wrapper">
+                        <tbody>
+                            <tr>
+
+                                <td class="left-td heading-td">
+                                    <span>Детализация купонов и дивидендов</span>
+                                </td>
+
+                                <td class="right-td heading-td">
+                                </td>
+
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    @Html.Partial("_PartialTableView", Model.DividedtsCoupons)
+
+</div>
+}
+
 <table class="section block-heading">
     <tbody>
         <tr>

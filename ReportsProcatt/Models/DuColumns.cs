@@ -231,5 +231,13 @@ namespace ReportsProcatt.Models
         public const string FinResProcent = "FinResProcent";
         public const string Valuta = "Valuta";
     }
-
+    public class DividedtsCouponsColumns
+    {
+        public const string Date = "Date";
+        public const string ToolName = "ToolName";
+        public const string PriceType = "PriceType";
+        public const string ContractName = "ContractName";
+        public const string Price = "Price";
+        public const string Valuta = "Valuta";
+    }
 }

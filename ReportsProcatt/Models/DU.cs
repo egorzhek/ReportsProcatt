@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -98,6 +99,9 @@ namespace ReportsProcatt.Models
             };
             InitAssetsStruct();
             InitFundStruct();
+
+            InitDividedtsCouponsChart();
+            InitDividedtsCoupons();
 
             InitClosedShares();
             InitClosedBonds();
@@ -221,6 +225,77 @@ namespace ReportsProcatt.Models
                         result = $"{otherPerent.DecimalToStr("#,##0")}%"
                     });
                 }
+            }
+        }
+
+        private void InitDividedtsCouponsChart()
+        {
+            if (_TrustManagementDS.Tables[DuTables.DivsNCoupsChartDT].Rows.Count > 0)
+            {
+                var cl = new CultureInfo("ru-RU", false);
+                DividedtsCouponsChart = new ChartClass($"DividedtsCouponsChart_{Id}")
+                {
+                    Lables = _TrustManagementDS.Tables[DuTables.DivsNCoupsChartDT].Rows.Cast<DataRow>().ToList()
+                        .Select(r => ((DateTime)r["Date"]).ToString("MMM yy", cl)).ToList(),
+                    Type = "bar",
+                    DataSets = new List<ChartClass.DataSetClass>()
+                    {
+                        new ChartClass.DataSetClass
+                        {
+                            data = _TrustManagementDS.Tables[DuTables.DivsNCoupsChartDT].Rows.Cast<DataRow>().ToList()
+                                .Select(r => new ChartClass.DataClass
+                                {
+                                    value = (r["Dividends"] as decimal?) ?? 0,
+                                    borderColor = "#E9F3F8"
+                                }).ToList(),
+                            backgroundColor = "#E9F3F8",
+                            lable = "Дивиденды"
+                        },
+                        new ChartClass.DataSetClass
+                        {
+                            data = _TrustManagementDS.Tables[DuTables.DivsNCoupsChartDT].Rows.Cast<DataRow>().ToList()
+                                .Select(r => new ChartClass.DataClass
+                                {
+                                    value = (r["Coupons"] as decimal?) ?? 0,
+                                    borderColor = "#09669A"
+                                }).ToList(),
+                            backgroundColor = "#09669A",
+                            lable = "Купоны"
+                        }
+                    }
+                };
+            }
+        }
+        private void InitDividedtsCoupons()
+        {
+            DividedtsCoupons = new TableView();
+            DividedtsCoupons.Table = new DataTable(); 
+            DividedtsCoupons.Table.Columns.Add(DividedtsCouponsColumns.Date);
+            DividedtsCoupons.Table.Columns.Add(DividedtsCouponsColumns.ToolName);
+            DividedtsCoupons.Table.Columns.Add(DividedtsCouponsColumns.PriceType);
+            DividedtsCoupons.Table.Columns.Add(DividedtsCouponsColumns.ContractName);
+            DividedtsCoupons.Table.Columns.Add(DividedtsCouponsColumns.Price);
+
+            DividedtsCoupons.Ths = new List<ViewElementAttr>{
+                new ViewElementAttr{ColumnName = DividedtsCouponsColumns.Date, DisplayName = "Дата", SortOrder = 1},
+                new ViewElementAttr{ColumnName = DividedtsCouponsColumns.ToolName, DisplayName = "Инструмент", SortOrder = 2},
+                new ViewElementAttr{ColumnName = DividedtsCouponsColumns.PriceType, DisplayName = "Тип выплаты", SortOrder = 3},
+                new ViewElementAttr{ColumnName = DividedtsCouponsColumns.ContractName, DisplayName = "Количество", SortOrder = 4},
+                new ViewElementAttr{ColumnName = DividedtsCouponsColumns.Price, DisplayName = "Сумма сделки", SortOrder = 5},
+            };
+
+            DividedtsCoupons.Ths.Where(t => t.ColumnName == DividedtsCouponsColumns.ToolName).First().AttrRow.Add("width", "320px");
+            DividedtsCoupons.Ths.Where(t => t.ColumnName == DividedtsCouponsColumns.PriceType).First().AttrRow.Add("width", "150px");
+            DividedtsCoupons.Ths.Where(t => t.ColumnName == DividedtsCouponsColumns.Price).First().AttrRow.Add("width", "150px");
+
+            foreach (DataRow dr in _TrustManagementDS.Tables[DuTables.DividedtsCoupons].Rows)
+            { 
+                DataRow row = DividedtsCoupons.Table.NewRow(); 
+                row[DividedtsCouponsColumns.Date] = ((DateTime)dr["Date"]).ToString("dd.MM.yyyy");
+                row[DividedtsCouponsColumns.ToolName] = dr["ToolName"];
+                row[DividedtsCouponsColumns.PriceType] = dr["PriceType"];
+                row[DividedtsCouponsColumns.ContractName] = dr["ContractName"];
+                row[DividedtsCouponsColumns.Price] = $"{dr["Price"].DecimalToStr()}"; //{dr["Valuta"]}";
             }
         }
         private void InitClosedShares()
@@ -850,6 +925,8 @@ namespace ReportsProcatt.Models
     {
         public const int MainResultDT = 0;
         public const int DiagramDT = 3;
+        public const int DivsNCoupsChartDT = 4;
+        public const int DividedtsCoupons = 5;
         public const int CurrentShares = 11;
         public const int ClosedShares = 12;
         public const int CurrentBonds = 13;
