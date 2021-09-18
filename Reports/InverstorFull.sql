@@ -17,7 +17,7 @@ declare @MinDate date, @MaxDate date
 
 Declare @SItog numeric(30,10), @AmountDayMinus_RUR numeric(30,10), @Snach numeric(30,10), @AmountDayPlus_RUR numeric(30,10),
 @Sum_INPUT_VALUE_RUR  numeric(30,10),
-@Sum_OUTPUT_VALUE_RUR numeric(30,10),
+@Sum_OUTPUT_VALUE_RUR numeric(30,10), @Sum_OUTPUT_VALUE_RUR1 numeric(30,10), @Sum_OUTPUT_VALUE_RUR2 numeric(30,10),
 @Sum_INPUT_COUPONS_RUR numeric(30,10),
 @Sum_INPUT_DIVIDENTS_RUR numeric(30,10),
 @InvestResult numeric(30,10);
@@ -84,7 +84,9 @@ FROM
 	INPUT_DIVIDENTS_EURO = sum(INPUT_DIVIDENTS_EURO),
 	INPUT_COUPONS_RUR = sum(INPUT_COUPONS_RUR),
 	INPUT_COUPONS_USD = sum(INPUT_COUPONS_USD),
-	INPUT_COUPONS_EURO = sum(INPUT_COUPONS_EURO)
+	INPUT_COUPONS_EURO = sum(INPUT_COUPONS_EURO),
+	OUTPUT_VALUE_RUR1 = sum(OUTPUT_VALUE_RUR1),
+	OUTPUT_VALUE_RUR2 = sum(OUTPUT_VALUE_RUR2)
 	from
 	(
 		select
@@ -119,7 +121,15 @@ FROM
 			INPUT_DIVIDENTS_EURO = 0.0000000000,
 			INPUT_COUPONS_RUR = 0.0000000000,
 			INPUT_COUPONS_USD = 0.0000000000,
-			INPUT_COUPONS_EURO = 0.0000000000
+			INPUT_COUPONS_EURO = 0.0000000000,
+			OUTPUT_VALUE_RUR1 =
+			case
+				when @Valuta = 'RUB' then AmountDayMinus_RUR
+				when @Valuta = 'USD' then AmountDayMinus_USD
+				when @Valuta = 'EUR' then AmountDayMinus_EVRO
+				else AmountDayMinus_RUR
+			end,
+			OUTPUT_VALUE_RUR2 = 0.000
 		from InvestorFundDate nolock
 		where Investor = @InvestorId and [Date] >= @StartDate and [Date] <= @EndDate
 		union all
@@ -155,7 +165,15 @@ FROM
 			INPUT_DIVIDENTS_EURO = 0.0000000000,
 			INPUT_COUPONS_RUR = 0.0000000000,
 			INPUT_COUPONS_USD = 0.0000000000,
-			INPUT_COUPONS_EURO = 0.0000000000
+			INPUT_COUPONS_EURO = 0.0000000000,
+			OUTPUT_VALUE_RUR1 =
+			case
+				when @Valuta = 'RUB' then AmountDayMinus_RUR
+				when @Valuta = 'USD' then AmountDayMinus_USD
+				when @Valuta = 'EUR' then AmountDayMinus_EVRO
+				else AmountDayMinus_RUR
+			end,
+			OUTPUT_VALUE_RUR2 = 0.000
 		from InvestorFundDateLast nolock
 		where Investor = @InvestorId and [Date] >= @StartDate and [Date] <= @EndDate
 		union all
@@ -212,7 +230,15 @@ FROM
 				else INPUT_COUPONS_RUR
 			end,
 			INPUT_COUPONS_USD,
-			INPUT_COUPONS_EURO
+			INPUT_COUPONS_EURO,
+			OUTPUT_VALUE_RUR1 = 0.000,
+			OUTPUT_VALUE_RUR2 =
+			case
+				when @Valuta = 'RUB' then OUTPUT_VALUE_RUR
+				when @Valuta = 'USD' then OUTPUT_VALUE_USD
+				when @Valuta = 'EUR' then OUTPUT_VALUE_EURO
+				else OUTPUT_VALUE_RUR
+			end
 		from Assets_Contracts nolock
 		where InvestorId = @InvestorId and [Date] >= @StartDate and [Date] <= @EndDate
 		union all
@@ -269,7 +295,15 @@ FROM
 				else INPUT_COUPONS_RUR
 			end,
 			INPUT_COUPONS_USD,
-			INPUT_COUPONS_EURO
+			INPUT_COUPONS_EURO,
+			OUTPUT_VALUE_RUR1 = 0.000,
+			OUTPUT_VALUE_RUR2 =
+			case
+				when @Valuta = 'RUB' then OUTPUT_VALUE_RUR
+				when @Valuta = 'USD' then OUTPUT_VALUE_USD
+				when @Valuta = 'EUR' then OUTPUT_VALUE_EURO
+				else OUTPUT_VALUE_RUR
+			end
 		from Assets_ContractsLast nolock
 		where InvestorId = @InvestorId and [Date] >= @StartDate and [Date] <= @EndDate
 	)
@@ -290,7 +324,7 @@ update #ResInvAssets set
 	--DailyDecrement_RUR = 0,	DailyDecrement_USD = 0,	DailyDecrement_EURO = 0,
 	INPUT_DIVIDENTS_RUR = 0,INPUT_DIVIDENTS_USD = 0,INPUT_DIVIDENTS_EURO = 0,
 	INPUT_COUPONS_RUR = 0,  INPUT_COUPONS_USD = 0,  INPUT_COUPONS_EURO = 0,
-	INPUT_VALUE_RUR = 0, OUTPUT_VALUE_RUR = 0
+	INPUT_VALUE_RUR = 0, OUTPUT_VALUE_RUR = 0, OUTPUT_VALUE_RUR1 = 0, OUTPUT_VALUE_RUR2 = 0
 where [Date] = @StartDate
 and (OUTPUT_VALUE_RUR <> 0 or INPUT_VALUE_RUR <> 0 or INPUT_COUPONS_RUR <> 0 or INPUT_DIVIDENTS_RUR <> 0) -- вводы и выводы были в этот день
 
@@ -304,7 +338,7 @@ VALUE_EURO = VALUE_EURO, -- - DailyIncrement_EURO - DailyDecrement_EURO,
 -- DailyDecrement_RUR = 0,	DailyDecrement_USD = 0,	DailyDecrement_EURO = 0,
 INPUT_DIVIDENTS_RUR = 0,INPUT_DIVIDENTS_USD = 0,INPUT_DIVIDENTS_EURO = 0,
 INPUT_COUPONS_RUR = 0,  INPUT_COUPONS_USD = 0,  INPUT_COUPONS_EURO = 0,
-INPUT_VALUE_RUR = 0, OUTPUT_VALUE_RUR = 0
+INPUT_VALUE_RUR = 0, OUTPUT_VALUE_RUR = 0, OUTPUT_VALUE_RUR1 = 0, OUTPUT_VALUE_RUR2 = 0
 from #ResInvAssets as a
 where [Date] = @EndDate
 and (OUTPUT_VALUE_RUR <> 0 or INPUT_VALUE_RUR <> 0 or INPUT_COUPONS_RUR <> 0 or INPUT_DIVIDENTS_RUR <> 0) -- вводы и выводы были в этот день
@@ -335,7 +369,9 @@ SELECT
 	@Sum_INPUT_VALUE_RUR = sum(INPUT_VALUE_RUR),
 	@Sum_OUTPUT_VALUE_RUR = sum(OUTPUT_VALUE_RUR),
 	@Sum_INPUT_COUPONS_RUR = sum(INPUT_COUPONS_RUR),
-	@Sum_INPUT_DIVIDENTS_RUR = sum(INPUT_DIVIDENTS_RUR)
+	@Sum_INPUT_DIVIDENTS_RUR = sum(INPUT_DIVIDENTS_RUR),
+	@Sum_OUTPUT_VALUE_RUR1 = sum(OUTPUT_VALUE_RUR1),
+	@Sum_OUTPUT_VALUE_RUR2 = sum(OUTPUT_VALUE_RUR2)
 FROM #ResInvAssets
 
 set @InvestResult =
@@ -451,7 +487,9 @@ select
 	InVal = CAST(Round(@Sum_INPUT_VALUE_RUR,2) as Decimal(30,2)),
 	OutVal = CAST(Round(@Sum_OUTPUT_VALUE_RUR,2) as Decimal(30,2)),
 	Dividents = CAST(Round(@Sum_INPUT_DIVIDENTS_RUR,2) as Decimal(30,2)),
-	Coupons = CAST(Round(@Sum_INPUT_COUPONS_RUR,2) as Decimal(30,2))
+	Coupons = CAST(Round(@Sum_INPUT_COUPONS_RUR,2) as Decimal(30,2)),
+	OutVal1 = CAST(Round(@Sum_OUTPUT_VALUE_RUR1,2) as Decimal(30,2)),
+	OutVal2 = CAST(Round(@Sum_OUTPUT_VALUE_RUR2,2) as Decimal(30,2))
 
 
 /*
