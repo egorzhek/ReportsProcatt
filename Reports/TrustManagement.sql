@@ -395,13 +395,36 @@ select ActiveName = 'Активы на ' + FORMAT(@StartDate,'dd.MM.yyyy') , ActiveValue
 
 
 -- Дивиденты, купоны - график
-select
-	[Date],
-	[Dividends] = [INPUT_DIVIDENTS_RUR],
-	[Coupons] = [INPUT_COUPONS_RUR]
-From #ResInvAssets
-where INPUT_DIVIDENTS_RUR <> 0 or INPUT_DIVIDENTS_USD <> 0 
-order by [Date];
+;WITH cte AS
+(
+  SELECT 
+    [Iter]      = CAST(1 AS INT),
+    [DateFrom]  = DATEFROMPARTS(YEAR(@EndDate),MONTH(@EndDate),1),
+    [DateTo]    = DATEADD(MONTH,1, DATEFROMPARTS(YEAR(@EndDate),MONTH(@EndDate),1))
+  
+  UNION ALL
+  
+  SELECT 
+    [Iter] + 1,
+    DATEADD(MONTH,-1,[DateFrom]) ,
+    DATEADD(MONTH,-1,[DateTo]) 
+  FROM cte
+  WHERE [Iter] < 12
+)
+SELECT
+	[Date] = [DateFrom],
+	[Dividends] = SUM([INPUT_DIVIDENTS_RUR]),
+	[Coupons] = SUM([INPUT_COUPONS_RUR])
+FROM cte 
+LEFT JOIN 
+(
+    SELECT * 
+    FROM #ResInvAssets 
+    WHERE INPUT_DIVIDENTS_RUR <> 0 or INPUT_DIVIDENTS_USD <> 0
+)r ON r.[Date] BETWEEN [DateFrom] AND DATEADD(DAY,-1,[DateTo])
+GROUP BY [DateFrom]
+ORDER BY [DateFrom];
+
 
 -- Детализация купонов и дивидендов
 select

@@ -265,7 +265,7 @@ set @AllMinus_RUR = @AmountDayMinus_RUR;
     [ProfitName] = 'Доход за период ' + Replace(CONVERT(NVarchar(50), @StartDate, 103),'/','.') + ' - ' + Replace(CONVERT(NVarchar(50), @EndDate, 103),'/','.'),
     [ProfitValue] = CAST([dbo].f_Round(@InvestResult, 2) AS DECIMAL(30,2)),
     [ProfitProcentValue] = case when @ResutSum = 0.00 then cast(0.00 AS DECIMAL(30,2)) else CAST([dbo].f_Round(@InvestResult/@ResutSum * 100.000, 2) AS DECIMAL(30,2)) end,
-    [OpenDate] = Replace(CONVERT(NVarchar(50), @MinDate, 103),'/','.'),
+    [OpenDate] = @MinDate,
     [LS_NUM] = @LS_NUM,
     [EndSumAmount] = @EndSumAmount,
     [FundName] = @FundName,
