@@ -1316,7 +1316,7 @@ fetch next from obj_cur into
 	@CategoryId, @IsActive
 while(@@fetch_status = 0)
 begin
-	if @CategoryId = 2
+	if @CategoryId <> 2
 	begin
 		select
 			cc.CategoryId,
