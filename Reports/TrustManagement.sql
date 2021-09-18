@@ -1316,57 +1316,128 @@ fetch next from obj_cur into
 	@CategoryId, @IsActive
 while(@@fetch_status = 0)
 begin
-
-	select
-		cc.CategoryId,
-		cg.CategoryName,
-		[IsActive] = isnull(a.IsActive,0),
-		InvestmentId = b.InvestmentId,
-		Investment = i.Investment,
-		PriceName = CAST(CAST(Round(a.VALUE_NOM,2) as Decimal(30,2)) as Nvarchar(30)) + N' ' + isnull(c.Symbol,N'?'),
-		a.Amount,
-		Ammount2 =  FORMAT(a.Amount, '0.######') + ' רע.',
-		Detail =   FORMAT(a.FinRes, '0.######') + N' ' + isnull(c.Symbol,N'?') + ' (' + FORMAT(a.FinResProcent, '0.######') + '%)',
-		Valuta = isnull(c.Symbol,N'?'),
-		a.ShareId,
-		a.InvestorId,
-		a.ContractId,
-		a.Fifo_Date,
-		a.ISIN,
-		a.In_Wir,
-		a.In_Date,
-		a.Ic_NameId,
-		a.In_Dol,
-		a.Ir_Trans,
-		a.In_Summa,
-		a.In_Eq,
-		a.In_Comm,
-		a.In_Price,
-		a.Il_Num,
-		a.In_Price_eq,
-		a.Today_PRICE,
-		a.Value_NOM,
-		a.Dividends,
-		a.FinRes,
-		a.FinResProcent,
-		a.CUR_ID,
-		a.Oferta_Date,
-		a.Oblig_Date_end,
-		a.Oferta_Type,
-		a.UKD,
-		a.NKD,
-		a.Amortizations,
-		a.Coupons,
-		a.Out_Date,
-		a.Out_Summa,
-		a.OutPrice
-	from #POSITION_KEEPING_EndDate as a with(nolock)
-	inner join #TrustTree as b with(nolock) on a.ShareId = b.VALUE_ID
-	inner join [CacheDB].[dbo].[InvestmentIds] as i with(nolock) on b.InvestmentId = i.Id
-	inner join [dbo].[ClassCategories] as cc with(nolock) on a.Class = cc.ClassId and cc.CategoryId = @CategoryId
-	inner join [dbo].[Categories] as cg on cc.CategoryId = cg.Id
-	left join [CacheDB].[dbo].[Currencies] as c with(nolock) on a.CUR_ID = c.Id
-	where isnull(a.IsActive,0) = @IsActive
+	if @CategoryId = 2
+	begin
+		select
+			cc.CategoryId,
+			cg.CategoryName,
+			[IsActive] = isnull(a.IsActive,0),
+			InvestmentId = b.InvestmentId,
+			Investment = i.Investment,
+			PriceName = CAST(CAST(Round(a.VALUE_NOM,2) as Decimal(30,2)) as Nvarchar(30)) + N' ' + isnull(c.Symbol,N'?'),
+			a.Amount,
+			Ammount2 =  FORMAT(a.Amount, '0.######') + ' רע.',
+			Detail =   FORMAT(a.FinRes, '0.######') + N' ' + isnull(c.Symbol,N'?') + ' (' + FORMAT(a.FinResProcent, '0.######') + '%)',
+			Valuta = isnull(c.Symbol,N'?'),
+			a.ShareId,
+			a.InvestorId,
+			a.ContractId,
+			a.Fifo_Date,
+			a.ISIN,
+			a.In_Wir,
+			a.In_Date,
+			a.Ic_NameId,
+			a.In_Dol,
+			a.Ir_Trans,
+			a.In_Summa,
+			a.In_Eq,
+			a.In_Comm,
+			a.In_Price,
+			a.Il_Num,
+			a.In_Price_eq,
+			a.Today_PRICE,
+			a.Value_NOM,
+			a.Dividends,
+			a.FinRes,
+			a.FinResProcent,
+			a.CUR_ID,
+			a.Oferta_Date,
+			a.Oblig_Date_end,
+			a.Oferta_Type,
+			a.UKD,
+			a.NKD,
+			a.Amortizations,
+			a.Coupons,
+			a.Out_Date,
+			a.Out_Summa,
+			a.OutPrice
+		from #POSITION_KEEPING_EndDate as a with(nolock)
+		inner join #TrustTree as b with(nolock) on a.ShareId = b.VALUE_ID
+		inner join [CacheDB].[dbo].[InvestmentIds] as i with(nolock) on b.InvestmentId = i.Id
+		inner join [dbo].[ClassCategories] as cc with(nolock) on a.Class = cc.ClassId and cc.CategoryId = @CategoryId
+		inner join [dbo].[Categories] as cg on cc.CategoryId = cg.Id
+		left join [CacheDB].[dbo].[Currencies] as c with(nolock) on a.CUR_ID = c.Id
+		where isnull(a.IsActive,0) = @IsActive
+	end
+	else
+	begin
+		select
+			cc.CategoryId,
+			cg.CategoryName,
+			[IsActive] = isnull(a.IsActive,0),
+			InvestmentId = b.InvestmentId,
+			Investment = i.Investment,
+			PriceName = CAST(CAST(Round(a.VALUE_NOM,2) as Decimal(30,2)) as Nvarchar(30)) + N' ' + isnull(c.Symbol,N'?'),
+			a.Amount,
+			Ammount2 =  FORMAT(a.Amount, '0.######') + ' רע.',
+			Detail =   FORMAT(a.FinRes, '0.######') + N' ' + isnull(c.Symbol,N'?') + ' (' + FORMAT(a.FinResProcent, '0.######') + '%)',
+			Valuta = isnull(c.Symbol,N'?'),
+			a.ShareId,
+			a.InvestorId,
+			a.ContractId,
+			a.Fifo_Date,
+			a.ISIN,
+			a.In_Wir,
+			a.In_Date,
+			a.Ic_NameId,
+			a.In_Dol,
+			a.Ir_Trans,
+			a.In_Summa,
+			a.In_Eq,
+			a.In_Comm,
+			a.In_Price,
+			a.Il_Num,
+			a.In_Price_eq,
+			a.Today_PRICE,
+			a.Value_NOM,
+			a.Dividends,
+			a.FinRes,
+			a.FinResProcent,
+			a.CUR_ID,
+			Oferta_Date = OFE.B_DATE,
+			Oblig_Date_end = OBL.DEATHDATE,
+			Oferta_Type = case when OFE.O_TYPE = 1 then 'Put' when OFE.O_TYPE = 2 then 'Call' else '' end,
+			a.UKD,
+			a.NKD,
+			a.Amortizations,
+			a.Coupons,
+			a.Out_Date,
+			a.Out_Summa,
+			a.OutPrice
+		from #POSITION_KEEPING_EndDate as a with(nolock)
+		inner join #TrustTree as b with(nolock) on a.ShareId = b.VALUE_ID
+		inner join [CacheDB].[dbo].[InvestmentIds] as i with(nolock) on b.InvestmentId = i.Id
+		inner join [dbo].[ClassCategories] as cc with(nolock) on a.Class = cc.ClassId and cc.CategoryId = @CategoryId
+		inner join [dbo].[Categories] as cg on cc.CategoryId = cg.Id
+		left join [CacheDB].[dbo].[Currencies] as c with(nolock) on a.CUR_ID = c.Id
+		outer apply
+		(
+			select top(1)
+				DEATHDATE = case when Datepart(YEAR, OI.DEATHDATE) = 9999 then NULL else OI.DEATHDATE end
+			FROM OBLIG_INFO as OI
+			where OI.SELF_ID = a.ShareId
+			order by OI.DEATHDATE desc
+		) as OBL
+		outer apply
+		(
+			select top(1)
+				OO.B_DATE, OO.O_TYPE
+			FROM [dbo].[OBLIG_OFERTS] as OO
+			where OO.SHARE = a.ShareId
+			order by OO.B_DATE desc
+		) as OFE
+		where isnull(a.IsActive,0) = @IsActive
+	end
 	
 	fetch next from obj_cur into
 		@CategoryId, @IsActive
