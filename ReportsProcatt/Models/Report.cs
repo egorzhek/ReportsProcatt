@@ -7,6 +7,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
 
 namespace ReportsProcatt.Models
 {
@@ -40,11 +41,17 @@ namespace ReportsProcatt.Models
         private DataSet _circleAssetsDS => _data.DataSet_CircleAssets;
         private DataSet _circleCurrenciesDS => _data.DataSet_CircleCurrencies;
         private DataSet _circleInstrumentsDS => _data.DataSet_CircleInstruments;
-        private string connectionString => @"Data Source=DESKTOP-2G9NLM6\MSSQLSERVER15;Encrypt=False;Initial Catalog=CacheDB;Integrated Security=True;User ID=DESKTOP-2G9NLM6\D";
-        private string ReportPath = @"c:\Users\D\source\Ingos\ReportsProcatt\Reports\";
+        //private string connectionString => @"Data Source=DESKTOP-2G9NLM6\MSSQLSERVER15;Encrypt=False;Initial Catalog=CacheDB;Integrated Security=True;User ID=DESKTOP-2G9NLM6\D";
+        //private string ReportPath = @"c:\Users\D\source\Ingos\ReportsProcatt\Reports\";
+        private string connectionString;
+        private string ReportPath;
+
         #endregion
         public Report(int aInvestorId, DateTime? aDateFrom, DateTime? aDateTo,string CurrencyCode)
         {
+            ReportPath = Environment.GetEnvironmentVariable("ReportPath");
+            connectionString = Program.GetReportSqlConnection(Path.Combine(ReportPath, "appsettings.json"));
+
             ReportCurrency = CurrencyClass.GetCurrency(CurrencyCode);
 
             InvestorId = aInvestorId;

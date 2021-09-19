@@ -353,9 +353,9 @@ select
 	InvestorName = @NUM,
 	ContractNumber = @NUM,
 	Fee = 99.99,
-	ContractOpenDate = FORMAT(@DATE_OPEN,'dd.MM.yyyy'),
+	ContractOpenDate = @DATE_OPEN,
 	SuccessFee = 99.99,
-	DateFromName = FORMAT(@StartDate,'dd.MM.yyyy'),
+	DateFromName = @StartDate,
 	ParamValuta = @Valuta;
 
 select ActiveName = 'Активы на ' + FORMAT(@StartDate,'dd.MM.yyyy') , ActiveValue = CAST(Round(@Snach,2) as Decimal(38,2)), Sort = 1
@@ -438,7 +438,7 @@ from [CacheDB].[dbo].[DIVIDENDS_AND_COUPONS_History]
 where InvestorId = @InvestorId and ContractId = @ContractId
 union all
 select
-	[Date] =  FORMAT([PaymentDateTime],'dd.MM.yyyy'),
+	[Date] =  [PaymentDateTime],
 	[ToolName] = [ShareName],
 	[PriceType] = case when [Type] = 1 then 'Купоны' else 'Дивиденды' end,
 	[ContractName] = [ShareName],
@@ -450,7 +450,7 @@ order by [PaymentDateTime];
 
 
 select
-	[Date] = FORMAT([Date], 'dd.MM.yyyy'),
+	[Date] = [Date],
 	[OperName] = T_Name,
 	[ISIN],
 	[ToolName] = Investment,
@@ -470,7 +470,7 @@ from [CacheDB].[dbo].[Operations_History_Contracts]
 where InvestorId = @InvestorId and ContractId = @ContractId
 union
 select
-	[Date] = FORMAT([Date], 'dd.MM.yyyy'),
+	[Date] = [Date],
 	[OperName] = T_Name,
 	[ISIN],
 	[ToolName] = Investment,
