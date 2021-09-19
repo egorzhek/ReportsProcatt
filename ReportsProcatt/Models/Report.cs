@@ -260,7 +260,6 @@ namespace ReportsProcatt.Models
                 new ViewElementAttr{ColumnName = AllAssetsColumns.CurrencyProfit, DisplayName = "ДОХОД В ВАЛЮТЕ", SortOrder = 9},
                 new ViewElementAttr{ColumnName = AllAssetsColumns.ProfitPercent, DisplayName = "ДОХОД В %", SortOrder = 10},
             };
-            AllAssets.Ths.Where(t => t.ColumnName == AllAssetsColumns.Product).First().AttrRow.Add("width", "520px");
 
             foreach (DataRow dr in _invFullDS.Tables[InvestFullTables.FundsResultDt].Rows)
             {

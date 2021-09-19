@@ -637,7 +637,6 @@ namespace ReportsProcatt.Models
             CurrentShares = new TableView();
             CurrentShares.Table = new DataTable(); 
             CurrentShares.Table.Columns.Add(CurrentSharesColumns.IN_DATE);
-            CurrentShares.Table.Columns.Add(CurrentSharesColumns.ISIN);
             CurrentShares.Table.Columns.Add(CurrentSharesColumns.Investment);
             CurrentShares.Table.Columns.Add(CurrentSharesColumns.IN_PRICE);
             CurrentShares.Table.Columns.Add(CurrentSharesColumns.Amount);
@@ -650,9 +649,8 @@ namespace ReportsProcatt.Models
 
             CurrentShares.Ths = new List<ViewElementAttr>{
                 new ViewElementAttr{ColumnName = CurrentSharesColumns.IN_DATE, DisplayName = "Дата покупки", SortOrder = 1},
-                new ViewElementAttr{ColumnName = CurrentSharesColumns.ISIN, DisplayName = "ISIN", SortOrder = 2},
                 new ViewElementAttr{ColumnName = CurrentSharesColumns.Investment, DisplayName = "Инструмент", SortOrder = 3},
-                new ViewElementAttr{ColumnName = CurrentSharesColumns.IN_PRICE, DisplayName = "Цена 1 бумаги на дату покупки", SortOrder = 4},
+                new ViewElementAttr{ColumnName = CurrentSharesColumns.IN_PRICE, DisplayName = "Цена покупки 1 лота", SortOrder = 4},
                 new ViewElementAttr{ColumnName = CurrentSharesColumns.Amount, DisplayName = "Кол-во, шт", SortOrder = 5},
                 new ViewElementAttr{ColumnName = CurrentSharesColumns.In_Summa, DisplayName = "Сумма покупки ", SortOrder = 6},
                 new ViewElementAttr{ColumnName = CurrentSharesColumns.Today_Price, DisplayName = "Цена 1 бумаги на дату отчета", SortOrder = 7},
@@ -666,7 +664,6 @@ namespace ReportsProcatt.Models
             {
                 DataRow row = CurrentShares.Table.NewRow(); 
                 row[CurrentSharesColumns.IN_DATE] = ((DateTime)dr["IN_DATE"]).ToString("dd.MM.yyyy");
-                row[CurrentSharesColumns.ISIN] = dr["ISIN"];
                 row[CurrentSharesColumns.Investment] = dr["Investment"];
                 row[CurrentSharesColumns.IN_PRICE] = $"{dr["IN_PRICE"].DecimalToStr()} {dr["Valuta"]}";
                 row[CurrentSharesColumns.Amount] = dr["Amount"].DecimalToStr();
