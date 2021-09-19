@@ -75,12 +75,10 @@ namespace ReportsProcatt.Models
             MainDiagram = new Dictionary<string, string>();
             MainDiagram.Add(MainDiagramParams.Begin, _invFullDS.DecimalToStr(InvestFullTables.MainDiagramDT, "Snach", "#,##0"));
             MainDiagram.Add(MainDiagramParams.InVal, _invFullDS.DecimalToStr(InvestFullTables.MainDiagramDT, "InVal", "#,##0", true));
-            MainDiagram.Add(MainDiagramParams.OutVal, _invFullDS.DecimalToStr(InvestFullTables.MainDiagramDT, "OutVal", "#,##0", true));
+            MainDiagram.Add(MainDiagramParams.OutVal, _invFullDS.DecimalToStr(InvestFullTables.MainDiagramDT, "OutVal2", "#,##0", true));
             MainDiagram.Add(MainDiagramParams.Dividents, _invFullDS.DecimalToStr(InvestFullTables.MainDiagramDT, "Dividents", "#,##0", true));
             MainDiagram.Add(MainDiagramParams.Coupons, _invFullDS.DecimalToStr(InvestFullTables.MainDiagramDT, "Coupons", "#,##0", true));
-            MainDiagram.Add(MainDiagramParams.ReVal, "");
-            MainDiagram.Add(MainDiagramParams.Taxes, "");
-            MainDiagram.Add(MainDiagramParams.Fee, "");
+            MainDiagram.Add(MainDiagramParams.OutVal1, _invFullDS.DecimalToStr(InvestFullTables.MainDiagramDT, "OutVal1", "#,##0", true));
             MainDiagram.Add(MainDiagramParams.End, _invFullDS.DecimalToStr(InvestFullTables.MainResultDT, "ActiveDateToValue", "#,##0"));
         }
         public void InitPIFsTotalTable()
@@ -95,7 +93,7 @@ namespace ReportsProcatt.Models
             {
                 new ViewElementAttr{ColumnName = PIFsTotalColumns.PIFs, DisplayName = "ПИФЫ", SortOrder = 1},
                 new ViewElementAttr{ColumnName = PIFsTotalColumns.AssetsToEnd, DisplayName = $"АКТИВЫ НА {Dto.ToString("dd.MM.yyyy")}", SortOrder = 2 },
-                new ViewElementAttr{ColumnName = PIFsTotalColumns.Result, DisplayName = $"РЕЗУЛЬТАТЫ ЗА {Period}", SortOrder = 3 }
+                new ViewElementAttr{ColumnName = PIFsTotalColumns.Result, DisplayName = $"РЕЗУЛЬТАТЫ* ЗА {Period}", SortOrder = 3 }
             };
             PIFsTotals.Ths.Where(t => t.ColumnName == PIFsTotalColumns.PIFs).First().AttrRow.Add("width", "220px");
 
@@ -125,7 +123,7 @@ namespace ReportsProcatt.Models
             {
                 new ViewElementAttr{ColumnName = DUsTotalColumns.DUs, DisplayName = "ДОВЕРИТЕЛЬНОЕ УПРАВЛЕНИЕ", SortOrder = 1},
                 new ViewElementAttr{ColumnName = DUsTotalColumns.AssetsToEnd, DisplayName = $"АКТИВЫ НА {Dto.ToString("dd.MM.yyyy")}", SortOrder = 2 },
-                new ViewElementAttr{ColumnName = DUsTotalColumns.Result, DisplayName = $"РЕЗУЛЬТАТЫ ЗА {Period}", SortOrder = 3 }
+                new ViewElementAttr{ColumnName = DUsTotalColumns.Result, DisplayName = $"РЕЗУЛЬТАТЫ*  ЗА {Period}", SortOrder = 3 }
             };
             DUsTotals.Ths.Where(t => t.ColumnName == DUsTotalColumns.DUs).First().AttrRow.Add("width", "520px");
 
@@ -240,39 +238,39 @@ namespace ReportsProcatt.Models
         {
             AllAssets = new TableView();
             AllAssets.Table = new DataTable();
-            AllAssets.Table.Columns.Add(AllAssetsColumns.Product);
             AllAssets.Table.Columns.Add(AllAssetsColumns.BeginAssets);
             AllAssets.Table.Columns.Add(AllAssetsColumns.InVal);
             AllAssets.Table.Columns.Add(AllAssetsColumns.OutVal);
             AllAssets.Table.Columns.Add(AllAssetsColumns.Dividents);
             AllAssets.Table.Columns.Add(AllAssetsColumns.Coupons);
+            AllAssets.Table.Columns.Add(AllAssetsColumns.Redemption);
             AllAssets.Table.Columns.Add(AllAssetsColumns.EndAssets);
             AllAssets.Table.Columns.Add(AllAssetsColumns.CurrencyProfit);
             AllAssets.Table.Columns.Add(AllAssetsColumns.ProfitPercent);
 
             AllAssets.Ths = new List<ViewElementAttr>
             {
-                new ViewElementAttr{ColumnName = AllAssetsColumns.Product, DisplayName = "ПРОДУКТ", SortOrder = 1},
                 new ViewElementAttr{ColumnName = AllAssetsColumns.BeginAssets, DisplayName = "АКТИВЫ НА НАЧАЛО ПЕРИОДА", SortOrder = 2},
-                new ViewElementAttr{ColumnName = AllAssetsColumns.InVal, DisplayName = "ПОПОЛНЕНИЕ", SortOrder = 3},
-                new ViewElementAttr{ColumnName = AllAssetsColumns.OutVal, DisplayName = "ВЫВОД", SortOrder = 4},
-                new ViewElementAttr{ColumnName = AllAssetsColumns.Dividents, DisplayName = "СРЕДСТВ", SortOrder = 5},
-                new ViewElementAttr{ColumnName = AllAssetsColumns.Coupons, DisplayName = "ДИВИДЕНДЫ", SortOrder = 6},
-                new ViewElementAttr{ColumnName = AllAssetsColumns.EndAssets, DisplayName = "КУПОНЫ", SortOrder = 7},
-                new ViewElementAttr{ColumnName = AllAssetsColumns.CurrencyProfit, DisplayName = "ДОХОД В ВАЛЮТЕ", SortOrder = 8},
-                new ViewElementAttr{ColumnName = AllAssetsColumns.ProfitPercent, DisplayName = "ДОХОД В %", SortOrder = 9},
+                new ViewElementAttr{ColumnName = AllAssetsColumns.InVal, DisplayName = "ПОПОЛНЕНИЯ", SortOrder = 3},
+                new ViewElementAttr{ColumnName = AllAssetsColumns.OutVal, DisplayName = "ВЫВОД СРЕДСТВ", SortOrder = 4},
+                new ViewElementAttr{ColumnName = AllAssetsColumns.Dividents, DisplayName = "ДИВИДЕНДЫ", SortOrder = 5},
+                new ViewElementAttr{ColumnName = AllAssetsColumns.Coupons, DisplayName = "КУПОНЫ", SortOrder = 6},
+                new ViewElementAttr{ColumnName = AllAssetsColumns.Redemption, DisplayName = "ПОЛГАШЕНИЯ", SortOrder = 7},
+                new ViewElementAttr{ColumnName = AllAssetsColumns.EndAssets, DisplayName = "АКТИВЫ", SortOrder = 8},
+                new ViewElementAttr{ColumnName = AllAssetsColumns.CurrencyProfit, DisplayName = "ДОХОД В ВАЛЮТЕ", SortOrder = 9},
+                new ViewElementAttr{ColumnName = AllAssetsColumns.ProfitPercent, DisplayName = "ДОХОД В %", SortOrder = 10},
             };
             AllAssets.Ths.Where(t => t.ColumnName == AllAssetsColumns.Product).First().AttrRow.Add("width", "520px");
 
             foreach (DataRow dr in _invFullDS.Tables[InvestFullTables.FundsResultDt].Rows)
             {
                 DataRow row = AllAssets.Table.NewRow();
-                row[AllAssetsColumns.Product] = dr["NameObject"];
                 row[AllAssetsColumns.BeginAssets] = dr["StartDateValue"].DecimalToStr("#,##0");
                 row[AllAssetsColumns.InVal] = dr["INPUT_VALUE"].DecimalToStr("#,##0");
                 row[AllAssetsColumns.OutVal] = dr["OUTPUT_VALUE"].DecimalToStr("#,##0");
                 row[AllAssetsColumns.Dividents] = dr["INPUT_DIVIDENTS"].DecimalToStr("#,##0");
                 row[AllAssetsColumns.Coupons] = dr["INPUT_COUPONS"].DecimalToStr("#,##0");
+                row[AllAssetsColumns.Redemption] = "";
                 row[AllAssetsColumns.EndAssets] = dr["StartDateValue"].DecimalToStr("#,##0");
                 row[AllAssetsColumns.CurrencyProfit] = dr["ProfitValue"].DecimalToStr("#,##0");
                 row[AllAssetsColumns.ProfitPercent] = $"{dr["ProfitProcentValue"].DecimalToStr("#,##0")}%";
@@ -282,12 +280,12 @@ namespace ReportsProcatt.Models
             foreach (DataRow dr in _invFullDS.Tables[InvestFullTables.DUsResultDt].Rows)
             {
                 DataRow row = AllAssets.Table.NewRow();
-                row[AllAssetsColumns.Product] = dr["NameObject"];
                 row[AllAssetsColumns.BeginAssets] = dr["StartDateValue"].DecimalToStr("#,##0");
                 row[AllAssetsColumns.InVal] = dr["INPUT_VALUE"].DecimalToStr("#,##0");
                 row[AllAssetsColumns.OutVal] = dr["OUTPUT_VALUE"].DecimalToStr("#,##0");
                 row[AllAssetsColumns.Dividents] = dr["INPUT_DIVIDENTS"].DecimalToStr("#,##0");
                 row[AllAssetsColumns.Coupons] = dr["INPUT_COUPONS"].DecimalToStr("#,##0");
+                row[AllAssetsColumns.Redemption] = "";
                 row[AllAssetsColumns.EndAssets] = dr["StartDateValue"].DecimalToStr("#,##0");
                 row[AllAssetsColumns.CurrencyProfit] = dr["ProfitValue"].DecimalToStr("#,##0");
                 row[AllAssetsColumns.ProfitPercent] = $"{dr["ProfitProcentValue"].DecimalToStr("#,##0")}%";

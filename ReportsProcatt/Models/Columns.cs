@@ -8,13 +8,12 @@ namespace ReportsProcatt.Models
     public class MainDiagramParams
     {
         public const string Begin = "В начале";
-        public const string InVal = "Зачисления";
+        public const string InVal = "Пополнения";
         public const string OutVal = "Выводы";
         public const string Dividents = "Дивиденты";
         public const string Coupons = "Купоны";
-        public const string ReVal = "Переоценка";
-        public const string Taxes = "Налоги";
-        public const string Fee = "Комиссия";
+        public const string OutVal1 = "Погашения";
+        //public const string ReVal = "Переоценка";
         public const string End = "В конце";
     }
     public class PIFsTotalColumns
@@ -39,6 +38,7 @@ namespace ReportsProcatt.Models
         public const string OutVal = "OutVal";
         public const string Dividents = "Dividents";
         public const string Coupons = "Coupons";
+        public const string Redemption = "Redemption";
         public const string EndAssets = "EndAssets";
         public const string CurrencyProfit = "CurrencyProfit";
         public const string ProfitPercent = "ProfitPercent";

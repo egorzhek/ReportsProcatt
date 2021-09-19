@@ -179,6 +179,7 @@ namespace ReportsProcatt.Models
             PifOperationsHistory.Table = new DataTable();
             PifOperationsHistory.Table.Columns.Add(PifOperationsHistoryColumns.Wdate);
             PifOperationsHistory.Table.Columns.Add(PifOperationsHistoryColumns.Btype);
+            PifOperationsHistory.Table.Columns.Add(PifOperationsHistoryColumns.Instrument);
             PifOperationsHistory.Table.Columns.Add(PifOperationsHistoryColumns.Rate_rur);
             PifOperationsHistory.Table.Columns.Add(PifOperationsHistoryColumns.Amount);
             PifOperationsHistory.Table.Columns.Add(PifOperationsHistoryColumns.Value_rur);
@@ -186,12 +187,13 @@ namespace ReportsProcatt.Models
 
             PifOperationsHistory.Ths = new List<ViewElementAttr>
             {
-                new ViewElementAttr{ColumnName = PifOperationsHistoryColumns.Wdate, DisplayName = "Дата операции", SortOrder = 1},
+                new ViewElementAttr{ColumnName = PifOperationsHistoryColumns.Wdate, DisplayName = "Дата", SortOrder = 1},
                 new ViewElementAttr{ColumnName = PifOperationsHistoryColumns.Btype, DisplayName = "Тип операции", SortOrder = 2},
-                new ViewElementAttr{ColumnName = PifOperationsHistoryColumns.Rate_rur, DisplayName = "Стоимость бумаги", SortOrder = 3},
-                new ViewElementAttr{ColumnName = PifOperationsHistoryColumns.Amount, DisplayName = "Количество", SortOrder = 4},
-                new ViewElementAttr{ColumnName = PifOperationsHistoryColumns.Value_rur, DisplayName = "Сумма сделки", SortOrder = 5},
-                new ViewElementAttr{ColumnName = PifOperationsHistoryColumns.Fee_rur, DisplayName = "Комиссия", SortOrder = 6}
+                new ViewElementAttr{ColumnName = PifOperationsHistoryColumns.Instrument, DisplayName = "Инструмент", SortOrder = 3},
+                new ViewElementAttr{ColumnName = PifOperationsHistoryColumns.Rate_rur, DisplayName = "Цена Пая", SortOrder = 4},
+                new ViewElementAttr{ColumnName = PifOperationsHistoryColumns.Amount, DisplayName = "Количество", SortOrder = 5},
+                new ViewElementAttr{ColumnName = PifOperationsHistoryColumns.Value_rur, DisplayName = "Сумма сделки", SortOrder = 6},
+                new ViewElementAttr{ColumnName = PifOperationsHistoryColumns.Fee_rur, DisplayName = "Комиссия (надбавка/скидка)", SortOrder = 7}
             };
 
             PifOperationsHistory.Ths.Where(t => t.ColumnName == PifOperationsHistoryColumns.Wdate).First().AttrRow.Add("width", "170px");
@@ -207,10 +209,11 @@ namespace ReportsProcatt.Models
                 DataRow row = PifOperationsHistory.Table.NewRow();
                 row[PifOperationsHistoryColumns.Wdate] = dr["W_Date"];
                 row[PifOperationsHistoryColumns.Btype] = dr["OperName"];
-                row[PifOperationsHistoryColumns.Rate_rur] = dr["RATE_RUR"];
-                row[PifOperationsHistoryColumns.Amount] = dr["Amount"];
-                row[PifOperationsHistoryColumns.Value_rur] = dr["VALUE_RUR"];
-                row[PifOperationsHistoryColumns.Fee_rur] = dr["FEE_RUR"];
+                row[PifOperationsHistoryColumns.Instrument] = dr["Order_NUM"];
+                row[PifOperationsHistoryColumns.Rate_rur] = dr["RATE_RUR"].DecimalToStr();
+                row[PifOperationsHistoryColumns.Amount] = dr["Amount"].DecimalToStr();
+                row[PifOperationsHistoryColumns.Value_rur] = dr["VALUE_RUR"].DecimalToStr();
+                row[PifOperationsHistoryColumns.Fee_rur] = dr["FEE_RUR"].DecimalToStr();
                 PifOperationsHistory.Table.Rows.Add(row);
             }
 

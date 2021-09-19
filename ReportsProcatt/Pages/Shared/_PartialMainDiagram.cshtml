@@ -49,26 +49,19 @@
                                     </div>
                                 </div>
 
-                                <div class="progression-item progression-top">
+                                @*<div class="progression-item progression-top">
                                     <div class="progression-item-text">
                                         <p>Переоценка</p>
                                         <span>@Model[MainDiagramParams.ReVal]</span>
                                     </div>
-                                </div>
+                                </div>*@
 
-                                <div class="progression-item progression-minus">
-                                    <div class="progression-item-text">
-                                        <p>Налогов</p>
-                                        <span>@Model[MainDiagramParams.Taxes]</span>
-                                    </div>
+                            <div class="progression-item">
+                                <div class="progression-item-text">
+                                    <p>@MainDiagramParams.OutVal1</p>
+                                    <span>@Model[MainDiagramParams.OutVal1]</span>
                                 </div>
-
-                                <div class="progression-item progression-minus">
-                                    <div class="progression-item-text">
-                                        <p>Комиссия</p>
-                                        <span>@Model[MainDiagramParams.Fee]</span>
-                                    </div>
-                                </div>
+                            </div>
 
                                 <div class="progression-item">
                                     <div class="progression-item-text">

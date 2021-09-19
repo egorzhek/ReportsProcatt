@@ -48,7 +48,7 @@
                             </td>
 
                             <td class="right-td">
-                                <span>ОТЧЕТ ПО ПОРТФЕЛЮ / @Model.Period</span>
+                                <span>ОТЧЕТ ПО ПОРТФЕЛЮ</span>
                             </td>
 
                         </tr>
@@ -74,7 +74,7 @@
                             </td>
                             <td width="20px"></td>
                             <td class="second-asset-block">
-                                <p>Сумма дохода</p>
+                                <p>Текущий финансовый результат</p>
 
                                 <span>@Model.MainHeader.ProfitSum</span>
                             </td>
@@ -133,36 +133,6 @@
 
     @Html.Partial("_PartialMainDiagram", Model.MainDiagram)
 
-
-    <table class="section block-heading">
-        <tr>
-            <td>
-
-                <table class="section-wrapper">
-                    <tbody>
-                        <tr>
-
-                            <td class="left-td heading-td">
-                            </td>
-
-                            <td class="right-td heading-td">
-                                <span>Период: @Model.Period</span>
-                            </td>
-
-                        </tr>
-                    </tbody>
-                </table>
-
-            </td>
-        </tr>
-    </table>
-
-
-    @Html.Partial("_PartialTableView", Model.PIFsTotals)
-
-    @Html.Partial("_PartialTableView", Model.DUsTotals)
-
-    @*<div style="page-break-before: always;"></div>*@
     <table class="section block-heading">
         <tr>
             <td>
@@ -175,10 +145,6 @@
                                 <span>Все активы</span>
                             </td>
 
-                            <td class="right-td heading-td">
-                                <span>Счет №0000000</span>
-                            </td>
-
                         </tr>
                     </tbody>
                 </table>
@@ -186,6 +152,13 @@
             </td>
         </tr>
     </table>
+
+    @Html.Partial("_PartialTableView", Model.PIFsTotals)
+
+    @Html.Partial("_PartialTableView", Model.DUsTotals)
+
+    @*<div style="page-break-before: always;"></div>*@
+
 
     @Html.Partial("_PartialTableView", Model.AllAssets)
 
@@ -200,10 +173,6 @@
 
                             <td class="left-td heading-td">
                                 <span>Дивиденды и купоны</span>
-                            </td>
-
-                            <td class="right-td heading-td">
-                                <span>Счет №0000000</span>
                             </td>
 
                         </tr>
@@ -225,7 +194,7 @@
                         <tr>
 
                             <td class="left-td heading-td">
-                                <span>Фактические и прогнозные выплаты до конца года</span>
+                                <span>Фактические выплаты дивидендов и купонов</span>
                             </td>
 
                             <td class="right-td heading-td">
@@ -299,7 +268,7 @@
                                 <tr>
 
                                     <td class="left-td heading-td">
-                                        <span>Структура активов по портфелю</span>
+                                        <span>Структура активов в портфеле</span>
                                     </td>
 
                                     <td class="right-td heading-td">
