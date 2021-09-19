@@ -25,15 +25,15 @@ namespace ReportsProcatt.Controllers
         [Route("Report")]
         public async Task<IActionResult> Report
         (
-            [FromQuery] int InvestorId,
+            [FromQuery] int? InvestorId,
             [FromQuery] DateTime? DateFrom,
-            [FromQuery] DateTime? DateTo
+            [FromQuery] DateTime? DateTo,
+            [FromQuery] string Currency
         )
         {
             try
             {
-                //var data = new Report(InvestorId, DateFrom, DateTo)
-                var data = new Report(2149652, new DateTime(2001,05,17), new DateTime(2021,05,29))
+                var data = new Report(InvestorId ?? 2149652, DateFrom ?? new DateTime(2001, 05, 17), DateTo ?? new DateTime(2021, 05, 29), Currency)
                 {
                     rootStr = "/app/wwwroot"
                 };
@@ -53,7 +53,6 @@ namespace ReportsProcatt.Controllers
 
                 var stream = new MemoryStream();
                 var writer = new StreamWriter(stream);
-                //writer.Write(ex.Message + " - " + rows);
                 writer.Write(message);
                 writer.Flush();
                 stream.Position = 0;
@@ -65,14 +64,14 @@ namespace ReportsProcatt.Controllers
         [Route("Report_Win")]
         public async Task<IActionResult> Report_Win
         (
-            [FromQuery] int InvestorId,
-            [FromQuery] DateTime DateFrom,
-            [FromQuery] DateTime DateTo
+            [FromQuery] int? InvestorId,
+            [FromQuery] DateTime? DateFrom,
+            [FromQuery] DateTime? DateTo,
+            [FromQuery] string Currency
         )
         {
-            //var data = new Report(InvestorId, DateFrom, DateTo)
-            var data = new Report(2149652, new DateTime(2001, 05, 17), new DateTime(2021, 05, 29))
-            {//C:\Users\D\source\Ingos\ReportsProcatt\ReportsProcatt\wwwroot\css\style.css
+            var data = new Report(InvestorId ?? 2149652, DateFrom ?? new DateTime(2001, 05, 17), DateTo ?? new DateTime(2021, 05, 29), Currency)
+            {
                 rootStr = "file:///c:/Users/D/source/Ingos/ReportsProcatt/ReportsProcatt/wwwroot"
             };
 
@@ -92,17 +91,30 @@ namespace ReportsProcatt.Controllers
         {
             return View("Test");
         }
+        [HttpGet]
+        [Route("Test2_Report")]
+        public async Task<IActionResult> Test2_Report()
+        {
+            string rootStr = "file:///c:/Users/D/source/Ingos/ReportsProcatt/ReportsProcatt/wwwroot";
+            return await _generatePdf.GetPdf("Views/New/Test2.cshtml", rootStr);
+        }
 
+        [HttpGet]
+        [Route("Test2")]
+        public IActionResult Test2()
+        {
+            return View("Test2","");
+        }
         [HttpGet]
         public IActionResult Index
         (
-            [FromQuery] int InvestorId,
+            [FromQuery] int? InvestorId,
             [FromQuery] DateTime? DateFrom,
-            [FromQuery] DateTime? DateTo
+            [FromQuery] DateTime? DateTo,
+            [FromQuery] string Currency
         )
         {
-            //var data = new Report(InvestorId, DateFrom, DateTo)
-            var data = new Report(2149652, new DateTime(2001, 05, 17), new DateTime(2021, 05, 29))
+            var data = new Report(InvestorId ?? 2149652, DateFrom ?? new DateTime(2001, 05, 17), DateTo ?? new DateTime(2021, 05, 29), Currency)
             {
                 
             };

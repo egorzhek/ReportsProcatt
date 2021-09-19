@@ -23,7 +23,7 @@ namespace ReportsProcatt.Models
         public string Amount => $"{_FundInfoDS.GetValue(PifTables.MainResultDT, "EndSumAmount")} шт.";
         public CircleDiagram AssetsStruct { get; set; }
         public CircleDiagram FundStruct { get; set; }
-        public TableView OperationsHistory { get; set; }
+        public TableView PifOperationsHistory { get; set; }
         #region Поля
         private SQLDataPIF _data;
         private DataSet _FundInfoDS => _data.DataSet_FundInfo;
@@ -175,43 +175,43 @@ namespace ReportsProcatt.Models
         }
         private void InitOperationsHistory()
         {
-            OperationsHistory = new TableView();
-            OperationsHistory.Table = new DataTable();
-            OperationsHistory.Table.Columns.Add(OperationsHistoryColumns.Wdate);
-            OperationsHistory.Table.Columns.Add(OperationsHistoryColumns.Btype);
-            OperationsHistory.Table.Columns.Add(OperationsHistoryColumns.Rate_rur);
-            OperationsHistory.Table.Columns.Add(OperationsHistoryColumns.Amount);
-            OperationsHistory.Table.Columns.Add(OperationsHistoryColumns.Value_rur);
-            OperationsHistory.Table.Columns.Add(OperationsHistoryColumns.Fee_rur);
+            PifOperationsHistory = new TableView();
+            PifOperationsHistory.Table = new DataTable();
+            PifOperationsHistory.Table.Columns.Add(PifOperationsHistoryColumns.Wdate);
+            PifOperationsHistory.Table.Columns.Add(PifOperationsHistoryColumns.Btype);
+            PifOperationsHistory.Table.Columns.Add(PifOperationsHistoryColumns.Rate_rur);
+            PifOperationsHistory.Table.Columns.Add(PifOperationsHistoryColumns.Amount);
+            PifOperationsHistory.Table.Columns.Add(PifOperationsHistoryColumns.Value_rur);
+            PifOperationsHistory.Table.Columns.Add(PifOperationsHistoryColumns.Fee_rur);
 
-            OperationsHistory.Ths = new List<ViewElementAttr>
+            PifOperationsHistory.Ths = new List<ViewElementAttr>
             {
-                new ViewElementAttr{ColumnName = OperationsHistoryColumns.Wdate, DisplayName = "Дата операции", SortOrder = 1},
-                new ViewElementAttr{ColumnName = OperationsHistoryColumns.Btype, DisplayName = "Тип операции", SortOrder = 2},
-                new ViewElementAttr{ColumnName = OperationsHistoryColumns.Rate_rur, DisplayName = "Стоимость бумаги", SortOrder = 3},
-                new ViewElementAttr{ColumnName = OperationsHistoryColumns.Amount, DisplayName = "Количество", SortOrder = 4},
-                new ViewElementAttr{ColumnName = OperationsHistoryColumns.Value_rur, DisplayName = "Сумма сделки", SortOrder = 5},
-                new ViewElementAttr{ColumnName = OperationsHistoryColumns.Fee_rur, DisplayName = "Комиссия", SortOrder = 6}
+                new ViewElementAttr{ColumnName = PifOperationsHistoryColumns.Wdate, DisplayName = "Дата операции", SortOrder = 1},
+                new ViewElementAttr{ColumnName = PifOperationsHistoryColumns.Btype, DisplayName = "Тип операции", SortOrder = 2},
+                new ViewElementAttr{ColumnName = PifOperationsHistoryColumns.Rate_rur, DisplayName = "Стоимость бумаги", SortOrder = 3},
+                new ViewElementAttr{ColumnName = PifOperationsHistoryColumns.Amount, DisplayName = "Количество", SortOrder = 4},
+                new ViewElementAttr{ColumnName = PifOperationsHistoryColumns.Value_rur, DisplayName = "Сумма сделки", SortOrder = 5},
+                new ViewElementAttr{ColumnName = PifOperationsHistoryColumns.Fee_rur, DisplayName = "Комиссия", SortOrder = 6}
             };
 
-            OperationsHistory.Ths.Where(t => t.ColumnName == OperationsHistoryColumns.Wdate).First().AttrRow.Add("width", "170px");
-            OperationsHistory.Ths.Where(t => t.ColumnName == OperationsHistoryColumns.Btype).First().AttrRow.Add("width", "300px");
-            OperationsHistory.Ths.Where(t => t.ColumnName == OperationsHistoryColumns.Rate_rur).First().AttrRow.Add("width", "130px");
-            OperationsHistory.Ths.Where(t => t.ColumnName == OperationsHistoryColumns.Amount).First().AttrRow.Add("width", "96px");
-            OperationsHistory.Ths.Where(t => t.ColumnName == OperationsHistoryColumns.Value_rur).First().AttrRow.Add("width", "145px");
-            OperationsHistory.Ths.Where(t => t.ColumnName == OperationsHistoryColumns.Fee_rur).First().AttrRow.Add("width", "117px");
+            PifOperationsHistory.Ths.Where(t => t.ColumnName == PifOperationsHistoryColumns.Wdate).First().AttrRow.Add("width", "170px");
+            PifOperationsHistory.Ths.Where(t => t.ColumnName == PifOperationsHistoryColumns.Btype).First().AttrRow.Add("width", "300px");
+            PifOperationsHistory.Ths.Where(t => t.ColumnName == PifOperationsHistoryColumns.Rate_rur).First().AttrRow.Add("width", "130px");
+            PifOperationsHistory.Ths.Where(t => t.ColumnName == PifOperationsHistoryColumns.Amount).First().AttrRow.Add("width", "96px");
+            PifOperationsHistory.Ths.Where(t => t.ColumnName == PifOperationsHistoryColumns.Value_rur).First().AttrRow.Add("width", "145px");
+            PifOperationsHistory.Ths.Where(t => t.ColumnName == PifOperationsHistoryColumns.Fee_rur).First().AttrRow.Add("width", "117px");
 
 
             foreach (DataRow dr in _FundInfoDS.Tables[PifTables.OperationsHistory].Rows)
             {
-                DataRow row = OperationsHistory.Table.NewRow();
-                row[OperationsHistoryColumns.Wdate] = dr["W_Date"];
-                row[OperationsHistoryColumns.Btype] = dr["OperName"];
-                row[OperationsHistoryColumns.Rate_rur] = dr["RATE_RUR"];
-                row[OperationsHistoryColumns.Amount] = dr["Amount"];
-                row[OperationsHistoryColumns.Value_rur] = dr["VALUE_RUR"];
-                row[OperationsHistoryColumns.Fee_rur] = dr["FEE_RUR"];
-                OperationsHistory.Table.Rows.Add(row);
+                DataRow row = PifOperationsHistory.Table.NewRow();
+                row[PifOperationsHistoryColumns.Wdate] = dr["W_Date"];
+                row[PifOperationsHistoryColumns.Btype] = dr["OperName"];
+                row[PifOperationsHistoryColumns.Rate_rur] = dr["RATE_RUR"];
+                row[PifOperationsHistoryColumns.Amount] = dr["Amount"];
+                row[PifOperationsHistoryColumns.Value_rur] = dr["VALUE_RUR"];
+                row[PifOperationsHistoryColumns.Fee_rur] = dr["FEE_RUR"];
+                PifOperationsHistory.Table.Rows.Add(row);
             }
 
         }

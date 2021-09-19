@@ -13,7 +13,10 @@
 </head>
 <body>
 
-    <div class="reportGraph"><canvas id="canvas" style="height: 300px; width: 520px;"></canvas></div>
+    <div class="reportGraph">
+        <canvas id="canvas" style="height: 300px; width: 520px;"></canvas>
+        <div id="legend"></div>
+    </div>
 
     <script type="text/javascript">
 // wkhtmltopdf 0.12.5 crash fix.
@@ -61,19 +64,26 @@ function drawGraphs() {
                 "responsive": true,
                 "maintainAspectRatio": false,
                 "legend": {
-                    position: 'right',
-                    align: 'center',
-                    labels: {
-                        boxWidth: 10,
-                        padding: 20
-                    }
-                }
+                    display: false
+                },
+                //legendCallback: chart => {
+                //    let html = '<ul>';
+                //    chart.data.datasets.forEach((ds, i) => {
+                //        html += '<li>' +
+                //            '<span style="width: 36px; height: 14px; background-color:' + ds.backgroundColor + '; border:' + ds.borderWidth + 'px solid ' + ds.borderColor + '" onclick="onLegendClicked(event, \'' + i + '\')">&nbsp;</span>' +
+                //            '<span id="legend-label-' + i + '" onclick="onLegendClicked(event, \'' + i + '\')">' +
+                //            (Array.isArray(ds.label) ? ds.label.join('<br/>') : ds.label) + '</span>' +
+                //            '</li>';
+                //    });
+                //    return html + '</ul>';
+                //}
             }
         }
     );
 }
 window.onload = function() {
     drawGraphs();
+    //document.getElementById("legend").innerHTML = drawGraphs().generateLegend();
 };
     </script>
 </body>

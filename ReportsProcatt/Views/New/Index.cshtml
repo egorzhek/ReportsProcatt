@@ -33,7 +33,7 @@
             };
         };
     </script>
-
+    @*Шапка*@
     <table class="section header">
         <tr>
             <td>
@@ -58,7 +58,7 @@
             </td>
         </tr>
     </table>
-
+    @*Основной блок*@
     <table class="section assets-section">
         <tr>
             <td>
@@ -106,7 +106,7 @@
             </td>
         </tr>
     </table>
-
+    @*Основная диаграмма*@
     <table class="section block-heading">
         <tr>
             <td>
@@ -213,67 +213,8 @@
             </td>
         </tr>
     </table>
-    @*Дививденды*@
-    <table class="section info-table-section">
-        <tr>
-            <td>
-
-                <table class="section-wrapper">
-                    <tbody>
-                        <tr>
-
-                            <td class="info-table-wrap-td">
-
-                                <table class="info-table">
-                                    <tr class="heading-row">
-                                        <th>
-                                            Продукт
-                                        </th>
-
-                                        <th>
-                                            дивиденды
-                                        </th>
-
-                                        <th>
-                                            купоны
-                                        </th>
-
-                                        <th>
-                                            Сумма
-                                        </th>
-                                    </tr>
-
-                                    <tr class="body-row">
-
-                                        <td>
-                                            ДУ
-                                        </td>
-
-                                        <td>
-                                            7 581
-                                        </td>
-
-                                        <td>
-                                            7 581
-                                        </td>
-
-                                        <td>
-                                            7 581
-                                        </td>
-
-                                    </tr>
-
-                                </table>
-
-                            </td>
-
-                        </tr>
-                    </tbody>
-                </table>
-
-            </td>
-        </tr>
-    </table>
+    @*Дививденды и купоны*@
+    @Html.Partial("_PartialTableView", Model.DivsNCoupons)
 
     <table class="section block-heading">
         <tr>
@@ -298,24 +239,28 @@
         </tr>
     </table>
 
-    <table class="section graph-section projected-payments-section">
-        <tr>
-            <td>
+    <table class="section line-chart-section">
+        <tbody>
+            <tr>
+                <td>
 
-                <table class="section-wrapper">
-                    <tbody>
-                        <tr>
+                    <table class="section-wrapper">
+                        <tbody>
+                            <tr>
 
-                            <td class="graph-td" valign="center" height="237px">
-                                <img src="@Model.rootStr/img/projected-payments.jpg">
-                            </td>
+                                <td>
 
-                        </tr>
-                    </tbody>
-                </table>
+                                    @Html.Partial("_PartialChartDiagram", Model.DivsNCouponsChart)
 
-            </td>
-        </tr>
+                                </td>
+
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </td>
+            </tr>
+        </tbody>
     </table>
 
     <table class="section block-heading">
@@ -341,355 +286,74 @@
         </tr>
     </table>
 
-    <table class="section info-table-section">
-        <tbody>
+    @Html.Partial("_PartialTableView", Model.DivsNCouponsDetails)
+
+    <div class="keep-together">
+        <table class="section block-heading print-pt50">
+            <tbody>
+                <tr>
+                    <td>
+
+                        <table class="section-wrapper">
+                            <tbody>
+                                <tr>
+
+                                    <td class="left-td heading-td">
+                                        <span>Структура активов по портфелю</span>
+                                    </td>
+
+                                    <td class="right-td heading-td">
+                                    </td>
+
+                                </tr>
+                            </tbody>
+                        </table>
+
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <table class="section doughnut-section info-table-section">
             <tr>
                 <td>
 
                     <table class="section-wrapper">
                         <tbody>
                             <tr>
+                                <td class="canvas-td">
+                                    <div class="canvas-wrap">
 
-                                <td class="info-table-wrap-td">
+                                        <div class="canvas-row">
 
-                                    <table class="info-table">
-                                        <tbody>
-                                            <tr class="heading-row">
-                                                <th>
-                                                    Дата
-                                                </th>
+                                            @Html.Partial("_PartialCircleDiagram", Model.Assets)
 
-                                                <th width="320px">
-                                                    инструмент
-                                                </th>
+                                            @Html.Partial("_PartialCircleDiagram", Model.Instruments)
 
-                                                <th width="150px">
-                                                    тип выплаты
-                                                </th>
+                                        </div>
 
-                                                <th>
-                                                    Название договора
-                                                </th>
 
-                                                <th width="150px">
-                                                    сумма в валюте выплаты
-                                                </th>
-                                            </tr>
+                                        <div class="canvas-row">
 
-                                            <tr class="body-row">
+                                            <div class="canvas-item">
 
-                                                <td>
-                                                    28.04.2021
-                                                </td>
+                                                @Html.Partial("_PartialCircleDiagram", Model.Currencies)
 
-                                                <td>
-                                                    QIWI PLC
-                                                </td>
+                                            </div>
 
-                                                <td>
-                                                    Дивиденды
-                                                </td>
+                                        </div>
 
-                                                <td>
-                                                    Стратегия ДУ “Агрессивная”
-                                                </td>
 
-                                                <td>
-                                                    50,50 $
-                                                </td>
-                                            </tr>
-
-                                            <tr class="body-row">
-
-                                                <td>
-                                                    30.04.2021
-                                                </td>
-
-                                                <td>
-                                                    НК ЛУКОЙЛ
-                                                </td>
-
-                                                <td>
-                                                    Дивиденды
-                                                </td>
-
-                                                <td>
-                                                    Стратегия ДУ “Агрессивная”
-                                                </td>
-
-                                                <td>
-                                                    7,00 $
-                                                </td>
-                                            </tr>
-
-                                            <tr class="body-row">
-
-                                                <td>
-                                                    28.04.2021
-                                                </td>
-
-                                                <td>
-                                                    QIWI PLC
-                                                </td>
-
-                                                <td>
-                                                    Дивиденды
-                                                </td>
-
-                                                <td>
-                                                    Стратегия ДУ “Агрессивная”
-                                                </td>
-
-                                                <td>
-                                                    3 740,00 ₽
-                                                </td>
-                                            </tr>
-                                            <tr class="body-row">
-
-                                                <td>
-                                                    28.04.2021
-                                                </td>
-
-                                                <td>
-                                                    QIWI PLC
-                                                </td>
-
-                                                <td>
-                                                    Дивиденды
-                                                </td>
-
-                                                <td>
-                                                    Стратегия ДУ “Агрессивная”
-                                                </td>
-
-                                                <td>
-                                                    50,50 $
-                                                </td>
-                                            </tr>
-
-                                            <tr class="body-row">
-
-                                                <td>
-                                                    28.04.2021
-                                                </td>
-
-                                                <td>
-                                                    QIWI PLC
-                                                </td>
-
-                                                <td>
-                                                    Дивиденды
-                                                </td>
-
-                                                <td>
-                                                    Стратегия ДУ “Агрессивная”
-                                                </td>
-
-                                                <td>
-                                                    50,50 $
-                                                </td>
-                                            </tr>
-
-                                            <tr class="body-row">
-
-                                                <td>
-                                                    30.04.2021
-                                                </td>
-
-                                                <td>
-                                                    НК ЛУКОЙЛ
-                                                </td>
-
-                                                <td>
-                                                    Дивиденды
-                                                </td>
-
-                                                <td>
-                                                    Стратегия ДУ “Агрессивная”
-                                                </td>
-
-                                                <td>
-                                                    7,00 $
-                                                </td>
-                                            </tr>
-
-                                            <tr class="body-row">
-
-                                                <td>
-                                                    28.04.2021
-                                                </td>
-
-                                                <td>
-                                                    QIWI PLC
-                                                </td>
-
-                                                <td>
-                                                    Дивиденды
-                                                </td>
-
-                                                <td>
-                                                    Стратегия ДУ “Агрессивная”
-                                                </td>
-
-                                                <td>
-                                                    3 740,00 ₽
-                                                </td>
-                                            </tr>
-                                            <tr class="body-row">
-
-                                                <td>
-                                                    28.04.2021
-                                                </td>
-
-                                                <td>
-                                                    QIWI PLC
-                                                </td>
-
-                                                <td>
-                                                    Дивиденды
-                                                </td>
-
-                                                <td>
-                                                    Стратегия ДУ “Агрессивная”
-                                                </td>
-
-                                                <td>
-                                                    50,50 $
-                                                </td>
-                                            </tr>
-
-                                            <tr class="body-row">
-
-                                                <td>
-                                                    30.04.2021
-                                                </td>
-
-                                                <td>
-                                                    НК ЛУКОЙЛ
-                                                </td>
-
-                                                <td>
-                                                    Дивиденды
-                                                </td>
-
-                                                <td>
-                                                    Стратегия ДУ “Агрессивная”
-                                                </td>
-
-                                                <td>
-                                                    7,00 $
-                                                </td>
-                                            </tr>
-
-                                            <tr class="body-row">
-
-                                                <td>
-                                                    28.04.2021
-                                                </td>
-
-                                                <td>
-                                                    QIWI PLC
-                                                </td>
-
-                                                <td>
-                                                    Дивиденды
-                                                </td>
-
-                                                <td>
-                                                    Стратегия ДУ “Агрессивная”
-                                                </td>
-
-                                                <td>
-                                                    3 740,00 ₽
-                                                </td>
-                                            </tr>
-
-                                        </tbody>
-                                    </table>
-
+                                    </div>
                                 </td>
-
                             </tr>
                         </tbody>
                     </table>
-                    <div style="page-break-before: always;"></div>
 
-                    <div class="keep-together">
-                        <table class="section block-heading print-pt50">
-                            <tbody>
-                                <tr>
-                                    <td>
-
-                                        <table class="section-wrapper">
-                                            <tbody>
-                                                <tr>
-
-                                                    <td class="left-td heading-td">
-                                                        <span>Структура активов по портфелю</span>
-                                                    </td>
-
-                                                    <td class="right-td heading-td">
-                                                    </td>
-
-                                                </tr>
-                                            </tbody>
-                                        </table>
-
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <table class="section doughnut-section info-table-section">
-                            <tr>
-                                <td>
-
-                                    <table class="section-wrapper">
-                                        <tbody>
-                                            <tr>
-                                                <td class="canvas-td">
-                                                    <div class="canvas-wrap">
-
-                                                        <div class="canvas-row">
-
-                                                            @Html.Partial("_PartialCircleDiagram", Model.Assets)
-
-                                                            @Html.Partial("_PartialCircleDiagram", Model.Instruments)
-
-                                                        </div>
-
-
-                                                        <div class="canvas-row">
-
-                                                            <div class="canvas-item">
-
-                                                                @Html.Partial("_PartialCircleDiagram", Model.Currencies)
-
-                                                            </div>
-
-                                                        </div>
-
-
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-
-                                </td>
-                            </tr>
-                        </table>
-                    </div>
-
-
-                    <div class="break-after"></div>
-
-                    <!-- 				</td>
-                    </tr>
-                    </table> -->
                 </td>
             </tr>
-        </tbody>
-    </table>
+        </table>
+    </div>
+
     <div style="page-break-before: always;"></div>
 
     @foreach (var pif in Model.PIFs)

@@ -194,15 +194,15 @@
                             <td>
                                 <div class="coupons-wrap">
                                     <div class="coupons-item">
-                                        Всего – 44 450 833 ₽
+                                        Всего – @Model.Totals
                                     </div>
 
                                     <div class="coupons-item" style="color:#3E4E65">
-                                        Дивиденды – 5 000,45 ₽
+                                        Дивиденды – @Model.Dividends
                                     </div>
 
                                     <div class="coupons-item" style="color:#09669A">
-                                        Купоны – 1 000,45 ₽
+                                        Купоны – @Model.Coupons
                                     </div>
                                 </div>
                             </td>
@@ -216,40 +216,59 @@
     </tbody>
 </table>
 @*Детализация купонов и дивидендов*@
-@Html.Partial("_PartialChartDiagram", Model.DividedtsCouponsChart)
+
+<table class="section graph-section projected-payments-section">
+    <tr>
+        <td>
+
+            <table class="section-wrapper">
+                <tbody>
+                    <tr>
+
+                        <td>
+                            @Html.Partial("_PartialChartDiagram", Model.DividedtsCouponsChart)
+                        </td>
+
+                    </tr>
+                </tbody>
+            </table>
+
+        </td>
+    </tr>
+</table>
 
 @if (Model.DividedtsCoupons.Table.Rows.Count > 0)
 {
-<div class="keep-together">
+    <div class="keep-together">
 
-    <table class="section block-heading print-pt50">
-        <tbody>
-            <tr>
-                <td>
+        <table class="section block-heading print-pt50">
+            <tbody>
+                <tr>
+                    <td>
 
-                    <table class="section-wrapper">
-                        <tbody>
-                            <tr>
+                        <table class="section-wrapper">
+                            <tbody>
+                                <tr>
 
-                                <td class="left-td heading-td">
-                                    <span>Детализация купонов и дивидендов</span>
-                                </td>
+                                    <td class="left-td heading-td">
+                                        <span>Детализация купонов и дивидендов</span>
+                                    </td>
 
-                                <td class="right-td heading-td">
-                                </td>
+                                    <td class="right-td heading-td">
+                                    </td>
 
-                            </tr>
-                        </tbody>
-                    </table>
+                                </tr>
+                            </tbody>
+                        </table>
 
-                </td>
-            </tr>
-        </tbody>
-    </table>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
 
-    @Html.Partial("_PartialTableView", Model.DividedtsCoupons)
+        @Html.Partial("_PartialTableView", Model.DividedtsCoupons)
 
-</div>
+    </div>
 }
 
 <table class="section block-heading">
@@ -690,4 +709,103 @@
         </tbody>
     </table>
     @Html.Partial("_PartialTableView", Model.ClosedCash)
+}
+@if (Model.AssetsStruct != null || Model.ContractStruct != null)
+{
+    <div class="keep-together">
+
+        <table class="section block-heading">
+            <tbody>
+                <tr>
+                    <td>
+
+                        <table class="section-wrapper">
+                            <tbody>
+                                <tr>
+
+                                    <td class="left-td heading-td">
+                                        <span>Состав договора</span>
+                                    </td>
+
+                                    <td class="right-td heading-td">
+                                    </td>
+
+                                </tr>
+                            </tbody>
+                        </table>
+
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <table class="section doughnut-section info-table-section">
+            <tbody>
+                <tr>
+                    <td>
+
+                        <table class="section-wrapper">
+                            <tbody>
+                                <tr>
+                                    <td class="canvas-td">
+                                        <div class="canvas-wrap">
+
+                                            <div class="canvas-row">
+
+                                                @if (Model.AssetsStruct != null)
+                                                {
+                                                    @Html.Partial("_PartialCircleDiagram", Model.AssetsStruct)
+                                                }
+
+                                                @if (Model.ContractStruct != null)
+                                                {
+                                                    @Html.Partial("_PartialCircleDiagram", Model.ContractStruct)
+                                                }
+
+                                            </div>
+
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+    </div>
+}
+@if (Model.DuOperationsHistory.Table.Rows.Count > 0)
+{
+<div class="keep-together">
+
+    <table class="section block-heading print-pt100">
+        <tbody>
+            <tr>
+                <td>
+                    <table class="section-wrapper">
+                        <tbody>
+                            <tr>
+
+                                <td class="left-td heading-td">
+                                    <span>История операций</span>
+                                </td>
+
+                                <td class="right-td heading-td">
+                                </td>
+
+                            </tr>
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+
+    @Html.Partial("_PartialTableView", Model.DuOperationsHistory)
+
+</div>
 }

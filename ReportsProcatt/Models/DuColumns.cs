@@ -240,4 +240,16 @@ namespace ReportsProcatt.Models
         public const string Price = "Price";
         public const string Valuta = "Valuta";
     }
+    public class DuOperationsHistoryColumns
+    {
+        public const string Date = "Date";
+        public const string OperName = "OperName";
+        public const string Price = "Price";
+        public const string PaperAmount = "PaperAmount";
+        public const string Cost = "Cost";
+        public const string Fee = "Fee";
+    }
+
+
+
 }

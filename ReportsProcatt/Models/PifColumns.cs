@@ -12,7 +12,7 @@ namespace ReportsProcatt.Models
         public const string OutVal = "Выводы";
         public const string End = "В конце периода";
     }
-    public class OperationsHistoryColumns
+    public class PifOperationsHistoryColumns
     {
         public const string Wdate = "Wdate";
         public const string Btype = "Btype";

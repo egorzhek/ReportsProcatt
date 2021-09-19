@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ReportsProcatt.Models
 {
-    public class ChartClass 
+    public class ChartDiaramnClass 
     {
         public string ElementName { get; private set; }
         public string Type { get; set; }
@@ -23,7 +23,7 @@ namespace ReportsProcatt.Models
             public decimal value { get; set; }
             public string borderColor { get; set; }
         }
-        public ChartClass(string aElementName)
+        public ChartDiaramnClass(string aElementName)
         {
             ElementName = aElementName;
         }
@@ -80,5 +80,23 @@ namespace ReportsProcatt.Models
         public string Code { get; set; }
         public string Char { get; set; }
         public string Name { get; set; }
+
+        public static CurrencyClass GetCurrency(string Code)
+        {
+            return Currencies.FirstOrDefault(c => c.Code == Code) ?? Currencies.First();
+        }
+        private static List<CurrencyClass> Currencies = new List<CurrencyClass>()
+        {
+            new CurrencyClass{Code = "RUB", Char ="₽", Name = "Рубль"},
+            new CurrencyClass{Code = "USD", Char ="$", Name = "Dollar"},
+            new CurrencyClass{Code = "EUR", Char ="€", Name = "Euro"}
+
+        };
     }
+
+    public static partial class Extentions
+    {
+        
+    }
+    
 }

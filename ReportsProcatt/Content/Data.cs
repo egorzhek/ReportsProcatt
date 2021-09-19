@@ -22,9 +22,6 @@ namespace ReportsProcatt.Content
         {
             _path = ReportPath;
             _cnnStr = cnnStr;
-            //connectionString = @"Data Source=host.docker.internal,49172;Encrypt=False;Initial Catalog=CacheDB;Integrated Security=True;User ID=DESKTOP-2G9NLM6\D";
-            //ReportPath = Environment.GetEnvironmentVariable("ReportPath");
-            //connectionString = Program.GetReportSqlConnection(Path.Combine(ReportPath, "appsettings.json"));
 
             DataSet_InvestorFull = new DataSet();
             DataSet_CircleAssets = new DataSet();

@@ -1,27 +1,11 @@
-﻿@model ReportsProcatt.Models.ChartClass
-    <table class="section graph-section projected-payments-section">
-        <tr>
-            <td>
-
-                <table class="section-wrapper">
-                    <tbody>
-                        <tr>
-
-                            <td>
-                                <div class="line-chart-wrap">
-                                    <div class="reportGraph">
-                                        <canvas width="1156" height="237" id="@Model.ElementName"></canvas>
-                                    </div>
-                                </div>
-                            </td>
-
-                        </tr>
-                    </tbody>
-                </table>
-
-            </td>
-        </tr>
-    </table>
+﻿@model ReportsProcatt.Models.ChartDiaramnClass
+    
+    <div class="line-chart-wrap">
+        <div class="reportGraph">
+            <canvas width="1156" height="237" id="@Model.ElementName"></canvas>
+        </div>
+    </div>
+                            
     <script type="text/javascript">
 
     Charts.push(

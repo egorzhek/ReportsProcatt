@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -25,6 +26,7 @@ namespace ReportsProcatt.Models
         public TableView DUsTotals { get; set; }
         public TableView AllAssets { get; set; }
         public TableView DivsNCoupons { get; set; }
+        public ChartDiaramnClass DivsNCouponsChart { get; set; }
         public TableView DivsNCouponsDetails { get; set; }
         public CircleDiagram Assets { get; set; }
         public CircleDiagram Instruments { get; set; }
@@ -41,14 +43,9 @@ namespace ReportsProcatt.Models
         private string connectionString => @"Data Source=DESKTOP-2G9NLM6\MSSQLSERVER15;Encrypt=False;Initial Catalog=CacheDB;Integrated Security=True;User ID=DESKTOP-2G9NLM6\D";
         private string ReportPath = @"c:\Users\D\source\Ingos\ReportsProcatt\Reports\";
         #endregion
-        public Report(int aInvestorId, DateTime? aDateFrom, DateTime? aDateTo)
+        public Report(int aInvestorId, DateTime? aDateFrom, DateTime? aDateTo,string CurrencyCode)
         {
-            ReportCurrency = new CurrencyClass
-            {
-                Code = "RUB",
-                Char = "₽",
-                Name = "Рубли"
-            };
+            ReportCurrency = CurrencyClass.GetCurrency(CurrencyCode);
 
             InvestorId = aInvestorId;
             _data = new SQLData(ReportCurrency.Code ,aInvestorId, aDateFrom, aDateTo, connectionString, ReportPath);
@@ -62,6 +59,9 @@ namespace ReportsProcatt.Models
             InitMainDiagram();
             InitPIFsTotalTable();
             InitDUsTotalTable();
+            InitDivsNCoupons();
+            InitDivsNCouponsChart();
+            InitDivsNCouponsDetails();
             InitAllAssetsTable();
             InitAssets();
             InitInstruments();
@@ -97,7 +97,7 @@ namespace ReportsProcatt.Models
                 new ViewElementAttr{ColumnName = PIFsTotalColumns.AssetsToEnd, DisplayName = $"АКТИВЫ НА {Dto.ToString("dd.MM.yyyy")}", SortOrder = 2 },
                 new ViewElementAttr{ColumnName = PIFsTotalColumns.Result, DisplayName = $"РЕЗУЛЬТАТЫ ЗА {Period}", SortOrder = 3 }
             };
-            PIFsTotals.Ths.Where(t => t.ColumnName == PIFsTotalColumns.PIFs).First().AttrRow.Add("width", "520px");
+            PIFsTotals.Ths.Where(t => t.ColumnName == PIFsTotalColumns.PIFs).First().AttrRow.Add("width", "220px");
 
             foreach (DataRow dr in _invFullDS.Tables[InvestFullTables.FundsDt].Rows)
             {
@@ -141,6 +141,99 @@ namespace ReportsProcatt.Models
                 row[DUsTotalColumns.AssetsToEnd] = dr["EndValue"].DecimalToStr("#,##0");
                 row[DUsTotalColumns.Result] = vRes.ToString();
                 DUsTotals.Table.Rows.Add(row);
+            }
+        }
+        private void InitDivsNCoupons()
+        {
+            DivsNCoupons = new TableView();
+            DivsNCoupons.Table = new DataTable(); 
+            DivsNCoupons.Table.Columns.Add(DivsNCouponsColumns.NameObject);
+            DivsNCoupons.Table.Columns.Add(DivsNCouponsColumns.INPUT_DIVIDENTS);
+            DivsNCoupons.Table.Columns.Add(DivsNCouponsColumns.INPUT_COUPONS);
+            DivsNCoupons.Table.Columns.Add(DivsNCouponsColumns.Summ);
+
+            DivsNCoupons.Ths = new List<ViewElementAttr>
+            {
+                new ViewElementAttr{ColumnName = DivsNCouponsColumns.NameObject, DisplayName = "Продукт", SortOrder = 1},
+                new ViewElementAttr{ColumnName = DivsNCouponsColumns.INPUT_DIVIDENTS, DisplayName = "Дивиденды", SortOrder = 2},
+                new ViewElementAttr{ColumnName = DivsNCouponsColumns.INPUT_COUPONS, DisplayName = "Купоны", SortOrder = 3},
+                new ViewElementAttr{ColumnName = DivsNCouponsColumns.Summ, DisplayName = "Сумма", SortOrder = 4}
+            };
+
+            foreach (DataRow dr in _invFullDS.Tables[InvestFullTables.DivsNCoupons].Rows)
+            {
+                DataRow row = DivsNCoupons.Table.NewRow(); 
+                row[DivsNCouponsColumns.NameObject] = dr["NameObject"];
+                row[DivsNCouponsColumns.INPUT_DIVIDENTS] = $"{dr["INPUT_DIVIDENTS"].DecimalToStr()} {dr["Valuta"]}";
+                row[DivsNCouponsColumns.INPUT_COUPONS] = $"{dr["INPUT_COUPONS"].DecimalToStr()} {dr["Valuta"]}";
+                row[DivsNCouponsColumns.Summ] = $"{((decimal)dr["INPUT_DIVIDENTS"] + (decimal)dr["INPUT_COUPONS"]).DecimalToStr()} {dr["Valuta"]}";
+                DivsNCoupons.Table.Rows.Add(row);
+            }
+        }
+        private void InitDivsNCouponsChart()
+        {
+            var cl = new CultureInfo("ru-RU", false);
+
+            DivsNCouponsChart = new ChartDiaramnClass($"DivsNCoupons_main")
+            {
+                Lables = _invFullDS.Tables[InvestFullTables.DivsNCouponsChart].Rows.Cast<DataRow>().ToList()
+                    .Select(r => ((DateTime)r["Date"]).ToString("MMM yy", cl).ToUpper()).ToList(),
+                Type = "bar",
+                DataSets = new List<ChartDiaramnClass.DataSetClass>()
+                    {
+                        new ChartDiaramnClass.DataSetClass
+                        {
+                            data = _invFullDS.Tables[InvestFullTables.DivsNCouponsChart].Rows.Cast<DataRow>().ToList()
+                                .Select(r => new ChartDiaramnClass.DataClass
+                                {
+                                    value = (r["Dividends"] as decimal?) ?? 0,
+                                    borderColor = "#E9F3F8"
+                                }).ToList(),
+                            backgroundColor = "#E9F3F8",
+                            lable = "Дивиденды"
+                        },
+                        new ChartDiaramnClass.DataSetClass
+                        {
+                            data = _invFullDS.Tables[InvestFullTables.DivsNCouponsChart].Rows.Cast<DataRow>().ToList()
+                                .Select(r => new ChartDiaramnClass.DataClass
+                                {
+                                    value = (r["Coupons"] as decimal?) ?? 0,
+                                    borderColor = "#09669A"
+                                }).ToList(),
+                            backgroundColor = "#09669A",
+                            lable = "Купоны"
+                        }
+                    }
+            };
+        }
+        private void InitDivsNCouponsDetails()
+        {
+            DivsNCouponsDetails = new TableView();
+            DivsNCouponsDetails.Table = new DataTable(); 
+            DivsNCouponsDetails.Table.Columns.Add(DivsNCouponsDetailsColumns.Date);
+            DivsNCouponsDetails.Table.Columns.Add(DivsNCouponsDetailsColumns.ToolName);
+            DivsNCouponsDetails.Table.Columns.Add(DivsNCouponsDetailsColumns.PriceType);
+            DivsNCouponsDetails.Table.Columns.Add(DivsNCouponsDetailsColumns.ContractName);
+            DivsNCouponsDetails.Table.Columns.Add(DivsNCouponsDetailsColumns.Price);
+
+            DivsNCouponsDetails.Ths = new List<ViewElementAttr>
+            {
+                new ViewElementAttr{ColumnName = DivsNCouponsDetailsColumns.Date, DisplayName = "Дата", SortOrder = 1},
+                new ViewElementAttr{ColumnName = DivsNCouponsDetailsColumns.ToolName, DisplayName = "Инструмент", SortOrder = 2},
+                new ViewElementAttr{ColumnName = DivsNCouponsDetailsColumns.PriceType, DisplayName = "Тип выплаты", SortOrder = 3},
+                new ViewElementAttr{ColumnName = DivsNCouponsDetailsColumns.ContractName, DisplayName = "Количество", SortOrder = 4},
+                new ViewElementAttr{ColumnName = DivsNCouponsDetailsColumns.Price, DisplayName = "Сумма сделки", SortOrder = 5},
+            };
+
+            foreach (DataRow dr in _invFullDS.Tables[InvestFullTables.DivsNCouponsDetails].Rows)
+            {
+                DataRow row = DivsNCouponsDetails.Table.NewRow(); 
+                row[DivsNCouponsDetailsColumns.Date] = dr["Date"];
+                row[DivsNCouponsDetailsColumns.ToolName] = dr["ToolName"];
+                row[DivsNCouponsDetailsColumns.PriceType] = dr["PriceType"];
+                row[DivsNCouponsDetailsColumns.ContractName] = dr["ContractName"];
+                row[DivsNCouponsDetailsColumns.Price] = $"{dr["Price"].DecimalToStr()} {dr["Valuta"]}";
+                DivsNCouponsDetails.Table.Rows.Add(row);
             }
         }
         public void InitAllAssetsTable()
@@ -389,5 +482,8 @@ namespace ReportsProcatt.Models
         public const int DUsDt = 5;
         public const int FundsResultDt = 6;
         public const int DUsResultDt = 7;
+        public const int DivsNCoupons = 7;
+        public const int DivsNCouponsDetails = 8;
+        public const int DivsNCouponsChart = 9;
     }
 }

@@ -24,7 +24,7 @@ namespace ReportsProcatt.Models
         public string Totals { get; set; }
         public string Dividends { get; set; }
         public string Coupons { get; set; }
-        public ChartClass DividedtsCouponsChart { get; set; }
+        public ChartDiaramnClass DividedtsCouponsChart { get; set; }
 
         //Детализация купонов и дивидендов
         public TableView DividedtsCoupons { get; set; }
@@ -58,7 +58,7 @@ namespace ReportsProcatt.Models
         public CircleDiagram ContractStruct { get; set; }
 
         //История операций
-        public TableView OperationsHistory { get; set; }
+        public TableView DuOperationsHistory { get; set; }
         #region Поля
         private SQLDataDU _data;
         private DataSet _TrustManagementDS => _data.DataSet_TrustManagement;
@@ -97,6 +97,7 @@ namespace ReportsProcatt.Models
                 { DuDiagramColumns.Dividents, _TrustManagementDS.DecimalToStr(DuTables.DiagramDT, "Dividends", "#,##0") },
                 { DuDiagramColumns.End, _TrustManagementDS.DecimalToStr(DuTables.MainResultDT, "ActiveDateToValue", "#,##0") }
             };
+
             InitAssetsStruct();
             InitFundStruct();
 
@@ -117,7 +118,7 @@ namespace ReportsProcatt.Models
             InitCurrentFunds();
             InitCurrentDerivatives();
 
-
+            InitOperationsHistory();
         }
         private void InitAssetsStruct()
         {
@@ -232,18 +233,25 @@ namespace ReportsProcatt.Models
         {
             if (_TrustManagementDS.Tables[DuTables.DivsNCoupsChartDT].Rows.Count > 0)
             {
+                decimal coupons = Math.Round((decimal)_TrustManagementDS.GetValue(DuTables.DiagramDT, "Coupons"));
+                decimal dividends = Math.Round((decimal)_TrustManagementDS.GetValue(DuTables.DiagramDT, "Dividends"));
+                Totals = $"{(coupons + dividends).DecimalToStr()} {Currency.Char}";
+                Coupons = $"{coupons.DecimalToStr()} {Currency.Char}";
+                Dividends = $"{dividends.DecimalToStr()} {Currency.Char}";
+
                 var cl = new CultureInfo("ru-RU", false);
-                DividedtsCouponsChart = new ChartClass($"DividedtsCouponsChart_{Id}")
+
+                DividedtsCouponsChart = new ChartDiaramnClass($"DividedtsCouponsChart_{Id}")
                 {
                     Lables = _TrustManagementDS.Tables[DuTables.DivsNCoupsChartDT].Rows.Cast<DataRow>().ToList()
                         .Select(r => ((DateTime)r["Date"]).ToString("MMM yy", cl)).ToList(),
                     Type = "bar",
-                    DataSets = new List<ChartClass.DataSetClass>()
+                    DataSets = new List<ChartDiaramnClass.DataSetClass>()
                     {
-                        new ChartClass.DataSetClass
+                        new ChartDiaramnClass.DataSetClass
                         {
                             data = _TrustManagementDS.Tables[DuTables.DivsNCoupsChartDT].Rows.Cast<DataRow>().ToList()
-                                .Select(r => new ChartClass.DataClass
+                                .Select(r => new ChartDiaramnClass.DataClass
                                 {
                                     value = (r["Dividends"] as decimal?) ?? 0,
                                     borderColor = "#E9F3F8"
@@ -251,10 +259,10 @@ namespace ReportsProcatt.Models
                             backgroundColor = "#E9F3F8",
                             lable = "Дивиденды"
                         },
-                        new ChartClass.DataSetClass
+                        new ChartDiaramnClass.DataSetClass
                         {
                             data = _TrustManagementDS.Tables[DuTables.DivsNCoupsChartDT].Rows.Cast<DataRow>().ToList()
-                                .Select(r => new ChartClass.DataClass
+                                .Select(r => new ChartDiaramnClass.DataClass
                                 {
                                     value = (r["Coupons"] as decimal?) ?? 0,
                                     borderColor = "#09669A"
@@ -296,6 +304,7 @@ namespace ReportsProcatt.Models
                 row[DividedtsCouponsColumns.PriceType] = dr["PriceType"];
                 row[DividedtsCouponsColumns.ContractName] = dr["ContractName"];
                 row[DividedtsCouponsColumns.Price] = $"{dr["Price"].DecimalToStr()}"; //{dr["Valuta"]}";
+                DividedtsCoupons.Table.Rows.Add(row);
             }
         }
         private void InitClosedShares()
@@ -920,6 +929,47 @@ namespace ReportsProcatt.Models
 
         }
 
+        private void InitOperationsHistory()
+        {
+            DuOperationsHistory = new TableView();
+            DuOperationsHistory.Table = new DataTable();
+            DuOperationsHistory.Table.Columns.Add(DuOperationsHistoryColumns.Date);
+            DuOperationsHistory.Table.Columns.Add(DuOperationsHistoryColumns.OperName);
+            DuOperationsHistory.Table.Columns.Add(DuOperationsHistoryColumns.Price);
+            DuOperationsHistory.Table.Columns.Add(DuOperationsHistoryColumns.PaperAmount);
+            DuOperationsHistory.Table.Columns.Add(DuOperationsHistoryColumns.Cost);
+            DuOperationsHistory.Table.Columns.Add(DuOperationsHistoryColumns.Fee);
+
+            DuOperationsHistory.Ths = new List<ViewElementAttr>
+            {
+                new ViewElementAttr{ColumnName = DuOperationsHistoryColumns.Date, DisplayName = "Дата операции", SortOrder = 1},
+                new ViewElementAttr{ColumnName = DuOperationsHistoryColumns.OperName, DisplayName = "Тип операции", SortOrder = 2},
+                new ViewElementAttr{ColumnName = DuOperationsHistoryColumns.Price, DisplayName = "Стоимость бумаги", SortOrder = 3},
+                new ViewElementAttr{ColumnName = DuOperationsHistoryColumns.PaperAmount, DisplayName = "Количество", SortOrder = 4},
+                new ViewElementAttr{ColumnName = DuOperationsHistoryColumns.Cost, DisplayName = "Сумма сделки", SortOrder = 5},
+                new ViewElementAttr{ColumnName = DuOperationsHistoryColumns.Fee, DisplayName = "Комиссия", SortOrder = 6},
+
+            };
+
+            DuOperationsHistory.Ths.Where(t => t.ColumnName == DuOperationsHistoryColumns.Date).First().AttrRow.Add("width", "170px");
+            DuOperationsHistory.Ths.Where(t => t.ColumnName == DuOperationsHistoryColumns.OperName).First().AttrRow.Add("width", "300px");
+            DuOperationsHistory.Ths.Where(t => t.ColumnName == DuOperationsHistoryColumns.Price).First().AttrRow.Add("width", "130px");
+            DuOperationsHistory.Ths.Where(t => t.ColumnName == DuOperationsHistoryColumns.PaperAmount).First().AttrRow.Add("width", "96px");
+            DuOperationsHistory.Ths.Where(t => t.ColumnName == DuOperationsHistoryColumns.Cost).First().AttrRow.Add("width", "145px");
+            DuOperationsHistory.Ths.Where(t => t.ColumnName == DuOperationsHistoryColumns.Fee).First().AttrRow.Add("width", "117px");
+
+            foreach (DataRow dr in _TrustManagementDS.Tables[DuTables.DuOperationsHistory].Rows)
+            {
+                DataRow row = DuOperationsHistory.Table.NewRow();
+                row[DuOperationsHistoryColumns.Date] = dr["Date"];
+                row[DuOperationsHistoryColumns.OperName] = dr["OperName"];
+                row[DuOperationsHistoryColumns.Price] = dr["Price"].DecimalToStr();
+                row[DuOperationsHistoryColumns.PaperAmount] = dr["PaperAmount"].DecimalToStr();
+                row[DuOperationsHistoryColumns.Cost] = dr["Cost"].DecimalToStr();
+                row[DuOperationsHistoryColumns.Fee] = dr["Fee"].DecimalToStr();
+                DuOperationsHistory.Table.Rows.Add(row);
+            }
+        }
     }
     public class DuTables
     {
@@ -927,6 +977,7 @@ namespace ReportsProcatt.Models
         public const int DiagramDT = 3;
         public const int DivsNCoupsChartDT = 4;
         public const int DividedtsCoupons = 5;
+        public const int DuOperationsHistory = 6;
         public const int CurrentShares = 11;
         public const int ClosedShares = 12;
         public const int CurrentBonds = 13;

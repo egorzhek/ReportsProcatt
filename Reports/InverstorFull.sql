@@ -1,4 +1,4 @@
-DECLARE @ToDateStr     Nvarchar(50) = @DateToSharp;
+﻿DECLARE @ToDateStr     Nvarchar(50) = @DateToSharp;
 DECLARE @FromDateStr   Nvarchar(50) = @DateFromSharp;
 DECLARE @InvestorIdStr Nvarchar(50) = @InvestorIdSharp;
 --DECLARE @ContractIdStr Nvarchar(50) = @ContractIdSharp;
@@ -558,9 +558,9 @@ select DonutLabel1 = N'6 405 ₽', DonutLabel2 = N'4 актива'
 
 
 	set @ContractId = NULL;
-	
-	-- Детализация купонов и дивидендов по инвестору
-	select
+IF OBJECT_ID('tempdb..#DivsNCouponsDetails') IS NOT NULL DROP TABLE #DivsNCouponsDetails
+	-- Детализация купонов и дивидендов по инвестору - последние 12 мес
+select
 		[Date] = [PaymentDateTime],
 		[ToolName] = [ShareName],
 		[PriceType] = case when [Type] = 1 then N'Купоны' else N'Дивиденды' end,
@@ -574,7 +574,9 @@ select DonutLabel1 = N'6 405 ₽', DonutLabel2 = N'4 актива'
 			end
 			,2) as Decimal(30,2)),
 		[PaymentDateTime],
-		Valuta = @Valuta
+		Valuta = @Valuta,
+    [Type]
+  INTO #DivsNCouponsDetails
 	from [dbo].[DIVIDENDS_AND_COUPONS_History]
 	where InvestorId = @InvestorId
 	and (@ContractId is null or (@ContractId is not null and ContractId = @ContractId))
@@ -595,7 +597,8 @@ select DonutLabel1 = N'6 405 ₽', DonutLabel2 = N'4 актива'
 			end
 			,2) as Decimal(30,2)),
 		[PaymentDateTime],
-		Valuta = @Valuta
+		Valuta = @Valuta,
+    [Type]
 	from [dbo].[DIVIDENDS_AND_COUPONS_History_Last]
 	where InvestorId = @InvestorId
 	and (@ContractId is null or (@ContractId is not null and ContractId = @ContractId))
@@ -603,7 +606,7 @@ select DonutLabel1 = N'6 405 ₽', DonutLabel2 = N'4 актива'
 	and (@EndDate is null or (@EndDate is not null and PaymentDateTime < dateadd(day,1,@EndDate)))
 	order by [PaymentDateTime];
 
-	-- Детализация купонов и дивидендов по инвестору - последние 12 мес
+SELECT * FROM #DivsNCouponsDetails
 
 	;WITH cte AS
 	(
@@ -631,63 +634,14 @@ select DonutLabel1 = N'6 405 ₽', DonutLabel2 = N'4 актива'
 			[Date] = [PaymentDateTime],
 			Dividends = case when [Type] = 1 then 0.000000
 			else
-				CAST(Round(
-				case
-					when @Valuta = 'RUB' then AmountPayments_RUR
-					when @Valuta = 'USD' then AmountPayments_USD
-					when @Valuta = 'EUR' then AmountPayments_EURO
-					else AmountPayments_RUR
-				end
-				,2) as Decimal(30,2))
+				[Price]
 			end,
 			Coupons = case when [Type] = 1 then
-				CAST(Round(
-				case
-					when @Valuta = 'RUB' then AmountPayments_RUR
-					when @Valuta = 'USD' then AmountPayments_USD
-					when @Valuta = 'EUR' then AmountPayments_EURO
-					else AmountPayments_RUR
-				end
-				,2) as Decimal(30,2))
+				[Price]
 			else
 				0.000000
 			end
-		from [dbo].[DIVIDENDS_AND_COUPONS_History]
-		where InvestorId = @InvestorId
-		and (@ContractId is null or (@ContractId is not null and ContractId = @ContractId))
-		and (@StartDate is null or (@StartDate is not null and PaymentDateTime >= @StartDate))
-		and (@EndDate is null or (@EndDate is not null and PaymentDateTime < dateadd(day,1,@EndDate)))
-		union all
-		select
-			[Date] = [PaymentDateTime],
-			Dividends = case when [Type] = 1 then 0.000000
-			else
-				CAST(Round(
-				case
-					when @Valuta = 'RUB' then AmountPayments_RUR
-					when @Valuta = 'USD' then AmountPayments_USD
-					when @Valuta = 'EUR' then AmountPayments_EURO
-					else AmountPayments_RUR
-				end
-				,2) as Decimal(30,2))
-			end,
-			Coupons = case when [Type] = 1 then
-				CAST(Round(
-				case
-					when @Valuta = 'RUB' then AmountPayments_RUR
-					when @Valuta = 'USD' then AmountPayments_USD
-					when @Valuta = 'EUR' then AmountPayments_EURO
-					else AmountPayments_RUR
-				end
-				,2) as Decimal(30,2))
-			else
-				0.000000
-			end
-		from [dbo].[DIVIDENDS_AND_COUPONS_History_Last]
-		where InvestorId = @InvestorId
-		and (@ContractId is null or (@ContractId is not null and ContractId = @ContractId))
-		and (@StartDate is null or (@StartDate is not null and PaymentDateTime >= @StartDate))
-		and (@EndDate is null or (@EndDate is not null and PaymentDateTime < dateadd(day,1,@EndDate)))
+		from #DivsNCouponsDetails
 
 	) r ON r.[Date] BETWEEN cte.[DateFrom] AND DATEADD(DAY,-1,cte.[DateTo])
 	GROUP BY cte.[DateFrom]

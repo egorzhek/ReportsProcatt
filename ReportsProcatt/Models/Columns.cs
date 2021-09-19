@@ -43,4 +43,22 @@ namespace ReportsProcatt.Models
         public const string CurrencyProfit = "CurrencyProfit";
         public const string ProfitPercent = "ProfitPercent";
     }
+    public class DivsNCouponsColumns
+    {
+        public const string NameObject = "NameObject";
+        public const string INPUT_DIVIDENTS = "INPUT_DIVIDENTS";
+        public const string INPUT_COUPONS = "INPUT_COUPONS";
+        public const string Summ = "Summ";
+        public const string Valuta = "Valuta";
+    }
+    public class DivsNCouponsDetailsColumns
+    {
+        public const string Date = "Date";
+        public const string ToolName = "ToolName";
+        public const string PriceType = "PriceType";
+        public const string ContractName = "ContractName";
+        public const string Price = "Price";
+        public const string Valuta = "Valuta";
+    }
+
 }
