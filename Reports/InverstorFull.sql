@@ -558,6 +558,50 @@ select DonutLabel1 = N'6 405 ₽', DonutLabel2 = N'4 актива'
 
 
 	set @ContractId = NULL;
+	
+	-- Детализация купонов и дивидендов по инвестору
+	select
+		[Date] = [PaymentDateTime],
+		[ToolName] = [ShareName],
+		[PriceType] = case when [Type] = 1 then N'Купоны' else N'Дивиденды' end,
+		[ContractName] = [ShareName],
+		[Price] = CAST(Round(
+			case
+				when @Valuta = 'RUB' then AmountPayments_RUR
+				when @Valuta = 'USD' then AmountPayments_USD
+				when @Valuta = 'EUR' then AmountPayments_EURO
+				else AmountPayments_RUR
+			end
+			,2) as Decimal(30,2)),
+		[PaymentDateTime],
+		Valuta = @Valuta
+	from [dbo].[DIVIDENDS_AND_COUPONS_History]
+	where InvestorId = @InvestorId
+	and (@ContractId is null or (@ContractId is not null and ContractId = @ContractId))
+	and (@StartDate is null or (@StartDate is not null and PaymentDateTime >= @StartDate))
+	and (@EndDate is null or (@EndDate is not null and PaymentDateTime < dateadd(day,1,@EndDate)))
+	union all
+	select
+		[Date] = [PaymentDateTime],
+		[ToolName] = [ShareName],
+		[PriceType] = case when [Type] = 1 then N'Купоны' else N'Дивиденды' end,
+		[ContractName] = [ShareName],
+		[Price] = CAST(Round(
+			case
+				when @Valuta = 'RUB' then AmountPayments_RUR
+				when @Valuta = 'USD' then AmountPayments_USD
+				when @Valuta = 'EUR' then AmountPayments_EURO
+				else AmountPayments_RUR
+			end
+			,2) as Decimal(30,2)),
+		[PaymentDateTime],
+		Valuta = @Valuta
+	from [dbo].[DIVIDENDS_AND_COUPONS_History_Last]
+	where InvestorId = @InvestorId
+	and (@ContractId is null or (@ContractId is not null and ContractId = @ContractId))
+	and (@StartDate is null or (@StartDate is not null and PaymentDateTime >= @StartDate))
+	and (@EndDate is null or (@EndDate is not null and PaymentDateTime < dateadd(day,1,@EndDate)))
+	order by [PaymentDateTime];
 
 	-- Детализация купонов и дивидендов по инвестору - последние 12 мес
 
