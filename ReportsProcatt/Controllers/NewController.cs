@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using ReportsProcatt.Models;
 using System;
 using System.Collections.Generic;
@@ -120,6 +121,18 @@ namespace ReportsProcatt.Controllers
             };
 
             return View(data);
+        }
+        [HttpGet]
+        [Route("Api")]
+        public JsonResult Api
+        (
+            [FromQuery] int InvestorId,
+            [FromQuery] DateTime? DateFrom,
+            [FromQuery] DateTime? DateTo,
+            [FromQuery] string Currency
+        )
+        {
+            return Json(new Report(InvestorId, DateFrom, DateTo, Currency));
         }
     }
 }
