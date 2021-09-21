@@ -148,6 +148,9 @@ namespace ReportsProcatt.Content
                 command1.CommandType = CommandType.Text;
                 command1.CommandTimeout = 600;
 
+                //string DateToSharp = DateTo.ToString();
+                //string DateFromSharp = DateFrom.ToString();
+
                 command1.Parameters.AddWithValue("@DateToSharp", DateTo == null ? DBNull.Value : DateTo);
                 command1.Parameters.AddWithValue("@DateFromSharp", DateFrom == null ? DBNull.Value : DateFrom);
                 command1.Parameters.AddWithValue("@InvestorIdSharp", InvestorId);
