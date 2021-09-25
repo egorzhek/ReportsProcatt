@@ -570,53 +570,55 @@ select DonutLabel1 = N'6 405 ₽', DonutLabel2 = N'4 актива'
 	set @ContractId = NULL;
 IF OBJECT_ID('tempdb..#DivsNCouponsDetails') IS NOT NULL DROP TABLE #DivsNCouponsDetails
 	-- Детализация купонов и дивидендов по инвестору - последние 12 мес
-select
-		[Date] = [PaymentDateTime],
-		[ToolName] = [ShareName],
-		[PriceType] = case when [Type] = 1 then N'Купоны' else N'Дивиденды' end,
-		[ContractName] = [ShareName],
+	select
+		[Date] = a.[PaymentDateTime],
+		[ToolName] = a.[ShareName],
+		[PriceType] = case when a.[Type] = 1 then N'Купоны' else N'Дивиденды' end,
+		[ContractName] = a.[ShareName],
 		[Price] = CAST(Round(
 			case
-				when @Valuta = 'RUB' then AmountPayments_RUR
-				when @Valuta = 'USD' then AmountPayments_USD
-				when @Valuta = 'EUR' then AmountPayments_EURO
-				else AmountPayments_RUR
+				when @Valuta = 'RUB' then a.AmountPayments_RUR
+				when @Valuta = 'USD' then a.AmountPayments_USD
+				when @Valuta = 'EUR' then a.AmountPayments_EURO
+				else a.AmountPayments_RUR
 			end
 			,2) as Decimal(30,2)),
-		[PaymentDateTime],
+		a.[PaymentDateTime],
 		Valuta = @Valuta,
-    [Type]
-  INTO #DivsNCouponsDetails
-	from [dbo].[DIVIDENDS_AND_COUPONS_History]
-	where InvestorId = @InvestorId
-	and (@ContractId is null or (@ContractId is not null and ContractId = @ContractId))
-	and (@StartDate is null or (@StartDate is not null and PaymentDateTime >= @StartDate))
-	and (@EndDate is null or (@EndDate is not null and PaymentDateTime < dateadd(day,1,@EndDate)))
+    a.[Type]
+    INTO #DivsNCouponsDetails
+	from [dbo].[DIVIDENDS_AND_COUPONS_History] as a with(nolock)
+	join [dbo].[Assets_Info] as b with(nolock) on a.InvestorId = b.InvestorId and a.ContractId = b.ContractId and b.DATE_CLOSE >= @EndDate
+	where a.InvestorId = @InvestorId
+	and (@ContractId is null or (@ContractId is not null and a.ContractId = @ContractId))
+	and (@StartDate is null or (@StartDate is not null and a.PaymentDateTime >= @StartDate))
+	and (@EndDate is null or (@EndDate is not null and a.PaymentDateTime < dateadd(day,1,@EndDate)))
 	union all
 	select
-		[Date] = [PaymentDateTime],
-		[ToolName] = [ShareName],
-		[PriceType] = case when [Type] = 1 then N'Купоны' else N'Дивиденды' end,
-		[ContractName] = [ShareName],
+		[Date] = a.[PaymentDateTime],
+		[ToolName] = a.[ShareName],
+		[PriceType] = case when a.[Type] = 1 then N'Купоны' else N'Дивиденды' end,
+		[ContractName] = a.[ShareName],
 		[Price] = CAST(Round(
 			case
-				when @Valuta = 'RUB' then AmountPayments_RUR
-				when @Valuta = 'USD' then AmountPayments_USD
-				when @Valuta = 'EUR' then AmountPayments_EURO
-				else AmountPayments_RUR
+				when @Valuta = 'RUB' then a.AmountPayments_RUR
+				when @Valuta = 'USD' then a.AmountPayments_USD
+				when @Valuta = 'EUR' then a.AmountPayments_EURO
+				else a.AmountPayments_RUR
 			end
 			,2) as Decimal(30,2)),
-		[PaymentDateTime],
+		a.[PaymentDateTime],
 		Valuta = @Valuta,
-    [Type]
-	from [dbo].[DIVIDENDS_AND_COUPONS_History_Last]
-	where InvestorId = @InvestorId
-	and (@ContractId is null or (@ContractId is not null and ContractId = @ContractId))
-	and (@StartDate is null or (@StartDate is not null and PaymentDateTime >= @StartDate))
-	and (@EndDate is null or (@EndDate is not null and PaymentDateTime < dateadd(day,1,@EndDate)))
-	order by [PaymentDateTime];
+    a.[Type]
+	from [dbo].[DIVIDENDS_AND_COUPONS_History_Last] as a with(nolock)
+	join [dbo].[Assets_Info] as b with(nolock) on a.InvestorId = b.InvestorId and a.ContractId = b.ContractId and b.DATE_CLOSE >= @EndDate
+	where a.InvestorId = @InvestorId
+	and (@ContractId is null or (@ContractId is not null and a.ContractId = @ContractId))
+	and (@StartDate is null or (@StartDate is not null and a.PaymentDateTime >= @StartDate))
+	and (@EndDate is null or (@EndDate is not null and a.PaymentDateTime < dateadd(day,1,@EndDate)))
+	order by a.[PaymentDateTime];
 
-SELECT * FROM #DivsNCouponsDetails
+    SELECT * FROM #DivsNCouponsDetails
 
 	;WITH cte AS
 	(

@@ -328,26 +328,26 @@ CREATE OR ALTER PROCEDURE [dbo].[GetInvestorContracts]
     @InvestorId int,
     @StartDate Date,
     @EndDate Date,
-	@Valuta Nvarchar(10) = NULL
+    @Valuta Nvarchar(10) = NULL
 )
 AS BEGIN
-	if @Valuta is null set @Valuta = 'RUB';
+    if @Valuta is null set @Valuta = 'RUB';
 
     declare @ReSult table
     (
         ContractId Int NULL,
-		VAL decimal(28,10) NULL,
+        VAL decimal(28,10) NULL,
         ContractName NVarchar(300) NULL,
         ProfitValue decimal(28,10) NULL,
         ProfitProcentValue decimal(28,10) NULL,
         BeginValue decimal(28,10) NULL,
-		EndValue decimal(28,10) NULL
+        EndValue decimal(28,10) NULL
     );
 
     insert into @ReSult
     (
         ContractId,
-		VAL,
+        VAL,
         ContractName,
         ProfitValue,
         ProfitProcentValue,
@@ -355,7 +355,7 @@ AS BEGIN
     )
     select
         sd.ContractId,
-		sd.VAL,
+        sd.VAL,
         ContractName = fn.NUM,
         ProfitValue = NULL,
         ProfitProcentValue = NULL,
@@ -363,28 +363,30 @@ AS BEGIN
     from
     (
         SELECT
-			ContractId,
+            a.ContractId,
             VAL =
-			case
-				when @Valuta = 'RUB' then VALUE_RUR - DailyIncrement_RUR - DailyDecrement_RUR
-				when @Valuta = 'USD' then VALUE_USD - DailyIncrement_USD - DailyDecrement_USD
-				when @Valuta = 'EUR' then VALUE_EURO - DailyIncrement_EURO - DailyDecrement_EURO
-				else VALUE_RUR - DailyIncrement_RUR - DailyDecrement_RUR
-			end
-        FROM [CacheDB].[dbo].[Assets_Contracts] nolock
-        where InvestorId = @InvestorId and [Date] = @EndDate
+            case
+                when @Valuta = 'RUB' then a.VALUE_RUR - a.DailyIncrement_RUR - a.DailyDecrement_RUR
+                when @Valuta = 'USD' then a.VALUE_USD - a.DailyIncrement_USD - a.DailyDecrement_USD
+                when @Valuta = 'EUR' then a.VALUE_EURO - a.DailyIncrement_EURO - a.DailyDecrement_EURO
+                else a.VALUE_RUR - a.DailyIncrement_RUR - a.DailyDecrement_RUR
+            end
+        FROM [dbo].[Assets_Contracts] as a with(nolock)
+        join [dbo].[Assets_Info] as b with(nolock) on a.InvestorId = b.InvestorId and a.ContractId = b.ContractId and b.DATE_CLOSE >= @EndDate
+        where a.InvestorId = @InvestorId and a.[Date] = @EndDate
         union all
         SELECT
-			ContractId,
+            a.ContractId,
             VAL =
-			case
-				when @Valuta = 'RUB' then VALUE_RUR - DailyIncrement_RUR - DailyDecrement_RUR
-				when @Valuta = 'USD' then VALUE_USD - DailyIncrement_USD - DailyDecrement_USD
-				when @Valuta = 'EUR' then VALUE_EURO - DailyIncrement_EURO - DailyDecrement_EURO
-				else VALUE_RUR - DailyIncrement_RUR - DailyDecrement_RUR
-			end
-        FROM [CacheDB].[dbo].[Assets_ContractsLast] nolock
-        where InvestorId = @InvestorId and [Date] = @EndDate
+            case
+                when @Valuta = 'RUB' then a.VALUE_RUR - a.DailyIncrement_RUR - a.DailyDecrement_RUR
+                when @Valuta = 'USD' then a.VALUE_USD - a.DailyIncrement_USD - a.DailyDecrement_USD
+                when @Valuta = 'EUR' then a.VALUE_EURO - a.DailyIncrement_EURO - a.DailyDecrement_EURO
+                else a.VALUE_RUR - a.DailyIncrement_RUR - a.DailyDecrement_RUR
+            end
+        FROM [dbo].[Assets_ContractsLast] as a with(nolock)
+        join [dbo].[Assets_Info] as b with(nolock) on a.InvestorId = b.InvestorId and a.ContractId = b.ContractId and b.DATE_CLOSE >= @EndDate
+        where a.InvestorId = @InvestorId and a.[Date] = @EndDate
     ) as sd
     left join [dbo].[Assets_Info] as fn on sd.ContractId = fn.ContractId;
 
@@ -409,8 +411,8 @@ AS BEGIN
             @ProfitValue = @ProfitValue output,
             @ProfitProcentValue = @ProfitProcentValue output,
             @BeginValue = @BeginValue output,
-			@EndValue = @EndValue output,
-			@Valuta = @Valuta
+            @EndValue = @EndValue output,
+            @Valuta = @Valuta
 
         update @ReSult
             set ProfitValue = @ProfitValue, ProfitProcentValue = @ProfitProcentValue, BeginValue = @BeginValue, EndValue = @EndValue
@@ -422,20 +424,20 @@ AS BEGIN
     close obj_cur
     deallocate obj_cur
 
-	declare @Symbol Nvarchar(10)
-
-	select
-		@Symbol = Symbol
-	from Currencies nolock
-	where ShortName = @Valuta
+    declare @Symbol Nvarchar(10)
 
     select
-		ContractId,
+        @Symbol = Symbol
+    from Currencies nolock
+    where ShortName = @Valuta
+
+    select
+        ContractId,
         ContractName,
         ProfitValue = CAST([dbo].f_Round(ProfitValue, 2) AS DECIMAL(30,2)),
         ProfitProcentValue = CAST([dbo].f_Round(ProfitProcentValue, 2) AS DECIMAL(30,2)),
         BeginValue = CAST([dbo].f_Round(BeginValue, 2) AS DECIMAL(30,2)),
-		EndValue = CAST([dbo].f_Round(VAL, 2) AS DECIMAL(30,2)),
+        EndValue = CAST([dbo].f_Round(VAL, 2) AS DECIMAL(30,2)),
         Valuta = @Symbol
     from @ReSult
     order by ContractName;

@@ -3,10 +3,10 @@ CREATE OR ALTER PROCEDURE [dbo].[GetInvestorFundResults]
     @InvestorId int = 19865873,
     @StartDate Date = NULL,
     @EndDate Date = NULL,
-	@Valuta Nvarchar(10) = NULL
+    @Valuta Nvarchar(10) = NULL
 )
 AS BEGIN
-	if @Valuta is null set @Valuta = 'RUB';
+    if @Valuta is null set @Valuta = 'RUB';
 
     declare @MinDate date, @MaxDate date
 
@@ -22,21 +22,23 @@ AS BEGIN
         @MaxDate = max([Date])
     FROM
     (
-        SELECT [Date]
-        FROM [CacheDB].[dbo].[InvestorFundDate] NOLOCK
-        WHERE Investor = @InvestorId
+        SELECT a.[Date]
+        FROM [dbo].[InvestorFundDate] as a with(nolock)
+        join [dbo].[FundNames] as b with(nolock) on a.FundId = b.Id
+        WHERE a.Investor = @InvestorId and b.DATE_CLOSE >= @EndDate
         UNION
-        SELECT [Date]
-        FROM [CacheDB].[dbo].[InvestorFundDateLast] NOLOCK
-        WHERE Investor = @InvestorId
+        SELECT a.[Date]
+        FROM [dbo].[InvestorFundDateLast] as a with(nolock)
+        join [dbo].[FundNames] as b with(nolock) on a.FundId = b.Id
+        WHERE a.Investor = @InvestorId and b.DATE_CLOSE >= @EndDate
         /*
         UNION
         SELECT [Date]
-        FROM [CacheDB].[dbo].[Assets_Contracts] NOLOCK
+        FROM [dbo].[Assets_Contracts] NOLOCK
         WHERE InvestorId = @InvestorId
         UNION
         SELECT [Date]
-        FROM [CacheDB].[dbo].[Assets_ContractsLast] NOLOCK
+        FROM [dbo].[Assets_ContractsLast] NOLOCK
         WHERE InvestorId = @InvestorId
         */
     ) AS R
@@ -85,36 +87,36 @@ AS BEGIN
         from
         (
             select
-                InvestorId = Investor,
-                ContractId = Investor,
-                [Date], USDRATE, EURORATE = EVRORATE,
-				VALUE_RUR =
-				case
-					when @Valuta = 'RUB' then VALUE_RUR
-					when @Valuta = 'USD' then VALUE_USD
-					when @Valuta = 'EUR' then VALUE_EVRO
-					else VALUE_RUR
-				end,
-                VALUE_USD, VALUE_EURO = VALUE_EVRO,
+                InvestorId = a.Investor,
+                ContractId = a.Investor,
+                a.[Date], a.USDRATE, EURORATE = a.EVRORATE,
+                VALUE_RUR =
+                case
+                    when @Valuta = 'RUB' then a.VALUE_RUR
+                    when @Valuta = 'USD' then a.VALUE_USD
+                    when @Valuta = 'EUR' then a.VALUE_EVRO
+                    else a.VALUE_RUR
+                end,
+                a.VALUE_USD, VALUE_EURO = a.VALUE_EVRO,
 
                 INPUT_VALUE_RUR =
-				case
-					when @Valuta = 'RUB' then AmountDayPlus_RUR
-					when @Valuta = 'USD' then AmountDayPlus_USD
-					when @Valuta = 'EUR' then AmountDayPlus_EVRO
-					else AmountDayPlus_RUR
-				end,
-                INPUT_VALUE_USD = AmountDayPlus_USD,
-                INPUT_VALUE_EURO = AmountDayPlus_EVRO,
+                case
+                    when @Valuta = 'RUB' then a.AmountDayPlus_RUR
+                    when @Valuta = 'USD' then a.AmountDayPlus_USD
+                    when @Valuta = 'EUR' then a.AmountDayPlus_EVRO
+                    else a.AmountDayPlus_RUR
+                end,
+                INPUT_VALUE_USD = a.AmountDayPlus_USD,
+                INPUT_VALUE_EURO = a.AmountDayPlus_EVRO,
 
                 OUTPUT_VALUE_RUR = case
-					when @Valuta = 'RUB' then AmountDayMinus_RUR
-					when @Valuta = 'USD' then AmountDayMinus_USD
-					when @Valuta = 'EUR' then AmountDayMinus_EVRO
-					else AmountDayMinus_RUR
-				end,
-                OUTPUT_VALUE_USD = AmountDayMinus_USD,
-                OUTPUT_VALUE_EURO = AmountDayMinus_EVRO,
+                    when @Valuta = 'RUB' then a.AmountDayMinus_RUR
+                    when @Valuta = 'USD' then a.AmountDayMinus_USD
+                    when @Valuta = 'EUR' then a.AmountDayMinus_EVRO
+                    else a.AmountDayMinus_RUR
+                end,
+                OUTPUT_VALUE_USD = a.AmountDayMinus_USD,
+                OUTPUT_VALUE_EURO = a.AmountDayMinus_EVRO,
 
                 INPUT_DIVIDENTS_RUR = 0.0000000000,
                 INPUT_DIVIDENTS_USD = 0.0000000000,
@@ -122,40 +124,41 @@ AS BEGIN
                 INPUT_COUPONS_RUR = 0.0000000000,
                 INPUT_COUPONS_USD = 0.0000000000,
                 INPUT_COUPONS_EURO = 0.0000000000
-            from InvestorFundDate nolock
-            where Investor = @InvestorId and [Date] >= @StartDate and [Date] <= @EndDate
+            from InvestorFundDate as a with(nolock)
+            join [dbo].[FundNames] as b with(nolock) on a.FundId = b.Id and b.DATE_CLOSE >= @EndDate
+            where a.Investor = @InvestorId and a.[Date] >= @StartDate and a.[Date] <= @EndDate
             union all
             select
-                InvestorId = Investor,
-                ContractId = Investor,
-                [Date], USDRATE, EURORATE = EVRORATE,
-				VALUE_RUR =
-				case
-					when @Valuta = 'RUB' then VALUE_RUR
-					when @Valuta = 'USD' then VALUE_USD
-					when @Valuta = 'EUR' then VALUE_EVRO
-					else VALUE_RUR
-				end,
-                VALUE_USD, VALUE_EURO = VALUE_EVRO,
+                InvestorId = a.Investor,
+                ContractId = a.Investor,
+                a.[Date], a.USDRATE, EURORATE = a.EVRORATE,
+                VALUE_RUR =
+                case
+                    when @Valuta = 'RUB' then a.VALUE_RUR
+                    when @Valuta = 'USD' then a.VALUE_USD
+                    when @Valuta = 'EUR' then a.VALUE_EVRO
+                    else a.VALUE_RUR
+                end,
+                a.VALUE_USD, VALUE_EURO = a.VALUE_EVRO,
 
                 INPUT_VALUE_RUR =
-				case
-					when @Valuta = 'RUB' then AmountDayPlus_RUR
-					when @Valuta = 'USD' then AmountDayPlus_USD
-					when @Valuta = 'EUR' then AmountDayPlus_EVRO
-					else AmountDayPlus_RUR
-				end,
-                INPUT_VALUE_USD = AmountDayPlus_USD,
-                INPUT_VALUE_EURO = AmountDayPlus_EVRO,
+                case
+                    when @Valuta = 'RUB' then a.AmountDayPlus_RUR
+                    when @Valuta = 'USD' then a.AmountDayPlus_USD
+                    when @Valuta = 'EUR' then a.AmountDayPlus_EVRO
+                    else a.AmountDayPlus_RUR
+                end,
+                INPUT_VALUE_USD = a.AmountDayPlus_USD,
+                INPUT_VALUE_EURO = a.AmountDayPlus_EVRO,
 
                 OUTPUT_VALUE_RUR = case
-					when @Valuta = 'RUB' then AmountDayMinus_RUR
-					when @Valuta = 'USD' then AmountDayMinus_USD
-					when @Valuta = 'EUR' then AmountDayMinus_EVRO
-					else AmountDayMinus_RUR
-				end,
-                OUTPUT_VALUE_USD = AmountDayMinus_USD,
-                OUTPUT_VALUE_EURO = AmountDayMinus_EVRO,
+                    when @Valuta = 'RUB' then a.AmountDayMinus_RUR
+                    when @Valuta = 'USD' then a.AmountDayMinus_USD
+                    when @Valuta = 'EUR' then a.AmountDayMinus_EVRO
+                    else a.AmountDayMinus_RUR
+                end,
+                OUTPUT_VALUE_USD = a.AmountDayMinus_USD,
+                OUTPUT_VALUE_EURO = a.AmountDayMinus_EVRO,
 
                 INPUT_DIVIDENTS_RUR = 0.0000000000,
                 INPUT_DIVIDENTS_USD = 0.0000000000,
@@ -163,8 +166,9 @@ AS BEGIN
                 INPUT_COUPONS_RUR = 0.0000000000,
                 INPUT_COUPONS_USD = 0.0000000000,
                 INPUT_COUPONS_EURO = 0.0000000000
-            from InvestorFundDateLast nolock
-            where Investor = @InvestorId and [Date] >= @StartDate and [Date] <= @EndDate
+            from InvestorFundDateLast as a with(nolock)
+            join [dbo].[FundNames] as b with(nolock) on a.FundId = b.Id and b.DATE_CLOSE >= @EndDate
+            where a.Investor = @InvestorId and a.[Date] >= @StartDate and a.[Date] <= @EndDate
             /*
             union all
             select
@@ -278,6 +282,13 @@ AS BEGIN
         @Sum_INPUT_DIVIDENTS_RUR = sum(INPUT_DIVIDENTS_RUR)
     FROM #ResInvAssets
 
+
+    --SELECT
+        --OUTPUT_VALUE_RUR, ContractId, [Date]
+    --FROM #ResInvAssets
+    --where abs(OUTPUT_VALUE_RUR) > 0
+
+
     set @InvestResult =
     (@SItog - @AmountDayMinus_RUR) -- минус, потому что отрицательное значение
     - (@Snach + @AmountDayPlus_RUR) --as 'Результат инвестиций'
@@ -380,12 +391,12 @@ AS BEGIN
 
         if @ResutSum = 0 set @ResutSum = NULL
 
-	declare @Symbol Nvarchar(10)
+    declare @Symbol Nvarchar(10)
 
-	select
-		@Symbol = Symbol
-	from Currencies nolock
-	where ShortName = @Valuta
+    select
+        @Symbol = Symbol
+    from Currencies nolock
+    where ShortName = @Valuta
 
 
     select
@@ -404,7 +415,7 @@ AS BEGIN
 
         ProfitValue = CAST(Round(@InvestResult,2) as Decimal(30,2)),
         ProfitProcentValue = CAST(Round(@InvestResult/@ResutSum * 100,2) as Decimal(38,2)),
-		Valuta = @Symbol
+        Valuta = @Symbol
 END
 GO
 CREATE OR ALTER PROCEDURE [dbo].[GetInvestorContractResults]
@@ -412,10 +423,10 @@ CREATE OR ALTER PROCEDURE [dbo].[GetInvestorContractResults]
     @InvestorId int = 19865873,
     @StartDate Date = NULL,
     @EndDate Date = NULL,
-	@Valuta Nvarchar(10) = NULL
+    @Valuta Nvarchar(10) = NULL
 )
 AS BEGIN
-	if @Valuta is null set @Valuta = 'RUB';
+    if @Valuta is null set @Valuta = 'RUB';
 
     declare @MinDate date, @MaxDate date
 
@@ -433,22 +444,24 @@ AS BEGIN
     (
         /*
         SELECT [Date]
-        FROM [CacheDB].[dbo].[InvestorFundDate] NOLOCK
+        FROM [dbo].[InvestorFundDate] NOLOCK
         WHERE Investor = @InvestorId
         UNION
         SELECT [Date]
-        FROM [CacheDB].[dbo].[InvestorFundDateLast] NOLOCK
+        FROM [dbo].[InvestorFundDateLast] NOLOCK
         WHERE Investor = @InvestorId
         
         UNION
         */
-        SELECT [Date]
-        FROM [CacheDB].[dbo].[Assets_Contracts] NOLOCK
-        WHERE InvestorId = @InvestorId
+        SELECT a.[Date]
+        FROM [dbo].[Assets_Contracts] as a with(nolock)
+        join [dbo].[Assets_Info] as b with(nolock) on a.InvestorId = b.InvestorId and a.ContractId = b.ContractId
+        WHERE a.InvestorId = @InvestorId and b.DATE_CLOSE >= @EndDate
         UNION
-        SELECT [Date]
-        FROM [CacheDB].[dbo].[Assets_ContractsLast] NOLOCK
-        WHERE InvestorId = @InvestorId
+        SELECT a.[Date]
+        FROM [dbo].[Assets_ContractsLast] as a with(nolock)
+        join [dbo].[Assets_Info] as b with(nolock) on a.InvestorId = b.InvestorId and a.ContractId = b.ContractId
+        WHERE a.InvestorId = @InvestorId and b.DATE_CLOSE >= @EndDate
     ) AS R
 
     if @StartDate is null set @StartDate = @MinDate;
@@ -538,118 +551,120 @@ AS BEGIN
             union all
             */
             select
-				InvestorId,
-				ContractId = InvestorId,
-				[Date], USDRATE, EURORATE,
+                a.InvestorId,
+                ContractId = a.InvestorId,
+                a.[Date], a.USDRATE, a.EURORATE,
 
-				VALUE_RUR =
-				case
-					when @Valuta = 'RUB' then VALUE_RUR
-					when @Valuta = 'USD' then VALUE_USD
-					when @Valuta = 'EUR' then VALUE_EURO
-					else VALUE_RUR
-				end,
-				VALUE_USD,
-				VALUE_EURO,
+                VALUE_RUR =
+                case
+                    when @Valuta = 'RUB' then a.VALUE_RUR
+                    when @Valuta = 'USD' then a.VALUE_USD
+                    when @Valuta = 'EUR' then a.VALUE_EURO
+                    else a.VALUE_RUR
+                end,
+                a.VALUE_USD,
+                a.VALUE_EURO,
 
-				INPUT_VALUE_RUR =
-				case
-					when @Valuta = 'RUB' then INPUT_VALUE_RUR
-					when @Valuta = 'USD' then INPUT_VALUE_USD
-					when @Valuta = 'EUR' then INPUT_VALUE_EURO
-					else INPUT_VALUE_RUR
-				end,
-				INPUT_VALUE_USD,
-				INPUT_VALUE_EURO,
+                INPUT_VALUE_RUR =
+                case
+                    when @Valuta = 'RUB' then a.INPUT_VALUE_RUR
+                    when @Valuta = 'USD' then a.INPUT_VALUE_USD
+                    when @Valuta = 'EUR' then a.INPUT_VALUE_EURO
+                    else a.INPUT_VALUE_RUR
+                end,
+                a.INPUT_VALUE_USD,
+                a.INPUT_VALUE_EURO,
 
-				OUTPUT_VALUE_RUR =
-				case
-					when @Valuta = 'RUB' then OUTPUT_VALUE_RUR
-					when @Valuta = 'USD' then OUTPUT_VALUE_USD
-					when @Valuta = 'EUR' then OUTPUT_VALUE_EURO
-					else OUTPUT_VALUE_RUR
-				end,
-				OUTPUT_VALUE_USD,
-				OUTPUT_VALUE_EURO,
+                OUTPUT_VALUE_RUR =
+                case
+                    when @Valuta = 'RUB' then a.OUTPUT_VALUE_RUR
+                    when @Valuta = 'USD' then a.OUTPUT_VALUE_USD
+                    when @Valuta = 'EUR' then a.OUTPUT_VALUE_EURO
+                    else a.OUTPUT_VALUE_RUR
+                end,
+                a.OUTPUT_VALUE_USD,
+                a.OUTPUT_VALUE_EURO,
 
-				INPUT_DIVIDENTS_RUR =
-				case
-					when @Valuta = 'RUB' then INPUT_DIVIDENTS_RUR
-					when @Valuta = 'USD' then INPUT_DIVIDENTS_USD
-					when @Valuta = 'EUR' then INPUT_DIVIDENTS_EURO
-					else INPUT_DIVIDENTS_RUR
-				end,
-				INPUT_DIVIDENTS_USD,
-				INPUT_DIVIDENTS_EURO,
+                INPUT_DIVIDENTS_RUR =
+                case
+                    when @Valuta = 'RUB' then a.INPUT_DIVIDENTS_RUR
+                    when @Valuta = 'USD' then a.INPUT_DIVIDENTS_USD
+                    when @Valuta = 'EUR' then a.INPUT_DIVIDENTS_EURO
+                    else a.INPUT_DIVIDENTS_RUR
+                end,
+                a.INPUT_DIVIDENTS_USD,
+                a.INPUT_DIVIDENTS_EURO,
 
-				INPUT_COUPONS_RUR =
-				case
-					when @Valuta = 'RUB' then INPUT_COUPONS_RUR
-					when @Valuta = 'USD' then INPUT_COUPONS_USD
-					when @Valuta = 'EUR' then INPUT_COUPONS_EURO
-					else INPUT_COUPONS_RUR
-				end,
-				INPUT_COUPONS_USD,
-				INPUT_COUPONS_EURO
-            from Assets_Contracts nolock
-            where InvestorId = @InvestorId and [Date] >= @StartDate and [Date] <= @EndDate
+                INPUT_COUPONS_RUR =
+                case
+                    when @Valuta = 'RUB' then a.INPUT_COUPONS_RUR
+                    when @Valuta = 'USD' then a.INPUT_COUPONS_USD
+                    when @Valuta = 'EUR' then a.INPUT_COUPONS_EURO
+                    else a.INPUT_COUPONS_RUR
+                end,
+                a.INPUT_COUPONS_USD,
+                a.INPUT_COUPONS_EURO
+            from dbo.Assets_Contracts as a with(nolock)
+            join [dbo].[Assets_Info] as b with(nolock) on a.InvestorId = b.InvestorId and a.ContractId = b.ContractId and b.DATE_CLOSE >= @EndDate
+            where a.InvestorId = @InvestorId and a.[Date] >= @StartDate and a.[Date] <= @EndDate
             union all
             select
-                InvestorId,
-				ContractId = InvestorId,
-				[Date], USDRATE, EURORATE,
+                a.InvestorId,
+                ContractId = a.InvestorId,
+                a.[Date], a.USDRATE, a.EURORATE,
 
-				VALUE_RUR =
-				case
-					when @Valuta = 'RUB' then VALUE_RUR
-					when @Valuta = 'USD' then VALUE_USD
-					when @Valuta = 'EUR' then VALUE_EURO
-					else VALUE_RUR
-				end,
-				VALUE_USD,
-				VALUE_EURO,
+                VALUE_RUR =
+                case
+                    when @Valuta = 'RUB' then a.VALUE_RUR
+                    when @Valuta = 'USD' then a.VALUE_USD
+                    when @Valuta = 'EUR' then a.VALUE_EURO
+                    else a.VALUE_RUR
+                end,
+                a.VALUE_USD,
+                a.VALUE_EURO,
 
-				INPUT_VALUE_RUR =
-				case
-					when @Valuta = 'RUB' then INPUT_VALUE_RUR
-					when @Valuta = 'USD' then INPUT_VALUE_USD
-					when @Valuta = 'EUR' then INPUT_VALUE_EURO
-					else INPUT_VALUE_RUR
-				end,
-				INPUT_VALUE_USD,
-				INPUT_VALUE_EURO,
+                INPUT_VALUE_RUR =
+                case
+                    when @Valuta = 'RUB' then a.INPUT_VALUE_RUR
+                    when @Valuta = 'USD' then a.INPUT_VALUE_USD
+                    when @Valuta = 'EUR' then a.INPUT_VALUE_EURO
+                    else a.INPUT_VALUE_RUR
+                end,
+                a.INPUT_VALUE_USD,
+                a.INPUT_VALUE_EURO,
 
-				OUTPUT_VALUE_RUR =
-				case
-					when @Valuta = 'RUB' then OUTPUT_VALUE_RUR
-					when @Valuta = 'USD' then OUTPUT_VALUE_USD
-					when @Valuta = 'EUR' then OUTPUT_VALUE_EURO
-					else OUTPUT_VALUE_RUR
-				end,
-				OUTPUT_VALUE_USD,
-				OUTPUT_VALUE_EURO,
+                OUTPUT_VALUE_RUR =
+                case
+                    when @Valuta = 'RUB' then a.OUTPUT_VALUE_RUR
+                    when @Valuta = 'USD' then a.OUTPUT_VALUE_USD
+                    when @Valuta = 'EUR' then a.OUTPUT_VALUE_EURO
+                    else a.OUTPUT_VALUE_RUR
+                end,
+                a.OUTPUT_VALUE_USD,
+                a.OUTPUT_VALUE_EURO,
 
-				INPUT_DIVIDENTS_RUR =
-				case
-					when @Valuta = 'RUB' then INPUT_DIVIDENTS_RUR
-					when @Valuta = 'USD' then INPUT_DIVIDENTS_USD
-					when @Valuta = 'EUR' then INPUT_DIVIDENTS_EURO
-					else INPUT_DIVIDENTS_RUR
-				end,
-				INPUT_DIVIDENTS_USD,
-				INPUT_DIVIDENTS_EURO,
+                INPUT_DIVIDENTS_RUR =
+                case
+                    when @Valuta = 'RUB' then a.INPUT_DIVIDENTS_RUR
+                    when @Valuta = 'USD' then a.INPUT_DIVIDENTS_USD
+                    when @Valuta = 'EUR' then a.INPUT_DIVIDENTS_EURO
+                    else a.INPUT_DIVIDENTS_RUR
+                end,
+                a.INPUT_DIVIDENTS_USD,
+                a.INPUT_DIVIDENTS_EURO,
 
-				INPUT_COUPONS_RUR =
-				case
-					when @Valuta = 'RUB' then INPUT_COUPONS_RUR
-					when @Valuta = 'USD' then INPUT_COUPONS_USD
-					when @Valuta = 'EUR' then INPUT_COUPONS_EURO
-					else INPUT_COUPONS_RUR
-				end,
-				INPUT_COUPONS_USD,
-				INPUT_COUPONS_EURO
-            from Assets_ContractsLast nolock
-            where InvestorId = @InvestorId and [Date] >= @StartDate and [Date] <= @EndDate
+                INPUT_COUPONS_RUR =
+                case
+                    when @Valuta = 'RUB' then a.INPUT_COUPONS_RUR
+                    when @Valuta = 'USD' then a.INPUT_COUPONS_USD
+                    when @Valuta = 'EUR' then a.INPUT_COUPONS_EURO
+                    else a.INPUT_COUPONS_RUR
+                end,
+                a.INPUT_COUPONS_USD,
+                a.INPUT_COUPONS_EURO
+            from dbo.Assets_ContractsLast as a with(nolock)
+            join [dbo].[Assets_Info] as b with(nolock) on a.InvestorId = b.InvestorId and a.ContractId = b.ContractId and b.DATE_CLOSE >= @EndDate
+            where a.InvestorId = @InvestorId and a.[Date] >= @StartDate and a.[Date] <= @EndDate
         )
         as res
         group by InvestorId, ContractId, [Date]
@@ -825,12 +840,12 @@ AS BEGIN
 
         if @ResutSum = 0 set @ResutSum = NULL
 
-	declare @Symbol Nvarchar(10)
+    declare @Symbol Nvarchar(10)
 
-	select
-		@Symbol = Symbol
-	from Currencies nolock
-	where ShortName = @Valuta
+    select
+        @Symbol = Symbol
+    from Currencies nolock
+    where ShortName = @Valuta
 
 
     select
@@ -849,6 +864,6 @@ AS BEGIN
 
         ProfitValue = CAST(Round(@InvestResult,2) as Decimal(30,2)),
         ProfitProcentValue = CAST(Round(@InvestResult/@ResutSum * 100,2) as Decimal(38,2)),
-		Valuta = @Symbol
+        Valuta = @Symbol
 END
 GO

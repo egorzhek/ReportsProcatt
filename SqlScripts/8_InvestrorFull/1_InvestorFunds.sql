@@ -266,10 +266,10 @@ CREATE OR ALTER PROCEDURE [dbo].[GetInvestorFunds]
     @Investor int,
     @StartDate Date,
     @EndDate Date,
-	@Valuta Nvarchar(10) = NULL
+    @Valuta Nvarchar(10) = NULL
 )
 AS BEGIN
-	if @Valuta is null set @Valuta = 'RUB';
+    if @Valuta is null set @Valuta = 'RUB';
 
     declare @ReSult table
     (
@@ -279,7 +279,7 @@ AS BEGIN
         ProfitValue decimal(28,10) NULL,
         ProfitProcentValue decimal(28,10) NULL,
         BeginValue decimal(28,10) NULL,
-		EndValue decimal(28,10) NULL
+        EndValue decimal(28,10) NULL
     );
 
     insert into @ReSult
@@ -301,28 +301,30 @@ AS BEGIN
     from
     (
         select
-            FundId,
+            a.FundId,
             VAL =
-			case
-				when @Valuta = 'RUB' then (SumAmount - AmountDay) * RATE
-				when @Valuta = 'USD' then (SumAmount - AmountDay) * RATE * 1.000/USDRATE
-				when @Valuta = 'EUR' then (SumAmount - AmountDay) * RATE * 1.000/EVRORATE
-				else (SumAmount - AmountDay) * RATE
-			end
-        From [dbo].[InvestorFundDate]
-        where Investor = @Investor and [Date] = @EndDate
+            case
+                when @Valuta = 'RUB' then (a.SumAmount - a.AmountDay) * a.RATE
+                when @Valuta = 'USD' then (a.SumAmount - a.AmountDay) * a.RATE * 1.000/a.USDRATE
+                when @Valuta = 'EUR' then (a.SumAmount - a.AmountDay) * a.RATE * 1.000/a.EVRORATE
+                else (a.SumAmount - a.AmountDay) * RATE
+            end
+        From [dbo].[InvestorFundDate] as a
+        join [dbo].[FundNames] as b with(nolock) on a.FundId = b.Id and b.DATE_CLOSE >= @EndDate
+        where a.Investor = @Investor and a.[Date] = @EndDate
         union all
         select
-            FundId,
+            a.FundId,
             VAL =
-			case
-				when @Valuta = 'RUB' then (SumAmount - AmountDay) * RATE
-				when @Valuta = 'USD' then (SumAmount - AmountDay) * RATE * 1.000/USDRATE
-				when @Valuta = 'EUR' then (SumAmount - AmountDay) * RATE * 1.000/EVRORATE
-				else (SumAmount - AmountDay) * RATE
-			end
-        From [dbo].[InvestorFundDateLast]
-        where Investor = @Investor and [Date] = @EndDate
+            case
+                when @Valuta = 'RUB' then (a.SumAmount - a.AmountDay) * a.RATE
+                when @Valuta = 'USD' then (a.SumAmount - a.AmountDay) * a.RATE * 1.000/a.USDRATE
+                when @Valuta = 'EUR' then (a.SumAmount - a.AmountDay) * a.RATE * 1.000/a.EVRORATE
+                else (a.SumAmount - a.AmountDay) * RATE
+            end
+        From [dbo].[InvestorFundDateLast] as a
+        join [dbo].[FundNames] as b with(nolock) on a.FundId = b.Id and b.DATE_CLOSE >= @EndDate
+        where a.Investor = @Investor and a.[Date] = @EndDate
     ) as sd
     left join FundNames as fn on sd.FundId = fn.Id;
 
@@ -346,8 +348,8 @@ AS BEGIN
             @ProfitValue = @ProfitValue output,
             @ProfitProcentValue = @ProfitProcentValue output,
             @BeginValue = @BeginValue output,
-			@EndValue = @EndValue output,
-			@Valuta = @Valuta;
+            @EndValue = @EndValue output,
+            @Valuta = @Valuta;
 
         update @ReSult
             set ProfitValue = @ProfitValue, ProfitProcentValue = @ProfitProcentValue, BeginValue = @BeginValue, EndValue = @EndValue
@@ -359,21 +361,21 @@ AS BEGIN
     close obj_cur
     deallocate obj_cur
 
-	declare @Symbol Nvarchar(10)
-
-	select
-		@Symbol = Symbol
-	from Currencies nolock
-	where ShortName = @Valuta
+    declare @Symbol Nvarchar(10)
 
     select
-		FundId,
+        @Symbol = Symbol
+    from Currencies nolock
+    where ShortName = @Valuta
+
+    select
+        FundId,
         FundName,
         --VAL = CAST([dbo].f_Round(VAL, 2) AS DECIMAL(30,2)),
         ProfitValue = CAST([dbo].f_Round(ProfitValue, 2) AS DECIMAL(30,2)),
         ProfitProcentValue = CAST([dbo].f_Round(ProfitProcentValue, 2) AS DECIMAL(30,2)),
         BeginValue = CAST([dbo].f_Round(BeginValue, 2) AS DECIMAL(30,2)),
-		EndValue = CAST([dbo].f_Round(VAL, 2) AS DECIMAL(30,2)),
+        EndValue = CAST([dbo].f_Round(VAL, 2) AS DECIMAL(30,2)),
         Valuta = @Symbol
     from @ReSult
     order by FundName;
