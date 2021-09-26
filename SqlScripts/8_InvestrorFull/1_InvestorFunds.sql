@@ -361,12 +361,12 @@ AS BEGIN
     close obj_cur
     deallocate obj_cur
 
-    declare @Symbol Nvarchar(10)
+    /*declare @Symbol Nvarchar(10)
 
     select
         @Symbol = Symbol
     from Currencies nolock
-    where ShortName = @Valuta
+    where ShortName = @Valuta*/
 
     select
         FundId,
@@ -376,7 +376,7 @@ AS BEGIN
         ProfitProcentValue = CAST([dbo].f_Round(ProfitProcentValue, 2) AS DECIMAL(30,2)),
         BeginValue = CAST([dbo].f_Round(BeginValue, 2) AS DECIMAL(30,2)),
         EndValue = CAST([dbo].f_Round(VAL, 2) AS DECIMAL(30,2)),
-        Valuta = @Symbol
+        Valuta = @Valuta
     from @ReSult
     order by FundName;
 END

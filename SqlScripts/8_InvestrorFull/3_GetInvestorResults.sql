@@ -391,12 +391,12 @@ AS BEGIN
 
         if @ResutSum = 0 set @ResutSum = NULL
 
-    declare @Symbol Nvarchar(10)
+    /*declare @Symbol Nvarchar(10)
 
     select
         @Symbol = Symbol
     from Currencies nolock
-    where ShortName = @Valuta
+    where ShortName = @Valuta*/
 
 
     select
@@ -415,7 +415,7 @@ AS BEGIN
 
         ProfitValue = CAST(Round(@InvestResult,2) as Decimal(30,2)),
         ProfitProcentValue = CAST(Round(@InvestResult/@ResutSum * 100,2) as Decimal(38,2)),
-        Valuta = @Symbol
+        Valuta = @Valuta
 END
 GO
 CREATE OR ALTER PROCEDURE [dbo].[GetInvestorContractResults]
@@ -842,10 +842,10 @@ AS BEGIN
 
     declare @Symbol Nvarchar(10)
 
-    select
+    /*select
         @Symbol = Symbol
     from Currencies nolock
-    where ShortName = @Valuta
+    where ShortName = @Valuta*/
 
 
     select
@@ -864,6 +864,6 @@ AS BEGIN
 
         ProfitValue = CAST(Round(@InvestResult,2) as Decimal(30,2)),
         ProfitProcentValue = CAST(Round(@InvestResult/@ResutSum * 100,2) as Decimal(38,2)),
-        Valuta = @Symbol
+        Valuta = @Valuta
 END
 GO

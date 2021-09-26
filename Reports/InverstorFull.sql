@@ -499,7 +499,8 @@ select
 	Dividents = CAST(Round(@Sum_INPUT_DIVIDENTS_RUR,2) as Decimal(30,2)),
 	Coupons = CAST(Round(@Sum_INPUT_COUPONS_RUR,2) as Decimal(30,2)),
 	OutVal1 = CAST(Round(@Sum_OUTPUT_VALUE_RUR1,2) as Decimal(30,2)),
-	OutVal2 = CAST(Round(@Sum_OUTPUT_VALUE_RUR2,2) as Decimal(30,2))
+	OutVal2 = CAST(Round(@Sum_OUTPUT_VALUE_RUR2,2) as Decimal(30,2)),
+	Valuta = @Valuta
 
 
 /*
@@ -585,10 +586,13 @@ IF OBJECT_ID('tempdb..#DivsNCouponsDetails') IS NOT NULL DROP TABLE #DivsNCoupon
 			,2) as Decimal(30,2)),
 		a.[PaymentDateTime],
 		Valuta = @Valuta,
-    a.[Type]
+		a.[Type],
+		RowValuta = c.ShortName,
+		RowPrice = a.AmountPayments
     INTO #DivsNCouponsDetails
 	from [dbo].[DIVIDENDS_AND_COUPONS_History] as a with(nolock)
 	join [dbo].[Assets_Info] as b with(nolock) on a.InvestorId = b.InvestorId and a.ContractId = b.ContractId and b.DATE_CLOSE >= @EndDate
+	join dbo.Currencies as c with(nolock) on a.CurrencyId = c.Id
 	where a.InvestorId = @InvestorId
 	and (@ContractId is null or (@ContractId is not null and a.ContractId = @ContractId))
 	and (@StartDate is null or (@StartDate is not null and a.PaymentDateTime >= @StartDate))
@@ -609,9 +613,12 @@ IF OBJECT_ID('tempdb..#DivsNCouponsDetails') IS NOT NULL DROP TABLE #DivsNCoupon
 			,2) as Decimal(30,2)),
 		a.[PaymentDateTime],
 		Valuta = @Valuta,
-    a.[Type]
+		a.[Type],
+		RowValuta = c.ShortName,
+		RowPrice = a.AmountPayments
 	from [dbo].[DIVIDENDS_AND_COUPONS_History_Last] as a with(nolock)
 	join [dbo].[Assets_Info] as b with(nolock) on a.InvestorId = b.InvestorId and a.ContractId = b.ContractId and b.DATE_CLOSE >= @EndDate
+	join dbo.Currencies as c with(nolock) on a.CurrencyId = c.Id
 	where a.InvestorId = @InvestorId
 	and (@ContractId is null or (@ContractId is not null and a.ContractId = @ContractId))
 	and (@StartDate is null or (@StartDate is not null and a.PaymentDateTime >= @StartDate))
@@ -638,7 +645,8 @@ IF OBJECT_ID('tempdb..#DivsNCouponsDetails') IS NOT NULL DROP TABLE #DivsNCoupon
 	SELECT
 		[Date] = [DateFrom],
 		[Dividends] = SUM([Dividends]),
-		[Coupons] = SUM([Coupons])
+		[Coupons] = SUM([Coupons]),
+		Valuta = max(r.Valuta)
 	FROM cte
 	LEFT JOIN
 	(
@@ -652,7 +660,8 @@ IF OBJECT_ID('tempdb..#DivsNCouponsDetails') IS NOT NULL DROP TABLE #DivsNCoupon
 				[Price]
 			else
 				0.000000
-			end
+			end,
+			Valuta = @Valuta
 		from #DivsNCouponsDetails
 
 	) r ON r.[Date] BETWEEN cte.[DateFrom] AND DATEADD(DAY,-1,cte.[DateTo])

@@ -28,11 +28,11 @@ SELECT
 FROM
 (
     SELECT [Date], [LS_NUM]
-    FROM [CacheDB].[dbo].[InvestorFundDate] NOLOCK
+    FROM [dbo].[InvestorFundDate] NOLOCK
     WHERE Investor = @Investor and FundId = @FundId
     UNION
     SELECT [Date], [LS_NUM]
-    FROM [CacheDB].[dbo].[InvestorFundDateLast] NOLOCK
+    FROM [dbo].[InvestorFundDateLast] NOLOCK
     WHERE Investor = @Investor and FundId = @FundId
 ) AS R
 
@@ -93,7 +93,7 @@ FROM
 		,
 			AmountDayMinus_USD, AmountDayMinus_EVRO,
 		LS_NUM
-    FROM [CacheDB].[dbo].[InvestorFundDate] NOLOCK
+    FROM [dbo].[InvestorFundDate] NOLOCK
     WHERE Investor = @Investor and FundId = @FundId
     UNION
     SELECT
@@ -128,7 +128,7 @@ FROM
 		,
 			AmountDayMinus_USD, AmountDayMinus_EVRO,
 		LS_NUM
-    FROM [CacheDB].[dbo].[InvestorFundDateLast] NOLOCK
+    FROM [dbo].[InvestorFundDateLast] NOLOCK
     WHERE Investor = @Investor and FundId = @FundId
 ) AS R
 WHERE [Date] >= @StartDate and [Date] <= @EndDate
@@ -248,7 +248,7 @@ set @AllMinus_RUR = @AmountDayMinus_RUR;
     
     SELECT
         @FundName = [Name]
-    FROM [CacheDB].[dbo].[FundNames]
+    FROM [dbo].[FundNames]
     WHERE [Id] = @FundId;
     
 	/*
@@ -270,13 +270,14 @@ set @AllMinus_RUR = @AmountDayMinus_RUR;
     [EndSumAmount] = @EndSumAmount,
     [FundName] = @FundName,
     [InvestorName] = @InvestorName,
-	[ParamValuta] = @Valuta;
+	[Valuta] = @Valuta;
     
     select
         [ActiveName]  = 'Активы на ' + Replace(CONVERT(NVarchar(50), @StartDate, 103),'/','.'),
         [ActiveValue] = CAST([dbo].f_Round(@Snach, 2) AS DECIMAL(30,2)),
         [Пополнения]  = CAST([dbo].f_Round(@AllPlus_RUR, 2) AS DECIMAL(30,2)),
-        [Выводы]      = CAST([dbo].f_Round(-@AllMinus_RUR, 2) AS DECIMAL(30,2)); 
+        [Выводы]      = CAST([dbo].f_Round(-@AllMinus_RUR, 2) AS DECIMAL(30,2)),
+		[Valuta] = @Valuta;
     
     SELECT 
         B.[W_ID],
@@ -288,30 +289,31 @@ set @AllMinus_RUR = @AmountDayMinus_RUR;
         [Amount] = FORMAT(B.[Amount], '0.##'),
         [VALUE_RUR] = FORMAT(B.[VALUE_RUR], '0.##'),
         [Fee_RUR] = FORMAT(B.[Fee_RUR], '0.##'),
-        C.[OperName]
+        C.[OperName],
+		[Valuta] = 'RUB'
     FROM
     (
         SELECT * 
-        FROM [CacheDB].[dbo].[FundHistory] AS A WITH(NOLOCK)
+        FROM [dbo].[FundHistory] AS A WITH(NOLOCK)
         WHERE A.Investor = @Investor AND A.FundId = @FundId
         AND [W_Date] >= @StartDate AND [W_Date] < DateAdd(DAY,1, @EndDate)
         UNION
         SELECT * 
-        FROM [CacheDB].[dbo].[FundHistoryLast] AS A WITH(NOLOCK)
+        FROM [dbo].[FundHistoryLast] AS A WITH(NOLOCK)
         WHERE A.Investor = @Investor AND A.FundId = @FundId
         AND [W_Date] >= @StartDate AND [W_Date] < DateAdd(DAY,1, @EndDate)
     ) AS B
-    LEFT JOIN [CacheDB].[dbo].[WalkTypes] AS C WITH(NOLOCK) ON B.WALK = C.WALK AND B.[TYPE] = C.[TYPE]
+    LEFT JOIN [dbo].[WalkTypes] AS C WITH(NOLOCK) ON B.WALK = C.WALK AND B.[TYPE] = C.[TYPE]
     ORDER BY B.[W_Date];
 
     select
-        [Date], [RATE] =
-		case
+        [Date], [RATE], [Valuta] = 'RUB'
+		/*case
 			when @Valuta = 'RUB' then RATE
 			when @Valuta = 'USD' then USDRATE
 			when @Valuta = 'EUR' then EVRORATE
 			else AmountDayMinus_RUR
-		end
+		end*/
     from #ResInv
     order by [Date];
     

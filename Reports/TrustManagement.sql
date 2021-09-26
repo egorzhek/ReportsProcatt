@@ -27,11 +27,11 @@ SELECT
 FROM
 (
 	SELECT [Date]
-	FROM [CacheDB].[dbo].[Assets_Contracts] NOLOCK
+	FROM [dbo].[Assets_Contracts] NOLOCK
 	WHERE InvestorId = @InvestorId and ContractId = @ContractId
 	UNION
 	SELECT [Date]
-	FROM [CacheDB].[dbo].[Assets_ContractsLast] NOLOCK
+	FROM [dbo].[Assets_ContractsLast] NOLOCK
 	WHERE InvestorId = @InvestorId and ContractId = @ContractId
 ) AS R
 
@@ -113,7 +113,7 @@ FROM
 			else OUTPUT_VALUE_RUR
 		end,
 			OUTPUT_VALUE_USD, OUTPUT_VALUE_EURO
-	FROM [CacheDB].[dbo].[Assets_Contracts] NOLOCK
+	FROM [dbo].[Assets_Contracts] NOLOCK
 	WHERE InvestorId = @InvestorId and ContractId = @ContractId
 	UNION
 	SELECT
@@ -175,7 +175,7 @@ FROM
 			else OUTPUT_VALUE_RUR
 		end,
 			OUTPUT_VALUE_USD, OUTPUT_VALUE_EURO
-	FROM [CacheDB].[dbo].[Assets_ContractsLast] NOLOCK
+	FROM [dbo].[Assets_ContractsLast] NOLOCK
 	WHERE InvestorId = @InvestorId and ContractId = @ContractId
 ) AS R
 WHERE [Date] >= @StartDate and [Date] <= @EndDate
@@ -337,7 +337,7 @@ Declare @DATE_OPEN date, @NUM Nvarchar(100);
 select
 	@DATE_OPEN = DATE_OPEN,
 	@NUM = NUM
-from [CacheDB].[dbo].[Assets_Info] NOLOCK
+from [dbo].[Assets_Info] NOLOCK
 where [InvestorId] = @InvestorId and [ContractId] = @ContractId;
 
 select
@@ -356,17 +356,17 @@ select
 	ContractOpenDate = @DATE_OPEN,
 	SuccessFee = 99.99,
 	DateFromName = @StartDate,
-	ParamValuta = @Valuta;
+	Valuta = @Valuta;
 
-select ActiveName = 'Активы на ' + FORMAT(@StartDate,'dd.MM.yyyy') , ActiveValue = CAST(Round(@Snach,2) as Decimal(38,2)), Sort = 1
+select ActiveName = 'Активы на ' + FORMAT(@StartDate,'dd.MM.yyyy') , ActiveValue = CAST(Round(@Snach,2) as Decimal(38,2)), Sort = 1, Valuta = @Valuta
 union
-select 'Пополнения', CAST(Round(@Sum_INPUT_VALUE_RUR,2) as Decimal(30,2)), 2
+select 'Пополнения', CAST(Round(@Sum_INPUT_VALUE_RUR,2) as Decimal(30,2)), 2, Valuta = @Valuta
 union
-select 'Выводы', CAST(Round(@Sum_OUTPUT_VALUE_RUR,2) as Decimal(30,2)), 3
+select 'Выводы', CAST(Round(@Sum_OUTPUT_VALUE_RUR,2) as Decimal(30,2)), 3, Valuta = @Valuta
 union
-select 'Дивиденды', @Sum_INPUT_DIVIDENTS_RUR, 4
+select 'Дивиденды', @Sum_INPUT_DIVIDENTS_RUR, 4, Valuta = @Valuta
 union
-select 'Купоны', @Sum_INPUT_COUPONS_RUR, 5
+select 'Купоны', @Sum_INPUT_COUPONS_RUR, 5, Valuta = @Valuta
 order by 3
 
 
@@ -391,7 +391,8 @@ select ActiveName = 'Активы на ' + FORMAT(@StartDate,'dd.MM.yyyy') , ActiveValue
 [InVal] = CAST(Round(@Sum_INPUT_VALUE_RUR,2) as Decimal(30,2)), 
 [OutVal] = CAST(Round(@Sum_OUTPUT_VALUE_RUR,2) as Decimal(30,2)), 
 [Dividends] = @Sum_INPUT_DIVIDENTS_RUR, 
-[Coupons] = @Sum_INPUT_COUPONS_RUR
+[Coupons] = @Sum_INPUT_COUPONS_RUR,
+[Valuta] = @Valuta
 
 
 -- Дивиденты, купоны - график
@@ -414,11 +415,13 @@ select ActiveName = 'Активы на ' + FORMAT(@StartDate,'dd.MM.yyyy') , ActiveValue
 SELECT
 	[Date] = [DateFrom],
 	[Dividends] = SUM([INPUT_DIVIDENTS_RUR]),
-	[Coupons] = SUM([INPUT_COUPONS_RUR])
+	[Coupons] = SUM([INPUT_COUPONS_RUR]),
+	[Valuta] = MAX([Valuta])
 FROM cte 
 LEFT JOIN 
 (
-    SELECT * 
+    SELECT
+		[INPUT_DIVIDENTS_RUR], [INPUT_COUPONS_RUR], [Date], [Valuta] = @Valuta
     FROM #ResInvAssets 
     WHERE INPUT_DIVIDENTS_RUR <> 0 or INPUT_DIVIDENTS_USD <> 0
 )r ON r.[Date] BETWEEN [DateFrom] AND DATEADD(DAY,-1,[DateTo])
@@ -428,66 +431,62 @@ ORDER BY [DateFrom];
 
 -- Детализация купонов и дивидендов
 select
-	[Date] = [PaymentDateTime],
-	[ToolName] = [ShareName],
-	[PriceType] = case when [Type] = 1 then 'Купоны' else 'Дивиденды' end,
-	[ContractName] = [ShareName],
-	[Price] = CAST(Round([AmountPayments_RUR],2) as Decimal(30,2)),
-	[PaymentDateTime]
-from [CacheDB].[dbo].[DIVIDENDS_AND_COUPONS_History]
-where InvestorId = @InvestorId and ContractId = @ContractId
+	[Date] =  a.[PaymentDateTime],
+	[ToolName] = a.[ShareName],
+	[PriceType] = case when a.[Type] = 1 then 'Купоны' else 'Дивиденды' end,
+	[ContractName] = a.[ShareName],
+	[Price] = CAST(Round(a.[AmountPayments_RUR],2) as Decimal(30,2)),
+	a.[PaymentDateTime],
+	[RowPrice] = a.AmountPayments,
+	[RowValuta] = c.ShortName
+from [dbo].[DIVIDENDS_AND_COUPONS_History] as a
+join dbo.Currencies as c on a.CurrencyId = c.Id
+where a.InvestorId = @InvestorId and a.ContractId = @ContractId
 union all
 select
-	[Date] =  [PaymentDateTime],
-	[ToolName] = [ShareName],
-	[PriceType] = case when [Type] = 1 then 'Купоны' else 'Дивиденды' end,
-	[ContractName] = [ShareName],
-	[Price] = CAST(Round([AmountPayments_RUR],2) as Decimal(30,2)),
-	[PaymentDateTime]
-from [CacheDB].[dbo].[DIVIDENDS_AND_COUPONS_History_Last]
-where InvestorId = @InvestorId and ContractId = @ContractId
+	[Date] =  a.[PaymentDateTime],
+	[ToolName] = a.[ShareName],
+	[PriceType] = case when a.[Type] = 1 then 'Купоны' else 'Дивиденды' end,
+	[ContractName] = a.[ShareName],
+	[Price] = CAST(Round(a.[AmountPayments_RUR],2) as Decimal(30,2)),
+	a.[PaymentDateTime],
+	[RowPrice] = a.AmountPayments,
+	[RowValuta] = c.ShortName
+from [dbo].[DIVIDENDS_AND_COUPONS_History_Last] as a
+join dbo.Currencies as c on a.CurrencyId = c.Id
+where a.InvestorId = @InvestorId and a.ContractId = @ContractId
 order by [PaymentDateTime];
 
 
 select
-	[Date] = [Date],
-	[OperName] = T_Name,
-	[ISIN],
-	[ToolName] = Investment,
-	[Price] = CAST(Round([Price],2) as Decimal(30,2)),
-	[PaperAmount] = CAST(Round([Amount],2) as Decimal(30,2)),
-	[Valuta] =
-		case
-			when [Currency] = 1 then N'?'
-			when [Currency] = 2 then N'$'
-			when [Currency] = 5 then N'€'
-			else N'?'
-		end,
-	[Cost] = CAST(Round([Value_Nom],2) as Decimal(30,2)),
-	[Fee] = CAST(Round([Fee],2) as Decimal(30,2)),
+	[Date] = a.[Date],
+	[OperName] = a.T_Name,
+	a.[ISIN],
+	[ToolName] = a.Investment,
+	[Price] = CAST(Round(a.[Price],2) as Decimal(30,2)),
+	[PaperAmount] = CAST(Round(a.[Amount],2) as Decimal(30,2)),
+	[RowValuta] = c.ShortName,
+	[RowCost] = CAST(Round(a.[Value_Nom],2) as Decimal(30,2)),
+	[Fee] = CAST(Round(a.[Fee],2) as Decimal(30,2)),
 	[Status] = N''
-from [CacheDB].[dbo].[Operations_History_Contracts]
-where InvestorId = @InvestorId and ContractId = @ContractId
+from [dbo].[Operations_History_Contracts] as a
+join dbo.Currencies as c on a.Currency = c.Id
+where a.InvestorId = @InvestorId and a.ContractId = @ContractId
 union
 select
-	[Date] = [Date],
-	[OperName] = T_Name,
-	[ISIN],
-	[ToolName] = Investment,
-	[Price] = CAST(Round([Price],2) as Decimal(30,2)),
-	[PaperAmount] = CAST(Round([Amount],2) as Decimal(30,2)),
-	[Valuta] =
-		case
-			when [Currency] = 1 then N'?'
-			when [Currency] = 2 then N'$'
-			when [Currency] = 5 then N'€'
-			else N'?'
-		end,
-	[Cost] = CAST(Round([Value_Nom],2) as Decimal(30,2)),
-	[Fee] = CAST(Round([Fee],2) as Decimal(30,2)),
+	[Date] = a.[Date],
+	[OperName] = a.T_Name,
+	a.[ISIN],
+	[ToolName] = a.Investment,
+	[Price] = CAST(Round(a.[Price],2) as Decimal(30,2)),
+	[PaperAmount] = CAST(Round(a.[Amount],2) as Decimal(30,2)),
+	[RowValuta] = c.ShortName,
+	[RowCost] = CAST(Round(a.[Value_Nom],2) as Decimal(30,2)),
+	[Fee] = CAST(Round(a.[Fee],2) as Decimal(30,2)),
 	[Status] = N''
-from [CacheDB].[dbo].[Operations_History_Contracts_Last]
-where InvestorId = @InvestorId and ContractId = @ContractId
+from [dbo].[Operations_History_Contracts_Last] as a
+join dbo.Currencies as c on a.Currency = c.Id
+where a.InvestorId = @InvestorId and a.ContractId = @ContractId
 order by [Date];
 
 
@@ -503,12 +502,12 @@ INTO #TrustTree
 from
 (
 	select * 
-	from [CacheDB].[dbo].[PortFolio_Daily] with(nolock)
+	from [dbo].[PortFolio_Daily] with(nolock)
 	where InvestorId = @InvestorId and ContractId = @ContractId
 	and PortfolioDate = @EndDate
 	union all
 	select * 
-	from [CacheDB].[dbo].[PortFolio_Daily_Last] with(nolock)
+	from [dbo].[PortFolio_Daily_Last] with(nolock)
 	where InvestorId = @InvestorId and ContractId = @ContractId
 	and PortfolioDate = @EndDate
 ) as r;
@@ -547,8 +546,8 @@ select
 	TypeName = c.CategoryName,
 	ValutaId = cast(a.CUR_ID as BigInt)
 from #TrustTree as a
-inner join [CacheDB].[dbo].[ClassCategories] as cc on a.CLASS = cc.ClassId
-inner join [CacheDB].[dbo].[Categories] as c on cc.CategoryId = c.Id
+inner join [dbo].[ClassCategories] as cc on a.CLASS = cc.ClassId
+inner join [dbo].[Categories] as c on cc.CategoryId = c.Id
 group by c.id, c.CategoryName, a.CUR_ID
 
 
@@ -975,15 +974,16 @@ select
 	TypeId = cast(c.id as BigInt),
 	ChildName = i.Investment,
 	ValutaId = cast(a.CUR_ID as BigInt),
-	PriceName =  CAST(CAST(Round(a.[VALUE_NOM],2) as Decimal(30,2)) as Nvarchar(50)) + ' ' + IsNull(cr.[Symbol], N'?'),
-	Ammount = case when c.Id <> 4 then CAST(CAST(Round(a.[AMOUNT],2) as Decimal(30,2)) as Nvarchar(50)) + N' шт.' else N'' end,
-	Detail = CAST(CAST(Round(rst.InvestResult,2) as Decimal(30,2)) as Nvarchar(50)) + ' ' + IsNull(cr.[Symbol], N'?')
-		+ ' (' + CAST(CAST(Round(rst.InvestResultProcent,2) as Decimal(30,2)) as Nvarchar(50)) + '%)'
+	Valuta = cr.ShortName,
+	Price =  CAST(Round(a.[VALUE_NOM],2) as Decimal(30,2)),
+	Ammount = case when c.Id <> 4 then CAST(Round(a.[AMOUNT],2) as Decimal(30,2))  else NULL end,
+	Detail = CAST(Round(rst.InvestResult,2) as Decimal(30,2)),
+	ResultProcent = CAST(Round(rst.InvestResultProcent,2) as Decimal(30,2))
 from #TrustTree as a
-inner join [CacheDB].[dbo].[ClassCategories] as cc on a.CLASS = cc.ClassId
-inner join [CacheDB].[dbo].[Categories] as c on cc.CategoryId = c.Id
-inner join [CacheDB].[dbo].[InvestmentIds] as i on a.InvestmentId = i.Id
-left join  [CacheDB].[dbo].[Currencies] as cr on a.CUR_ID = cr.id
+inner join [dbo].[ClassCategories] as cc on a.CLASS = cc.ClassId
+inner join [dbo].[Categories] as c on cc.CategoryId = c.Id
+inner join [dbo].[InvestmentIds] as i on a.InvestmentId = i.Id
+left join  [dbo].[Currencies] as cr on a.CUR_ID = cr.id
 left join #SumStart as rst on a.VALUE_ID = rst.ShareId
 
 
@@ -1128,12 +1128,12 @@ select
 from
 (
 	select * 
-	from [CacheDB].[dbo].[POSITION_KEEPING] as a with(nolock)
+	from [dbo].[POSITION_KEEPING] as a with(nolock)
 	where a.InvestorId = @InvestorId and a.ContractId = @ContractId
 	and Fifo_Date = @EndDate
 	union all
 	select * 
-	from [CacheDB].[dbo].[POSITION_KEEPING_Last] as a with(nolock)
+	from [dbo].[POSITION_KEEPING_Last] as a with(nolock)
 	where a.InvestorId = @InvestorId and a.ContractId = @ContractId
 	and Fifo_Date = @EndDate
 ) as r
@@ -1168,12 +1168,12 @@ select
 from
 (
 	select * 
-	from [CacheDB].[dbo].[POSITION_KEEPING] as a with(nolock)
+	from [dbo].[POSITION_KEEPING] as a with(nolock)
 	where a.InvestorId = @InvestorId and a.ContractId = @ContractId
 	and Fifo_Date = @StartDate
 	union all
 	select * 
-	from [CacheDB].[dbo].[POSITION_KEEPING_Last] as a with(nolock)
+	from [dbo].[POSITION_KEEPING_Last] as a with(nolock)
 	where a.InvestorId = @InvestorId and a.ContractId = @ContractId
 	and Fifo_Date = @StartDate
 ) as r
@@ -1316,13 +1316,15 @@ select
 	Child2Id = a.Id,
 	ChildId = b.InvestmentId,
 	Child2Name = i.Investment,
-	PriceName = CAST(CAST(Round(a.VALUE_NOM,2) as Decimal(30,2)) as Nvarchar(30)) + N' ' + isnull(c.Symbol,N'?'),
-	Ammount =  FORMAT(a.Amount, '0.######') + ' шт.',
-	Detail =   FORMAT(a.FinRes, '0.######') + N' ' + isnull(c.Symbol,N'?') + ' (' + FORMAT(a.FinResProcent, '0.######') + '%)'
+	Price = CAST(Round(a.VALUE_NOM,2) as Decimal(30,2)),
+	Valuta = c.ShortName,
+	Ammount = a.Amount,
+	a.FinRes,
+	a.FinResProcent
 from #POSITION_KEEPING_EndDate as a with(nolock)
 inner join #TrustTree as b with(nolock) on a.ShareId = b.VALUE_ID
-inner join [CacheDB].[dbo].[InvestmentIds] as i with(nolock) on b.InvestmentId = i.Id
-left join [CacheDB].[dbo].[Currencies] as c with(nolock) on a.CUR_ID = c.Id
+inner join [dbo].[InvestmentIds] as i with(nolock) on b.InvestmentId = i.Id
+left join [dbo].[Currencies] as c with(nolock) on a.CUR_ID = c.Id
 
 declare @CategoryId Int, @IsActive Int
 
@@ -1347,11 +1349,9 @@ begin
 			[IsActive] = isnull(a.IsActive,0),
 			InvestmentId = b.InvestmentId,
 			Investment = i.Investment,
-			PriceName = CAST(CAST(Round(a.VALUE_NOM,2) as Decimal(30,2)) as Nvarchar(30)) + N' ' + isnull(c.Symbol,N'?'),
+			Price = CAST(Round(a.VALUE_NOM,2) as Decimal(30,2)),
 			a.Amount,
-			Ammount2 =  FORMAT(a.Amount, '0.######') + ' шт.',
-			Detail =   FORMAT(a.FinRes, '0.######') + N' ' + isnull(c.Symbol,N'?') + ' (' + FORMAT(a.FinResProcent, '0.######') + '%)',
-			Valuta = isnull(c.Symbol,N'?'),
+			Valuta = c.ShortName,
 			a.ShareId,
 			a.InvestorId,
 			a.ContractId,
@@ -1386,10 +1386,10 @@ begin
 			a.OutPrice
 		from #POSITION_KEEPING_EndDate as a with(nolock)
 		inner join #TrustTree as b with(nolock) on a.ShareId = b.VALUE_ID
-		inner join [CacheDB].[dbo].[InvestmentIds] as i with(nolock) on b.InvestmentId = i.Id
+		inner join [dbo].[InvestmentIds] as i with(nolock) on b.InvestmentId = i.Id
 		inner join [dbo].[ClassCategories] as cc with(nolock) on a.Class = cc.ClassId and cc.CategoryId = @CategoryId
 		inner join [dbo].[Categories] as cg on cc.CategoryId = cg.Id
-		left join [CacheDB].[dbo].[Currencies] as c with(nolock) on a.CUR_ID = c.Id
+		left join [dbo].[Currencies] as c with(nolock) on a.CUR_ID = c.Id
 		where isnull(a.IsActive,0) = @IsActive
 	end
 	else
@@ -1400,11 +1400,9 @@ begin
 			[IsActive] = isnull(a.IsActive,0),
 			InvestmentId = b.InvestmentId,
 			Investment = i.Investment,
-			PriceName = CAST(CAST(Round(a.VALUE_NOM,2) as Decimal(30,2)) as Nvarchar(30)) + N' ' + isnull(c.Symbol,N'?'),
+			Price = CAST(Round(a.VALUE_NOM,2) as Decimal(30,2)),
 			a.Amount,
-			Ammount2 =  FORMAT(a.Amount, '0.######') + ' шт.',
-			Detail =   FORMAT(a.FinRes, '0.######') + N' ' + isnull(c.Symbol,N'?') + ' (' + FORMAT(a.FinResProcent, '0.######') + '%)',
-			Valuta = isnull(c.Symbol,N'?'),
+			Valuta = c.ShortName,
 			a.ShareId,
 			a.InvestorId,
 			a.ContractId,
@@ -1439,10 +1437,10 @@ begin
 			a.OutPrice
 		from #POSITION_KEEPING_EndDate as a with(nolock)
 		inner join #TrustTree as b with(nolock) on a.ShareId = b.VALUE_ID
-		inner join [CacheDB].[dbo].[InvestmentIds] as i with(nolock) on b.InvestmentId = i.Id
+		inner join [dbo].[InvestmentIds] as i with(nolock) on b.InvestmentId = i.Id
 		inner join [dbo].[ClassCategories] as cc with(nolock) on a.Class = cc.ClassId and cc.CategoryId = @CategoryId
 		inner join [dbo].[Categories] as cg on cc.CategoryId = cg.Id
-		left join [CacheDB].[dbo].[Currencies] as c with(nolock) on a.CUR_ID = c.Id
+		left join [dbo].[Currencies] as c with(nolock) on a.CUR_ID = c.Id
 		outer apply
 		(
 			select top(1)
