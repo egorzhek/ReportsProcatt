@@ -355,61 +355,6 @@ namespace ReportsProcatt.Models
 
         private void InitClosedBonds() 
         {
-            CurrentBonds = new TableView();
-            CurrentBonds.Table = new DataTable();
-            CurrentBonds.Table.Columns.Add(CurrentBondsColumns.IN_DATE);
-            CurrentBonds.Table.Columns.Add(CurrentBondsColumns.Investment);
-            CurrentBonds.Table.Columns.Add(CurrentBondsColumns.Oblig_Date_end);
-            CurrentBonds.Table.Columns.Add(CurrentBondsColumns.Oferta_Date);
-            CurrentBonds.Table.Columns.Add(CurrentBondsColumns.IN_PRICE);
-            CurrentBonds.Table.Columns.Add(CurrentBondsColumns.Amount);
-            CurrentBonds.Table.Columns.Add(CurrentBondsColumns.In_Summa_UKD);
-            CurrentBonds.Table.Columns.Add(CurrentBondsColumns.UKD);
-            CurrentBonds.Table.Columns.Add(CurrentBondsColumns.In_Summa);
-            CurrentBonds.Table.Columns.Add(CurrentBondsColumns.Today_Price);
-            CurrentBonds.Table.Columns.Add(CurrentBondsColumns.NKD);
-            CurrentBonds.Table.Columns.Add(CurrentBondsColumns.Amortizations);
-            CurrentBonds.Table.Columns.Add(CurrentBondsColumns.Value_Nom);
-            CurrentBonds.Table.Columns.Add(CurrentBondsColumns.FinRes);
-
-            CurrentBonds.Ths = new List<ViewElementAttr>
-            {
-                new ViewElementAttr{ColumnName = CurrentBondsColumns.IN_DATE, DisplayName = "Дата покупки", SortOrder = 1},
-                new ViewElementAttr{ColumnName = CurrentBondsColumns.Investment, DisplayName = "Инструмент", SortOrder = 3},
-                new ViewElementAttr{ColumnName = CurrentBondsColumns.Oblig_Date_end, DisplayName = "Дата погашения", SortOrder = 4},
-                new ViewElementAttr{ColumnName = CurrentBondsColumns.Oferta_Date, DisplayName = "Дата и тип опциона", SortOrder = 5},
-                new ViewElementAttr{ColumnName = CurrentBondsColumns.IN_PRICE, DisplayName = "Цена 1 бумаги на дату покупки", SortOrder = 6},
-                new ViewElementAttr{ColumnName = CurrentBondsColumns.Amount, DisplayName = "Кол-во, шт", SortOrder = 7},
-                new ViewElementAttr{ColumnName = CurrentBondsColumns.In_Summa, DisplayName = "Сумма покупки без НКД", SortOrder = 8},
-                new ViewElementAttr{ColumnName = CurrentBondsColumns.UKD, DisplayName = "Уплаченный НКД", SortOrder = 9},
-                new ViewElementAttr{ColumnName = CurrentBondsColumns.In_Summa_UKD, DisplayName = "Сумма покупки с НКД", SortOrder = 10},
-                new ViewElementAttr{ColumnName = CurrentBondsColumns.Today_Price, DisplayName = "Цена 1 бумаги на дату отчета", SortOrder = 11},
-                new ViewElementAttr{ColumnName = CurrentBondsColumns.NKD, DisplayName = "НКД", SortOrder = 12},
-                new ViewElementAttr{ColumnName = CurrentBondsColumns.Amortizations, DisplayName = "Амортизация и купоны", SortOrder = 13},
-                new ViewElementAttr{ColumnName = CurrentBondsColumns.Value_Nom, DisplayName = "Стоимость на конец периода", SortOrder = 14},
-                new ViewElementAttr{ColumnName = CurrentBondsColumns.FinRes, DisplayName = "Фин. Результат", SortOrder = 15},
-            };
-
-            foreach (DataRow dr in _TrustManagementDS.Tables[DuTables.CurrentBonds].Rows)
-            {
-                DataRow row = CurrentBonds.Table.NewRow();
-                row[CurrentBondsColumns.IN_DATE] = ((DateTime)dr["IN_DATE"]).ToString("dd.MM.yyyy");
-                row[CurrentBondsColumns.Investment] = dr["Investment"];
-                row[CurrentBondsColumns.Oblig_Date_end] = (dr["Oblig_Date_end"] as DateTime?)?.ToString("dd.MM.yyyy");
-                row[CurrentBondsColumns.Oferta_Date] = $"{(dr["Oferta_Date"] as DateTime?)?.ToString("dd.MM.yyyy")}{(!string.IsNullOrEmpty(dr["Oferta_Type"]?.ToString()) ? $"({dr["Oferta_Type"]})" : "")}";
-                row[CurrentBondsColumns.IN_PRICE] = $"{dr["IN_PRICE"].DecimalToStr()} {dr["Valuta"]}";
-                row[CurrentBondsColumns.Amount] = dr["Amount"].DecimalToStr();
-                row[CurrentBondsColumns.In_Summa_UKD] = ((decimal)dr["In_Summa"] + (decimal)dr["UKD"]).DecimalToStr();
-                row[CurrentBondsColumns.UKD] = dr["UKD"].DecimalToStr();
-                row[CurrentBondsColumns.In_Summa] = dr["In_Summa"].DecimalToStr();
-                row[CurrentBondsColumns.Today_Price] = dr["Today_Price"].DecimalToStr();
-                row[CurrentBondsColumns.NKD] = dr["NKD"].DecimalToStr();
-                row[CurrentBondsColumns.Amortizations] = $"{dr["Amortizations"].DecimalToStr()}{(!string.IsNullOrEmpty(dr["Coupons"]?.ToString()) ? $"({dr["Coupons"].DecimalToStr()})" : "")}";
-                row[CurrentBondsColumns.Value_Nom] = dr["Value_Nom"].DecimalToStr();
-                row[CurrentBondsColumns.FinRes] = $"{dr["FinRes"].DecimalToStr()}({dr["FinResProcent"].DecimalToStr("#0.00")}%)";
-                CurrentBonds.Table.Rows.Add(row);
-            }
-
             ClosedBonds = new TableView();
             ClosedBonds.Table = new DataTable(); 
             ClosedBonds.Table.Columns.Add(ClosedBondsColumns.IN_DATE);
