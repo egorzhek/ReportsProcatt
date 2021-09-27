@@ -55,10 +55,10 @@ namespace ReportsProcatt.Models
             };
             Diagram = new Dictionary<string, string>
             {
-                { PifDiagramColumns.Begin, _FundInfoDS.DecimalToStr(PifTables.DiagramDT, "ActiveValue", "#,##0") },
-                { PifDiagramColumns.InVal, _FundInfoDS.DecimalToStr(PifTables.DiagramDT, "Пополнения", "#,##0") },
-                { PifDiagramColumns.OutVal, _FundInfoDS.DecimalToStr(PifTables.DiagramDT, "Выводы", "#,##0") },
-                { PifDiagramColumns.End, _FundInfoDS.DecimalToStr(PifTables.MainResultDT, "ActiveDateToValue", "#,##0") }
+                { PifDiagramColumns.Begin, $"{_FundInfoDS.DecimalToStr(PifTables.DiagramDT, "ActiveValue", "#,##0")} {Currency.Char}" },
+                { PifDiagramColumns.InVal, $"{_FundInfoDS.DecimalToStr(PifTables.DiagramDT, "Пополнения", "#,##0")} {Currency.Char}" },
+                { PifDiagramColumns.OutVal, $"{_FundInfoDS.DecimalToStr(PifTables.DiagramDT, "Выводы", "#,##0")} {Currency.Char}" },
+                { PifDiagramColumns.End, $"{_FundInfoDS.DecimalToStr(PifTables.MainResultDT, "ActiveDateToValue", "#,##0")} {Currency.Char}" }
             };
             //InitAccountDetails();
             InitAssetsStruct();
@@ -210,9 +210,9 @@ namespace ReportsProcatt.Models
                 row[PifOperationsHistoryColumns.Wdate] = dr["W_Date"];
                 row[PifOperationsHistoryColumns.Btype] = dr["OperName"];
                 row[PifOperationsHistoryColumns.Instrument] = dr["Order_NUM"];
-                row[PifOperationsHistoryColumns.Rate_rur] = dr["RATE_RUR"].DecimalToStr();
+                row[PifOperationsHistoryColumns.Rate_rur] = $"{dr["RATE_RUR"].DecimalToStr()} {dr["Valuta"]}";
                 row[PifOperationsHistoryColumns.Amount] = dr["Amount"].DecimalToStr();
-                row[PifOperationsHistoryColumns.Value_rur] = dr["VALUE_RUR"].DecimalToStr();
+                row[PifOperationsHistoryColumns.Value_rur] = $"{dr["VALUE_RUR"].DecimalToStr()} {dr["Valuta"]}";
                 row[PifOperationsHistoryColumns.Fee_rur] = dr["FEE_RUR"].DecimalToStr();
                 PifOperationsHistory.Table.Rows.Add(row);
             }

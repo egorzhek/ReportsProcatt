@@ -133,35 +133,65 @@
 
     @Html.Partial("_PartialMainDiagram", Model.MainDiagram)
 
-    <table class="section block-heading">
-        <tr>
-            <td>
+    <div class="keep-together">
 
-                <table class="section-wrapper">
-                    <tbody>
-                        <tr>
+        <table class="section block-heading">
+            <tbody>
+                <tr>
+                    <td>
 
-                            <td class="left-td heading-td">
-                                <span>Все активы</span>
-                            </td>
+                        <table class="section-wrapper">
+                            <tbody>
+                                <tr>
 
-                        </tr>
-                    </tbody>
-                </table>
+                                    <td class="left-td heading-td">
+                                        <span>Все активы</span>
+                                    </td>
 
-            </td>
-        </tr>
-    </table>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        @Html.Partial("_PartialTableView", Model.AllAssets)
+
+        <table class="section text-block">
+            <tbody>
+                <tr>
+                    <td>
+
+                        <table class="section-wrapper">
+
+                            <tbody>
+                                <tr>
+                                    <td class="text-wrap">
+                                        <p>
+                                            Указанная в настоящем Отчете информация не является исчерпывающей и подготовлена исключительно в информационных целях и носит ознакомительный характер; доходность по Вашему портфелю рассчитана индивидуально с учетом всех операций за выбранный период. <br>
+
+                                            Подробную информацию о деятельности АО УК «Ингосстрах – Инвестиции» и паевых инвестиционных фондов, находящихся под ее управлением, включая тексты правил доверительного управления, всех изменений и дополнений к ним, а также сведения о местах приема заявок на приобретение, погашение и обмен инвестиционных паев Вы можете получить по адресу 115035, г. Москва, ул. Пятницкая, д. 12, стр. 2, по телефону: (495) 720-48-98, а также на официальном сайте АО УК «Ингосстрах – Инвестиции» в сети Интернет по адресу: <a href="https://www.ingosinvest.ru">www.ingosinvest.ru</a>. <br>
+                                        </p>
+                                    </td>
+                                </tr>
+
+                            </tbody>
+                        </table>
+
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+    </div>
 
     @Html.Partial("_PartialTableView", Model.PIFsTotals)
 
     @Html.Partial("_PartialTableView", Model.DUsTotals)
 
     @*<div style="page-break-before: always;"></div>*@
-
-
-    @Html.Partial("_PartialTableView", Model.AllAssets)
-
 
     <table class="section block-heading">
         <tr>

@@ -10,7 +10,7 @@ namespace ReportsProcatt.Models
         public const string Begin = "В начале";
         public const string InVal = "Пополнения";
         public const string OutVal = "Выводы";
-        public const string Dividents = "Дивиденты";
+        public const string Dividents = "Дивиденды";
         public const string Coupons = "Купоны";
         public const string OutVal1 = "Погашения";
         //public const string ReVal = "Переоценка";

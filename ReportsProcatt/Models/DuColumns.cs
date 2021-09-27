@@ -9,7 +9,7 @@ namespace ReportsProcatt.Models
     {
         public const string Begin = "В начале периода";
         public const string InVal = "Пополнения";
-        public const string Dividents = "Дивиденты";
+        public const string Dividents = "Дивиденды";
         public const string Coupons = "Купоны";
         public const string OutVal = "Выводы";
         public const string End = "В конце периода";
@@ -31,6 +31,7 @@ namespace ReportsProcatt.Models
     }
     public class CurrentBondsColumns
     {
+        public const string IN_DATE = "IN_DATE";
         public const string ISIN = "ISIN";
         public const string Investment = "Investment";
         public const string Oblig_Date_end = "Oblig_Date_end";
@@ -244,6 +245,7 @@ namespace ReportsProcatt.Models
     {
         public const string Date = "Date";
         public const string OperName = "OperName";
+        public const string ToolName = "ToolName";
         public const string Price = "Price";
         public const string PaperAmount = "PaperAmount";
         public const string Cost = "Cost";

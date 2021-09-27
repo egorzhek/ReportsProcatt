@@ -41,8 +41,6 @@ namespace ReportsProcatt.Models
         private DataSet _circleAssetsDS => _data.DataSet_CircleAssets;
         private DataSet _circleCurrenciesDS => _data.DataSet_CircleCurrencies;
         private DataSet _circleInstrumentsDS => _data.DataSet_CircleInstruments;
-        //private string connectionString => @"Data Source=DESKTOP-2G9NLM6\MSSQLSERVER15;Encrypt=False;Initial Catalog=CacheDB;Integrated Security=True;User ID=DESKTOP-2G9NLM6\D";
-        //private string ReportPath = @"c:\Users\D\source\Ingos\ReportsProcatt\Reports\";
         private string connectionString;
         private string ReportPath;
 
@@ -51,6 +49,9 @@ namespace ReportsProcatt.Models
         {
             ReportPath = Environment.GetEnvironmentVariable("ReportPath");
             connectionString = Program.GetReportSqlConnection(Path.Combine(ReportPath, "appsettings.json"));
+            //connectionString = @"Data Source=DESKTOP-2G9NLM6\MSSQLSERVER15;Encrypt=False;Initial Catalog=CacheDB;Integrated Security=True;User ID=DESKTOP-2G9NLM6\D";
+            //connectionString = @"Data Source=DESKTOP-30A75GK;Encrypt=False;Initial Catalog=CacheDB;Integrated Security=True;User ID=DESKTOP-30A75GK\Света";
+            //ReportPath = @"c:\Users\Света\source\Ingos\ReportsProcatt\Reports\";
 
             ReportCurrency = CurrencyClass.GetCurrency(CurrencyCode);
 
@@ -80,13 +81,13 @@ namespace ReportsProcatt.Models
         public void InitMainDiagram()
         {
             MainDiagram = new Dictionary<string, string>();
-            MainDiagram.Add(MainDiagramParams.Begin, _invFullDS.DecimalToStr(InvestFullTables.MainDiagramDT, "Snach", "#,##0"));
-            MainDiagram.Add(MainDiagramParams.InVal, _invFullDS.DecimalToStr(InvestFullTables.MainDiagramDT, "InVal", "#,##0", true));
-            MainDiagram.Add(MainDiagramParams.OutVal, _invFullDS.DecimalToStr(InvestFullTables.MainDiagramDT, "OutVal2", "#,##0", true));
-            MainDiagram.Add(MainDiagramParams.Dividents, _invFullDS.DecimalToStr(InvestFullTables.MainDiagramDT, "Dividents", "#,##0", true));
-            MainDiagram.Add(MainDiagramParams.Coupons, _invFullDS.DecimalToStr(InvestFullTables.MainDiagramDT, "Coupons", "#,##0", true));
-            MainDiagram.Add(MainDiagramParams.OutVal1, _invFullDS.DecimalToStr(InvestFullTables.MainDiagramDT, "OutVal1", "#,##0", true));
-            MainDiagram.Add(MainDiagramParams.End, _invFullDS.DecimalToStr(InvestFullTables.MainResultDT, "ActiveDateToValue", "#,##0"));
+            MainDiagram.Add(MainDiagramParams.Begin, $"{_invFullDS.DecimalToStr(InvestFullTables.MainDiagramDT, "Snach", "#,##0")} {ReportCurrency.Char}");
+            MainDiagram.Add(MainDiagramParams.InVal, $"{_invFullDS.DecimalToStr(InvestFullTables.MainDiagramDT, "InVal", "#,##0", true)} {ReportCurrency.Char}");
+            MainDiagram.Add(MainDiagramParams.OutVal, $"{_invFullDS.DecimalToStr(InvestFullTables.MainDiagramDT, "OutVal2", "#,##0", true)} {ReportCurrency.Char}");
+            MainDiagram.Add(MainDiagramParams.Dividents, $"{_invFullDS.DecimalToStr(InvestFullTables.MainDiagramDT, "Dividents", "#,##0", true)} {ReportCurrency.Char}");
+            MainDiagram.Add(MainDiagramParams.Coupons, $"{_invFullDS.DecimalToStr(InvestFullTables.MainDiagramDT, "Coupons", "#,##0", true)} {ReportCurrency.Char}");
+            MainDiagram.Add(MainDiagramParams.OutVal1, $"{_invFullDS.DecimalToStr(InvestFullTables.MainDiagramDT, "OutVal1", "#,##0", true)} {ReportCurrency.Char}");
+            MainDiagram.Add(MainDiagramParams.End, $"{_invFullDS.DecimalToStr(InvestFullTables.MainResultDT, "ActiveDateToValue", "#,##0")} {ReportCurrency.Char}");
         }
         public void InitPIFsTotalTable()
         {
@@ -102,19 +103,14 @@ namespace ReportsProcatt.Models
                 new ViewElementAttr{ColumnName = PIFsTotalColumns.AssetsToEnd, DisplayName = $"АКТИВЫ НА {Dto.ToString("dd.MM.yyyy")}", SortOrder = 2 },
                 new ViewElementAttr{ColumnName = PIFsTotalColumns.Result, DisplayName = $"РЕЗУЛЬТАТЫ* ЗА {Period}", SortOrder = 3 }
             };
-            PIFsTotals.Ths.Where(t => t.ColumnName == PIFsTotalColumns.PIFs).First().AttrRow.Add("width", "220px");
+            PIFsTotals.Ths.Where(t => t.ColumnName == PIFsTotalColumns.PIFs).First().AttrRow.Add("width", "520px");
 
             foreach (DataRow dr in _invFullDS.Tables[InvestFullTables.FundsDt].Rows)
             {
-                StringBuilder vRes = new StringBuilder();
-                vRes.Append(dr["ProfitValue"].DecimalToStr("#,##0"));
-                vRes.Append($"({dr["ProfitProcentValue"].DecimalToStr()})");
-                vRes.Append(dr["Valuta"]);
-
                 DataRow row = PIFsTotals.Table.NewRow();
                 row[PIFsTotalColumns.PIFs] = dr["FundName"];
-                row[PIFsTotalColumns.AssetsToEnd] = dr["EndValue"].DecimalToStr("#,##0");
-                row[PIFsTotalColumns.Result] = vRes.ToString();
+                row[PIFsTotalColumns.AssetsToEnd] = dr["EndValue"].DecimalToStr();
+                row[PIFsTotalColumns.Result] = $"{dr["ProfitValue"].DecimalToStr()} {dr["Valuta"]} ({dr["ProfitProcentValue"].DecimalToStr()}%)";
                 PIFsTotals.Table.Rows.Add(row);
             }
         }
@@ -136,15 +132,10 @@ namespace ReportsProcatt.Models
 
             foreach (DataRow dr in _invFullDS.Tables[InvestFullTables.DUsDt].Rows)
             {
-                StringBuilder vRes = new StringBuilder();
-                vRes.Append(dr["ProfitValue"].DecimalToStr("#,##0"));
-                vRes.Append($"({dr["ProfitProcentValue"].DecimalToStr()}%)");
-                vRes.Append(dr["Valuta"]);
-
                 DataRow row = DUsTotals.Table.NewRow();
                 row[DUsTotalColumns.DUs] = dr["ContractName"];
-                row[DUsTotalColumns.AssetsToEnd] = dr["EndValue"].DecimalToStr("#,##0");
-                row[DUsTotalColumns.Result] = vRes.ToString();
+                row[DUsTotalColumns.AssetsToEnd] = dr["EndValue"].DecimalToStr();
+                row[DUsTotalColumns.Result] = $"{dr["ProfitValue"].DecimalToStr()} {dr["Valuta"]} ({dr["ProfitProcentValue"].DecimalToStr()}%)";
                 DUsTotals.Table.Rows.Add(row);
             }
         }
@@ -226,14 +217,14 @@ namespace ReportsProcatt.Models
                 new ViewElementAttr{ColumnName = DivsNCouponsDetailsColumns.Date, DisplayName = "Дата", SortOrder = 1},
                 new ViewElementAttr{ColumnName = DivsNCouponsDetailsColumns.ToolName, DisplayName = "Инструмент", SortOrder = 2},
                 new ViewElementAttr{ColumnName = DivsNCouponsDetailsColumns.PriceType, DisplayName = "Тип выплаты", SortOrder = 3},
-                new ViewElementAttr{ColumnName = DivsNCouponsDetailsColumns.ContractName, DisplayName = "Количество", SortOrder = 4},
+                new ViewElementAttr{ColumnName = DivsNCouponsDetailsColumns.ContractName, DisplayName = "НАЗВАНИЕ ДОГОВОРА", SortOrder = 4},
                 new ViewElementAttr{ColumnName = DivsNCouponsDetailsColumns.Price, DisplayName = "Сумма сделки", SortOrder = 5},
             };
 
             foreach (DataRow dr in _invFullDS.Tables[InvestFullTables.DivsNCouponsDetails].Rows)
             {
                 DataRow row = DivsNCouponsDetails.Table.NewRow(); 
-                row[DivsNCouponsDetailsColumns.Date] = dr["Date"];
+                row[DivsNCouponsDetailsColumns.Date] = ((DateTime)dr["Date"]).ToString("dd.MM.yyyy");
                 row[DivsNCouponsDetailsColumns.ToolName] = dr["ToolName"];
                 row[DivsNCouponsDetailsColumns.PriceType] = dr["PriceType"];
                 row[DivsNCouponsDetailsColumns.ContractName] = dr["ContractName"];
@@ -245,6 +236,7 @@ namespace ReportsProcatt.Models
         {
             AllAssets = new TableView();
             AllAssets.Table = new DataTable();
+            AllAssets.Table.Columns.Add(AllAssetsColumns.Product);
             AllAssets.Table.Columns.Add(AllAssetsColumns.BeginAssets);
             AllAssets.Table.Columns.Add(AllAssetsColumns.InVal);
             AllAssets.Table.Columns.Add(AllAssetsColumns.OutVal);
@@ -253,48 +245,47 @@ namespace ReportsProcatt.Models
             AllAssets.Table.Columns.Add(AllAssetsColumns.Redemption);
             AllAssets.Table.Columns.Add(AllAssetsColumns.EndAssets);
             AllAssets.Table.Columns.Add(AllAssetsColumns.CurrencyProfit);
-            AllAssets.Table.Columns.Add(AllAssetsColumns.ProfitPercent);
 
             AllAssets.Ths = new List<ViewElementAttr>
             {
-                new ViewElementAttr{ColumnName = AllAssetsColumns.BeginAssets, DisplayName = "АКТИВЫ НА НАЧАЛО ПЕРИОДА", SortOrder = 2},
+                new ViewElementAttr{ColumnName = AllAssetsColumns.Product, DisplayName = "Вид продукта", SortOrder = 1},
+                new ViewElementAttr{ColumnName = AllAssetsColumns.BeginAssets, DisplayName = $"АКТИВЫ НА {Dto.ToString("dd.MM.yyyy")}", SortOrder = 2},
                 new ViewElementAttr{ColumnName = AllAssetsColumns.InVal, DisplayName = "ПОПОЛНЕНИЯ", SortOrder = 3},
                 new ViewElementAttr{ColumnName = AllAssetsColumns.OutVal, DisplayName = "ВЫВОД СРЕДСТВ", SortOrder = 4},
                 new ViewElementAttr{ColumnName = AllAssetsColumns.Dividents, DisplayName = "ДИВИДЕНДЫ", SortOrder = 5},
                 new ViewElementAttr{ColumnName = AllAssetsColumns.Coupons, DisplayName = "КУПОНЫ", SortOrder = 6},
-                new ViewElementAttr{ColumnName = AllAssetsColumns.Redemption, DisplayName = "ПОЛГАШЕНИЯ", SortOrder = 7},
+                new ViewElementAttr{ColumnName = AllAssetsColumns.Redemption, DisplayName = "Погашения", SortOrder = 7},
                 new ViewElementAttr{ColumnName = AllAssetsColumns.EndAssets, DisplayName = "АКТИВЫ", SortOrder = 8},
                 new ViewElementAttr{ColumnName = AllAssetsColumns.CurrencyProfit, DisplayName = "ДОХОД В ВАЛЮТЕ", SortOrder = 9},
-                new ViewElementAttr{ColumnName = AllAssetsColumns.ProfitPercent, DisplayName = "ДОХОД В %", SortOrder = 10},
             };
 
             foreach (DataRow dr in _invFullDS.Tables[InvestFullTables.FundsResultDt].Rows)
             {
                 DataRow row = AllAssets.Table.NewRow();
-                row[AllAssetsColumns.BeginAssets] = dr["StartDateValue"].DecimalToStr("#,##0");
-                row[AllAssetsColumns.InVal] = dr["INPUT_VALUE"].DecimalToStr("#,##0");
-                row[AllAssetsColumns.OutVal] = dr["OUTPUT_VALUE"].DecimalToStr("#,##0");
-                row[AllAssetsColumns.Dividents] = dr["INPUT_DIVIDENTS"].DecimalToStr("#,##0");
-                row[AllAssetsColumns.Coupons] = dr["INPUT_COUPONS"].DecimalToStr("#,##0");
+                row[AllAssetsColumns.Product] = dr["NameObject"];
+                row[AllAssetsColumns.BeginAssets] = dr["StartDateValue"].DecimalToStr();
+                row[AllAssetsColumns.InVal] = dr["INPUT_VALUE"].DecimalToStr();
+                row[AllAssetsColumns.OutVal] = dr["OUTPUT_VALUE"].DecimalToStr();
+                row[AllAssetsColumns.Dividents] = dr["INPUT_DIVIDENTS"].DecimalToStr();
+                row[AllAssetsColumns.Coupons] = dr["INPUT_COUPONS"].DecimalToStr();
                 row[AllAssetsColumns.Redemption] = "";
-                row[AllAssetsColumns.EndAssets] = dr["StartDateValue"].DecimalToStr("#,##0");
-                row[AllAssetsColumns.CurrencyProfit] = dr["ProfitValue"].DecimalToStr("#,##0");
-                row[AllAssetsColumns.ProfitPercent] = $"{dr["ProfitProcentValue"].DecimalToStr("#,##0")}%";
+                row[AllAssetsColumns.EndAssets] = dr["StartDateValue"].DecimalToStr();
+                row[AllAssetsColumns.CurrencyProfit] = $"{dr["ProfitValue"].DecimalToStr()} {dr["Valuta"]} ({dr["ProfitProcentValue"].DecimalToStr()}%)";
                 AllAssets.Table.Rows.Add(row);
             }
 
             foreach (DataRow dr in _invFullDS.Tables[InvestFullTables.DUsResultDt].Rows)
             {
                 DataRow row = AllAssets.Table.NewRow();
-                row[AllAssetsColumns.BeginAssets] = dr["StartDateValue"].DecimalToStr("#,##0");
-                row[AllAssetsColumns.InVal] = dr["INPUT_VALUE"].DecimalToStr("#,##0");
-                row[AllAssetsColumns.OutVal] = dr["OUTPUT_VALUE"].DecimalToStr("#,##0");
-                row[AllAssetsColumns.Dividents] = dr["INPUT_DIVIDENTS"].DecimalToStr("#,##0");
-                row[AllAssetsColumns.Coupons] = dr["INPUT_COUPONS"].DecimalToStr("#,##0");
+                row[AllAssetsColumns.Product] = dr["NameObject"];
+                row[AllAssetsColumns.BeginAssets] = dr["StartDateValue"].DecimalToStr();
+                row[AllAssetsColumns.InVal] = dr["INPUT_VALUE"].DecimalToStr();
+                row[AllAssetsColumns.OutVal] = dr["OUTPUT_VALUE"].DecimalToStr();
+                row[AllAssetsColumns.Dividents] = dr["INPUT_DIVIDENTS"].DecimalToStr();
+                row[AllAssetsColumns.Coupons] = dr["INPUT_COUPONS"].DecimalToStr();
                 row[AllAssetsColumns.Redemption] = "";
-                row[AllAssetsColumns.EndAssets] = dr["StartDateValue"].DecimalToStr("#,##0");
-                row[AllAssetsColumns.CurrencyProfit] = dr["ProfitValue"].DecimalToStr("#,##0");
-                row[AllAssetsColumns.ProfitPercent] = $"{dr["ProfitProcentValue"].DecimalToStr("#,##0")}%";
+                row[AllAssetsColumns.EndAssets] = dr["StartDateValue"].DecimalToStr();
+                row[AllAssetsColumns.CurrencyProfit] = $"{dr["ProfitValue"].DecimalToStr()} {dr["Valuta"]} ({dr["ProfitProcentValue"].DecimalToStr()}%)";
                 AllAssets.Table.Rows.Add(row);
             }
         }
@@ -345,7 +336,7 @@ namespace ReportsProcatt.Models
                         .Sum(r => (decimal)r["VALUE_RUR"]),
                     backgroundColor = CircleDiagramsColorCodes.MainAssetsCircle[7],
                     borderColor = CircleDiagramsColorCodes.MainAssetsCircle[7],
-                    result = $"{otherPerent.DecimalToStr("#,##0")}%"
+                    result = $"{otherPerent.DecimalToStr()}%"
                 });
             }
         }
@@ -396,7 +387,7 @@ namespace ReportsProcatt.Models
                         .Sum(r => (decimal)r["VALUE_RUR"]),
                     backgroundColor = CircleDiagramsColorCodes.MainInstrumentsCircle[7],
                     borderColor = CircleDiagramsColorCodes.MainInstrumentsCircle[7],
-                    result = $"{otherPerent.DecimalToStr("#,##0")}%"
+                    result = $"{otherPerent.DecimalToStr()}%"
                 });
             }
         }
@@ -447,7 +438,7 @@ namespace ReportsProcatt.Models
                         .Sum(r => (decimal)r["VALUE_RUR"]),
                     backgroundColor = CircleDiagramsColorCodes.MainCurrenciesCircle[7],
                     borderColor = CircleDiagramsColorCodes.MainCurrenciesCircle[7],
-                    result = $"{otherPerent.DecimalToStr("#,##0")}%"
+                    result = $"{otherPerent.DecimalToStr()}%"
                 });
             }
         }
