@@ -34,7 +34,7 @@ namespace ReportsProcatt.Controllers
         {
             try
             {
-                var data = new Report(InvestorId ?? 2149652, DateFrom ?? new DateTime(2001, 05, 17), DateTo ?? new DateTime(2021, 05, 29), Currency)
+                var data = new Report(InvestorId ?? 2149652, DateFrom, DateTo, Currency)
                 {
                     rootStr = "/app/wwwroot"
                 };
@@ -71,9 +71,9 @@ namespace ReportsProcatt.Controllers
             [FromQuery] string Currency
         )
         {
-            var data = new Report(InvestorId ?? 2149652, DateFrom ?? new DateTime(2001, 05, 17), DateTo ?? new DateTime(2021, 05, 29), Currency)
+            var data = new Report(InvestorId ?? 2149652, DateFrom, DateTo, Currency)
             {
-                rootStr = "file:///c:/Users/D/source/Ingos/ReportsProcatt/ReportsProcatt/wwwroot"
+                rootStr = "file:///c:/Users/Света/source/Ingos/ReportsProcatt/ReportsProcatt/wwwroot"
             };
 
             return await _generatePdf.GetPdf("Views/New/Index.cshtml", data);
@@ -115,12 +115,7 @@ namespace ReportsProcatt.Controllers
             [FromQuery] string Currency
         )
         {
-            var data = new Report(InvestorId ?? 2149652, DateFrom ?? new DateTime(2001, 05, 17), DateTo ?? new DateTime(2021, 05, 29), Currency)
-            {
-                
-            };
-
-            return View(data);
+            return View(new Report(InvestorId, DateFrom, DateTo, Currency));
         }
         [HttpGet]
         [Route("Api")]

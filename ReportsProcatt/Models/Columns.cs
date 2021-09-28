@@ -7,26 +7,28 @@ namespace ReportsProcatt.Models
 {
     public class MainDiagramParams
     {
-        public const string Begin = "В начале";
+        public const string Begin = "В начале периода";
         public const string InVal = "Пополнения";
         public const string OutVal = "Выводы";
         public const string Dividents = "Дивиденды";
         public const string Coupons = "Купоны";
         public const string OutVal1 = "Погашения";
         //public const string ReVal = "Переоценка";
-        public const string End = "В конце";
+        public const string End = "В конце периода";
     }
     public class PIFsTotalColumns
     {
         public const string PIFs = "PIFs";
-        public const string AssetsToEnd = "AssetsToEnd";
+        public const string StartValue = "StartValue";
+        public const string EndValue = "EndValue";
         public const string Result = "Result";
     }
 
     public class DUsTotalColumns
     {
         public const string DUs = "DUs";
-        public const string AssetsToEnd = "AssetsToEnd";
+        public const string StartValue = "StartValue";
+        public const string EndValue = "EndValue";
         public const string Result = "Result";
     }
 
