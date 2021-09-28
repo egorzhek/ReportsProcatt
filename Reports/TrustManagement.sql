@@ -969,12 +969,13 @@ where aa.In_Summa > 0 or bb.Out_Summa > 0;
 
 
 -- tree3
-select
+SELECT
+  c.CategoryName,
 	ChildId = cast(a.InvestmentId as BigInt),
 	TypeId = cast(c.id as BigInt),
 	ChildName = i.Investment,
 	ValutaId = cast(a.CUR_ID as BigInt),
-	Valuta = cr.ShortName,
+	Valuta = cr.Symbol,
 	Price =  CAST(Round(a.[VALUE_NOM],2) as Decimal(30,2)),
 	Ammount = case when c.Id <> 4 then CAST(Round(a.[AMOUNT],2) as Decimal(30,2))  else NULL end,
 	Detail = CAST(Round(rst.InvestResult,2) as Decimal(30,2)),
@@ -1317,7 +1318,7 @@ select
 	ChildId = b.InvestmentId,
 	Child2Name = i.Investment,
 	Price = CAST(Round(a.VALUE_NOM,2) as Decimal(30,2)),
-	Valuta = c.ShortName,
+	Valuta = c.Symbol,
 	Ammount = a.Amount,
 	a.FinRes,
 	a.FinResProcent
@@ -1510,31 +1511,6 @@ GROUP BY CategoryName,Investment,Symbol
 		inner join [dbo].[Categories] as cg on cc.CategoryId = cg.Id
 		left join [CacheDB].[dbo].[Currencies] as c with(nolock) on a.CUR_ID = c.Id
 		where isnull(a.IsActive,0) = 1
-
-
-BEGIN TRY
-	drop table #TrustTree;
-END TRY
-BEGIN CATCH
-END CATCH;
-
-BEGIN TRY
-	DROP TABLE #ResInvAssets
-END TRY
-BEGIN CATCH
-END CATCH;
-
-begin try
-	drop table #POSITION_KEEPING_EndDate;
-end try
-begin catch
-end catch
-
-begin try
-	drop table #POSITION_KEEPING_StartDate;
-end try
-begin catch
-end catch
 
 
 

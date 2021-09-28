@@ -36,7 +36,8 @@ namespace ReportsProcatt.Models
         public string SuccessFee => $"{_TrustManagementDS.GetValue(DuTables.MainResultDT, "Fee")}%";
 
         //Текущие позиции по валютам
-
+        public DataTable GroupPositionData { get; set; }
+        public DataTable DetailPositionData { get; set; }
         //Текущие позиции в периоде
         public TableView CurrentShares { get; set; }
         public TableView CurrentBonds { get; set; }
@@ -103,6 +104,8 @@ namespace ReportsProcatt.Models
 
             InitDividedtsCouponsChart();
             InitDividedtsCoupons();
+
+            InitCurrentAssetsPositions();
 
             InitClosedShares();
             InitClosedBonds();
@@ -277,7 +280,7 @@ namespace ReportsProcatt.Models
         private void InitDividedtsCoupons()
         {
             DividedtsCoupons = new TableView();
-            DividedtsCoupons.Table = new DataTable(); 
+            DividedtsCoupons.Table = new DataTable();
             DividedtsCoupons.Table.Columns.Add(DividedtsCouponsColumns.Date);
             DividedtsCoupons.Table.Columns.Add(DividedtsCouponsColumns.ToolName);
             DividedtsCoupons.Table.Columns.Add(DividedtsCouponsColumns.PriceType);
@@ -297,14 +300,62 @@ namespace ReportsProcatt.Models
             DividedtsCoupons.Ths.Where(t => t.ColumnName == DividedtsCouponsColumns.Price).First().AttrRow.Add("width", "150px");
 
             foreach (DataRow dr in _TrustManagementDS.Tables[DuTables.DividedtsCoupons].Rows)
-            { 
-                DataRow row = DividedtsCoupons.Table.NewRow(); 
+            {
+                DataRow row = DividedtsCoupons.Table.NewRow();
                 row[DividedtsCouponsColumns.Date] = ((DateTime)dr["Date"]).ToString("dd.MM.yyyy");
                 row[DividedtsCouponsColumns.ToolName] = dr["ToolName"];
                 row[DividedtsCouponsColumns.PriceType] = dr["PriceType"];
                 row[DividedtsCouponsColumns.ContractName] = dr["ContractName"];
                 row[DividedtsCouponsColumns.Price] = $"{dr["Price"].DecimalToStr()}"; //{dr["Valuta"]}";
                 DividedtsCoupons.Table.Rows.Add(row);
+            }
+        }
+        private void InitCurrentAssetsPositions()
+        {
+            GroupPositionData = new DataTable();
+            GroupPositionData.Columns.Add(GrPosDtColumns.ChildName);
+            GroupPositionData.Columns.Add(GrPosDtColumns.Price);
+            GroupPositionData.Columns.Add(GrPosDtColumns.Valuta);
+            GroupPositionData.Columns.Add(GrPosDtColumns.Ammount);
+            GroupPositionData.Columns.Add(GrPosDtColumns.Result);
+            GroupPositionData.Columns.Add(GrPosDtColumns.ResultProcent);
+            GroupPositionData.Columns.Add(GrPosDtColumns.ChildId);
+            GroupPositionData.Columns.Add(GrPosDtColumns.CategoryName);
+
+            foreach (DataRow dr in _TrustManagementDS.Tables[DuTables.GroupPositionDataTable].Rows)
+            {
+                DataRow row = GroupPositionData.NewRow();
+                row[GrPosDtColumns.ChildName] = dr["ChildName"];
+                row[GrPosDtColumns.Price] = dr["Price"];
+                row[GrPosDtColumns.Valuta] = dr["Valuta"];
+                row[GrPosDtColumns.Ammount] = dr["Ammount"];
+                row[GrPosDtColumns.Result] = dr["Detail"];
+                row[GrPosDtColumns.ResultProcent] = dr["ResultProcent"];
+                row[GrPosDtColumns.ChildId] = dr["ChildId"];
+                row[GrPosDtColumns.CategoryName] = dr["CategoryName"];
+                GroupPositionData.Rows.Add(row);
+            }
+
+            DetailPositionData = new DataTable();
+            DetailPositionData.Columns.Add(DtlPosDtColumns.ChildId);
+            DetailPositionData.Columns.Add(DtlPosDtColumns.Child2Name);
+            DetailPositionData.Columns.Add(DtlPosDtColumns.Price);
+            DetailPositionData.Columns.Add(DtlPosDtColumns.Valuta);
+            DetailPositionData.Columns.Add(DtlPosDtColumns.Ammount);
+            DetailPositionData.Columns.Add(DtlPosDtColumns.FinRes);
+            DetailPositionData.Columns.Add(DtlPosDtColumns.FinResProcent);
+
+            foreach (DataRow dr in _TrustManagementDS.Tables[DuTables.DetailPositionDataTable].Rows)
+            {
+                DataRow row = DetailPositionData.NewRow();
+                row[DtlPosDtColumns.ChildId] = dr["ChildId"];
+                row[DtlPosDtColumns.Child2Name] = dr["Child2Name"];
+                row[DtlPosDtColumns.Price] = dr["Price"];
+                row[DtlPosDtColumns.Valuta] = dr["Valuta"];
+                row[DtlPosDtColumns.Ammount] = dr["Ammount"];
+                row[DtlPosDtColumns.FinRes] = dr["FinRes"];
+                row[DtlPosDtColumns.FinResProcent] = dr["FinResProcent"];
+                DetailPositionData.Rows.Add(row);
             }
         }
         private void InitClosedShares()
@@ -337,8 +388,8 @@ namespace ReportsProcatt.Models
             };
 
             foreach (DataRow dr in _TrustManagementDS.Tables[DuTables.ClosedShares].Rows)
-            { 
-                DataRow row = ClosedShares.Table.NewRow(); 
+            {
+                DataRow row = ClosedShares.Table.NewRow();
                 row[ClosedSharesColumns.IN_DATE] = ((DateTime)dr["IN_DATE"]).ToString("dd.MM.yyyy");
                 row[ClosedSharesColumns.Investment] = dr["Investment"];
                 row[ClosedSharesColumns.IN_PRICE] = $"{dr["IN_PRICE"].DecimalToStr()} {dr["Valuta"]}";
@@ -353,10 +404,10 @@ namespace ReportsProcatt.Models
             }
         }
 
-        private void InitClosedBonds() 
+        private void InitClosedBonds()
         {
             ClosedBonds = new TableView();
-            ClosedBonds.Table = new DataTable(); 
+            ClosedBonds.Table = new DataTable();
             ClosedBonds.Table.Columns.Add(ClosedBondsColumns.IN_DATE);
             ClosedBonds.Table.Columns.Add(ClosedBondsColumns.ISIN);
             ClosedBonds.Table.Columns.Add(ClosedBondsColumns.Investment);
@@ -395,7 +446,7 @@ namespace ReportsProcatt.Models
 
             foreach (DataRow dr in _TrustManagementDS.Tables[DuTables.ClosedBonds].Rows)
             {
-                DataRow row = ClosedBonds.Table.NewRow(); 
+                DataRow row = ClosedBonds.Table.NewRow();
                 row[ClosedBondsColumns.IN_DATE] = ((DateTime)dr["IN_DATE"]).ToString("dd.MM.yyyy");
                 row[ClosedBondsColumns.ISIN] = dr["ISIN"];
                 row[ClosedBondsColumns.Investment] = dr["Investment"];
@@ -415,10 +466,10 @@ namespace ReportsProcatt.Models
                 ClosedBonds.Table.Rows.Add(row);
             }
         }
-        private void InitClosedFunds() 
+        private void InitClosedFunds()
         {
             ClosedFunds = new TableView();
-            ClosedFunds.Table = new DataTable(); 
+            ClosedFunds.Table = new DataTable();
             ClosedFunds.Table.Columns.Add(ClosedFundsColumns.IN_DATE);
             ClosedFunds.Table.Columns.Add(ClosedFundsColumns.Investment);
             ClosedFunds.Table.Columns.Add(ClosedFundsColumns.IN_PRICE);
@@ -444,7 +495,7 @@ namespace ReportsProcatt.Models
 
             foreach (DataRow dr in _TrustManagementDS.Tables[DuTables.ClosedFunds].Rows)
             {
-                DataRow row = ClosedFunds.Table.NewRow(); 
+                DataRow row = ClosedFunds.Table.NewRow();
                 row[ClosedFundsColumns.IN_DATE] = ((DateTime)dr["IN_DATE"]).ToString("dd.MM.yyyy");
                 row[ClosedFundsColumns.Investment] = dr["Investment"];
                 row[ClosedFundsColumns.IN_PRICE] = $"{dr["IN_PRICE"].DecimalToStr()} {dr["Valuta"]}";
@@ -457,7 +508,7 @@ namespace ReportsProcatt.Models
                 ClosedFunds.Table.Rows.Add(row);
             }
         }
-        private void InitClosedDerivatives() 
+        private void InitClosedDerivatives()
         {
             ClosedDerivatives = new TableView();
             ClosedDerivatives.Table = new DataTable();
@@ -502,10 +553,10 @@ namespace ReportsProcatt.Models
                 ClosedDerivatives.Table.Rows.Add(row);
             }
         }
-        private void InitClosedBills() 
+        private void InitClosedBills()
         {
             ClosedBills = new TableView();
-            ClosedBills.Table = new DataTable(); 
+            ClosedBills.Table = new DataTable();
             ClosedBills.Table.Columns.Add(ClosedBillsColumns.IN_DATE);
             ClosedBills.Table.Columns.Add(ClosedBillsColumns.ISIN);
             ClosedBills.Table.Columns.Add(ClosedBillsColumns.Investment);
@@ -547,7 +598,7 @@ namespace ReportsProcatt.Models
 
             foreach (DataRow dr in _TrustManagementDS.Tables[DuTables.ClosedBills].Rows)
             {
-                DataRow row = ClosedBills.Table.NewRow(); 
+                DataRow row = ClosedBills.Table.NewRow();
                 row[ClosedBillsColumns.IN_DATE] = ((DateTime)dr["IN_DATE"]).ToString("dd.MM.yyyy");
                 row[ClosedBillsColumns.ISIN] = dr["ISIN"];
                 row[ClosedBillsColumns.Investment] = dr["Investment"];
@@ -568,7 +619,7 @@ namespace ReportsProcatt.Models
                 ClosedBills.Table.Rows.Add(row);
             }
         }
-        private void InitClosedCash() 
+        private void InitClosedCash()
         {
             ClosedCash = new TableView();
             ClosedCash.Table = new DataTable();
@@ -610,9 +661,10 @@ namespace ReportsProcatt.Models
                 ClosedCash.Table.Rows.Add(row);
             }
         }
-        private void InitCurrentShares() {
+        private void InitCurrentShares()
+        {
             CurrentShares = new TableView();
-            CurrentShares.Table = new DataTable(); 
+            CurrentShares.Table = new DataTable();
             CurrentShares.Table.Columns.Add(CurrentSharesColumns.IN_DATE);
             CurrentShares.Table.Columns.Add(CurrentSharesColumns.Investment);
             CurrentShares.Table.Columns.Add(CurrentSharesColumns.IN_PRICE);
@@ -637,7 +689,7 @@ namespace ReportsProcatt.Models
 
             foreach (DataRow dr in _TrustManagementDS.Tables[DuTables.CurrentShares].Rows)
             {
-                DataRow row = CurrentShares.Table.NewRow(); 
+                DataRow row = CurrentShares.Table.NewRow();
                 row[CurrentSharesColumns.IN_DATE] = ((DateTime)dr["IN_DATE"]).ToString("dd.MM.yyyy");
                 row[CurrentSharesColumns.Investment] = dr["Investment"];
                 row[CurrentSharesColumns.IN_PRICE] = $"{dr["IN_PRICE"].DecimalToStr()} {dr["Valuta"]}";
@@ -650,7 +702,7 @@ namespace ReportsProcatt.Models
                 CurrentShares.Table.Rows.Add(row);
             }
         }
-        private void InitCurrentBonds() 
+        private void InitCurrentBonds()
         {
             CurrentBonds = new TableView();
             CurrentBonds.Table = new DataTable();
@@ -701,13 +753,13 @@ namespace ReportsProcatt.Models
                 row[CurrentBondsColumns.In_Summa] = dr["In_Summa"].DecimalToStr();
                 row[CurrentBondsColumns.Today_Price] = dr["Today_Price"].DecimalToStr();
                 row[CurrentBondsColumns.NKD] = dr["NKD"].DecimalToStr();
-                row[CurrentBondsColumns.Amortizations] = $"{dr["Amortizations"].DecimalToStr()}{(!string.IsNullOrEmpty(dr["Coupons"]?.ToString()) ? $"({dr["Coupons"].DecimalToStr()})" :"")}";
+                row[CurrentBondsColumns.Amortizations] = $"{dr["Amortizations"].DecimalToStr()}{(!string.IsNullOrEmpty(dr["Coupons"]?.ToString()) ? $"({dr["Coupons"].DecimalToStr()})" : "")}";
                 row[CurrentBondsColumns.Value_Nom] = dr["Value_Nom"].DecimalToStr();
                 row[CurrentBondsColumns.FinRes] = $"{dr["FinRes"].DecimalToStr()}({dr["FinResProcent"].DecimalToStr("#0.00")}%)";
                 CurrentBonds.Table.Rows.Add(row);
             }
         }
-        private void InitCurrentBills() 
+        private void InitCurrentBills()
         {
             CurrentBills = new TableView();
             CurrentBills.Table = new DataTable();
@@ -764,7 +816,7 @@ namespace ReportsProcatt.Models
                 CurrentBills.Table.Rows.Add(row);
             }
         }
-        private void InitCurrentCash() 
+        private void InitCurrentCash()
         {
             CurrentCash = new TableView();
             CurrentCash.Table = new DataTable();
@@ -802,9 +854,10 @@ namespace ReportsProcatt.Models
                 CurrentCash.Table.Rows.Add(row);
             }
         }
-        private void InitCurrentFunds() {
+        private void InitCurrentFunds()
+        {
             CurrentFunds = new TableView();
-            CurrentFunds.Table = new DataTable(); 
+            CurrentFunds.Table = new DataTable();
             CurrentFunds.Table.Columns.Add(CurrentFundsColumns.IN_DATE);
             CurrentFunds.Table.Columns.Add(CurrentFundsColumns.Investment);
             CurrentFunds.Table.Columns.Add(CurrentFundsColumns.IN_PRICE);
@@ -825,9 +878,9 @@ namespace ReportsProcatt.Models
                 new ViewElementAttr{ColumnName = CurrentFundsColumns.FinRes, DisplayName = "Фин. Результат", SortOrder = 8},
             };
 
-           foreach (DataRow dr in _TrustManagementDS.Tables[DuTables.CurrentFunds].Rows)
+            foreach (DataRow dr in _TrustManagementDS.Tables[DuTables.CurrentFunds].Rows)
             {
-                DataRow row = CurrentFunds.Table.NewRow(); 
+                DataRow row = CurrentFunds.Table.NewRow();
                 row[CurrentFundsColumns.IN_DATE] = ((DateTime)dr["IN_DATE"]).ToString("dd.MM.yyyy");
                 row[CurrentFundsColumns.Investment] = dr["Investment"];
                 row[CurrentFundsColumns.IN_PRICE] = $"{dr["IN_PRICE"].DecimalToStr()} {dr["Valuta"]}";
@@ -839,7 +892,7 @@ namespace ReportsProcatt.Models
                 CurrentFunds.Table.Rows.Add(row);
             }
         }
-        private void InitCurrentDerivatives() 
+        private void InitCurrentDerivatives()
         {
             CurrentDerivatives = new TableView();
             CurrentDerivatives.Table = new DataTable();
@@ -932,6 +985,8 @@ namespace ReportsProcatt.Models
         public const int DivsNCoupsChartDT = 4;
         public const int DividedtsCoupons = 5;
         public const int DuOperationsHistory = 6;
+        public const int GroupPositionDataTable = 9;
+        public const int DetailPositionDataTable = 10;
         public const int CurrentShares = 11;
         public const int ClosedShares = 12;
         public const int CurrentBonds = 13;

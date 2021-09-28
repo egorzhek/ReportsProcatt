@@ -252,6 +252,26 @@ namespace ReportsProcatt.Models
         public const string Fee = "Fee";
     }
 
+    public class GrPosDtColumns
+    {
+        public const string ChildName = "ChildName";
+        public const string Price = "Price";
+        public const string Valuta = "Valuta";
+        public const string Ammount = "Ammount";
+        public const string Result = "Detail";
+        public const string ResultProcent = "ResultProcent";
+        public const string ChildId = "ChildId";
+        public const string CategoryName = "CategoryName";
+    }
 
-
+    public class DtlPosDtColumns
+    {
+        public const string ChildId = "ChildId";
+        public const string Child2Name = "Child2Name";
+        public const string Price = "Price";
+        public const string Valuta = "Valuta";
+        public const string Ammount = "Ammount";
+        public const string FinRes = "FinRes";
+        public const string FinResProcent = "FinResProcent";
+    }
 }

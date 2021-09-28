@@ -326,6 +326,8 @@
         </tr>
     </tbody>
 </table>
+
+@*Текущие позиции по валютам*@
 <table class="section block-heading">
     <tbody>
         <tr>
@@ -350,7 +352,8 @@
         </tr>
     </tbody>
 </table>
-@*Текущие позиции по валютам*@
+@Html.Partial("_PartialCurrentAssetsPositions", Model)
+
 @if (Model.CurrentShares.Table.Rows.Count > 0)
 {
     <table class="section block-heading">
@@ -380,6 +383,7 @@
     </table>
     @Html.Partial("_PartialTableView", Model.CurrentShares)
 }
+
 @if (Model.CurrentBonds.Table.Rows.Count > 0)
 {
     <table class="section block-heading">
@@ -768,33 +772,33 @@
 }
 @if (Model.DuOperationsHistory.Table.Rows.Count > 0)
 {
-<div class="keep-together">
+    <div class="keep-together">
 
-    <table class="section block-heading print-pt100">
-        <tbody>
-            <tr>
-                <td>
-                    <table class="section-wrapper">
-                        <tbody>
-                            <tr>
+        <table class="section block-heading print-pt100">
+            <tbody>
+                <tr>
+                    <td>
+                        <table class="section-wrapper">
+                            <tbody>
+                                <tr>
 
-                                <td class="left-td heading-td">
-                                    <span>История операций</span>
-                                </td>
+                                    <td class="left-td heading-td">
+                                        <span>История операций</span>
+                                    </td>
 
-                                <td class="right-td heading-td">
-                                </td>
+                                    <td class="right-td heading-td">
+                                    </td>
 
-                            </tr>
-                        </tbody>
-                    </table>
-                </td>
-            </tr>
-        </tbody>
-    </table>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
 
 
-    @Html.Partial("_PartialTableView", Model.DuOperationsHistory)
+        @Html.Partial("_PartialTableView", Model.DuOperationsHistory)
 
-</div>
+    </div>
 }

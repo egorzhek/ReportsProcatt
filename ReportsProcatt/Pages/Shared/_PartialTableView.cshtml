@@ -22,7 +22,7 @@
                                     }
                                 </tr>
 
-                                @foreach (DataRow tr in Model.Table.Rows)
+                                @foreach (DataRow tr in Model.Table.Rows.Cast<DataRow>().Take(15).ToList())
                                 {
                                 <tr class="body-row">
                                     @foreach (var th in Model.Ths)

@@ -1,0 +1,96 @@
+﻿@using ReportsProcatt.Content;
+@using System.Data;
+@using ReportsProcatt.Models;
+@model ReportsProcatt.Models.DU
+
+<table class="section currency-position-section">
+    <tbody>
+        <tr>
+            <td>
+
+                <table class="section-wrapper">
+                    <tbody>
+                        <tr class="details-container">
+
+                            <td>
+
+                                <div class="details-wrap">
+                                @foreach (var cat in Model.GroupPositionData.Rows.Cast<DataRow>()
+                                                      .Select(r => r[GrPosDtColumns.CategoryName])
+                                                      .Distinct().ToList())
+                                {
+                                    <span class="currency-position-head">@cat</span>
+                                    <div class="currency-position-item">
+
+                                        <ol>
+                                        @foreach (var instr in Model.GroupPositionData.AsEnumerable()
+                                                                    .Where(r => r[GrPosDtColumns.CategoryName].Equals(cat))
+                                                                    .ToList())
+                                        {
+                                            <li>
+                                                <div class="currency-position-item-content">
+                                               
+                                                    <div class="currency-position-item-upper">
+                                                        @Html.Raw($"{instr[GrPosDtColumns.ChildName]}")
+
+                                                        <span>@Html.Raw($"{instr[GrPosDtColumns.Price].DecimalToStr("#,##0.00")} {instr[GrPosDtColumns.Valuta]}")</span>
+                                                    </div>
+
+                                                    @if (!instr[GrPosDtColumns.CategoryName].Equals("Денежные средства"))
+                                                    {
+                                                    <div class="currency-position-item-lower">
+                                                        <span>@Html.Raw($"{instr[GrPosDtColumns.Ammount].DecimalToStr()}") шт.</span>
+
+
+                                                        <span>@Html.Raw($"{instr[GrPosDtColumns.Result].DecimalToStr("#,##0.00", true)} {instr[GrPosDtColumns.Valuta]} ({instr[GrPosDtColumns.ResultProcent].DecimalToStr("#,##0.00", true)}%)")</span>
+                                                    </div>
+                                                    }
+
+                                                    @if (Model.DetailPositionData.Rows.Cast<DataRow>()
+                                                   .Any(r => r[DtlPosDtColumns.ChildId].Equals(instr[GrPosDtColumns.ChildId])))
+                                                    {
+                                                    <ol>
+                                                        @foreach (var dt in Model.DetailPositionData.Rows.Cast<DataRow>()
+                                                                       .Where(r => r[DtlPosDtColumns.ChildId].Equals(instr[GrPosDtColumns.ChildId]))
+                                                                       .ToList())
+                                                        {
+                                                        <li>
+                                                            <div class="currency-position-item-content">
+
+                                                                <div class="currency-position-item-upper">
+                                                                    @dt[DtlPosDtColumns.Child2Name]
+
+                                                                    <span>@Html.Raw($"{dt[DtlPosDtColumns.Price].DecimalToStr("#,##0.00")} {dt[DtlPosDtColumns.Valuta]}")</span>
+                                                                </div>
+
+                                                                <div class="currency-position-item-lower">
+                                                                    <span>@Html.Raw($"{dt[DtlPosDtColumns.Ammount].DecimalToStr()}") шт.</span>
+
+
+                                                                    <span>@Html.Raw($"{dt[DtlPosDtColumns.FinRes].DecimalToStr("#,##0.00", true)} {dt[DtlPosDtColumns.Valuta]} ({dt[DtlPosDtColumns.FinResProcent].DecimalToStr("#,##0.00", true)}%)")</span>
+                                                                </div>
+                                                            </div>
+                                                        </li>
+                                                        }
+                                                    </ol>
+                                                    }
+
+                                                </div>
+                                            </li>
+                                        }
+                                        </ol>
+
+                                    </div>
+                                }
+                                </div>
+
+                            </td>
+
+                        </tr>
+                    </tbody>
+                </table>
+
+            </td>
+        </tr>
+    </tbody>
+</table>
