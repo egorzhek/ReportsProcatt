@@ -46,11 +46,11 @@ namespace ReportsProcatt.Models
         #endregion
         public Report(int aInvestorId, DateTime? aDateFrom, DateTime? aDateTo,string CurrencyCode)
         {
-            ReportPath = Environment.GetEnvironmentVariable("ReportPath");
-            connectionString = Program.GetReportSqlConnection(Path.Combine(ReportPath, "appsettings.json"));
+            //ReportPath = Environment.GetEnvironmentVariable("ReportPath");
+            //connectionString = Program.GetReportSqlConnection(Path.Combine(ReportPath, "appsettings.json"));
             //connectionString = @"Data Source=DESKTOP-2G9NLM6\MSSQLSERVER15;Encrypt=False;Initial Catalog=CacheDB;Integrated Security=True;User ID=DESKTOP-2G9NLM6\D";
-            //connectionString = @"Data Source=DESKTOP-30A75GK;Encrypt=False;Initial Catalog=CacheDB;Integrated Security=True;User ID=DESKTOP-30A75GK\Света";
-            //ReportPath = @"c:\Users\Света\source\Ingos\ReportsProcatt\Reports\";
+            connectionString = @"Data Source=DESKTOP-30A75GK;Encrypt=False;Initial Catalog=CacheDB;Integrated Security=True;User ID=DESKTOP-30A75GK\Света";
+            ReportPath = @"c:\Users\Света\source\Ingos\ReportsProcatt\Reports\";
 
             ReportCurrency = CurrencyClass.GetCurrency(CurrencyCode);
 
@@ -93,13 +93,15 @@ namespace ReportsProcatt.Models
             PIFsTotals = new TableView();
             PIFsTotals.Table = new DataTable();
             PIFsTotals.Table.Columns.Add(PIFsTotalColumns.PIFs);
-            PIFsTotals.Table.Columns.Add(PIFsTotalColumns.AssetsToEnd);
+            PIFsTotals.Table.Columns.Add(PIFsTotalColumns.StartValue);
+            PIFsTotals.Table.Columns.Add(PIFsTotalColumns.EndValue);
             PIFsTotals.Table.Columns.Add(PIFsTotalColumns.Result);
 
             PIFsTotals.Ths = new List<ViewElementAttr>
             {
-                new ViewElementAttr{ColumnName = PIFsTotalColumns.PIFs, DisplayName = "ПИФЫ", SortOrder = 1},
-                new ViewElementAttr{ColumnName = PIFsTotalColumns.AssetsToEnd, DisplayName = $"АКТИВЫ НА {Dto.ToString("dd.MM.yyyy")}", SortOrder = 2 },
+                new ViewElementAttr{ColumnName = PIFsTotalColumns.PIFs, DisplayName = "ПИФЫ", SortOrder = 0},
+                new ViewElementAttr{ColumnName = PIFsTotalColumns.EndValue, DisplayName = $"АКТИВЫ НА {Dfrom.ToString("dd.MM.yyyy")}", SortOrder = 1 },
+                new ViewElementAttr{ColumnName = PIFsTotalColumns.StartValue, DisplayName = $"АКТИВЫ НА {Dto.ToString("dd.MM.yyyy")}", SortOrder = 2 },
                 new ViewElementAttr{ColumnName = PIFsTotalColumns.Result, DisplayName = $"РЕЗУЛЬТАТЫ* ЗА {Period}", SortOrder = 3 }
             };
             PIFsTotals.Ths.Where(t => t.ColumnName == PIFsTotalColumns.PIFs).First().AttrRow.Add("width", "520px");
@@ -108,8 +110,9 @@ namespace ReportsProcatt.Models
             {
                 DataRow row = PIFsTotals.Table.NewRow();
                 row[PIFsTotalColumns.PIFs] = dr["FundName"];
-                row[PIFsTotalColumns.AssetsToEnd] = dr["EndValue"].DecimalToStr();
-                row[PIFsTotalColumns.Result] = $"{dr["ProfitValue"].DecimalToStr()} {dr["Valuta"]} ({dr["ProfitProcentValue"].DecimalToStr()}%)";
+                row[PIFsTotalColumns.StartValue] = dr["BeginValue"].DecimalToStr();
+                row[PIFsTotalColumns.EndValue] = dr["EndValue"].DecimalToStr();
+                row[PIFsTotalColumns.Result] = $"{dr["ProfitValue"].DecimalToStr()} {dr["Valuta"]} ({dr["ProfitProcentValue"].DecimalToStr("#,##0.00")}%)";
                 PIFsTotals.Table.Rows.Add(row);
             }
         }
@@ -118,13 +121,15 @@ namespace ReportsProcatt.Models
             DUsTotals = new TableView();
             DUsTotals.Table = new DataTable();
             DUsTotals.Table.Columns.Add(DUsTotalColumns.DUs);
-            DUsTotals.Table.Columns.Add(DUsTotalColumns.AssetsToEnd);
+            DUsTotals.Table.Columns.Add(DUsTotalColumns.StartValue);
+            DUsTotals.Table.Columns.Add(DUsTotalColumns.EndValue);
             DUsTotals.Table.Columns.Add(DUsTotalColumns.Result);
 
             DUsTotals.Ths = new List<ViewElementAttr>
             {
-                new ViewElementAttr{ColumnName = DUsTotalColumns.DUs, DisplayName = "ДОВЕРИТЕЛЬНОЕ УПРАВЛЕНИЕ", SortOrder = 1},
-                new ViewElementAttr{ColumnName = DUsTotalColumns.AssetsToEnd, DisplayName = $"АКТИВЫ НА {Dto.ToString("dd.MM.yyyy")}", SortOrder = 2 },
+                new ViewElementAttr{ColumnName = DUsTotalColumns.DUs, DisplayName = "ДОВЕРИТЕЛЬНОЕ УПРАВЛЕНИЕ", SortOrder = 0},
+                new ViewElementAttr{ColumnName = DUsTotalColumns.StartValue, DisplayName = $"АКТИВЫ НА {Dfrom.ToString("dd.MM.yyyy")}", SortOrder = 1 },
+                new ViewElementAttr{ColumnName = DUsTotalColumns.EndValue, DisplayName = $"АКТИВЫ НА {Dto.ToString("dd.MM.yyyy")}", SortOrder = 2 },
                 new ViewElementAttr{ColumnName = DUsTotalColumns.Result, DisplayName = $"РЕЗУЛЬТАТЫ*  ЗА {Period}", SortOrder = 3 }
             };
             DUsTotals.Ths.Where(t => t.ColumnName == DUsTotalColumns.DUs).First().AttrRow.Add("width", "520px");
@@ -133,8 +138,9 @@ namespace ReportsProcatt.Models
             {
                 DataRow row = DUsTotals.Table.NewRow();
                 row[DUsTotalColumns.DUs] = dr["ContractName"];
-                row[DUsTotalColumns.AssetsToEnd] = dr["EndValue"].DecimalToStr();
-                row[DUsTotalColumns.Result] = $"{dr["ProfitValue"].DecimalToStr()} {dr["Valuta"]} ({dr["ProfitProcentValue"].DecimalToStr()}%)";
+                row[DUsTotalColumns.StartValue] = dr["BeginValue"].DecimalToStr();
+                row[DUsTotalColumns.EndValue] = dr["EndValue"].DecimalToStr();
+                row[DUsTotalColumns.Result] = $"{dr["ProfitValue"].DecimalToStr()} {dr["Valuta"]} ({dr["ProfitProcentValue"].DecimalToStr("#,##0.00")}%)";
                 DUsTotals.Table.Rows.Add(row);
             }
         }
@@ -248,13 +254,13 @@ namespace ReportsProcatt.Models
             AllAssets.Ths = new List<ViewElementAttr>
             {
                 new ViewElementAttr{ColumnName = AllAssetsColumns.Product, DisplayName = "Вид продукта", SortOrder = 1},
-                new ViewElementAttr{ColumnName = AllAssetsColumns.BeginAssets, DisplayName = $"АКТИВЫ НА {Dto.ToString("dd.MM.yyyy")}", SortOrder = 2},
+                new ViewElementAttr{ColumnName = AllAssetsColumns.BeginAssets, DisplayName = $"АКТИВЫ НА {Dfrom.ToString("dd.MM.yyyy")}", SortOrder = 2},
                 new ViewElementAttr{ColumnName = AllAssetsColumns.InVal, DisplayName = "ПОПОЛНЕНИЯ", SortOrder = 3},
                 new ViewElementAttr{ColumnName = AllAssetsColumns.OutVal, DisplayName = "ВЫВОД СРЕДСТВ", SortOrder = 4},
                 new ViewElementAttr{ColumnName = AllAssetsColumns.Dividents, DisplayName = "ДИВИДЕНДЫ", SortOrder = 5},
                 new ViewElementAttr{ColumnName = AllAssetsColumns.Coupons, DisplayName = "КУПОНЫ", SortOrder = 6},
                 new ViewElementAttr{ColumnName = AllAssetsColumns.Redemption, DisplayName = "Погашения", SortOrder = 7},
-                new ViewElementAttr{ColumnName = AllAssetsColumns.EndAssets, DisplayName = "АКТИВЫ", SortOrder = 8},
+                new ViewElementAttr{ColumnName = AllAssetsColumns.EndAssets, DisplayName = $"АКТИВЫ НА {Dto.ToString("dd.MM.yyyy")}", SortOrder = 8},
                 new ViewElementAttr{ColumnName = AllAssetsColumns.CurrencyProfit, DisplayName = "ДОХОД В ВАЛЮТЕ", SortOrder = 9},
             };
 
@@ -264,12 +270,12 @@ namespace ReportsProcatt.Models
                 row[AllAssetsColumns.Product] = dr["NameObject"];
                 row[AllAssetsColumns.BeginAssets] = dr["StartDateValue"].DecimalToStr();
                 row[AllAssetsColumns.InVal] = dr["INPUT_VALUE"].DecimalToStr();
-                row[AllAssetsColumns.OutVal] = dr["OUTPUT_VALUE"].DecimalToStr();
+                row[AllAssetsColumns.OutVal] = "";
                 row[AllAssetsColumns.Dividents] = dr["INPUT_DIVIDENTS"].DecimalToStr();
                 row[AllAssetsColumns.Coupons] = dr["INPUT_COUPONS"].DecimalToStr();
-                row[AllAssetsColumns.Redemption] = "";
-                row[AllAssetsColumns.EndAssets] = dr["StartDateValue"].DecimalToStr();
-                row[AllAssetsColumns.CurrencyProfit] = $"{dr["ProfitValue"].DecimalToStr()} {dr["Valuta"]} ({dr["ProfitProcentValue"].DecimalToStr()}%)";
+                row[AllAssetsColumns.Redemption] = dr["OUTPUT_VALUE"].DecimalToStr();
+                row[AllAssetsColumns.EndAssets] = dr["EndDateValue"].DecimalToStr();
+                row[AllAssetsColumns.CurrencyProfit] = $"{dr["ProfitValue"].DecimalToStr()} {dr["Valuta"]} ({dr["ProfitProcentValue"].DecimalToStr("#,##0.00")}%)";
                 AllAssets.Table.Rows.Add(row);
             }
 
@@ -283,8 +289,8 @@ namespace ReportsProcatt.Models
                 row[AllAssetsColumns.Dividents] = dr["INPUT_DIVIDENTS"].DecimalToStr();
                 row[AllAssetsColumns.Coupons] = dr["INPUT_COUPONS"].DecimalToStr();
                 row[AllAssetsColumns.Redemption] = "";
-                row[AllAssetsColumns.EndAssets] = dr["StartDateValue"].DecimalToStr();
-                row[AllAssetsColumns.CurrencyProfit] = $"{dr["ProfitValue"].DecimalToStr()} {dr["Valuta"]} ({dr["ProfitProcentValue"].DecimalToStr()}%)";
+                row[AllAssetsColumns.EndAssets] = dr["EndDateValue"].DecimalToStr();
+                row[AllAssetsColumns.CurrencyProfit] = $"{dr["ProfitValue"].DecimalToStr()} {dr["Valuta"]} ({dr["ProfitProcentValue"].DecimalToStr("#,##0.00")}%)";
                 AllAssets.Table.Rows.Add(row);
             }
         }
