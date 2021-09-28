@@ -1467,7 +1467,49 @@ close obj_cur
 deallocate obj_cur
 
 
+;WITH c AS 
+(
+    select
+			cc.CategoryId,
+			cg.CategoryName,
+      c.Symbol,
+      i.Investment,
+      a.VALUE_NOM,
+      a.Amount,
+      a.FinRes,
+      a.FinResProcent
+		from #POSITION_KEEPING_EndDate as a with(nolock)
+		inner join #TrustTree as b with(nolock) on a.ShareId = b.VALUE_ID
+		inner join [CacheDB].[dbo].[InvestmentIds] as i with(nolock) on b.InvestmentId = i.Id
+		inner join [dbo].[ClassCategories] as cc with(nolock) on a.Class = cc.ClassId
+		inner join [dbo].[Categories] as cg on cc.CategoryId = cg.Id
+		left join [CacheDB].[dbo].[Currencies] as c with(nolock) on a.CUR_ID = c.Id
+		where isnull(a.IsActive,0) = 1
+)
+SELECT CategoryName,Investment,Symbol,
+    Amount_Sum = SUM(Amount),
+    VALUE_NOM_Sum = ROUND(SUM(Value_NOM),2),
+    FinRes_Sum = ROUND(SUM(FinRes),2),
+    FinResProcent_Sum = SUM(FinResProcent)
+FROM c
+GROUP BY CategoryName,Investment,Symbol
 
+  select
+			cc.CategoryId,
+			cg.CategoryName,
+      c.Symbol,
+      i.Investment,
+      a.VALUE_NOM,
+      a.Amount,
+      a.FinRes,
+      a.FinResProcent
+		from #POSITION_KEEPING_EndDate as a with(nolock)
+		inner join #TrustTree as b with(nolock) on a.ShareId = b.VALUE_ID
+		inner join [CacheDB].[dbo].[InvestmentIds] as i with(nolock) on b.InvestmentId = i.Id
+		inner join [dbo].[ClassCategories] as cc with(nolock) on a.Class = cc.ClassId
+		inner join [dbo].[Categories] as cg on cc.CategoryId = cg.Id
+		left join [CacheDB].[dbo].[Currencies] as c with(nolock) on a.CUR_ID = c.Id
+		where isnull(a.IsActive,0) = 1
 
 
 BEGIN TRY
