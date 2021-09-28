@@ -46,11 +46,11 @@ namespace ReportsProcatt.Models
         #endregion
         public Report(int aInvestorId, DateTime? aDateFrom, DateTime? aDateTo,string CurrencyCode)
         {
-            //ReportPath = Environment.GetEnvironmentVariable("ReportPath");
-            //connectionString = Program.GetReportSqlConnection(Path.Combine(ReportPath, "appsettings.json"));
+            ReportPath = Environment.GetEnvironmentVariable("ReportPath");
+            connectionString = Program.GetReportSqlConnection(Path.Combine(ReportPath, "appsettings.json"));
             //connectionString = @"Data Source=DESKTOP-2G9NLM6\MSSQLSERVER15;Encrypt=False;Initial Catalog=CacheDB;Integrated Security=True;User ID=DESKTOP-2G9NLM6\D";
-            connectionString = @"Data Source=DESKTOP-30A75GK;Encrypt=False;Initial Catalog=CacheDB;Integrated Security=True;User ID=DESKTOP-30A75GK\Света";
-            ReportPath = @"c:\Users\Света\source\Ingos\ReportsProcatt\Reports\";
+            //connectionString = @"Data Source=DESKTOP-30A75GK;Encrypt=False;Initial Catalog=CacheDB;Integrated Security=True;User ID=DESKTOP-30A75GK\Света";
+            //ReportPath = @"c:\Users\Света\source\Ingos\ReportsProcatt\Reports\";
 
             ReportCurrency = CurrencyClass.GetCurrency(CurrencyCode);
 
