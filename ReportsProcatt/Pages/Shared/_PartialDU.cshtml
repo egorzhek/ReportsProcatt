@@ -271,91 +271,7 @@
     </div>
 }
 
-<table class="section block-heading">
-    <tbody>
-        <tr>
-            <td>
-
-                <table class="section-wrapper">
-                    <tbody>
-                        <tr>
-
-                            <td class="left-td heading-td">
-                                <span>Информация по договору</span>
-                            </td>
-
-                            <td class="right-td heading-td">
-                            </td>
-
-                        </tr>
-                    </tbody>
-                </table>
-
-            </td>
-        </tr>
-    </tbody>
-</table>
-<table class="section details-section">
-    <tbody>
-        <tr>
-            <td>
-
-                <table class="section-wrapper">
-                    <tbody>
-                        <tr class="details-container">
-
-                            <td>
-
-                                <div class="details-wrap">
-                                    <div class="detail-item">
-                                        <span>Номер договора </span>
-                                        <p>@Model.ContractNumber</p>
-                                    </div>
-
-                                    <div class="detail-item">
-                                        <span>Дата открытия</span>
-                                        <p>@Model.OpenDate</p>
-                                    </div>
-
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </td>
-        </tr>
-    </tbody>
-</table>
-
-@*Текущие позиции по валютам*@
-<table class="section block-heading">
-    <tbody>
-        <tr>
-            <td>
-
-                <table class="section-wrapper">
-                    <tbody>
-                        <tr>
-
-                            <td class="left-td heading-td">
-                                <span>Текущие позиции по валютам</span>
-                            </td>
-
-                            <td class="right-td heading-td">
-                            </td>
-
-                        </tr>
-                    </tbody>
-                </table>
-
-            </td>
-        </tr>
-    </tbody>
-</table>
-@Html.Partial("_PartialCurrentAssetsPositions", Model)
-
-@if (Model.CurrentShares.Table.Rows.Count > 0)
-{
+<div class="keep-together">
     <table class="section block-heading">
         <tbody>
             <tr>
@@ -366,11 +282,10 @@
                             <tr>
 
                                 <td class="left-td heading-td">
-                                    <span>Акции</span>
+                                    <span>Информация по договору</span>
                                 </td>
 
                                 <td class="right-td heading-td">
-                                    Текущие позиции в периоде
                                 </td>
 
                             </tr>
@@ -381,327 +296,440 @@
             </tr>
         </tbody>
     </table>
-    @Html.Partial("_PartialTableView", Model.CurrentShares)
+    <table class="section details-section">
+        <tbody>
+            <tr>
+                <td>
+
+                    <table class="section-wrapper">
+                        <tbody>
+                            <tr class="details-container">
+
+                                <td>
+
+                                    <div class="details-wrap">
+                                        <div class="detail-item">
+                                            <span>Номер договора </span>
+                                            <p>@Model.ContractNumber</p>
+                                        </div>
+
+                                        <div class="detail-item">
+                                            <span>Дата открытия</span>
+                                            <p>@Model.OpenDate</p>
+                                        </div>
+
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+@*Текущие позиции по валютам*@
+<div class="keep-together">
+    <table class="section block-heading">
+        <tbody>
+            <tr>
+                <td>
+
+                    <table class="section-wrapper">
+                        <tbody>
+                            <tr>
+
+                                <td class="left-td heading-td">
+                                    <span>Текущие позиции по валютам</span>
+                                </td>
+
+                                <td class="right-td heading-td">
+                                </td>
+
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    @Html.Partial("_PartialCurrentAssetsPositions", Model)
+</div>
+
+@if (Model.CurrentShares.Table.Rows.Count > 0)
+{
+    <div class="keep-together">
+        <table class="section block-heading">
+            <tbody>
+                <tr>
+                    <td>
+
+                        <table class="section-wrapper">
+                            <tbody>
+                                <tr>
+
+                                    <td class="left-td heading-td">
+                                        <span>Акции</span>
+                                    </td>
+
+                                    <td class="right-td heading-td">
+                                        Текущие позиции в периоде
+                                    </td>
+
+                                </tr>
+                            </tbody>
+                        </table>
+
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        @Html.Partial("_PartialTableView", Model.CurrentShares)
+    </div>
 }
 
 @if (Model.CurrentBonds.Table.Rows.Count > 0)
 {
-    <table class="section block-heading">
-        <tbody>
-            <tr>
-                <td>
+    <div class="keep-together">
+        <table class="section block-heading">
+            <tbody>
+                <tr>
+                    <td>
 
-                    <table class="section-wrapper">
-                        <tbody>
-                            <tr>
+                        <table class="section-wrapper">
+                            <tbody>
+                                <tr>
 
-                                <td class="left-td heading-td">
-                                    <span>Облигации</span>
-                                </td>
+                                    <td class="left-td heading-td">
+                                        <span>Облигации</span>
+                                    </td>
 
-                                <td class="right-td heading-td">
-                                    Текущие позиции в периоде
-                                </td>
+                                    <td class="right-td heading-td">
+                                        Текущие позиции в периоде
+                                    </td>
 
-                            </tr>
-                        </tbody>
-                    </table>
+                                </tr>
+                            </tbody>
+                        </table>
 
-                </td>
-            </tr>
-        </tbody>
-    </table>
-    @Html.Partial("_PartialTableView", Model.CurrentBonds)
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        @Html.Partial("_PartialTableView", Model.CurrentBonds)
+    </div>
 }
 @if (Model.CurrentFunds.Table.Rows.Count > 0)
 {
-    <table class="section block-heading">
-        <tbody>
-            <tr>
-                <td>
+    <div class="keep-together">
+        <table class="section block-heading">
+            <tbody>
+                <tr>
+                    <td>
 
-                    <table class="section-wrapper">
-                        <tbody>
-                            <tr>
+                        <table class="section-wrapper">
+                            <tbody>
+                                <tr>
 
-                                <td class="left-td heading-td">
-                                    <span>ПИФ</span>
-                                </td>
+                                    <td class="left-td heading-td">
+                                        <span>ПИФ</span>
+                                    </td>
 
-                                <td class="right-td heading-td">
-                                    Текущие позиции в периоде
-                                </td>
+                                    <td class="right-td heading-td">
+                                        Текущие позиции в периоде
+                                    </td>
 
-                            </tr>
-                        </tbody>
-                    </table>
+                                </tr>
+                            </tbody>
+                        </table>
 
-                </td>
-            </tr>
-        </tbody>
-    </table>
-    @Html.Partial("_PartialTableView", Model.CurrentFunds)
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        @Html.Partial("_PartialTableView", Model.CurrentFunds)
+    </div>
 }
 @if (Model.CurrentBills.Table.Rows.Count > 0)
 {
-    <table class="section block-heading">
-        <tbody>
-            <tr>
-                <td>
+    <div class="keep-together">
+        <table class="section block-heading">
+            <tbody>
+                <tr>
+                    <td>
 
-                    <table class="section-wrapper">
-                        <tbody>
-                            <tr>
+                        <table class="section-wrapper">
+                            <tbody>
+                                <tr>
 
-                                <td class="left-td heading-td">
-                                    <span>Векселя</span>
-                                </td>
+                                    <td class="left-td heading-td">
+                                        <span>Векселя</span>
+                                    </td>
 
-                                <td class="right-td heading-td">
-                                    Текущие позиции в периоде
-                                </td>
+                                    <td class="right-td heading-td">
+                                        Текущие позиции в периоде
+                                    </td>
 
-                            </tr>
-                        </tbody>
-                    </table>
+                                </tr>
+                            </tbody>
+                        </table>
 
-                </td>
-            </tr>
-        </tbody>
-    </table>
-    @Html.Partial("_PartialTableView", Model.CurrentBills)
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        @Html.Partial("_PartialTableView", Model.CurrentBills)
+    </div>
 }
 @if (Model.CurrentDerivatives.Table.Rows.Count > 0)
 {
-    <table class="section block-heading">
-        <tbody>
-            <tr>
-                <td>
+    <div class="keep-together">
+        <table class="section block-heading">
+            <tbody>
+                <tr>
+                    <td>
 
-                    <table class="section-wrapper">
-                        <tbody>
-                            <tr>
+                        <table class="section-wrapper">
+                            <tbody>
+                                <tr>
 
-                                <td class="left-td heading-td">
-                                    <span>Деривативы</span>
-                                </td>
+                                    <td class="left-td heading-td">
+                                        <span>Деривативы</span>
+                                    </td>
 
-                                <td class="right-td heading-td">
-                                    Текущие позиции в периоде
-                                </td>
+                                    <td class="right-td heading-td">
+                                        Текущие позиции в периоде
+                                    </td>
 
-                            </tr>
-                        </tbody>
-                    </table>
+                                </tr>
+                            </tbody>
+                        </table>
 
-                </td>
-            </tr>
-        </tbody>
-    </table>
-    @Html.Partial("_PartialTableView", Model.CurrentDerivatives)
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        @Html.Partial("_PartialTableView", Model.CurrentDerivatives)
+    </div>
 }
 @if (Model.CurrentCash.Table.Rows.Count > 0)
 {
-    <table class="section block-heading">
-        <tbody>
-            <tr>
-                <td>
+    <div class="keep-together">
+        <table class="section block-heading">
+            <tbody>
+                <tr>
+                    <td>
 
-                    <table class="section-wrapper">
-                        <tbody>
-                            <tr>
+                        <table class="section-wrapper">
+                            <tbody>
+                                <tr>
 
-                                <td class="left-td heading-td">
-                                    <span>Деньги</span>
-                                </td>
+                                    <td class="left-td heading-td">
+                                        <span>Деньги</span>
+                                    </td>
 
-                                <td class="right-td heading-td">
-                                    Текущие позиции в периоде
-                                </td>
+                                    <td class="right-td heading-td">
+                                        Текущие позиции в периоде
+                                    </td>
 
-                            </tr>
-                        </tbody>
-                    </table>
+                                </tr>
+                            </tbody>
+                        </table>
 
-                </td>
-            </tr>
-        </tbody>
-    </table>
-    @Html.Partial("_PartialTableView", Model.CurrentCash)
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        @Html.Partial("_PartialTableView", Model.CurrentCash)
+    </div>
 }
 @if (Model.ClosedShares.Table.Rows.Count > 0)
 {
-    <table class="section block-heading">
-        <tbody>
-            <tr>
-                <td>
+    <div class="keep-together">
+        <table class="section block-heading">
+            <tbody>
+                <tr>
+                    <td>
 
-                    <table class="section-wrapper">
-                        <tbody>
-                            <tr>
+                        <table class="section-wrapper">
+                            <tbody>
+                                <tr>
 
-                                <td class="left-td heading-td">
-                                    <span>Акции</span>
-                                </td>
+                                    <td class="left-td heading-td">
+                                        <span>Акции</span>
+                                    </td>
 
-                                <td class="right-td heading-td">
-                                    Закрытые позиции в периоде
-                                </td>
+                                    <td class="right-td heading-td">
+                                        Закрытые позиции в периоде
+                                    </td>
 
-                            </tr>
-                        </tbody>
-                    </table>
+                                </tr>
+                            </tbody>
+                        </table>
 
-                </td>
-            </tr>
-        </tbody>
-    </table>
-    @Html.Partial("_PartialTableView", Model.ClosedShares)
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        @Html.Partial("_PartialTableView", Model.ClosedShares)
+    </div>
 }
 @if (Model.ClosedBonds.Table.Rows.Count > 0)
 {
-    <table class="section block-heading">
-        <tbody>
-            <tr>
-                <td>
+    <div class="keep-together">
+        <table class="section block-heading">
+            <tbody>
+                <tr>
+                    <td>
 
-                    <table class="section-wrapper">
-                        <tbody>
-                            <tr>
+                        <table class="section-wrapper">
+                            <tbody>
+                                <tr>
 
-                                <td class="left-td heading-td">
-                                    <span>Облигации</span>
-                                </td>
+                                    <td class="left-td heading-td">
+                                        <span>Облигации</span>
+                                    </td>
 
-                                <td class="right-td heading-td">
-                                    Закрытые позиции в периоде
-                                </td>
+                                    <td class="right-td heading-td">
+                                        Закрытые позиции в периоде
+                                    </td>
 
-                            </tr>
-                        </tbody>
-                    </table>
+                                </tr>
+                            </tbody>
+                        </table>
 
-                </td>
-            </tr>
-        </tbody>
-    </table>
-    @Html.Partial("_PartialTableView", Model.ClosedBonds)
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        @Html.Partial("_PartialTableView", Model.ClosedBonds)
+    </div>
 }
 @if (Model.ClosedFunds.Table.Rows.Count > 0)
 {
-    <table class="section block-heading">
-        <tbody>
-            <tr>
-                <td>
+    <div class="keep-together">
+        <table class="section block-heading">
+            <tbody>
+                <tr>
+                    <td>
 
-                    <table class="section-wrapper">
-                        <tbody>
-                            <tr>
+                        <table class="section-wrapper">
+                            <tbody>
+                                <tr>
 
-                                <td class="left-td heading-td">
-                                    <span>ПИФ</span>
-                                </td>
+                                    <td class="left-td heading-td">
+                                        <span>ПИФ</span>
+                                    </td>
 
-                                <td class="right-td heading-td">
-                                    Закрытые позиции в периоде
-                                </td>
+                                    <td class="right-td heading-td">
+                                        Закрытые позиции в периоде
+                                    </td>
 
-                            </tr>
-                        </tbody>
-                    </table>
+                                </tr>
+                            </tbody>
+                        </table>
 
-                </td>
-            </tr>
-        </tbody>
-    </table>
-    @Html.Partial("_PartialTableView", Model.ClosedFunds)
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        @Html.Partial("_PartialTableView", Model.ClosedFunds)
+    </div>
 }
 @if (Model.ClosedBills.Table.Rows.Count > 0)
 {
-    <table class="section block-heading">
-        <tbody>
-            <tr>
-                <td>
+    <div class="keep-together">
+        <table class="section block-heading">
+            <tbody>
+                <tr>
+                    <td>
 
-                    <table class="section-wrapper">
-                        <tbody>
-                            <tr>
+                        <table class="section-wrapper">
+                            <tbody>
+                                <tr>
 
-                                <td class="left-td heading-td">
-                                    <span>Векселя</span>
-                                </td>
+                                    <td class="left-td heading-td">
+                                        <span>Векселя</span>
+                                    </td>
 
-                                <td class="right-td heading-td">
-                                    Закрытые позиции в периоде
-                                </td>
+                                    <td class="right-td heading-td">
+                                        Закрытые позиции в периоде
+                                    </td>
 
-                            </tr>
-                        </tbody>
-                    </table>
+                                </tr>
+                            </tbody>
+                        </table>
 
-                </td>
-            </tr>
-        </tbody>
-    </table>
-    @Html.Partial("_PartialTableView", Model.ClosedBills)
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        @Html.Partial("_PartialTableView", Model.ClosedBills)
+    </div>
 }
 @if (Model.ClosedDerivatives.Table.Rows.Count > 0)
 {
-    <table class="section block-heading">
-        <tbody>
-            <tr>
-                <td>
+    <div class="keep-together">
+        <table class="section block-heading">
+            <tbody>
+                <tr>
+                    <td>
 
-                    <table class="section-wrapper">
-                        <tbody>
-                            <tr>
+                        <table class="section-wrapper">
+                            <tbody>
+                                <tr>
 
-                                <td class="left-td heading-td">
-                                    <span>Деривативы</span>
-                                </td>
+                                    <td class="left-td heading-td">
+                                        <span>Деривативы</span>
+                                    </td>
 
-                                <td class="right-td heading-td">
-                                    Закрытые позиции в периоде
-                                </td>
+                                    <td class="right-td heading-td">
+                                        Закрытые позиции в периоде
+                                    </td>
 
-                            </tr>
-                        </tbody>
-                    </table>
+                                </tr>
+                            </tbody>
+                        </table>
 
-                </td>
-            </tr>
-        </tbody>
-    </table>
-    @Html.Partial("_PartialTableView", Model.ClosedDerivatives)
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        @Html.Partial("_PartialTableView", Model.ClosedDerivatives)
+    </div>
 }
 @if (Model.ClosedCash.Table.Rows.Count > 0)
 {
-    <table class="section block-heading">
-        <tbody>
-            <tr>
-                <td>
+    <div class="keep-together">
+        <table class="section block-heading">
+            <tbody>
+                <tr>
+                    <td>
 
-                    <table class="section-wrapper">
-                        <tbody>
-                            <tr>
+                        <table class="section-wrapper">
+                            <tbody>
+                                <tr>
 
-                                <td class="left-td heading-td">
-                                    <span>Деньги</span>
-                                </td>
+                                    <td class="left-td heading-td">
+                                        <span>Деньги</span>
+                                    </td>
 
-                                <td class="right-td heading-td">
-                                    Закрытые позиции в периоде
-                                </td>
+                                    <td class="right-td heading-td">
+                                        Закрытые позиции в периоде
+                                    </td>
 
-                            </tr>
-                        </tbody>
-                    </table>
+                                </tr>
+                            </tbody>
+                        </table>
 
-                </td>
-            </tr>
-        </tbody>
-    </table>
-    @Html.Partial("_PartialTableView", Model.ClosedCash)
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        @Html.Partial("_PartialTableView", Model.ClosedCash)
+    </div>
 }
 @if (Model.AssetsStruct != null || Model.ContractStruct != null)
 {
