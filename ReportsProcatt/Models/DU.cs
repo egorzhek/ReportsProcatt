@@ -134,17 +134,17 @@ namespace ReportsProcatt.Models
                     MainText = $"{_DuDS.DecimalToStr(0, "AllSum", "#,##0")} {Currency.Char}",
                     Footer = $"{_DuDS.Tables[0].Rows.Count} АКТИВА(ов)",
                     Data = _DuDS.Tables[0].Rows.Cast<DataRow>().ToList()
-                        .OrderByDescending(r => (decimal)r["Result"])
+                        .OrderByDescending(r => r["Result"].ToDecimal())
                         .Take(7)
                         .Select(r =>
                         {
                             var el = new CircleDiagram.DataClass
                             {
                                 lable = $"{r["CategoryName"]}",
-                                data = (decimal)r["VALUE_RUR"],
+                                data = r["VALUE_RUR"].ToDecimal(),
                                 backgroundColor = CircleDiagramsColorCodes.MainCurrenciesCircle[i],
                                 borderColor = CircleDiagramsColorCodes.MainCurrenciesCircle[i],
-                                result = $"{((decimal)r["Result"] * 100).DecimalToStr("#,##0.00")}%"
+                                result = $"{(r["Result"].ToDecimal() * 100).DecimalToStr("#,##0.00")}%"
                             };
                             i++;
                             return el;
@@ -159,7 +159,7 @@ namespace ReportsProcatt.Models
                         _DuDS.Tables[0].Rows.Cast<DataRow>().ToList()
                             .OrderByDescending(r => (double)r["Result"])
                             .Skip(6)
-                            .Sum(r => (decimal)r["Result"]) * 100;
+                            .Sum(r => r["Result"].ToDecimal()) * 100;
 
                     AssetsStruct.Data.RemoveAt(AssetsStruct.Data.Count - 1);
 
@@ -167,9 +167,9 @@ namespace ReportsProcatt.Models
                     {
                         lable = @$"Прочее",
                         data = _DuDS.Tables[0].Rows.Cast<DataRow>().ToList()
-                            .OrderByDescending(r => (decimal)r["Result"])
+                            .OrderByDescending(r => r["Result"].ToDecimal())
                             .Skip(6)
-                            .Sum(r => (decimal)r["VALUE_RUR"]),
+                            .Sum(r => r["VALUE_RUR"].ToDecimal()),
                         backgroundColor = CircleDiagramsColorCodes.MainAssetsCircle[7],
                         borderColor = CircleDiagramsColorCodes.MainAssetsCircle[7],
                         result = $"{otherPerent.DecimalToStr("#,##0")}%"
@@ -188,17 +188,17 @@ namespace ReportsProcatt.Models
                     MainText = $"{_Du2DS.DecimalToStr(0, "AllSum", "#,##0")} {Currency.Char}",
                     Footer = $"{_Du2DS.Tables[0].Rows.Count} инструментов",
                     Data = _Du2DS.Tables[0].Rows.Cast<DataRow>().ToList()
-                        .OrderByDescending(r => (decimal)r["Result"])
+                        .OrderByDescending(r => r["Result"].ToDecimal())
                         .Take(7)
                         .Select(r =>
                         {
                             var el = new CircleDiagram.DataClass
                             {
                                 lable = $"{r["Investment"]}",
-                                data = (decimal)r["VALUE_RUR"],
+                                data = r["VALUE_RUR"].ToDecimal(),
                                 backgroundColor = CircleDiagramsColorCodes.MainInstrumentsCircle[i],
                                 borderColor = CircleDiagramsColorCodes.MainInstrumentsCircle[i],
-                                result = $"{((decimal)r["Result"] * 100).DecimalToStr("#,##0.00")}%"
+                                result = $"{(r["Result"].ToDecimal() * 100).DecimalToStr("#,##0.00")}%"
                             };
                             i++;
                             return el;
@@ -211,9 +211,9 @@ namespace ReportsProcatt.Models
                 {
                     decimal otherPerent = 100 -
                         _Du2DS.Tables[0].Rows.Cast<DataRow>().ToList()
-                            .OrderByDescending(r => (decimal)r["Result"])
+                            .OrderByDescending(r => r["Result"].ToDecimal())
                             .Skip(6)
-                            .Sum(r => (decimal)r["Result"]) * 100;
+                            .Sum(r => r["Result"].ToDecimal()) * 100;
 
                     ContractStruct.Data.RemoveAt(ContractStruct.Data.Count - 1);
 
@@ -221,9 +221,9 @@ namespace ReportsProcatt.Models
                     {
                         lable = @$"Прочее",
                         data = _Du2DS.Tables[0].Rows.Cast<DataRow>().ToList()
-                            .OrderByDescending(r => (decimal)r["Result"])
+                            .OrderByDescending(r => r["Result"].ToDecimal())
                             .Skip(6)
-                            .Sum(r => (decimal)r["VALUE_RUR"]),
+                            .Sum(r => r["VALUE_RUR"].ToDecimal()),
                         backgroundColor = CircleDiagramsColorCodes.MainInstrumentsCircle[7],
                         borderColor = CircleDiagramsColorCodes.MainInstrumentsCircle[7],
                         result = $"{otherPerent.DecimalToStr("#,##0")}%"
@@ -236,8 +236,8 @@ namespace ReportsProcatt.Models
         {
             if (_TrustManagementDS.Tables[DuTables.DivsNCoupsChartDT].Rows.Count > 0)
             {
-                decimal coupons = Math.Round((decimal)_TrustManagementDS.GetValue(DuTables.DiagramDT, "Coupons"));
-                decimal dividends = Math.Round((decimal)_TrustManagementDS.GetValue(DuTables.DiagramDT, "Dividends"));
+                decimal coupons = Math.Round(_TrustManagementDS.GetValue(DuTables.DiagramDT, "Coupons").ToDecimal());
+                decimal dividends = Math.Round(_TrustManagementDS.GetValue(DuTables.DiagramDT, "Dividends").ToDecimal());
                 Totals = $"{(coupons + dividends).DecimalToStr()} {Currency.Char}";
                 Coupons = $"{coupons.DecimalToStr()} {Currency.Char}";
                 Dividends = $"{dividends.DecimalToStr()} {Currency.Char}";
@@ -456,7 +456,7 @@ namespace ReportsProcatt.Models
                 row[ClosedBondsColumns.Amount] = dr["Amount"].DecimalToStr();
                 row[ClosedBondsColumns.In_Summa] = dr["In_Summa"].DecimalToStr();
                 row[ClosedBondsColumns.UKD] = dr["UKD"].DecimalToStr();
-                row[ClosedBondsColumns.In_Summa_UKD] = ((decimal)dr["In_Summa"] + (decimal)dr["UKD"]).DecimalToStr();
+                row[ClosedBondsColumns.In_Summa_UKD] = (dr["In_Summa"].ToDecimal() + dr["UKD"].ToDecimal()).DecimalToStr();
                 row[ClosedBondsColumns.Out_Price] = dr["OutPrice"].DecimalToStr();
                 row[ClosedBondsColumns.NKD] = dr["NKD"].DecimalToStr();
                 row[ClosedBondsColumns.Amortizations] = $"{dr["Amortizations"].DecimalToStr()}{(!string.IsNullOrEmpty(dr["Coupons"]?.ToString()) ? $"({dr["Coupons"].DecimalToStr()})" : "")}";
@@ -608,7 +608,7 @@ namespace ReportsProcatt.Models
                 row[ClosedBillsColumns.Amount] = dr["Amount"].DecimalToStr();
                 row[ClosedBillsColumns.In_Summa] = dr["In_Summa"].DecimalToStr();
                 row[ClosedBillsColumns.UKD] = dr["UKD"].DecimalToStr();
-                row[ClosedBillsColumns.In_Summa_UKD] = ((decimal)dr["In_Summa"] + (decimal)dr["UKD"]).DecimalToStr();
+                row[ClosedBillsColumns.In_Summa_UKD] = (dr["In_Summa"].ToDecimal() + dr["UKD"].ToDecimal()).DecimalToStr();
                 row[ClosedBillsColumns.Out_Price] = dr["OutPrice"].DecimalToStr();
                 row[ClosedBillsColumns.NKD] = dr["NKD"].DecimalToStr();
                 row[ClosedBillsColumns.Amortizations] = $"{dr["Amortizations"].DecimalToStr()} ({dr["Coupons"].DecimalToStr()})";
@@ -748,7 +748,7 @@ namespace ReportsProcatt.Models
                 row[CurrentBondsColumns.Oferta_Date] = $"{(dr["Oferta_Date"] as DateTime?)?.ToString("dd.MM.yyyy")}{(!string.IsNullOrEmpty(dr["Oferta_Type"]?.ToString()) ? $"({dr["Oferta_Type"]})" : "")}";
                 row[CurrentBondsColumns.IN_PRICE] = $"{dr["IN_PRICE"].DecimalToStr()} {dr["Valuta"]}";
                 row[CurrentBondsColumns.Amount] = dr["Amount"].DecimalToStr();
-                row[CurrentBondsColumns.In_Summa_UKD] = ((decimal)dr["In_Summa"] + (decimal)dr["UKD"]).DecimalToStr();
+                row[CurrentBondsColumns.In_Summa_UKD] = (dr["In_Summa"].ToDecimal() + dr["UKD"].ToDecimal()).DecimalToStr();
                 row[CurrentBondsColumns.UKD] = dr["UKD"].DecimalToStr();
                 row[CurrentBondsColumns.In_Summa] = dr["In_Summa"].DecimalToStr();
                 row[CurrentBondsColumns.Today_Price] = dr["Today_Price"].DecimalToStr();
@@ -805,7 +805,7 @@ namespace ReportsProcatt.Models
                 row[CurrentBillsColumns.Oferta_Date] = $"{(dr["Oferta_Date"] as DateTime?)?.ToString("dd.MM.yyyy")}{(!string.IsNullOrEmpty(dr["Oferta_Type"]?.ToString()) ? $"({dr["Oferta_Type"]})" : "")}";
                 row[CurrentBillsColumns.IN_PRICE] = $"{dr["IN_PRICE"].DecimalToStr()} {dr["Valuta"]}";
                 row[CurrentBillsColumns.Amount] = dr["Amount"].DecimalToStr();
-                row[CurrentBillsColumns.In_Summa_UKD] = ((decimal)dr["In_Summa"] + (decimal)dr["UKD"]).DecimalToStr();
+                row[CurrentBillsColumns.In_Summa_UKD] = (dr["In_Summa"].ToDecimal() + dr["UKD"].ToDecimal()).DecimalToStr();
                 row[CurrentBillsColumns.UKD] = dr["UKD"].DecimalToStr();
                 row[CurrentBillsColumns.In_Summa] = dr["In_Summa"].DecimalToStr();
                 row[CurrentBillsColumns.Today_Price] = dr["Today_Price"].DecimalToStr();

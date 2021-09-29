@@ -320,5 +320,9 @@ namespace ReportsProcatt.Content
             string vSign = vVal > 0 ? "+" : "";
             return res ? $"{(aWithSign ? vSign : "")}{vVal.ToString(aFormat, cl)}" : "";
         }
+        public static decimal ToDecimal(this object val)
+        {
+            return val as decimal? ?? 0;
+        }
     }
 }

@@ -76,17 +76,17 @@ namespace ReportsProcatt.Models
                     MainText = $"{_PifDS.DecimalToStr(0, "AllSum", "#,##0")} {Currency.Char}",
                     Footer = $"{_PifDS.Tables[0].Rows.Count} АКТИВА(ов)",
                     Data = _PifDS.Tables[0].Rows.Cast<DataRow>().ToList()
-                        .OrderByDescending(r => (decimal)r["Result"])
+                        .OrderByDescending(r => r["Result"].ToDecimal())
                         .Take(7)
                         .Select(r =>
                         {
                             var el = new CircleDiagram.DataClass
                             {
                                 lable = $"{r["CurrencyName"]}",
-                                data = (decimal)r["VALUE_RUR"],
+                                data = r["VALUE_RUR"].ToDecimal(),
                                 backgroundColor = CircleDiagramsColorCodes.MainCurrenciesCircle[i],
                                 borderColor = CircleDiagramsColorCodes.MainCurrenciesCircle[i],
-                                result = $"{((decimal)r["Result"] * 100).DecimalToStr("#,##0.00")}%"
+                                result = $"{(r["Result"].ToDecimal() * 100).DecimalToStr("#,##0.00")}%"
                             };
                             i++;
                             return el;
@@ -101,7 +101,7 @@ namespace ReportsProcatt.Models
                         _PifDS.Tables[0].Rows.Cast<DataRow>().ToList()
                             .OrderByDescending(r => (double)r["Result"])
                             .Skip(6)
-                            .Sum(r => (decimal)r["Result"]) * 100;
+                            .Sum(r => r["Result"].ToDecimal()) * 100;
 
                     AssetsStruct.Data.RemoveAt(AssetsStruct.Data.Count - 1);
 
@@ -109,9 +109,9 @@ namespace ReportsProcatt.Models
                     {
                         lable = @$"Прочее",
                         data = _PifDS.Tables[0].Rows.Cast<DataRow>().ToList()
-                            .OrderByDescending(r => (decimal)r["Result"])
+                            .OrderByDescending(r => r["Result"].ToDecimal())
                             .Skip(6)
-                            .Sum(r => (decimal)r["VALUE_RUR"]),
+                            .Sum(r => r["VALUE_RUR"].ToDecimal()),
                         backgroundColor = CircleDiagramsColorCodes.MainAssetsCircle[7],
                         borderColor = CircleDiagramsColorCodes.MainAssetsCircle[7],
                         result = $"{otherPerent.DecimalToStr("#,##0")}%"
@@ -130,17 +130,17 @@ namespace ReportsProcatt.Models
                     MainText = $"{_Pif2DS.DecimalToStr(1, "AllSum", "#,##0")} {Currency.Char}",
                     Footer = $"{_Pif2DS.Tables[0].Rows.Count} инструментов",
                     Data = _Pif2DS.Tables[0].Rows.Cast<DataRow>().ToList()
-                        .OrderByDescending(r => (decimal)r["Result"])
+                        .OrderByDescending(r => r["Result"].ToDecimal())
                         .Take(7)
                         .Select(r =>
                         {
                             var el = new CircleDiagram.DataClass
                             {
                                 lable = $"{r["Investment"]}",
-                                data = (decimal)r["VALUE_RUR"],
+                                data = r["VALUE_RUR"].ToDecimal(),
                                 backgroundColor = CircleDiagramsColorCodes.MainInstrumentsCircle[i],
                                 borderColor = CircleDiagramsColorCodes.MainInstrumentsCircle[i],
-                                result = $"{((decimal)r["Result"] * 100).DecimalToStr("#,##0.00")}%"
+                                result = $"{(r["Result"].ToDecimal() * 100).DecimalToStr("#,##0.00")}%"
                             };
                             i++;
                             return el;
@@ -153,9 +153,9 @@ namespace ReportsProcatt.Models
                 {
                     decimal otherPerent = 100 -
                         _Pif2DS.Tables[0].Rows.Cast<DataRow>().ToList()
-                            .OrderByDescending(r => (decimal)r["Result"])
+                            .OrderByDescending(r => r["Result"].ToDecimal())
                             .Skip(6)
-                            .Sum(r => (decimal)r["Result"]) * 100;
+                            .Sum(r => r["Result"].ToDecimal()) * 100;
 
                     FundStruct.Data.RemoveAt(FundStruct.Data.Count - 1);
 
@@ -163,9 +163,9 @@ namespace ReportsProcatt.Models
                     {
                         lable = @$"Прочее",
                         data = _Pif2DS.Tables[0].Rows.Cast<DataRow>().ToList()
-                            .OrderByDescending(r => (decimal)r["Result"])
+                            .OrderByDescending(r => r["Result"].ToDecimal())
                             .Skip(6)
-                            .Sum(r => (decimal)r["VALUE_RUR"]),
+                            .Sum(r => r["VALUE_RUR"].ToDecimal()),
                         backgroundColor = CircleDiagramsColorCodes.MainInstrumentsCircle[7],
                         borderColor = CircleDiagramsColorCodes.MainInstrumentsCircle[7],
                         result = $"{otherPerent.DecimalToStr("#,##0")}%"
