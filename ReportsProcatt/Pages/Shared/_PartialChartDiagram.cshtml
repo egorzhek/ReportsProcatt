@@ -13,7 +13,7 @@
             new Chart(document.getElementById("@Model.ElementName"), {
                 "type": 'bar',
                 "data": {
-                    "labels": [@Html.Raw(string.Join(",", Model.Lables.Select(l => $"'{l}'").ToArray()))],
+                    "labels": [@Html.Raw(string.Join(",", Model.Lables.Select(l => $"\"{l}\"").ToArray()))],
                     "datasets": [
                         {
                             "label": '@Html.Raw(Model.DataSets[0].lable)',

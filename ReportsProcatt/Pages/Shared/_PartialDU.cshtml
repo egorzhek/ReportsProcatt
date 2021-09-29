@@ -171,71 +171,6 @@
         </tr>
     </tbody>
 </table>
-<table class="section block-heading">
-    <tbody>
-        <tr>
-            <td>
-
-                <table class="section-wrapper">
-                    <tbody>
-
-                        <tr>
-
-                            <td class="left-td heading-td">
-                                <span>Дивиденды и купоны</span>
-                            </td>
-
-                            <td class="right-td heading-td">
-                            </td>
-
-                        </tr>
-
-                        <tr class="coupons-tr">
-                            <td>
-                                <div class="coupons-wrap">
-                                    <div class="coupons-item">
-                                        Всего – @Model.Totals
-                                    </div>
-
-                                    <div class="coupons-item" style="color:#3E4E65">
-                                        Дивиденды – @Model.Dividends
-                                    </div>
-
-                                    <div class="coupons-item" style="color:#09669A">
-                                        Купоны – @Model.Coupons
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-
-                    </tbody>
-                </table>
-
-            </td>
-        </tr>
-    </tbody>
-</table>
-@*Детализация купонов и дивидендов*@
-
-<table class="section graph-section projected-payments-section">
-    <tr>
-        <td>
-
-            <table class="section-wrapper">
-                <tbody>
-                    <tr>
-
-                        <td>
-                            @Html.Partial("_PartialChartDiagram", Model.DividedtsCouponsChart)
-                        </td>
-
-                    </tr>
-                </tbody>
-            </table>
-
-        </td>
-    </tr>
-</table>
 
 <div class="keep-together">
     <table class="section block-heading">
@@ -294,6 +229,73 @@
         </tbody>
     </table>
 </div>
+
+@*Детализация купонов и дивидендов*@
+<table class="section block-heading">
+    <tbody>
+        <tr>
+            <td>
+
+                <table class="section-wrapper">
+                    <tbody>
+
+                        <tr>
+
+                            <td class="left-td heading-td">
+                                <span>Дивиденды и купоны</span>
+                            </td>
+
+                            <td class="right-td heading-td">
+                            </td>
+
+                        </tr>
+
+                        <tr class="coupons-tr">
+                            <td>
+                                <div class="coupons-wrap">
+                                    <div class="coupons-item">
+                                        Всего – @Model.Totals
+                                    </div>
+
+                                    <div class="coupons-item" style="color:#3E4E65">
+                                        Дивиденды – @Model.Dividends
+                                    </div>
+
+                                    <div class="coupons-item" style="color:#09669A">
+                                        Купоны – @Model.Coupons
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+
+                    </tbody>
+                </table>
+
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<table class="section graph-section projected-payments-section">
+    <tr>
+        <td>
+
+            <table class="section-wrapper">
+                <tbody>
+                    <tr>
+
+                        <td>
+                            @Html.Partial("_PartialChartDiagram", Model.DividedtsCouponsChart)
+                        </td>
+
+                    </tr>
+                </tbody>
+            </table>
+
+        </td>
+    </tr>
+</table>
+
 
 @if (Model.DividedtsCoupons.Table.Rows.Count > 0)
 {

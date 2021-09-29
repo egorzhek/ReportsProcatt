@@ -31,6 +31,7 @@ namespace ReportsProcatt.Models
 
     public class TableView
     {
+        public bool IsTextBlock { get; set; }
         public List<ViewElementAttr> Ths { get; set; }
         public DataTable Table { get; set; }
 

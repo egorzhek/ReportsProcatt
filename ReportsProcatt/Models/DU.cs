@@ -973,7 +973,7 @@ namespace ReportsProcatt.Models
                 row[DuOperationsHistoryColumns.Price] = dr["Price"].DecimalToStr();
                 row[DuOperationsHistoryColumns.PaperAmount] = dr["PaperAmount"].DecimalToStr();
                 row[DuOperationsHistoryColumns.Cost] = dr["RowCost"].DecimalToStr();
-                row[DuOperationsHistoryColumns.Fee] = dr["Fee"].DecimalToStr();
+                row[DuOperationsHistoryColumns.Fee] = dr["Fee"].DecimalToStr("#,##0.00");
                 DuOperationsHistory.Table.Rows.Add(row);
             }
         }

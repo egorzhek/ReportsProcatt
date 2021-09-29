@@ -1,7 +1,7 @@
 ﻿@using System.Data
 @model ReportsProcatt.Models.TableView
 
-<table class="section info-table-section">
+<table class="section info-table-section @Html.Raw(Model.IsTextBlock ? "text-block" : "")">
     <tr>
         <td>
 
@@ -17,7 +17,7 @@
                                     @foreach (var th in Model.Ths)
                                     {
                                     <th @Html.Raw(String.Join(" ", th.AttrRow.ToList().Select(k => $"{k.Key}=\"{k.Value}\" ").ToArray()))>
-                                        @th.DisplayName
+                                        @Html.Raw(th.DisplayName)
                                     </th>
                                     }
                                 </tr>
@@ -28,7 +28,7 @@
                                     @foreach (var th in Model.Ths)
                                     {
                                     <td>
-                                        @tr[th.ColumnName]?.ToString()
+                                        @Html.Raw(tr[th.ColumnName]?.ToString())
                                     </td>
                                     }
 
