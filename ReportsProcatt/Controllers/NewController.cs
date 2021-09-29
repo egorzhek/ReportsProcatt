@@ -63,8 +63,7 @@ namespace ReportsProcatt.Controllers
                 return File(stream, "application/json");
             }
         }
-        [HttpGet]
-        [Route("Report_Win")]
+        [HttpGet("Report_Win")]
         public async Task<IActionResult> Report_Win
         (
             [FromQuery] int InvestorId,
