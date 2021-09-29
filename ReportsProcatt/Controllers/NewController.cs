@@ -26,7 +26,7 @@ namespace ReportsProcatt.Controllers
         [Route("Report")]
         public async Task<IActionResult> Report
         (
-            [FromQuery] int? InvestorId,
+            [FromQuery] int InvestorId,
             [FromQuery] DateTime? DateFrom,
             [FromQuery] DateTime? DateTo,
             [FromQuery] string Currency
@@ -34,7 +34,7 @@ namespace ReportsProcatt.Controllers
         {
             try
             {
-                var data = new Report(InvestorId ?? 2149652, DateFrom, DateTo, Currency)
+                var data = new Report(InvestorId, DateFrom, DateTo, Currency)
                 {
                     rootStr = "/app/wwwroot"
                 };
@@ -60,56 +60,10 @@ namespace ReportsProcatt.Controllers
                 return File(stream, "application/json");
             }
         }
-
-        [HttpGet]
-        [Route("Report_Win")]
-        public async Task<IActionResult> Report_Win
-        (
-            [FromQuery] int? InvestorId,
-            [FromQuery] DateTime? DateFrom,
-            [FromQuery] DateTime? DateTo,
-            [FromQuery] string Currency
-        )
-        {
-            var data = new Report(InvestorId ?? 2149652, DateFrom, DateTo, Currency)
-            {
-                rootStr = "file:///c:/Users/Света/source/Ingos/ReportsProcatt/ReportsProcatt/wwwroot"
-            };
-
-            return await _generatePdf.GetPdf("Views/New/Index.cshtml", data);
-        }
-
-        [HttpGet]
-        [Route("Test_Report")]
-        public async Task<IActionResult> Test_Report()
-        {
-            return await _generatePdf.GetPdf("Views/New/Test.cshtml");
-        }
-
-        [HttpGet]
-        [Route("Test")]
-        public IActionResult Test()
-        {
-            return View("Test");
-        }
-        [HttpGet]
-        [Route("Test2_Report")]
-        public async Task<IActionResult> Test2_Report()
-        {
-            string rootStr = "file:///c:/Users/D/source/Ingos/ReportsProcatt/ReportsProcatt/wwwroot";
-            return await _generatePdf.GetPdf("Views/New/Test2.cshtml", rootStr);
-        }
-
-        [HttpGet]
-        [Route("Test2")]
-        public IActionResult Test2()
-        {
-            return View("Test2","");
-        }
         [HttpGet]
         public IActionResult Index
         (
-            [FromQuery] int? InvestorId,
+            [FromQuery] int InvestorId,
             [FromQuery] DateTime? DateFrom,
             [FromQuery] DateTime? DateTo,
             [FromQuery] string Currency
