@@ -189,7 +189,7 @@ namespace ReportsProcatt.Models
             {
                 new ViewElementAttr{ColumnName = PifOperationsHistoryColumns.Wdate, DisplayName = "Дата", SortOrder = 1},
                 new ViewElementAttr{ColumnName = PifOperationsHistoryColumns.Btype, DisplayName = "Тип операции", SortOrder = 2},
-                new ViewElementAttr{ColumnName = PifOperationsHistoryColumns.Instrument, DisplayName = "Инструмент", SortOrder = 3},
+                new ViewElementAttr{ColumnName = PifOperationsHistoryColumns.Instrument, DisplayName = "Номер и дата заявки", SortOrder = 3},
                 new ViewElementAttr{ColumnName = PifOperationsHistoryColumns.Rate_rur, DisplayName = "Цена Пая", SortOrder = 4},
                 new ViewElementAttr{ColumnName = PifOperationsHistoryColumns.Amount, DisplayName = "Количество", SortOrder = 5},
                 new ViewElementAttr{ColumnName = PifOperationsHistoryColumns.Value_rur, DisplayName = "Сумма сделки", SortOrder = 6},
@@ -213,7 +213,7 @@ namespace ReportsProcatt.Models
                 row[PifOperationsHistoryColumns.Rate_rur] = $"{dr["RATE_RUR"].DecimalToStr()} {dr["Valuta"]}";
                 row[PifOperationsHistoryColumns.Amount] = dr["Amount"].DecimalToStr();
                 row[PifOperationsHistoryColumns.Value_rur] = $"{dr["VALUE_RUR"].DecimalToStr()} {dr["Valuta"]}";
-                row[PifOperationsHistoryColumns.Fee_rur] = dr["FEE_RUR"].DecimalToStr();
+                row[PifOperationsHistoryColumns.Fee_rur] = dr["FEE_RUR"].DecimalToStr("#,##0.00");
                 PifOperationsHistory.Table.Rows.Add(row);
             }
 

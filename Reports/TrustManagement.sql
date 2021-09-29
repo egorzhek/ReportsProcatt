@@ -438,7 +438,7 @@ select
 	[Price] = CAST(Round(a.[AmountPayments_RUR],2) as Decimal(30,2)),
 	a.[PaymentDateTime],
 	[RowPrice] = a.AmountPayments,
-	[RowValuta] = c.ShortName
+	[RowValuta] = c.Symbol
 from [dbo].[DIVIDENDS_AND_COUPONS_History] as a
 join dbo.Currencies as c on a.CurrencyId = c.Id
 where a.InvestorId = @InvestorId and a.ContractId = @ContractId

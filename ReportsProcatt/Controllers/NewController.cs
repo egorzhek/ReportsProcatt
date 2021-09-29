@@ -64,6 +64,23 @@ namespace ReportsProcatt.Controllers
             }
         }
         [HttpGet]
+        [Route("Report_Win")]
+        public async Task<IActionResult> Report_Win
+        (
+            [FromQuery] int InvestorId,
+            [FromQuery] DateTime? DateFrom,
+            [FromQuery] DateTime? DateTo,
+            [FromQuery] string Currency
+        )
+        {
+            var data = new Report(InvestorId, DateFrom, DateTo, Currency)
+            {
+                rootStr = "file:///c:/Users/Света/source/Ingos/ReportsProcatt/ReportsProcatt/wwwroot"
+            };
+
+            return await _generatePdf.GetPdf("Views/New/Index.cshtml", data);
+        }
+        [HttpGet]
         public IActionResult Index
         (
             [FromQuery] int? InvestorId,
@@ -72,10 +89,31 @@ namespace ReportsProcatt.Controllers
             [FromQuery] string Currency
         )
         {
-            if (InvestorId == null)
-                throw new Exception("InvestorId is null");
+            try
+            {
+                if (InvestorId == null)
+                    throw new Exception("InvestorId is null");
 
-            return View(new Report((int)InvestorId, DateFrom, DateTo, Currency));
+                return View(new Report((int)InvestorId, DateFrom, DateTo, Currency));
+            }
+            catch (Exception exception)
+            {
+                var messages = new List<string>();
+                do
+                {
+                    messages.Add(exception.Message);
+                    exception = exception.InnerException;
+                }
+                while (exception != null);
+                var message = string.Join(" - ", messages);
+
+                var stream = new MemoryStream();
+                var writer = new StreamWriter(stream);
+                writer.Write(message);
+                writer.Flush();
+                stream.Position = 0;
+                return File(stream, "application/json");
+            }
         }
         [HttpGet]
         [Route("Api")]

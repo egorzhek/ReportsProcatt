@@ -237,40 +237,6 @@
     </tr>
 </table>
 
-@if (Model.DividedtsCoupons.Table.Rows.Count > 0)
-{
-    <div class="keep-together">
-
-        <table class="section block-heading print-pt50">
-            <tbody>
-                <tr>
-                    <td>
-
-                        <table class="section-wrapper">
-                            <tbody>
-                                <tr>
-
-                                    <td class="left-td heading-td">
-                                        <span>Детализация купонов и дивидендов</span>
-                                    </td>
-
-                                    <td class="right-td heading-td">
-                                    </td>
-
-                                </tr>
-                            </tbody>
-                        </table>
-
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-
-        @Html.Partial("_PartialTableView", Model.DividedtsCoupons)
-
-    </div>
-}
-
 <div class="keep-together">
     <table class="section block-heading">
         <tbody>
@@ -328,6 +294,40 @@
         </tbody>
     </table>
 </div>
+
+@if (Model.DividedtsCoupons.Table.Rows.Count > 0)
+{
+    <div class="keep-together">
+
+        <table class="section block-heading print-pt50">
+            <tbody>
+                <tr>
+                    <td>
+
+                        <table class="section-wrapper">
+                            <tbody>
+                                <tr>
+
+                                    <td class="left-td heading-td">
+                                        <span>Детализация купонов и дивидендов</span>
+                                    </td>
+
+                                    <td class="right-td heading-td">
+                                    </td>
+
+                                </tr>
+                            </tbody>
+                        </table>
+
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        @Html.Partial("_PartialTableView", Model.DividedtsCoupons)
+
+    </div>
+}
 
 @*Текущие позиции по валютам*@
 <div class="keep-together">

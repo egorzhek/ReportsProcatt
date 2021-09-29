@@ -306,7 +306,7 @@ namespace ReportsProcatt.Models
                 row[DividedtsCouponsColumns.ToolName] = dr["ToolName"];
                 row[DividedtsCouponsColumns.PriceType] = dr["PriceType"];
                 row[DividedtsCouponsColumns.ContractName] = dr["ContractName"];
-                row[DividedtsCouponsColumns.Price] = $"{dr["Price"].DecimalToStr()}"; //{dr["Valuta"]}";
+                row[DividedtsCouponsColumns.Price] = $"{dr["Price"].DecimalToStr()} {dr["RowValuta"]}"; //{dr["Valuta"]}";
                 DividedtsCoupons.Table.Rows.Add(row);
             }
         }
@@ -967,7 +967,7 @@ namespace ReportsProcatt.Models
             foreach (DataRow dr in _TrustManagementDS.Tables[DuTables.DuOperationsHistory].Rows)
             {
                 DataRow row = DuOperationsHistory.Table.NewRow();
-                row[DuOperationsHistoryColumns.Date] = dr["Date"];
+                row[DuOperationsHistoryColumns.Date] = ((DateTime)dr["Date"]).ToString("dd.MM.yyyy");
                 row[DuOperationsHistoryColumns.OperName] = dr["OperName"];
                 row[DuOperationsHistoryColumns.ToolName] = dr["ToolName"];
                 row[DuOperationsHistoryColumns.Price] = dr["Price"].DecimalToStr();
