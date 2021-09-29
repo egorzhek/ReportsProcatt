@@ -575,7 +575,7 @@ IF OBJECT_ID('tempdb..#DivsNCouponsDetails') IS NOT NULL DROP TABLE #DivsNCoupon
 		[Date] = a.[PaymentDateTime],
 		[ToolName] = a.[ShareName],
 		[PriceType] = case when a.[Type] = 1 then N'Купоны' else N'Дивиденды' end,
-		[ContractName] = a.[ShareName],
+		[ContractName] = b.NUM,
 		[Price] = CAST(Round(
 			case
 				when @Valuta = 'RUB' then a.AmountPayments_RUR
@@ -602,7 +602,7 @@ IF OBJECT_ID('tempdb..#DivsNCouponsDetails') IS NOT NULL DROP TABLE #DivsNCoupon
 		[Date] = a.[PaymentDateTime],
 		[ToolName] = a.[ShareName],
 		[PriceType] = case when a.[Type] = 1 then N'Купоны' else N'Дивиденды' end,
-		[ContractName] = a.[ShareName],
+		[ContractName] = b.NUM,
 		[Price] = CAST(Round(
 			case
 				when @Valuta = 'RUB' then a.AmountPayments_RUR

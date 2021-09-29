@@ -442,6 +442,8 @@ select
 from [dbo].[DIVIDENDS_AND_COUPONS_History] as a
 join dbo.Currencies as c on a.CurrencyId = c.Id
 where a.InvestorId = @InvestorId and a.ContractId = @ContractId
+and (@StartDate is null or (@StartDate is not null and a.PaymentDateTime >= @StartDate))
+and (@EndDate is null or (@EndDate is not null and a.PaymentDateTime < dateadd(day,1,@EndDate)))
 union all
 select
 	[Date] =  a.[PaymentDateTime],
@@ -455,6 +457,8 @@ select
 from [dbo].[DIVIDENDS_AND_COUPONS_History_Last] as a
 join dbo.Currencies as c on a.CurrencyId = c.Id
 where a.InvestorId = @InvestorId and a.ContractId = @ContractId
+and (@StartDate is null or (@StartDate is not null and a.PaymentDateTime >= @StartDate))
+and (@EndDate is null or (@EndDate is not null and a.PaymentDateTime < dateadd(day,1,@EndDate)))
 order by [PaymentDateTime];
 
 
@@ -472,6 +476,8 @@ select
 from [dbo].[Operations_History_Contracts] as a
 join dbo.Currencies as c on a.Currency = c.Id
 where a.InvestorId = @InvestorId and a.ContractId = @ContractId
+and (@StartDate is null or (@StartDate is not null and a.[Date] >= @StartDate))
+and (@EndDate is null or (@EndDate is not null and a.[Date] < dateadd(day,1,@EndDate)))
 union
 select
 	[Date] = a.[Date],
@@ -487,6 +493,8 @@ select
 from [dbo].[Operations_History_Contracts_Last] as a
 join dbo.Currencies as c on a.Currency = c.Id
 where a.InvestorId = @InvestorId and a.ContractId = @ContractId
+and (@StartDate is null or (@StartDate is not null and a.[Date] >= @StartDate))
+and (@EndDate is null or (@EndDate is not null and a.[Date] < dateadd(day,1,@EndDate)))
 order by [Date];
 
 
