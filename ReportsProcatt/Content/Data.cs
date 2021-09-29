@@ -29,10 +29,17 @@ namespace ReportsProcatt.Content
             DataSet_CircleCurrencies = new DataSet();
             DataSet_CircleInstruments = new DataSet();
 
-            InitFullData(Currency, InvestorId, DateFrom, DateTo);
+            Task.WaitAll
+            (
+                Task.Run(() => InitFullData(Currency, InvestorId, DateFrom, DateTo))
+            );
 
-            DateFrom = (DateTime)DataSet_InvestorFull.GetValue(InvestFullTables.MainResultDT, "StartDate");
-            DateTo = (DateTime)DataSet_InvestorFull.GetValue(InvestFullTables.MainResultDT, "EndDate");
+            try
+            {
+                DateFrom = (DateTime)DataSet_InvestorFull.GetValue(InvestFullTables.MainResultDT, "StartDate");
+                DateTo = (DateTime)DataSet_InvestorFull.GetValue(InvestFullTables.MainResultDT, "EndDate");
+            }
+            catch { }
 
             Task.WaitAll
             (
@@ -41,7 +48,7 @@ namespace ReportsProcatt.Content
                 Task.Run(() => InitInstrumentsData(InvestorId, DateTo))
             );
         }
-        private void InitFullData(string Currency, int InvestorId, DateTime? DateFrom, DateTime? DateTo)
+        private async Task InitFullData(string Currency, int InvestorId, DateTime? DateFrom, DateTime? DateTo)
         {
             string queryString1 = File.ReadAllText(Path.Combine(_path, @"InverstorFull.sql"));
 
@@ -59,7 +66,7 @@ namespace ReportsProcatt.Content
 
                 using (SqlDataAdapter sda = new SqlDataAdapter(command1))
                 {
-                    sda.Fill(DataSet_InvestorFull);
+                    await Task.Run(() => sda.Fill(DataSet_InvestorFull));
                 }
             }
         }

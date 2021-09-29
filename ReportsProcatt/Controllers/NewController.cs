@@ -26,7 +26,7 @@ namespace ReportsProcatt.Controllers
         [Route("Report")]
         public async Task<IActionResult> Report
         (
-            [FromQuery] int InvestorId,
+            [FromQuery] int? InvestorId,
             [FromQuery] DateTime? DateFrom,
             [FromQuery] DateTime? DateTo,
             [FromQuery] string Currency
@@ -34,7 +34,10 @@ namespace ReportsProcatt.Controllers
         {
             try
             {
-                var data = new Report(InvestorId, DateFrom, DateTo, Currency)
+                if (InvestorId == null)
+                    throw new Exception("InvestorId is null");
+
+                var data = new Report((int)InvestorId, DateFrom, DateTo, Currency)
                 {
                     rootStr = "/app/wwwroot"
                 };
@@ -63,13 +66,16 @@ namespace ReportsProcatt.Controllers
         [HttpGet]
         public IActionResult Index
         (
-            [FromQuery] int InvestorId,
+            [FromQuery] int? InvestorId,
             [FromQuery] DateTime? DateFrom,
             [FromQuery] DateTime? DateTo,
             [FromQuery] string Currency
         )
         {
-            return View(new Report(InvestorId, DateFrom, DateTo, Currency));
+            if (InvestorId == null)
+                throw new Exception("InvestorId is null");
+
+            return View(new Report((int)InvestorId, DateFrom, DateTo, Currency));
         }
         [HttpGet]
         [Route("Api")]
