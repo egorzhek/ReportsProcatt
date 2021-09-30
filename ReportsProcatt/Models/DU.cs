@@ -290,7 +290,7 @@ namespace ReportsProcatt.Models
                 new ViewElementAttr{ColumnName = DividedtsCouponsColumns.Date, DisplayName = "Дата", SortOrder = 1},
                 new ViewElementAttr{ColumnName = DividedtsCouponsColumns.ToolName, DisplayName = "Инструмент", SortOrder = 2},
                 new ViewElementAttr{ColumnName = DividedtsCouponsColumns.PriceType, DisplayName = "Тип выплаты", SortOrder = 3},
-                new ViewElementAttr{ColumnName = DividedtsCouponsColumns.ContractName, DisplayName = "Количество", SortOrder = 4},
+                new ViewElementAttr{ColumnName = DividedtsCouponsColumns.Price, DisplayName = "Сумма сделки", SortOrder = 5},
             };
 
             DividedtsCoupons.Ths.Where(t => t.ColumnName == DividedtsCouponsColumns.ToolName).First().AttrRow.Add("width", "320px");
@@ -303,7 +303,7 @@ namespace ReportsProcatt.Models
                 row[DividedtsCouponsColumns.Date] = ((DateTime)dr["Date"]).ToString("dd.MM.yyyy");
                 row[DividedtsCouponsColumns.ToolName] = dr["ToolName"];
                 row[DividedtsCouponsColumns.PriceType] = dr["PriceType"];
-                row[DividedtsCouponsColumns.Price] = $"{dr["Price"].DecimalToStr()} {dr["RowValuta"]}";
+                row[DividedtsCouponsColumns.Price] = $"{dr["Price"].DecimalToStr()} {dr["RowValuta"]}"; //{dr["Valuta"]}";
                 DividedtsCoupons.Table.Rows.Add(row);
             }
         }
