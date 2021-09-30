@@ -593,7 +593,7 @@ AS BEGIN
 	USING
 	(
 		SELECT TOP 1
-			[ID] = S.[id], [NAME] = F.[NAME], [DATE_CLOSE] = C.[E_DATE]
+			[ID] = S.[id], [NAME] = F.[NAME], [DATE_CLOSE] = C.[E_DATE], FundID = C.Investor
 		FROM [BAL_DATA_STD].[dbo].OD_SHARES AS S WITH(NOLOCK)
 		INNER JOIN [BAL_DATA_STD].[dbo].OD_FACES AS F WITH(NOLOCK) ON S.ISSUER = F.SELF_ID AND F.LAST_FLAG =1 AND F.E_DATE >= @CurrentDate
 		INNER JOIN [BAL_DATA_STD].[dbo].D_B_CONTRACTS AS C WITH(NOLOCK) ON S.ISSUER = C.INVESTOR AND C.I_TYPE = 5
@@ -602,16 +602,17 @@ AS BEGIN
 	on t.Id = s.Id
 	when not matched
 		then insert (
-			[ID], [NAME], [DATE_CLOSE]
+			[ID], [NAME], [DATE_CLOSE], [FundID]
 		)
 		values (
 			s.[ID],
 			s.[NAME],
-			s.[DATE_CLOSE]
+			s.[DATE_CLOSE],
+			s.[FundID]
 		)
 	when matched
 	then update set
-		[NAME] = s.[NAME], [DATE_CLOSE] = s.[DATE_CLOSE];
+		[NAME] = s.[NAME], [DATE_CLOSE] = s.[DATE_CLOSE], [FundID] = s.[FundID];
 
 
 

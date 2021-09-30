@@ -83,6 +83,7 @@ CREATE TABLE [dbo].[FundNames]
 	[Id] int NOT NULL,
 	[Name] Nvarchar(300) NULL,
 	[DATE_CLOSE] [date] NULL,
+	[FundId] [int] NULL,
 CONSTRAINT [PK_FundNames] PRIMARY KEY CLUSTERED
 (
 	[Id] ASC
