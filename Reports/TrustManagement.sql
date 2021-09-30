@@ -186,9 +186,9 @@ WHERE [Date] >= @StartDate and [Date] <= @EndDate
 --order by [Date];
 
 -----------------------------------------------
--- преобразование на начальную и последнюю дату
+-- РїСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёРµ РЅР° РЅР°С‡Р°Р»СЊРЅСѓСЋ Рё РїРѕСЃР»РµРґРЅСЋСЋ РґР°С‚Сѓ
 
--- забыть вводы выводы на первую дату
+-- Р·Р°Р±С‹С‚СЊ РІРІРѕРґС‹ РІС‹РІРѕРґС‹ РЅР° РїРµСЂРІСѓСЋ РґР°С‚Сѓ
 update #ResInvAssets set
 	DailyIncrement_RUR = 0, DailyIncrement_USD = 0,	DailyIncrement_EURO = 0,
 	DailyDecrement_RUR = 0,	DailyDecrement_USD = 0,	DailyDecrement_EURO = 0,
@@ -196,9 +196,9 @@ update #ResInvAssets set
 	INPUT_COUPONS_RUR = 0,  INPUT_COUPONS_USD = 0,  INPUT_COUPONS_EURO = 0,
 	INPUT_VALUE_RUR = 0, OUTPUT_VALUE_RUR = 0
 where [Date] = @StartDate
-and (OUTPUT_VALUE_RUR <> 0 or INPUT_VALUE_RUR <> 0 or INPUT_COUPONS_RUR <> 0 or INPUT_DIVIDENTS_RUR <> 0) -- вводы и выводы были в этот день
+and (OUTPUT_VALUE_RUR <> 0 or INPUT_VALUE_RUR <> 0 or INPUT_COUPONS_RUR <> 0 or INPUT_DIVIDENTS_RUR <> 0) -- РІРІРѕРґС‹ Рё РІС‹РІРѕРґС‹ Р±С‹Р»Рё РІ СЌС‚РѕС‚ РґРµРЅСЊ
 
--- посчитать последний день обратно
+-- РїРѕСЃС‡РёС‚Р°С‚СЊ РїРѕСЃР»РµРґРЅРёР№ РґРµРЅСЊ РѕР±СЂР°С‚РЅРѕ
 update a set 
 VALUE_RUR = VALUE_RUR - DailyIncrement_RUR - DailyDecrement_RUR,
 VALUE_USD = VALUE_USD - DailyIncrement_USD - DailyDecrement_USD,
@@ -211,18 +211,18 @@ INPUT_COUPONS_RUR = 0,  INPUT_COUPONS_USD = 0,  INPUT_COUPONS_EURO = 0,
 INPUT_VALUE_RUR = 0, OUTPUT_VALUE_RUR = 0
 from #ResInvAssets as a
 where [Date] = @EndDate
-and (OUTPUT_VALUE_RUR <> 0 or INPUT_VALUE_RUR <> 0 or INPUT_COUPONS_RUR <> 0 or INPUT_DIVIDENTS_RUR <> 0) -- вводы и выводы были в этот день
+and (OUTPUT_VALUE_RUR <> 0 or INPUT_VALUE_RUR <> 0 or INPUT_COUPONS_RUR <> 0 or INPUT_DIVIDENTS_RUR <> 0) -- РІРІРѕРґС‹ Рё РІС‹РІРѕРґС‹ Р±С‹Р»Рё РІ СЌС‚РѕС‚ РґРµРЅСЊ
 
--- преобразование на начальную и последнюю дату
+-- РїСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёРµ РЅР° РЅР°С‡Р°Р»СЊРЅСѓСЋ Рё РїРѕСЃР»РµРґРЅСЋСЋ РґР°С‚Сѓ
 -----------------------------------------------
 
 --select * From #ResInvAssets
 --where OUTPUT_VALUE_RUR <> 0
 --order by [Date];
 
--- В рублях
+-- Р’ СЂСѓР±Р»СЏС…
 
--- Итоговая оценка инвестиций
+-- РС‚РѕРіРѕРІР°СЏ РѕС†РµРЅРєР° РёРЅРІРµСЃС‚РёС†РёР№
 
 SELECT
 	@SItog = VALUE_RUR
@@ -236,9 +236,9 @@ where [Date] = @StartDate
 
 
 
--- сумма всех выводов средств
+-- СЃСѓРјРјР° РІСЃРµС… РІС‹РІРѕРґРѕРІ СЃСЂРµРґСЃС‚РІ
 SELECT
-	@AmountDayMinus_RUR = sum(OUTPUT_VALUE_RUR), -- отрицательное значение
+	@AmountDayMinus_RUR = sum(OUTPUT_VALUE_RUR), -- РѕС‚СЂРёС†Р°С‚РµР»СЊРЅРѕРµ Р·РЅР°С‡РµРЅРёРµ
 	@AmountDayPlus_RUR = sum(INPUT_VALUE_RUR + INPUT_DIVIDENTS_RUR + INPUT_COUPONS_RUR),
 	@Sum_INPUT_VALUE_RUR = sum(INPUT_VALUE_RUR),
 	@Sum_OUTPUT_VALUE_RUR = sum(OUTPUT_VALUE_RUR),
@@ -249,8 +249,8 @@ FROM #ResInvAssets
 --select @SItog as '@SItog', @Snach as '@Snach', @OUTPUT_VALUE_RUR as '@OUTPUT_VALUE_RUR', @AmountDayPlus_RUR as '@AmountDayPlus_RUR'
 
 set @InvestResult =
-(@SItog - @AmountDayMinus_RUR) -- минус, потому что отрицательное значение
-- (@Snach + @AmountDayPlus_RUR) --as 'Результат инвестиций'
+(@SItog - @AmountDayMinus_RUR) -- РјРёРЅСѓСЃ, РїРѕС‚РѕРјСѓ С‡С‚Рѕ РѕС‚СЂРёС†Р°С‚РµР»СЊРЅРѕРµ Р·РЅР°С‡РµРЅРёРµ
+- (@Snach + @AmountDayPlus_RUR) --as 'Р РµР·СѓР»СЊС‚Р°С‚ РёРЅРІРµСЃС‚РёС†РёР№'
 
 /*
 		SELECT --*
@@ -292,14 +292,14 @@ set @InvestResult =
 	begin
 		set @Counter += 1;
 
-		-- начальную дату пропускаем
+		-- РЅР°С‡Р°Р»СЊРЅСѓСЋ РґР°С‚Сѓ РїСЂРѕРїСѓСЃРєР°РµРј
 		if @DateCur = @StartDate
 		begin
 			set @LastDate = @DateCur
 		end
 		else
 		begin
-			-- со второй записи определяем период
+			-- СЃРѕ РІС‚РѕСЂРѕР№ Р·Р°РїРёСЃРё РѕРїСЂРµРґРµР»СЏРµРј РїРµСЂРёРѕРґ
 			set @T = DATEDIFF(DAY, @LastDate, @DateCur);
 			if @DateCur = @EndDate set @T = @T + 1;
 
@@ -324,13 +324,13 @@ set @InvestResult =
 	end
 
 	--select
-	--@InvestResult as 'Результат инвестиций',
-	--@ResutSum as 'Средневзвешенная сумма вложенных средств',
-	--@InvestResult/@ResutSum * 100 as 'Доходность в %',
-	--@InvestResult as 'Доходность абсолютная',
-	--@StartDate as 'Дата начала',
-	--@EndDate as 'Дата завершения',
-	--@SumT as 'Количество дней'
+	--@InvestResult as 'Р РµР·СѓР»СЊС‚Р°С‚ РёРЅРІРµСЃС‚РёС†РёР№',
+	--@ResutSum as 'РЎСЂРµРґРЅРµРІР·РІРµС€РµРЅРЅР°СЏ СЃСѓРјРјР° РІР»РѕР¶РµРЅРЅС‹С… СЃСЂРµРґСЃС‚РІ',
+	--@InvestResult/@ResutSum * 100 as 'Р”РѕС…РѕРґРЅРѕСЃС‚СЊ РІ %',
+	--@InvestResult as 'Р”РѕС…РѕРґРЅРѕСЃС‚СЊ Р°Р±СЃРѕР»СЋС‚РЅР°СЏ',
+	--@StartDate as 'Р”Р°С‚Р° РЅР°С‡Р°Р»Р°',
+	--@EndDate as 'Р”Р°С‚Р° Р·Р°РІРµСЂС€РµРЅРёСЏ',
+	--@SumT as 'РљРѕР»РёС‡РµСЃС‚РІРѕ РґРЅРµР№'
 
 Declare @DATE_OPEN date, @NUM Nvarchar(100);
 
@@ -341,9 +341,9 @@ from [dbo].[Assets_Info] NOLOCK
 where [InvestorId] = @InvestorId and [ContractId] = @ContractId;
 
 select
-	ActiveDateToName = 'Активы на ' + FORMAT(@EndDate,'dd.MM.yyyy'),
+	ActiveDateToName = 'РђРєС‚РёРІС‹ РЅР° ' + FORMAT(@EndDate,'dd.MM.yyyy'),
 	ActiveDateToValue =  CAST(Round(@SItog,2) as Decimal(30,2)),
-	ProfitName = 'Доход за период ' + FORMAT(@StartDate,'dd.MM.yyyy') + ' - ' + FORMAT(@EndDate,'dd.MM.yyyy'),
+	ProfitName = 'Р”РѕС…РѕРґ Р·Р° РїРµСЂРёРѕРґ ' + FORMAT(@StartDate,'dd.MM.yyyy') + ' - ' + FORMAT(@EndDate,'dd.MM.yyyy'),
 	ProfitValue = CAST(Round(@InvestResult,2) as Decimal(30,2)),
 	ProfitProcentValue = CAST(Round(@InvestResult/@ResutSum * 100,2) as Decimal(38,2)),
 	OpenDate = @DATE_OPEN,
@@ -358,15 +358,15 @@ select
 	DateFromName = @StartDate,
 	Valuta = @Valuta;
 
-select ActiveName = 'Активы на ' + FORMAT(@StartDate,'dd.MM.yyyy') , ActiveValue = CAST(Round(@Snach,2) as Decimal(38,2)), Sort = 1, Valuta = @Valuta
+select ActiveName = 'РђРєС‚РёРІС‹ РЅР° ' + FORMAT(@StartDate,'dd.MM.yyyy') , ActiveValue = CAST(Round(@Snach,2) as Decimal(38,2)), Sort = 1, Valuta = @Valuta
 union
-select 'Пополнения', CAST(Round(@Sum_INPUT_VALUE_RUR,2) as Decimal(30,2)), 2, Valuta = @Valuta
+select 'РџРѕРїРѕР»РЅРµРЅРёСЏ', CAST(Round(@Sum_INPUT_VALUE_RUR,2) as Decimal(30,2)), 2, Valuta = @Valuta
 union
-select 'Выводы', CAST(Round(@Sum_OUTPUT_VALUE_RUR,2) as Decimal(30,2)), 3, Valuta = @Valuta
+select 'Р’С‹РІРѕРґС‹', CAST(Round(@Sum_OUTPUT_VALUE_RUR,2) as Decimal(30,2)), 3, Valuta = @Valuta
 union
-select 'Дивиденды', @Sum_INPUT_DIVIDENTS_RUR, 4, Valuta = @Valuta
+select 'Р”РёРІРёРґРµРЅРґС‹', @Sum_INPUT_DIVIDENTS_RUR, 4, Valuta = @Valuta
 union
-select 'Купоны', @Sum_INPUT_COUPONS_RUR, 5, Valuta = @Valuta
+select 'РљСѓРїРѕРЅС‹', @Sum_INPUT_COUPONS_RUR, 5, Valuta = @Valuta
 order by 3
 
 
@@ -387,7 +387,7 @@ end
 
 
 
-select ActiveName = 'Активы на ' + FORMAT(@StartDate,'dd.MM.yyyy') , ActiveValue = CAST(Round(@Snach,2) as Decimal(38,2)),
+select ActiveName = 'РђРєС‚РёРІС‹ РЅР° ' + FORMAT(@StartDate,'dd.MM.yyyy') , ActiveValue = CAST(Round(@Snach,2) as Decimal(38,2)),
 [InVal] = CAST(Round(@Sum_INPUT_VALUE_RUR,2) as Decimal(30,2)), 
 [OutVal] = CAST(Round(@Sum_OUTPUT_VALUE_RUR,2) as Decimal(30,2)), 
 [Dividends] = @Sum_INPUT_DIVIDENTS_RUR, 
@@ -395,7 +395,7 @@ select ActiveName = 'Активы на ' + FORMAT(@StartDate,'dd.MM.yyyy') , ActiveValue
 [Valuta] = @Valuta
 
 
--- Дивиденты, купоны - график
+-- Р”РёРІРёРґРµРЅС‚С‹, РєСѓРїРѕРЅС‹ - РіСЂР°С„РёРє
 ;WITH cte AS
 (
   SELECT 
@@ -429,11 +429,11 @@ GROUP BY [DateFrom]
 ORDER BY [DateFrom];
 
 
--- Детализация купонов и дивидендов
+-- Р”РµС‚Р°Р»РёР·Р°С†РёСЏ РєСѓРїРѕРЅРѕРІ Рё РґРёРІРёРґРµРЅРґРѕРІ
 select
 	[Date] =  a.[PaymentDateTime],
 	[ToolName] = a.[ShareName],
-	[PriceType] = case when a.[Type] = 1 then 'Купоны' else 'Дивиденды' end,
+	[PriceType] = case when a.[Type] = 1 then 'РљСѓРїРѕРЅС‹' else 'Р”РёРІРёРґРµРЅРґС‹' end,
 	[ContractName] = a.[ShareName],
 	[Price] = CAST(Round(a.[AmountPayments_RUR],2) as Decimal(30,2)),
 	a.[PaymentDateTime],
@@ -448,7 +448,7 @@ union all
 select
 	[Date] =  a.[PaymentDateTime],
 	[ToolName] = a.[ShareName],
-	[PriceType] = case when a.[Type] = 1 then 'Купоны' else 'Дивиденды' end,
+	[PriceType] = case when a.[Type] = 1 then 'РљСѓРїРѕРЅС‹' else 'Р”РёРІРёРґРµРЅРґС‹' end,
 	[ContractName] = a.[ShareName],
 	[Price] = CAST(Round(a.[AmountPayments_RUR],2) as Decimal(30,2)),
 	a.[PaymentDateTime],
@@ -521,7 +521,7 @@ from
 ) as r;
 
 
--- Прибавляем VALUE_NOM от BAL_ACC 2782
+-- РџСЂРёР±Р°РІР»СЏРµРј VALUE_NOM РѕС‚ BAL_ACC 2782
 UPDATE T SET
 	T.VALUE_NOM = T.VALUE_NOM + R.VALUE_NOM
 FROM
@@ -534,12 +534,12 @@ FROM
 ) AS R
 JOIN #TrustTree AS T ON R.VALUE_ID = T.VALUE_ID AND (T.BAL_ACC <> 2782 OR T.BAL_ACC IS NULL);
 
--- убираем BAL_ACC 2782
+-- СѓР±РёСЂР°РµРј BAL_ACC 2782
 delete from #TrustTree
 where BAL_ACC = 2782;
 
 
--- Дерево - четыре уровня вложенности
+-- Р”РµСЂРµРІРѕ - С‡РµС‚С‹СЂРµ СѓСЂРѕРІРЅСЏ РІР»РѕР¶РµРЅРЅРѕСЃС‚Рё
 -- tree1
 select
 	ValutaId = cast(CUR_ID as BigInt),
@@ -561,7 +561,7 @@ group by c.id, c.CategoryName, a.CUR_ID
 
 
 --------------------------------
---- расчёт уровня 3
+--- СЂР°СЃС‡С‘С‚ СѓСЂРѕРІРЅСЏ 3
 BEGIN TRY
 	DROP TABLE #StartDaily;
 END TRY
@@ -610,7 +610,7 @@ CREATE TABLE #ShareDates
 
 
 
--- начальная дата
+-- РЅР°С‡Р°Р»СЊРЅР°СЏ РґР°С‚Р°
 select *
 into #StartDaily
 from
@@ -631,7 +631,7 @@ from
 ) as res
 
 
--- конечная дата
+-- РєРѕРЅРµС‡РЅР°СЏ РґР°С‚Р°
 select *
 into #EndDaily
 from
@@ -652,7 +652,7 @@ from
 ) as res
 
 
--- позиции на начало
+-- РїРѕР·РёС†РёРё РЅР° РЅР°С‡Р°Р»Рѕ
 select *
 into #StartPostions
 from
@@ -673,7 +673,7 @@ from
 ) as res
 
 
--- позиции на конец
+-- РїРѕР·РёС†РёРё РЅР° РєРѕРЅРµС†
 select *, RowNumber = ROW_NUMBER() over( order by Id)
 into #EndPostions
 from
@@ -715,7 +715,7 @@ CREATE TABLE #SumStart
 	[InvestResultProcent] [decimal](38, 10) NULL
 );
 
--- список бумаг на конец периода
+-- СЃРїРёСЃРѕРє Р±СѓРјР°Рі РЅР° РєРѕРЅРµС† РїРµСЂРёРѕРґР°
 insert into #SumStart
 (
 	[IsActive], [In_Wir], [InvestorId], [ContractId],
@@ -814,13 +814,13 @@ outer apply
 	and bb.Out_Date <= @EndDate
 ) as b;
 
--- посчитали SumInput
+-- РїРѕСЃС‡РёС‚Р°Р»Рё SumInput
 update a set 
 	InvestResult = (SumEnd + SumOutput) - (SumStart + SumInput)
 from #SumStart as a;
 
 
--- посчитали InvestResult
+-- РїРѕСЃС‡РёС‚Р°Р»Рё InvestResult
 
 insert into #ShareDates
 (
@@ -913,14 +913,14 @@ where aa.In_Summa > 0 or bb.Out_Summa > 0;
 
 				set @Countter += 1;
         
-				-- начальную дату пропускаем
+				-- РЅР°С‡Р°Р»СЊРЅСѓСЋ РґР°С‚Сѓ РїСЂРѕРїСѓСЃРєР°РµРј
 				if @DateCCur = @StartDate
 				begin
 					set @LastDDate = @DateCCur
 				end
 				else
 				begin
-					-- со второй записи определ¤ем период
+					-- СЃРѕ РІС‚РѕСЂРѕР№ Р·Р°РїРёСЃРё РѕРїСЂРµРґРµР»В¤РµРј РїРµСЂРёРѕРґ
 					set @TT = DATEDIFF(DAY, @LastDDate, @DateCCur);
 					if @DateCCur = @EndDate set @TT = @TT + 1;
             
@@ -938,7 +938,7 @@ where aa.In_Summa > 0 or bb.Out_Summa > 0;
 			close obj_cur
 			deallocate obj_cur
 
-			-- фиксация до последнего дня
+			-- С„РёРєСЃР°С†РёСЏ РґРѕ РїРѕСЃР»РµРґРЅРµРіРѕ РґРЅСЏ
 			if @DateCCur2 is not null
 			begin
 				if @DateCCur2 < @EndDate
@@ -970,9 +970,9 @@ where aa.In_Summa > 0 or bb.Out_Summa > 0;
     close share_cur
     deallocate share_cur
 
-	-- результат
+	-- СЂРµР·СѓР»СЊС‚Р°С‚
 	--select * from #SumStart
---- расчёт уровня 3
+--- СЂР°СЃС‡С‘С‚ СѓСЂРѕРІРЅСЏ 3
 --------------------------------
 
 
@@ -1314,7 +1314,7 @@ outer apply
 ) as b
 where a.IsActive = 1;
 
--- округление и процентирование
+-- РѕРєСЂСѓРіР»РµРЅРёРµ Рё РїСЂРѕС†РµРЅС‚РёСЂРѕРІР°РЅРёРµ
 update a set
 	a.FinRes = dbo.f_Round(a.FinRes, 2),
 	a.FinResProcent = dbo.f_Round(a.FinResProcent * 100.000, 2)
