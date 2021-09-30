@@ -383,10 +383,16 @@ AS BEGIN
         close obj_cur
         deallocate obj_cur
 
-
         if @SumT > 0
         begin
-            set @ResutSum = @ResutSum/(@SumT - @MinutT)
+			if @SumT - @MinutT > 0
+			begin
+				set @ResutSum = @ResutSum/(@SumT - @MinutT)
+			end
+			else
+			begin
+				set @ResutSum = 0
+			end
         end
 
         if @ResutSum = 0 set @ResutSum = NULL

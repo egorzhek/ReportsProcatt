@@ -292,7 +292,7 @@ AS BEGIN
         BeginValue
     )
     select
-        FundId,
+        sd.FundId,
         FundName = fn.[Name],
         VAL,
         ProfitValue = NULL,
