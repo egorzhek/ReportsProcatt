@@ -320,6 +320,38 @@ namespace ReportsProcatt.Content
             string vSign = vVal > 0 ? "+" : "";
             return res ? $"{(aWithSign ? vSign : "")}{vVal.ToString(aFormat, cl)}" : "";
         }
+        public static string ToCharString(this DateTime dt)
+        {
+            switch (dt.Month)
+            {
+                case 1:
+                    return $"ЯНВ {dt.ToString("yy")}";
+                case 2:
+                    return $"ФЕВ {dt.ToString("yy")}";
+                case 3:
+                    return $"МАР {dt.ToString("yy")}";
+                case 4:
+                    return $"АПР {dt.ToString("yy")}";
+                case 5:
+                    return $"МАЙ {dt.ToString("yy")}";
+                case 6:
+                    return $"ИЮН {dt.ToString("yy")}";
+                case 7:
+                    return $"ИЮЛ {dt.ToString("yy")}";
+                case 8:
+                    return $"АВГ {dt.ToString("yy")}";
+                case 9:
+                    return $"СЕН {dt.ToString("yy")}";
+                case 10:
+                    return $"ОКТ {dt.ToString("yy")}";
+                case 11:
+                    return $"НОЯ {dt.ToString("yy")}";
+                case 12:
+                    return $"ДЕК {dt.ToString("yy")}";
+                default:
+                    return "ERROR";
+            }
+        }
         public static decimal ToDecimal(this object val)
         {
             return val as decimal? ?? 0;

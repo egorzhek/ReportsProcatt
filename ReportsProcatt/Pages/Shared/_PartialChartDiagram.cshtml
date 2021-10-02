@@ -1,12 +1,21 @@
 ﻿@model ReportsProcatt.Models.ChartDiaramnClass
-    
-    <div class="line-chart-wrap">
-        <div class="reportGraph">
-            <canvas width="1156" height="237" id="@Model.ElementName"></canvas>
+
+<div class="line-chart-wrap">
+    <div class="reportGraph column-graph">
+        <div class="chartjs-size-monitor"><div class="chartjs-size-monitor-expand"><div class=""></div></div><div class="chartjs-size-monitor-shrink"><div class=""></div></div></div>
+        <canvas width="1256" height="172" id="@Model.ElementName"></canvas>
+        <div class="column-graph-legend column-graph-legend-bottom">
+            <ul>
+            @foreach (var lbl in Model.Lables)
+            {
+                <li>@lbl</li>
+            }
+            </ul>
         </div>
     </div>
-                            
-    <script type="text/javascript">
+</div>
+
+<script type="text/javascript">
 
     Charts.push(
         function () {
@@ -41,7 +50,7 @@
                                 "padding": 20,
                                 "fontStyle": 'bolder',
                                 "fontFamily": 'MuseoSans',
-                                "beginAtZero": true,
+                                "beginAtZero": true
                             },
                             "gridLines": {
                                 "tickMarkLength": 18,
@@ -53,12 +62,7 @@
                         }],
                         "xAxes": [{
                             "ticks": {
-                                "color": "#3E4E65",
-                                "fontSize": 12,
-                                "padding": 20,
-                                "fontStyle": 'bolder',
-                                "fontFamily": 'MuseoSans',
-                                "beginAtZero": true,
+                                "display": false
                             },
                             "gridLines": {
                                 "tickMarkLength": 18,
@@ -81,4 +85,4 @@
             });
         }
     );
-    </script>
+</script>
