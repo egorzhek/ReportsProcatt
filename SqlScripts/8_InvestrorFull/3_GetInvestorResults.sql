@@ -8,6 +8,57 @@ CREATE OR ALTER PROCEDURE [dbo].[GetInvestorFundResults]
 AS BEGIN
     if @Valuta is null set @Valuta = 'RUB';
 
+    declare @ReSult table
+    (
+        FundId Int NULL
+    );
+
+    insert into @ReSult
+    (
+        FundId
+    )
+    select
+        sd.FundId
+    from
+    (
+        select
+            a.FundId
+        From [dbo].[InvestorFundDate] as a
+        join [dbo].[FundNames] as b with(nolock) on a.FundId = b.Id and b.DATE_CLOSE >= @EndDate
+        where a.Investor = @InvestorId and a.[Date] = @EndDate
+        union all
+        select
+            a.FundId
+        From [dbo].[InvestorFundDateLast] as a
+        join [dbo].[FundNames] as b with(nolock) on a.FundId = b.Id and b.DATE_CLOSE >= @EndDate
+        where a.Investor = @InvestorId and a.[Date] = @EndDate
+    ) as sd;
+
+    declare @Result2 table
+    (
+        NameObject NVarChar(200),
+        StartDate NVarChar(50),
+        StartDateValue Numeric(30,10),
+        EndDate NVarChar(50),
+        EndDateValue Decimal(30,2),
+        INPUT_VALUE Numeric(30,10),
+        OUTPUT_VALUE Numeric(30,10),
+        INPUT_COUPONS Numeric(30,10),
+        INPUT_DIVIDENTS Numeric(30,10),
+        ProfitValue Numeric(30,2),
+        ProfitProcentValue Numeric(38,2),
+        Valuta NVarChar(10)
+    );
+
+    if not exists
+    (
+        select 1 from @ReSult
+    )
+    begin
+        select * from @Result2
+        return;
+    end
+
     declare @MinDate date, @MaxDate date
 
     Declare @SItog numeric(30,10), @AmountDayMinus_RUR numeric(30,10), @Snach numeric(30,10), @AmountDayPlus_RUR numeric(30,10),
@@ -24,11 +75,13 @@ AS BEGIN
     (
         SELECT a.[Date]
         FROM [dbo].[InvestorFundDate] as a with(nolock)
+        join @ReSult as g on a.FundId = g.FundId
         join [dbo].[FundNames] as b with(nolock) on a.FundId = b.Id
         WHERE a.Investor = @InvestorId and b.DATE_CLOSE >= @EndDate
         UNION
         SELECT a.[Date]
         FROM [dbo].[InvestorFundDateLast] as a with(nolock)
+        join @ReSult as g on a.FundId = g.FundId
         join [dbo].[FundNames] as b with(nolock) on a.FundId = b.Id
         WHERE a.Investor = @InvestorId and b.DATE_CLOSE >= @EndDate
         /*
@@ -125,6 +178,7 @@ AS BEGIN
                 INPUT_COUPONS_USD = 0.0000000000,
                 INPUT_COUPONS_EURO = 0.0000000000
             from InvestorFundDate as a with(nolock)
+            join @ReSult as g on a.FundId = g.FundId
             join [dbo].[FundNames] as b with(nolock) on a.FundId = b.Id and b.DATE_CLOSE >= @EndDate
             where a.Investor = @InvestorId and a.[Date] >= @StartDate and a.[Date] <= @EndDate
             union all
@@ -167,6 +221,7 @@ AS BEGIN
                 INPUT_COUPONS_USD = 0.0000000000,
                 INPUT_COUPONS_EURO = 0.0000000000
             from InvestorFundDateLast as a with(nolock)
+            join @ReSult as g on a.FundId = g.FundId
             join [dbo].[FundNames] as b with(nolock) on a.FundId = b.Id and b.DATE_CLOSE >= @EndDate
             where a.Investor = @InvestorId and a.[Date] >= @StartDate and a.[Date] <= @EndDate
             /*
@@ -385,14 +440,14 @@ AS BEGIN
 
         if @SumT > 0
         begin
-			if @SumT - @MinutT > 0
-			begin
-				set @ResutSum = @ResutSum/(@SumT - @MinutT)
-			end
-			else
-			begin
-				set @ResutSum = 0
-			end
+            if @SumT - @MinutT > 0
+            begin
+                set @ResutSum = @ResutSum/(@SumT - @MinutT)
+            end
+            else
+            begin
+                set @ResutSum = 0
+            end
         end
 
         if @ResutSum = 0 set @ResutSum = NULL
@@ -434,6 +489,57 @@ CREATE OR ALTER PROCEDURE [dbo].[GetInvestorContractResults]
 AS BEGIN
     if @Valuta is null set @Valuta = 'RUB';
 
+    declare @ReSult table
+    (
+        ContractId Int NULL
+    );
+
+    insert into @ReSult
+    (
+        ContractId
+    )
+    select
+        sd.ContractId
+    from
+    (
+        SELECT
+            a.ContractId
+        FROM [dbo].[Assets_Contracts] as a with(nolock)
+        join [dbo].[Assets_Info] as b with(nolock) on a.InvestorId = b.InvestorId and a.ContractId = b.ContractId and b.DATE_CLOSE >= @EndDate
+        where a.InvestorId = @InvestorId and a.[Date] = @EndDate
+        union all
+        SELECT
+            a.ContractId
+        FROM [dbo].[Assets_ContractsLast] as a with(nolock)
+        join [dbo].[Assets_Info] as b with(nolock) on a.InvestorId = b.InvestorId and a.ContractId = b.ContractId and b.DATE_CLOSE >= @EndDate
+        where a.InvestorId = @InvestorId and a.[Date] = @EndDate
+    ) as sd;
+
+    declare @Result2 table
+    (
+        NameObject NVarChar(200),
+        StartDate NVarChar(50),
+        StartDateValue Numeric(30,10),
+        EndDate NVarChar(50),
+        EndDateValue Decimal(30,2),
+        INPUT_VALUE Numeric(30,10),
+        OUTPUT_VALUE Numeric(30,10),
+        INPUT_COUPONS Numeric(30,10),
+        INPUT_DIVIDENTS Numeric(30,10),
+        ProfitValue Numeric(30,2),
+        ProfitProcentValue Numeric(38,2),
+        Valuta NVarChar(10)
+    );
+
+    if not exists
+    (
+        select 1 from @ReSult
+    )
+    begin
+        select * from @Result2
+        return;
+    end
+
     declare @MinDate date, @MaxDate date
 
     Declare @SItog numeric(30,10), @AmountDayMinus_RUR numeric(30,10), @Snach numeric(30,10), @AmountDayPlus_RUR numeric(30,10),
@@ -461,11 +567,13 @@ AS BEGIN
         */
         SELECT a.[Date]
         FROM [dbo].[Assets_Contracts] as a with(nolock)
+        join @ReSult as g on a.ContractId = g.ContractId
         join [dbo].[Assets_Info] as b with(nolock) on a.InvestorId = b.InvestorId and a.ContractId = b.ContractId
         WHERE a.InvestorId = @InvestorId and b.DATE_CLOSE >= @EndDate
         UNION
         SELECT a.[Date]
         FROM [dbo].[Assets_ContractsLast] as a with(nolock)
+        join @ReSult as g on a.ContractId = g.ContractId
         join [dbo].[Assets_Info] as b with(nolock) on a.InvestorId = b.InvestorId and a.ContractId = b.ContractId
         WHERE a.InvestorId = @InvestorId and b.DATE_CLOSE >= @EndDate
     ) AS R
@@ -611,6 +719,7 @@ AS BEGIN
                 a.INPUT_COUPONS_USD,
                 a.INPUT_COUPONS_EURO
             from dbo.Assets_Contracts as a with(nolock)
+            join @ReSult as g on a.ContractId = g.ContractId
             join [dbo].[Assets_Info] as b with(nolock) on a.InvestorId = b.InvestorId and a.ContractId = b.ContractId and b.DATE_CLOSE >= @EndDate
             where a.InvestorId = @InvestorId and a.[Date] >= @StartDate and a.[Date] <= @EndDate
             union all
@@ -669,6 +778,7 @@ AS BEGIN
                 a.INPUT_COUPONS_USD,
                 a.INPUT_COUPONS_EURO
             from dbo.Assets_ContractsLast as a with(nolock)
+            join @ReSult as g on a.ContractId = g.ContractId
             join [dbo].[Assets_Info] as b with(nolock) on a.InvestorId = b.InvestorId and a.ContractId = b.ContractId and b.DATE_CLOSE >= @EndDate
             where a.InvestorId = @InvestorId and a.[Date] >= @StartDate and a.[Date] <= @EndDate
         )
