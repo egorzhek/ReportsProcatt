@@ -180,7 +180,7 @@ namespace ReportsProcatt.Models
             DivsNCouponsChart = new ChartDiaramnClass($"DivsNCoupons_main")
             {
                 Lables = _invFullDS.Tables[InvestFullTables.DivsNCouponsChart].Rows.Cast<DataRow>().ToList()
-                    .Select(r => ((DateTime)r["Date"]).ToString("MMM yy", cl).ToUpper()).ToList(),
+                    .Select(r => ((DateTime)r["Date"]).ToCharString()).ToList(),
                 Type = "bar",
                 DataSets = new List<ChartDiaramnClass.DataSetClass>()
                     {

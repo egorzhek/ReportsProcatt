@@ -247,7 +247,7 @@ namespace ReportsProcatt.Models
                 DividedtsCouponsChart = new ChartDiaramnClass($"DividedtsCouponsChart_{Id}")
                 {
                     Lables = _TrustManagementDS.Tables[DuTables.DivsNCoupsChartDT].Rows.Cast<DataRow>().ToList()
-                        .Select(r => ((DateTime)r["Date"]).ToString("MMM yy", cl)).ToList(),
+                        .Select(r => ((DateTime)r["Date"]).ToCharString()).ToList(),
                     Type = "bar",
                     DataSets = new List<ChartDiaramnClass.DataSetClass>()
                     {
