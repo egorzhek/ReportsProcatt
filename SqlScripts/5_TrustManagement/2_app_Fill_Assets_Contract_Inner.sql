@@ -1123,7 +1123,7 @@ AS BEGIN
 	--option(loop join,force order)
 
 	-- Теперь самое интересное
-	declare @ApplId int = -500 --ид для идентификации выборки из временой таблицы (произвольный)
+	declare @ApplId int = -NEXT VALUE FOR ApplCycle; --ид для идентификации выборки из временой таблицы (произвольный)
 
 	declare @practitionerId int
 
