@@ -42,12 +42,12 @@ from
         select
             Investment_id, VALUE_RUR, CLASS, VALUE_ID
         from [dbo].[FundStructure] nolock
-        where Investment_id = @Contract_Id and PortfolioDate = @Date
+        where Investor_Id = @Contract_Id and PortfolioDate = @Date
         union all
         select
             Investment_id, VALUE_RUR, CLASS, VALUE_ID
         from [dbo].[FundStructure_Last] nolock
-        where Investment_id = @Contract_Id and PortfolioDate = @Date
+        where Investor_Id = @Contract_Id and PortfolioDate = @Date
     ) as res
     join [dbo].[InvestmentIds] as Inv on res.Investment_id = Inv.Id
     join [dbo].[ClassCategories] as cs on res.CLASS = cs.ClassId
