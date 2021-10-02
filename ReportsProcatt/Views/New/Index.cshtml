@@ -134,58 +134,58 @@
 
     @Html.Partial("_PartialMainDiagram", Model.MainDiagram)
 
-<div class="keep-together">
+    <div class="keep-together">
 
-    <table class="section block-heading">
-        <tbody>
-            <tr>
-                <td>
+        <table class="section block-heading">
+            <tbody>
+                <tr>
+                    <td>
 
-                    <table class="section-wrapper">
-                        <tbody>
-                            <tr>
+                        <table class="section-wrapper">
+                            <tbody>
+                                <tr>
 
-                                <td class="left-td heading-td">
-                                    <span>Все активы</span>
-                                </td>
+                                    <td class="left-td heading-td">
+                                        <span>Все активы</span>
+                                    </td>
 
-                            </tr>
-                        </tbody>
-                    </table>
+                                </tr>
+                            </tbody>
+                        </table>
 
-                </td>
-            </tr>
-        </tbody>
-    </table>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
 
-    @Html.Partial("_PartialTableView", Model.AllAssets)
-    <table class="section text-block">
-        <tbody>
-            <tr>
-                <td>
+        @Html.Partial("_PartialTableView", Model.AllAssets)
+        <table class="section text-block">
+            <tbody>
+                <tr>
+                    <td>
 
-                    <table class="section-wrapper">
+                        <table class="section-wrapper">
 
-                        <tbody>
-                            <tr>
-                                <td class="text-wrap">
-                                    <p>
-                                        * - Указанная в настоящем Отчете информация не является исчерпывающей и подготовлена исключительно в информационных целях и носит ознакомительный характер; доходность по Вашему портфелю рассчитана индивидуально с учетом всех операций за выбранный период. <br>
+                            <tbody>
+                                <tr>
+                                    <td class="text-wrap">
+                                        <p>
+                                            * - Указанная в настоящем Отчете информация не является исчерпывающей и подготовлена исключительно в информационных целях и носит ознакомительный характер; доходность по Вашему портфелю рассчитана индивидуально с учетом всех операций за выбранный период. <br>
 
-                                        Подробную информацию о деятельности АО УК «Ингосстрах – Инвестиции» и паевых инвестиционных фондов, находящихся под ее управлением, включая тексты правил доверительного управления, всех изменений и дополнений к ним, а также сведения о местах приема заявок на приобретение, погашение и обмен инвестиционных паев Вы можете получить по адресу 115035, г. Москва, ул. Пятницкая, д. 12, стр. 2, по телефону: (495) 720-48-98, а также на официальном сайте АО УК «Ингосстрах – Инвестиции» в сети Интернет по адресу: <a href="https://www.ingosinvest.ru">www.ingosinvest.ru</a>. <br>
-                                    </p>
-                                </td>
-                            </tr>
+                                            Подробную информацию о деятельности АО УК «Ингосстрах – Инвестиции» и паевых инвестиционных фондов, находящихся под ее управлением, включая тексты правил доверительного управления, всех изменений и дополнений к ним, а также сведения о местах приема заявок на приобретение, погашение и обмен инвестиционных паев Вы можете получить по адресу 115035, г. Москва, ул. Пятницкая, д. 12, стр. 2, по телефону: (495) 720-48-98, а также на официальном сайте АО УК «Ингосстрах – Инвестиции» в сети Интернет по адресу: <a href="https://www.ingosinvest.ru">www.ingosinvest.ru</a>. <br>
+                                        </p>
+                                    </td>
+                                </tr>
 
-                        </tbody>
-                    </table>
+                            </tbody>
+                        </table>
 
-                </td>
-            </tr>
-        </tbody>
-    </table>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
 
-</div>
+    </div>
     @if (Model.PIFsTotals.Table.Rows.Count > 0)
     {
         @Html.Partial("_PartialTableView", Model.PIFsTotals)
@@ -196,7 +196,72 @@
         @Html.Partial("_PartialTableView", Model.DUsTotals)
     }
 
-    
+    @*Структура активов в портфеле*@
+    <div class="keep-together">
+        <table class="section block-heading print-pt50">
+            <tbody>
+                <tr>
+                    <td>
+
+                        <table class="section-wrapper">
+                            <tbody>
+                                <tr>
+
+                                    <td class="left-td heading-td">
+                                        <span>Структура активов в портфеле</span>
+                                    </td>
+
+                                    <td class="right-td heading-td">
+                                    </td>
+
+                                </tr>
+                            </tbody>
+                        </table>
+
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <table class="section doughnut-section info-table-section">
+            <tr>
+                <td>
+
+                    <table class="section-wrapper">
+                        <tbody>
+                            <tr>
+                                <td class="canvas-td">
+                                    <div class="canvas-wrap">
+
+                                        <div class="canvas-row">
+
+                                            @Html.Partial("_PartialCircleDiagram", Model.Assets)
+
+                                            @Html.Partial("_PartialCircleDiagram", Model.Instruments)
+
+                                        </div>
+
+
+                                        <div class="canvas-row">
+
+                                            <div class="canvas-item">
+
+                                                @Html.Partial("_PartialCircleDiagram", Model.Currencies)
+
+                                            </div>
+
+                                        </div>
+
+
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </td>
+            </tr>
+        </table>
+    </div>
 
     @*Дививденды и купоны*@
     <div class="keep-together">
@@ -300,72 +365,7 @@
         @Html.Partial("_PartialTableView", Model.DivsNCouponsDetails)
     </div>
 
-    @*Структура активов в портфеле*@
-    <div class="keep-together">
-        <table class="section block-heading print-pt50">
-            <tbody>
-                <tr>
-                    <td>
 
-                        <table class="section-wrapper">
-                            <tbody>
-                                <tr>
-
-                                    <td class="left-td heading-td">
-                                        <span>Структура активов в портфеле</span>
-                                    </td>
-
-                                    <td class="right-td heading-td">
-                                    </td>
-
-                                </tr>
-                            </tbody>
-                        </table>
-
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-        <table class="section doughnut-section info-table-section">
-            <tr>
-                <td>
-
-                    <table class="section-wrapper">
-                        <tbody>
-                            <tr>
-                                <td class="canvas-td">
-                                    <div class="canvas-wrap">
-
-                                        <div class="canvas-row">
-
-                                            @Html.Partial("_PartialCircleDiagram", Model.Assets)
-
-                                            @Html.Partial("_PartialCircleDiagram", Model.Instruments)
-
-                                        </div>
-
-
-                                        <div class="canvas-row">
-
-                                            <div class="canvas-item">
-
-                                                @Html.Partial("_PartialCircleDiagram", Model.Currencies)
-
-                                            </div>
-
-                                        </div>
-
-
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-
-                </td>
-            </tr>
-        </table>
-    </div>
 
     @foreach (var pif in Model.PIFs)
     {

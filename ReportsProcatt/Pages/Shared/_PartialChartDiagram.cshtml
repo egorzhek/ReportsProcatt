@@ -1,10 +1,13 @@
 ﻿@model ReportsProcatt.Models.ChartDiaramnClass
-
+@{ 
+    int len = Model.DataSets[0].data.Max(t => Math.Abs(Math.Round(t.value))).ToString().Length;
+    len = Math.Max(len, Model.DataSets[1].data.Max(t => Math.Abs(Math.Round(t.value))).ToString().Length);
+}
 <div class="line-chart-wrap">
     <div class="reportGraph column-graph">
         <div class="chartjs-size-monitor"><div class="chartjs-size-monitor-expand"><div class=""></div></div><div class="chartjs-size-monitor-shrink"><div class=""></div></div></div>
         <canvas width="1256" height="172" id="@Model.ElementName"></canvas>
-        <div class="column-graph-legend column-graph-legend-bottom">
+        <div class="column-graph-legend column-graph-legend-bottom" style="padding-left:@Html.Raw(20+len*10)px">
             <ul>
             @foreach (var lbl in Model.Lables)
             {
