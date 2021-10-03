@@ -1,4 +1,4 @@
-DECLARE @ToDateStr     Nvarchar(50) = @DateToSharp;
+﻿DECLARE @ToDateStr     Nvarchar(50) = @DateToSharp;
 DECLARE @FromDateStr   Nvarchar(50) = @DateFromSharp;
 DECLARE @InvestorIdStr Nvarchar(50) = @InvestorIdSharp;
 DECLARE @ContractIdStr Nvarchar(50) = @ContractIdSharp;
@@ -438,7 +438,7 @@ select
 	[Price] = CAST(Round(a.[AmountPayments_RUR],2) as Decimal(30,2)),
 	a.[PaymentDateTime],
 	[RowPrice] = a.AmountPayments,
-	[RowValuta] = c.Symbol
+	[RowValuta] = c.ShortName
 from [dbo].[DIVIDENDS_AND_COUPONS_History] as a
 join dbo.Currencies as c on a.CurrencyId = c.Id
 where a.InvestorId = @InvestorId and a.ContractId = @ContractId
@@ -983,7 +983,7 @@ SELECT
 	TypeId = cast(c.id as BigInt),
 	ChildName = i.Investment,
 	ValutaId = cast(a.CUR_ID as BigInt),
-	Valuta = cr.Symbol,
+	Valuta = cr.ShortName,
 	Price =  CAST(Round(a.[VALUE_NOM],2) as Decimal(30,2)),
 	Ammount = case when c.Id <> 4 then CAST(Round(a.[AMOUNT],2) as Decimal(30,2))  else NULL end,
 	Detail = CAST(Round(rst.InvestResult,2) as Decimal(30,2)),
@@ -1326,7 +1326,7 @@ select
 	ChildId = b.InvestmentId,
 	Child2Name = i.Investment,
 	Price = CAST(Round(a.VALUE_NOM,2) as Decimal(30,2)),
-	Valuta = c.Symbol,
+	Valuta = c.ShortName,
 	Ammount = a.Amount,
 	a.FinRes,
 	a.FinResProcent
