@@ -65,7 +65,7 @@ select
         then left( ltrim(rtrim(s.Investment)), len (ltrim(rtrim(s.Investment))) - 5)
         else s.Investment
     end,
-    s.VALUE_ID, VALUE_RUR = sum(s.VALUE_RUR), Result = sum(s.Result), s.AllSum
+    s.VALUE_ID, VALUE_RUR = sum(s.VALUE_RUR), Result = sum(s.Result), s.AllSum, 'RUB' as CurrencyName
 from @Tmp as s
 group by s.VALUE_ID, s.AllSum,
     case when right(rtrim(s.Investment), 5) = '; НКД'

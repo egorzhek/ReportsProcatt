@@ -127,7 +127,7 @@ namespace ReportsProcatt.Models
                 FundStruct = new CircleDiagram($"Fund_{Id}_StructCircle")
                 {
                     LegendName = "Инструменты",
-                    MainText = $"{_Pif2DS.DecimalToStr(1, "AllSum", "#,##0")} {Currency.Char}",
+                    MainText = $"{_Pif2DS.DecimalToStr(0, "AllSum", "#,##0")} {Currency.Char}",
                     Footer = $"{_Pif2DS.Tables[0].Rows.Count} инструментов",
                     Data = _Pif2DS.Tables[0].Rows.Cast<DataRow>().ToList()
                         .OrderByDescending(r => r["Result"].ToDecimal())

@@ -17,7 +17,7 @@ if @Contract_Id2 is not null set @Contract_Id = @Contract_Id2;
 
 
 select
-    CategoryName, VALUE_RUR = sum(VALUE_RUR), AllSum, Result = sum(VALUE_RUR)/AllSum
+    CategoryName, VALUE_RUR = sum(VALUE_RUR), AllSum, Result = sum(VALUE_RUR)/AllSum, 'RUB' as CurrencyName
 from
 (
     select
