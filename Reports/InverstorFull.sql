@@ -59,6 +59,45 @@ if @EndDate > @MaxDate set @EndDate = @MaxDate;
 if @EndDate < @MinDate set @EndDate = @MaxDate;
 
 
+declare @FundReSult table
+(
+    FundId Int NULL,
+    FundName NVarchar(300) NULL,
+    ProfitValue decimal(28,10) NULL,
+    ProfitProcentValue decimal(28,10) NULL,
+    BeginValue decimal(28,10) NULL,
+    EndValue decimal(28,10) NULL,
+	Valuta NVarchar(10),
+    InvestResult decimal(28,10) NULL,
+    ResutSum decimal(28,10) NULL
+);
+
+declare @ContractReSult table
+(
+	ContractId Int NULL,
+	ContractName NVarchar(300) NULL,
+	ProfitValue decimal(28,10) NULL,
+	ProfitProcentValue decimal(28,10) NULL,
+	BeginValue decimal(28,10) NULL,
+	EndValue decimal(28,10) NULL,
+	Valuta NVarchar(300) NULL,
+	InvestResult decimal(28,10) NULL,
+	ResutSum decimal(28,10) NULL
+);
+
+insert into @FundReSult
+EXEC [dbo].[GetInvestorFunds]
+		@Investor = @InvestorId,
+		@StartDate = @StartDate,
+		@EndDate = @EndDate,
+		@Valuta = @Valuta
+
+insert into @ContractReSult
+EXEC [dbo].[GetInvestorContracts]
+		@InvestorId = @InvestorId,
+		@StartDate = @StartDate,
+		@EndDate = @EndDate,
+		@Valuta = @Valuta
 
 
 BEGIN TRY
@@ -456,12 +495,39 @@ select
 from [dbo].[Assets_Info] NOLOCK
 where [InvestorId] = @InvestorId; --and [ContractId] = @ContractId;
 */
+
+declare @FProfitValue decimal(28,10), @FInvestResult decimal(28,10), @FResutSum decimal(28,10), @FProcentValue decimal(28,10);
+
+select
+	@FProfitValue = sum(ProfitValue),
+	@FInvestResult = sum(InvestResult),
+	@FResutSum = sum(ResutSum)
+from
+(
+	select
+		ProfitValue, InvestResult, ResutSum
+	from @FundReSult
+	union all
+	select
+		ProfitValue, InvestResult, ResutSum
+	from @ContractReSult
+) as res;
+
+if @FResutSum <> 0
+begin
+	set @FProcentValue = @FInvestResult/@FResutSum * 100.00;
+end
+else
+begin
+	set @FProcentValue = 0;
+end
+
 select
 	ActiveDateToName = N'Сумма активов на дату окончания периода',
 	ActiveDateToValue =  CAST(Round(@SItog,2) as Decimal(30,2)),
 	ProfitName = N'ОТЧЁТ ПО ПОРТФЕЛЮ / ' + FORMAT(@StartDate,'dd.MM.yyyy') + ' - ' + FORMAT(@EndDate,'dd.MM.yyyy'),
-	ProfitValue = CAST(Round(@InvestResult,2) as Decimal(30,2)),
-	ProfitProcentValue = CAST(Round(@InvestResult/@ResutSum * 100,2) as Decimal(38,2)),
+	ProfitValue = CAST(Round(@FProfitValue,2) as Decimal(30,2)),
+	ProfitProcentValue = CAST(Round(@FProcentValue,2) as Decimal(38,2)),
 	--OpenDate = FORMAT(@DATE_OPEN,'dd.MM.yyyy'),
 	LS_NUM = '2940000083',
 	EndSumAmount = 99999.99,
@@ -539,33 +605,107 @@ select DonutLabel1 = N'6 405 ₽', DonutLabel2 = N'4 актива'
 
     -- Fifth
 	-- Выдаёт Список ПИФОВ
-	EXEC [dbo].[GetInvestorFunds]
-		@Investor = @InvestorId,
-		@StartDate = @StartDate,
-		@EndDate = @EndDate,
-		@Valuta = @Valuta
+	select
+		FundId,
+        FundName,
+        ProfitValue = CAST([dbo].f_Round(ProfitValue, 2) AS DECIMAL(30,2)),
+        ProfitProcentValue = CAST([dbo].f_Round(ProfitProcentValue, 2) AS DECIMAL(30,2)),
+        BeginValue = CAST([dbo].f_Round(BeginValue, 2) AS DECIMAL(30,2)),
+        EndValue = CAST([dbo].f_Round(EndValue, 2) AS DECIMAL(30,2)),
+        Valuta,
+        InvestResult,
+		ResutSum
+	from @FundReSult
+	order by FundName
 
 	-- Sixth
 	-- выдаёт список ДУ
-	EXEC [dbo].[GetInvestorContracts]
-		@InvestorId = @InvestorId,
-		@StartDate = @StartDate,
-		@EndDate = @EndDate,
-		@Valuta = @Valuta
+	select
+        ContractId,
+        ContractName,
+        ProfitValue = CAST([dbo].f_Round(ProfitValue, 2) AS DECIMAL(30,2)),
+        ProfitProcentValue = CAST([dbo].f_Round(ProfitProcentValue, 2) AS DECIMAL(30,2)),
+        BeginValue = CAST([dbo].f_Round(BeginValue, 2) AS DECIMAL(30,2)),
+        EndValue = CAST([dbo].f_Round(EndValue, 2) AS DECIMAL(30,2)),
+        Valuta,
+        InvestResult,
+        ResutSum
+    from @ContractReSult
+    order by ContractName;
+
+	
+
+
+
+	set @FProfitValue = NULL
+	set @FInvestResult = NULL
+	set @FResutSum = NULL
+	set @FProcentValue = NULL
+
+	select
+	@FProfitValue = sum(ProfitValue),
+	@FInvestResult = sum(InvestResult),
+	@FResutSum = sum(ResutSum)
+	from
+	(
+		select
+			ProfitValue, InvestResult, ResutSum
+		from @FundReSult
+	) as res;
+
+	if @FResutSum <> 0
+	begin
+		set @FProcentValue = @FInvestResult/@FResutSum * 100.00;
+	end
+	else
+	begin
+		set @FProcentValue = 0;
+	end
 
   -- Результаты по ПИФам
   EXEC [dbo].[GetInvestorFundResults]
 		@InvestorId = @InvestorId,
   		@StartDate = @StartDate,
   		@EndDate = @EndDate,
-		@Valuta = @Valuta
+		@Valuta = @Valuta,
+		@ProfitValue = @FProfitValue,
+		@ProfitProcentValue = @FProcentValue
+	
+
+
+	set @FProfitValue = NULL
+	set @FInvestResult = NULL
+	set @FResutSum = NULL
+	set @FProcentValue = NULL
+
+	select
+	@FProfitValue = sum(ProfitValue),
+	@FInvestResult = sum(InvestResult),
+	@FResutSum = sum(ResutSum)
+	from
+	(
+		select
+			ProfitValue, InvestResult, ResutSum
+		from @ContractReSult
+	) as res;
+
+	if @FResutSum <> 0
+	begin
+		set @FProcentValue = @FInvestResult/@FResutSum * 100.00;
+	end
+	else
+	begin
+		set @FProcentValue = 0;
+	end
 
   -- Результаты по ДУ
   EXEC [dbo].[GetInvestorContractResults]
 		@InvestorId = @InvestorId,
   		@StartDate = @StartDate,
   		@EndDate = @EndDate,
-		@Valuta = @Valuta
+		@Valuta = @Valuta,
+		@ProfitValue = @FProfitValue,
+		@ProfitProcentValue = @FProcentValue
 
 
 	set @ContractId = NULL;

@@ -3,7 +3,9 @@ CREATE OR ALTER PROCEDURE [dbo].[GetInvestorFundResults]
     @InvestorId int = 19865873,
     @StartDate Date = NULL,
     @EndDate Date = NULL,
-    @Valuta Nvarchar(10) = NULL
+    @Valuta Nvarchar(10) = NULL,
+    @ProfitValue decimal(28,10) = NULL,
+    @ProfitProcentValue decimal(28,10) = NULL
 )
 AS BEGIN
     if @Valuta is null set @Valuta = 'RUB';
@@ -474,8 +476,8 @@ AS BEGIN
         INPUT_COUPONS = @Sum_INPUT_COUPONS_RUR,
         INPUT_DIVIDENTS = @Sum_INPUT_DIVIDENTS_RUR,
 
-        ProfitValue = CAST(Round(@InvestResult,2) as Decimal(30,2)),
-        ProfitProcentValue = CAST(Round(@InvestResult/@ResutSum * 100,2) as Decimal(38,2)),
+        ProfitValue = CAST(Round(@ProfitValue,2) as Decimal(30,2)),
+        ProfitProcentValue = CAST(Round(@ProfitProcentValue,2) as Decimal(38,2)),
         Valuta = @Valuta
 END
 GO
@@ -484,7 +486,9 @@ CREATE OR ALTER PROCEDURE [dbo].[GetInvestorContractResults]
     @InvestorId int = 19865873,
     @StartDate Date = NULL,
     @EndDate Date = NULL,
-    @Valuta Nvarchar(10) = NULL
+    @Valuta Nvarchar(10) = NULL,
+    @ProfitValue decimal(28,10) = NULL,
+    @ProfitProcentValue decimal(28,10) = NULL
 )
 AS BEGIN
     if @Valuta is null set @Valuta = 'RUB';
@@ -978,8 +982,8 @@ AS BEGIN
         INPUT_COUPONS = @Sum_INPUT_COUPONS_RUR,
         INPUT_DIVIDENTS = @Sum_INPUT_DIVIDENTS_RUR,
 
-        ProfitValue = CAST(Round(@InvestResult,2) as Decimal(30,2)),
-        ProfitProcentValue = CAST(Round(@InvestResult/@ResutSum * 100,2) as Decimal(38,2)),
+        ProfitValue = CAST(Round(@ProfitValue,2) as Decimal(30,2)),
+        ProfitProcentValue = CAST(Round(@ProfitProcentValue,2) as Decimal(38,2)),
         Valuta = @Valuta
 END
 GO

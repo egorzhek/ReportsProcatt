@@ -10,10 +10,12 @@ CREATE OR ALTER PROCEDURE [dbo].[app_CulcContractProfit]
     @ProfitProcentValue decimal(28,10) = NULL output,
     @BeginValue decimal(28,10) = NULL output,
     @EndValue decimal(28,10) = NULL output,
-	@Valuta Nvarchar(10) = NULL
+    @Valuta Nvarchar(10) = NULL,
+    @OutInvestResult decimal(28,10) = NULL output,
+    @OutResutSum decimal(28,10) = NULL output
 )
 AS BEGIN
-	if @Valuta is null set @Valuta = 'RUB';
+    if @Valuta is null set @Valuta = 'RUB';
 
     declare @MinDate date, @MaxDate date
 
@@ -57,138 +59,138 @@ AS BEGIN
     FROM
     (
         SELECT
-			InvestorId, ContractId, [Date], USDRATE, EURORATE,
+            InvestorId, ContractId, [Date], USDRATE, EURORATE,
 
-			VALUE_RUR =
-			case
-				when @Valuta = 'RUB' then VALUE_RUR
-				when @Valuta = 'USD' then VALUE_USD
-				when @Valuta = 'EUR' then VALUE_EURO
-				else VALUE_RUR
-			end,
-				VALUE_USD, VALUE_EURO,
+            VALUE_RUR =
+            case
+                when @Valuta = 'RUB' then VALUE_RUR
+                when @Valuta = 'USD' then VALUE_USD
+                when @Valuta = 'EUR' then VALUE_EURO
+                else VALUE_RUR
+            end,
+                VALUE_USD, VALUE_EURO,
 
-			DailyIncrement_RUR =
-			case
-				when @Valuta = 'RUB' then DailyIncrement_RUR
-				when @Valuta = 'USD' then DailyIncrement_USD
-				when @Valuta = 'EUR' then DailyIncrement_EURO
-				else DailyIncrement_RUR
-			end,
-				DailyIncrement_USD, DailyIncrement_EURO,
+            DailyIncrement_RUR =
+            case
+                when @Valuta = 'RUB' then DailyIncrement_RUR
+                when @Valuta = 'USD' then DailyIncrement_USD
+                when @Valuta = 'EUR' then DailyIncrement_EURO
+                else DailyIncrement_RUR
+            end,
+                DailyIncrement_USD, DailyIncrement_EURO,
 
-			DailyDecrement_RUR =
-			case
-				when @Valuta = 'RUB' then DailyDecrement_RUR
-				when @Valuta = 'USD' then DailyDecrement_USD
-				when @Valuta = 'EUR' then DailyDecrement_EURO
-				else DailyDecrement_RUR
-			end,
-				DailyDecrement_USD, DailyDecrement_EURO,
+            DailyDecrement_RUR =
+            case
+                when @Valuta = 'RUB' then DailyDecrement_RUR
+                when @Valuta = 'USD' then DailyDecrement_USD
+                when @Valuta = 'EUR' then DailyDecrement_EURO
+                else DailyDecrement_RUR
+            end,
+                DailyDecrement_USD, DailyDecrement_EURO,
 
-			INPUT_DIVIDENTS_RUR =
-			case
-				when @Valuta = 'RUB' then INPUT_DIVIDENTS_RUR
-				when @Valuta = 'USD' then INPUT_DIVIDENTS_USD
-				when @Valuta = 'EUR' then INPUT_DIVIDENTS_EURO
-				else INPUT_DIVIDENTS_RUR
-			end,
-				INPUT_DIVIDENTS_USD, INPUT_DIVIDENTS_EURO,
+            INPUT_DIVIDENTS_RUR =
+            case
+                when @Valuta = 'RUB' then INPUT_DIVIDENTS_RUR
+                when @Valuta = 'USD' then INPUT_DIVIDENTS_USD
+                when @Valuta = 'EUR' then INPUT_DIVIDENTS_EURO
+                else INPUT_DIVIDENTS_RUR
+            end,
+                INPUT_DIVIDENTS_USD, INPUT_DIVIDENTS_EURO,
 
-			INPUT_COUPONS_RUR =
-			case
-				when @Valuta = 'RUB' then INPUT_COUPONS_RUR
-				when @Valuta = 'USD' then INPUT_COUPONS_USD
-				when @Valuta = 'EUR' then INPUT_COUPONS_EURO
-				else INPUT_COUPONS_RUR
-			end,
-				INPUT_COUPONS_USD, INPUT_COUPONS_EURO,
+            INPUT_COUPONS_RUR =
+            case
+                when @Valuta = 'RUB' then INPUT_COUPONS_RUR
+                when @Valuta = 'USD' then INPUT_COUPONS_USD
+                when @Valuta = 'EUR' then INPUT_COUPONS_EURO
+                else INPUT_COUPONS_RUR
+            end,
+                INPUT_COUPONS_USD, INPUT_COUPONS_EURO,
 
-			INPUT_VALUE_RUR =
-			case
-				when @Valuta = 'RUB' then INPUT_VALUE_RUR
-				when @Valuta = 'USD' then INPUT_VALUE_USD
-				when @Valuta = 'EUR' then INPUT_VALUE_EURO
-				else INPUT_VALUE_RUR
-			end,
-				INPUT_VALUE_USD, INPUT_VALUE_EURO,
+            INPUT_VALUE_RUR =
+            case
+                when @Valuta = 'RUB' then INPUT_VALUE_RUR
+                when @Valuta = 'USD' then INPUT_VALUE_USD
+                when @Valuta = 'EUR' then INPUT_VALUE_EURO
+                else INPUT_VALUE_RUR
+            end,
+                INPUT_VALUE_USD, INPUT_VALUE_EURO,
 
-			OUTPUT_VALUE_RUR =
-			case
-				when @Valuta = 'RUB' then OUTPUT_VALUE_RUR
-				when @Valuta = 'USD' then OUTPUT_VALUE_USD
-				when @Valuta = 'EUR' then OUTPUT_VALUE_EURO
-				else OUTPUT_VALUE_RUR
-			end,
-				OUTPUT_VALUE_USD, OUTPUT_VALUE_EURO
+            OUTPUT_VALUE_RUR =
+            case
+                when @Valuta = 'RUB' then OUTPUT_VALUE_RUR
+                when @Valuta = 'USD' then OUTPUT_VALUE_USD
+                when @Valuta = 'EUR' then OUTPUT_VALUE_EURO
+                else OUTPUT_VALUE_RUR
+            end,
+                OUTPUT_VALUE_USD, OUTPUT_VALUE_EURO
         FROM [CacheDB].[dbo].[Assets_Contracts] NOLOCK
         WHERE InvestorId = @InvestorId and ContractId = @ContractId
         UNION
         SELECT
-			InvestorId, ContractId, [Date], USDRATE, EURORATE,
+            InvestorId, ContractId, [Date], USDRATE, EURORATE,
 
-			VALUE_RUR =
-			case
-				when @Valuta = 'RUB' then VALUE_RUR
-				when @Valuta = 'USD' then VALUE_USD
-				when @Valuta = 'EUR' then VALUE_EURO
-				else VALUE_RUR
-			end,
-				VALUE_USD, VALUE_EURO,
+            VALUE_RUR =
+            case
+                when @Valuta = 'RUB' then VALUE_RUR
+                when @Valuta = 'USD' then VALUE_USD
+                when @Valuta = 'EUR' then VALUE_EURO
+                else VALUE_RUR
+            end,
+                VALUE_USD, VALUE_EURO,
 
-			DailyIncrement_RUR =
-			case
-				when @Valuta = 'RUB' then DailyIncrement_RUR
-				when @Valuta = 'USD' then DailyIncrement_USD
-				when @Valuta = 'EUR' then DailyIncrement_EURO
-				else DailyIncrement_RUR
-			end,
-				DailyIncrement_USD, DailyIncrement_EURO,
+            DailyIncrement_RUR =
+            case
+                when @Valuta = 'RUB' then DailyIncrement_RUR
+                when @Valuta = 'USD' then DailyIncrement_USD
+                when @Valuta = 'EUR' then DailyIncrement_EURO
+                else DailyIncrement_RUR
+            end,
+                DailyIncrement_USD, DailyIncrement_EURO,
 
-			DailyDecrement_RUR =
-			case
-				when @Valuta = 'RUB' then DailyDecrement_RUR
-				when @Valuta = 'USD' then DailyDecrement_USD
-				when @Valuta = 'EUR' then DailyDecrement_EURO
-				else DailyDecrement_RUR
-			end,
-				DailyDecrement_USD, DailyDecrement_EURO,
+            DailyDecrement_RUR =
+            case
+                when @Valuta = 'RUB' then DailyDecrement_RUR
+                when @Valuta = 'USD' then DailyDecrement_USD
+                when @Valuta = 'EUR' then DailyDecrement_EURO
+                else DailyDecrement_RUR
+            end,
+                DailyDecrement_USD, DailyDecrement_EURO,
 
-			INPUT_DIVIDENTS_RUR =
-			case
-				when @Valuta = 'RUB' then INPUT_DIVIDENTS_RUR
-				when @Valuta = 'USD' then INPUT_DIVIDENTS_USD
-				when @Valuta = 'EUR' then INPUT_DIVIDENTS_EURO
-				else INPUT_DIVIDENTS_RUR
-			end,
-				INPUT_DIVIDENTS_USD, INPUT_DIVIDENTS_EURO,
+            INPUT_DIVIDENTS_RUR =
+            case
+                when @Valuta = 'RUB' then INPUT_DIVIDENTS_RUR
+                when @Valuta = 'USD' then INPUT_DIVIDENTS_USD
+                when @Valuta = 'EUR' then INPUT_DIVIDENTS_EURO
+                else INPUT_DIVIDENTS_RUR
+            end,
+                INPUT_DIVIDENTS_USD, INPUT_DIVIDENTS_EURO,
 
-			INPUT_COUPONS_RUR =
-			case
-				when @Valuta = 'RUB' then INPUT_COUPONS_RUR
-				when @Valuta = 'USD' then INPUT_COUPONS_USD
-				when @Valuta = 'EUR' then INPUT_COUPONS_EURO
-				else INPUT_COUPONS_RUR
-			end,
-				INPUT_COUPONS_USD, INPUT_COUPONS_EURO,
+            INPUT_COUPONS_RUR =
+            case
+                when @Valuta = 'RUB' then INPUT_COUPONS_RUR
+                when @Valuta = 'USD' then INPUT_COUPONS_USD
+                when @Valuta = 'EUR' then INPUT_COUPONS_EURO
+                else INPUT_COUPONS_RUR
+            end,
+                INPUT_COUPONS_USD, INPUT_COUPONS_EURO,
 
-			INPUT_VALUE_RUR =
-			case
-				when @Valuta = 'RUB' then INPUT_VALUE_RUR
-				when @Valuta = 'USD' then INPUT_VALUE_USD
-				when @Valuta = 'EUR' then INPUT_VALUE_EURO
-				else INPUT_VALUE_RUR
-			end,
-				INPUT_VALUE_USD, INPUT_VALUE_EURO,
+            INPUT_VALUE_RUR =
+            case
+                when @Valuta = 'RUB' then INPUT_VALUE_RUR
+                when @Valuta = 'USD' then INPUT_VALUE_USD
+                when @Valuta = 'EUR' then INPUT_VALUE_EURO
+                else INPUT_VALUE_RUR
+            end,
+                INPUT_VALUE_USD, INPUT_VALUE_EURO,
 
-			OUTPUT_VALUE_RUR =
-			case
-				when @Valuta = 'RUB' then OUTPUT_VALUE_RUR
-				when @Valuta = 'USD' then OUTPUT_VALUE_USD
-				when @Valuta = 'EUR' then OUTPUT_VALUE_EURO
-				else OUTPUT_VALUE_RUR
-			end,
-				OUTPUT_VALUE_USD, OUTPUT_VALUE_EURO
+            OUTPUT_VALUE_RUR =
+            case
+                when @Valuta = 'RUB' then OUTPUT_VALUE_RUR
+                when @Valuta = 'USD' then OUTPUT_VALUE_USD
+                when @Valuta = 'EUR' then OUTPUT_VALUE_EURO
+                else OUTPUT_VALUE_RUR
+            end,
+                OUTPUT_VALUE_USD, OUTPUT_VALUE_EURO
         FROM [CacheDB].[dbo].[Assets_ContractsLast] NOLOCK
         WHERE InvestorId = @InvestorId and ContractId = @ContractId
     ) AS R
@@ -314,7 +316,9 @@ AS BEGIN
     SET @ProfitValue = @InvestResult;
     SET @ProfitProcentValue = @InvestResult/@ResutSum * 100.000;
     SET @BeginValue = @Snach;
-	SET @EndValue = @SItog;
+    SET @EndValue = @SItog;
+    SET @OutInvestResult = @InvestResult;
+    SET @OutResutSum = @ResutSum;
 
     BEGIN TRY
         DROP TABLE #ResInvAssets5
@@ -341,7 +345,9 @@ AS BEGIN
         ProfitValue decimal(28,10) NULL,
         ProfitProcentValue decimal(28,10) NULL,
         BeginValue decimal(28,10) NULL,
-        EndValue decimal(28,10) NULL
+        EndValue decimal(28,10) NULL,
+        InvestResult decimal(28,10) NULL,
+        ResutSum decimal(28,10) NULL
     );
 
     insert into @ReSult
@@ -392,7 +398,8 @@ AS BEGIN
 
     
     
-    declare @ContractId Int, @ProfitValue decimal(28,10), @ProfitProcentValue decimal(28,10), @BeginValue decimal(28,10), @EndValue decimal(28,10);
+    declare @ContractId Int, @ProfitValue decimal(28,10), @ProfitProcentValue decimal(28,10), @BeginValue decimal(28,10), @EndValue decimal(28,10),
+        @InvestResult decimal(28,10), @ResutSum decimal(28,10);
 
 
     declare obj_cur cursor local fast_forward for
@@ -412,10 +419,13 @@ AS BEGIN
             @ProfitProcentValue = @ProfitProcentValue output,
             @BeginValue = @BeginValue output,
             @EndValue = @EndValue output,
-            @Valuta = @Valuta
+            @Valuta = @Valuta,
+            @OutInvestResult = @InvestResult output,
+            @OutResutSum = @ResutSum output
 
         update @ReSult
-            set ProfitValue = @ProfitValue, ProfitProcentValue = @ProfitProcentValue, BeginValue = @BeginValue, EndValue = @EndValue
+            set ProfitValue = @ProfitValue, ProfitProcentValue = @ProfitProcentValue, BeginValue = @BeginValue, EndValue = @EndValue,
+                InvestResult = @InvestResult, ResutSum = @ResutSum
         where ContractId = @ContractId
         
         fetch next from obj_cur into
@@ -434,11 +444,13 @@ AS BEGIN
     select
         ContractId,
         ContractName,
-        ProfitValue = CAST([dbo].f_Round(ProfitValue, 2) AS DECIMAL(30,2)),
-        ProfitProcentValue = CAST([dbo].f_Round(ProfitProcentValue, 2) AS DECIMAL(30,2)),
-        BeginValue = CAST([dbo].f_Round(BeginValue, 2) AS DECIMAL(30,2)),
-        EndValue = CAST([dbo].f_Round(EndValue, 2) AS DECIMAL(30,2)),
-        Valuta = @Valuta
+        ProfitValue,
+        ProfitProcentValue,
+        BeginValue,
+        EndValue,
+        Valuta = @Valuta,
+        InvestResult,
+        ResutSum
     from @ReSult
     order by ContractName;
 END
