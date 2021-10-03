@@ -312,7 +312,7 @@ AS BEGIN
     end
     
     SET @ProfitValue = @InvestResult;
-    SET @ProfitProcentValue = @InvestResult/@ResutSum;
+    SET @ProfitProcentValue = @InvestResult/@ResutSum * 100.000;
     SET @BeginValue = @Snach;
 	SET @EndValue = @SItog;
 
