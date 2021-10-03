@@ -3,6 +3,8 @@ Declare
     @Investor_Id Int = @InvestorIdSharp;
 --    set @Investor_Id = 2149652; set @EndDate = CONVERT(Date, '01.04.2018', 103);
 
+    set @EndDate = DATEADD(DAY, 1, @EndDate);
+
     declare @Funds table ( FundId int);
     declare @Contracts table ( ContractId int);
 

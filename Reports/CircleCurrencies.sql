@@ -2,6 +2,8 @@ Declare
     @Date Date = @DateToSharp, 
     @Investor_Id Int = @InvestorIdSharp;
 
+    set @Date = DATEADD(DAY, 1, @Date);
+
 --Declare
 --   set @Date = CONVERT(Date, '01.04.2019', 103); set @Investor_Id = 2149652;
     

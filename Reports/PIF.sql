@@ -1,6 +1,8 @@
 Declare
     @Date Date = @DateToSharp, 
     @Contract_Id Int = @FundIdSharp;
+
+    set @Date = DATEADD(DAY, 1, @Date);
 --
 --Declare
 --    @Date Date = CONVERT(Date, '31.01.2009', 103),
