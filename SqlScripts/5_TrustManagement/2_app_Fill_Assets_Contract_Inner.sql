@@ -1733,7 +1733,8 @@ as begin
 		[AMOUNT] [decimal](30, 7) NULL,
 		[In_Wir] [int] NULL,
 		[Coupons] [decimal](30, 7) NULL,
-		[PrevCoupons] [decimal](30, 7) NULL
+		[PrevCoupons] [decimal](30, 7) NULL,
+		[Out_Wir] [int] NULL
 	);
 
 startprocess:
@@ -1923,7 +1924,8 @@ startprocess:
 		[ContractId],
 		[ShareId],
 		[AMOUNT],
-		[In_Wir]
+		[In_Wir],
+		[Out_Wir]
 	)
 	select
 		[id],
@@ -1932,18 +1934,19 @@ startprocess:
 		[ContractId],
 		[ShareId],
 		[AMOUNT],
-		[In_Wir]
+		[In_Wir],
+		[Out_Wir]
 	from
 	(
 		select
-			a.Id, a.IsActive, a.InvestorId, a.ContractId, a.ShareId, A.AMOUNT, a.In_Wir
+			a.Id, a.IsActive, a.InvestorId, a.ContractId, a.ShareId, A.AMOUNT, a.In_Wir, a.Out_Wir
 		from [dbo].[POSITION_KEEPING] as a with(nolock)
 		where a.InvestorId = @InvestorId and a.ContractId = @ContractId
 		and a.ShareId = @PaperId
 		and a.Fifo_Date = @Cur_Date
 		union all
 		select
-			a.Id, a.IsActive, a.InvestorId, a.ContractId, a.ShareId, A.AMOUNT, a.In_Wir
+			a.Id, a.IsActive, a.InvestorId, a.ContractId, a.ShareId, A.AMOUNT, a.In_Wir, a.Out_Wir
 		from [dbo].[POSITION_KEEPING_Last] as a with(nolock)
 		where a.InvestorId = @InvestorId and a.ContractId = @ContractId
 		and a.ShareId = @PaperId
@@ -1971,6 +1974,7 @@ startprocess:
 			and a.Fifo_Date = @Prev_Date
 			and a.IsActive = 0
 			and a.Amount = zz.AMOUNT
+			and a.Out_Wir = zz.Out_Wir
 			union all
 			select
 				a.Coupons
@@ -1981,6 +1985,7 @@ startprocess:
 			and a.Fifo_Date = @Prev_Date
 			and a.IsActive = 0
 			and a.Amount = zz.AMOUNT
+			and a.Out_Wir = zz.Out_Wir
 		) as rs
 	)
 	as res
@@ -1996,6 +2001,7 @@ startprocess:
 		and a.ShareId = b.ShareId
 		and b.Fifo_Date = @Cur_Date
 		and a.In_Wir = b.In_Wir
+		and a.Out_Wir = b.Out_Wir
 		and a.id = b.id;
 
 	update b set
@@ -2007,6 +2013,7 @@ startprocess:
 		and a.ShareId = b.ShareId
 		and b.Fifo_Date = @Cur_Date
 		and a.In_Wir = b.In_Wir
+		and a.Out_Wir = b.Out_Wir
 		and a.id = b.id;
 
 
@@ -2120,7 +2127,8 @@ as begin
 		[AMOUNT] [decimal](30, 7) NULL,
 		[In_Wir] [int] NULL,
 		[Amortizations] [decimal](30, 7) NULL,
-		[PrevAmortizations] [decimal](30, 7) NULL
+		[PrevAmortizations] [decimal](30, 7) NULL,
+		[Out_Wir] [int] NULL
 	);
 
 	
@@ -2322,7 +2330,8 @@ startprocess:
 		[ContractId],
 		[ShareId],
 		[AMOUNT],
-		[In_Wir]
+		[In_Wir],
+		[Out_Wir]
 	)
 	select
 		[id],
@@ -2331,18 +2340,19 @@ startprocess:
 		[ContractId],
 		[ShareId],
 		[AMOUNT],
-		[In_Wir]
+		[In_Wir],
+		[Out_Wir]
 	from
 	(
 		select
-			a.Id, a.IsActive, a.InvestorId, a.ContractId, a.ShareId, A.AMOUNT, a.In_Wir
+			a.Id, a.IsActive, a.InvestorId, a.ContractId, a.ShareId, A.AMOUNT, a.In_Wir, a.Out_Wir
 		from [dbo].[POSITION_KEEPING] as a with(nolock)
 		where a.InvestorId = @InvestorId and a.ContractId = @ContractId
 		and a.ShareId = @PaperId
 		and a.Fifo_Date = @Cur_Date
 		union all
 		select
-			a.Id, a.IsActive, a.InvestorId, a.ContractId, a.ShareId, A.AMOUNT, a.In_Wir
+			a.Id, a.IsActive, a.InvestorId, a.ContractId, a.ShareId, A.AMOUNT, a.In_Wir, a.Out_Wir
 		from [dbo].[POSITION_KEEPING_Last] as a with(nolock)
 		where a.InvestorId = @InvestorId and a.ContractId = @ContractId
 		and a.ShareId = @PaperId
@@ -2370,6 +2380,7 @@ startprocess:
 			and a.Fifo_Date = @Prev_Date
 			and a.IsActive = 0
 			and a.Amount = zz.AMOUNT
+			and a.Out_Wir = zz.Out_Wir
 			union all
 			select
 				a.Amortizations
@@ -2380,6 +2391,7 @@ startprocess:
 			and a.Fifo_Date = @Prev_Date
 			and a.IsActive = 0
 			and a.Amount = zz.AMOUNT
+			and a.Out_Wir = zz.Out_Wir
 		) as rs
 	)
 	as res
@@ -2395,6 +2407,7 @@ startprocess:
 		and a.ShareId = b.ShareId
 		and b.Fifo_Date = @Cur_Date
 		and a.In_Wir = b.In_Wir
+		and a.Out_Wir = b.Out_Wir
 		and a.id = b.id;
 
 	update b set
@@ -2406,6 +2419,7 @@ startprocess:
 		and a.ShareId = b.ShareId
 		and b.Fifo_Date = @Cur_Date
 		and a.In_Wir = b.In_Wir
+		and a.Out_Wir = b.Out_Wir
 		and a.id = b.id;
 
 
