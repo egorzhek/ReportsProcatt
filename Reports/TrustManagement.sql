@@ -512,12 +512,12 @@ from
 	select * 
 	from [dbo].[PortFolio_Daily] with(nolock)
 	where InvestorId = @InvestorId and ContractId = @ContractId
-	and PortfolioDate = @EndDate
+	and PortfolioDate = DateADD(day, 1, @EndDate)
 	union all
 	select * 
 	from [dbo].[PortFolio_Daily_Last] with(nolock)
 	where InvestorId = @InvestorId and ContractId = @ContractId
-	and PortfolioDate = @EndDate
+	and PortfolioDate = DateADD(day, 1, @EndDate)
 ) as r;
 
 
@@ -1139,12 +1139,12 @@ from
 	select * 
 	from [dbo].[POSITION_KEEPING] as a with(nolock)
 	where a.InvestorId = @InvestorId and a.ContractId = @ContractId
-	and Fifo_Date = @EndDate
+	and Fifo_Date = DateADD(day, 1, @EndDate)
 	union all
 	select * 
 	from [dbo].[POSITION_KEEPING_Last] as a with(nolock)
 	where a.InvestorId = @InvestorId and a.ContractId = @ContractId
-	and Fifo_Date = @EndDate
+	and Fifo_Date = DateADD(day, 1, @EndDate)
 ) as r
 
 

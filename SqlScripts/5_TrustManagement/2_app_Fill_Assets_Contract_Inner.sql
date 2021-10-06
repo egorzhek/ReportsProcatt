@@ -791,9 +791,9 @@ AS BEGIN
 		S_BAL_SUMMA_RUR = BAL_SUMMA, -- балансовая стоимость по позиции с переоценкой;
 		S.NOMINAL, -- Номинал (В валюте номинала)
 		RUR_PRICE , --стоимость одной позиции в рублях
-		ROUND(RUR_PRICE/Cur.RATE/Cur.CNT,2) as Nom_Price, --стоимость одной позиции в валюте номинвала 
+		ROUND(RUR_PRICE/Cur.RATE/Cur.CNT,6) as Nom_Price, --стоимость одной позиции в валюте номинвала 
 		RUR_RATE as VALUE_RUR, -- оценка имущества в национальной валюте;
-		ROUND(RUR_RATE/Cur.RATE/Cur.CNT, 3) as VALUE_NOM, -- оценка имущества в валюте инструмента;
+		ROUND(RUR_RATE/Cur.RATE/Cur.CNT, 6) as VALUE_NOM, -- оценка имущества в валюте инструмента;
 		ISNULL(S.NOM_VAL,P.VALUE_ID) as CUR_ID, -- Валюта номина
 		VC.[SYSNAME] as CUR_NAME, -- Код валюты номинала
 		Cur.RATE/Cur.CNT as RATE, -- Курс валюты номинала к рублю
