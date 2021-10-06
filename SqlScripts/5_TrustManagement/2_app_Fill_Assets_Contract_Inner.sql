@@ -714,7 +714,7 @@ AS BEGIN
 
 	DECLARE @R_RATER INT = null;				-- Котировщик, используем данные из договора (портфеля);
 	DECLARE @R_MODE INT = null;				-- Способ взятия котировки (null - используется способ указанный в договоре (портфеле));
-	DECLARE @P_FLAGS INT = (2+8+16+32);
+	DECLARE @P_FLAGS INT = (2+8);
 
 
 	-- вычищаем постоянный кэш на указанную дату
@@ -802,7 +802,7 @@ AS BEGIN
 	FROM [BAL_DATA_STD].[dbo].PR_B_PORTFOLIO(@InvestorId, @ContractId, @P_DATE, @P_FLAGS, @R_MODE, @R_RATER) P
 	LEFT JOIN [BAL_DATA_STD].[dbo].D_B_CONTRACTS AS C WITH(NOLOCK) ON P.CONTR = C.DOC
 	LEFT JOIN [BAL_DATA_STD].[dbo].OD_VALUES AS V WITH(NOLOCK) ON V.ID = VALUE_ID 
-	LEFT JOIN [BAL_DATA_STD].[dbo].OD_SHARES AS S WITH(NOLOCK) ON S.SELF_ID = p.VALUE_ID AND S.E_DATE > GetDate()
+	LEFT JOIN [BAL_DATA_STD].[dbo].OD_SHARES AS S WITH(NOLOCK) ON S.SELF_ID = p.VALUE_ID AND S.E_DATE > GetDate() AND S.B_DATE<GetDate()
 	CROSS APPLY [BAL_DATA_STD].[dbo].PR_GET_RATE( ISNULL(S.NOM_VAL,P.VALUE_ID),DATEADD(day,-1,@P_DATE),null,null) Cur
 	LEFT JOIN [BAL_DATA_STD].[dbo].OD_VALUES AS VC WITH(NOLOCK) ON VC.ID = ISNULL(S.NOM_VAL,P.VALUE_ID)
 	WHERE CONTR > 0 -- Отбросим паевые фонды.
