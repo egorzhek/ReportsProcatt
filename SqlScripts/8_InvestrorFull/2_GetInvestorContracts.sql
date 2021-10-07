@@ -245,7 +245,7 @@ AS BEGIN
     -- сумма всех выводов средств
     SELECT
         @AmountDayMinus_RUR = sum(OUTPUT_VALUE_RUR), -- отрицательное значение
-        @AmountDayPlus_RUR = sum(INPUT_VALUE_RUR + INPUT_DIVIDENTS_RUR + INPUT_COUPONS_RUR),
+        @AmountDayPlus_RUR = sum(INPUT_VALUE_RUR),
         @Sum_INPUT_VALUE_RUR = sum(INPUT_VALUE_RUR),
         @Sum_OUTPUT_VALUE_RUR = sum(OUTPUT_VALUE_RUR),
         @Sum_INPUT_COUPONS_RUR = sum(INPUT_COUPONS_RUR),
@@ -265,14 +265,13 @@ AS BEGIN
         -- 
         SELECT --*
             [Date],
-            [AmountDayPlus_RUR] = INPUT_VALUE_RUR + INPUT_DIVIDENTS_RUR + INPUT_COUPONS_RUR,
+            [AmountDayPlus_RUR] = INPUT_VALUE_RUR,
             [AmountDayMinus_RUR] = OUTPUT_VALUE_RUR
         FROM #ResInvAssets5
         where (
             [Date] in (@StartDate, @EndDate) or
             (
-                INPUT_VALUE_RUR <> 0 or OUTPUT_VALUE_RUR <> 0 or
-                INPUT_DIVIDENTS_RUR <> 0 or INPUT_COUPONS_RUR <> 0
+                INPUT_VALUE_RUR <> 0 or OUTPUT_VALUE_RUR <> 0
             )
         )
         order by [Date]

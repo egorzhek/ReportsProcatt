@@ -239,7 +239,7 @@ where [Date] = @StartDate
 -- сумма всех выводов средств
 SELECT
 	@AmountDayMinus_RUR = sum(OUTPUT_VALUE_RUR), -- отрицательное значение
-	@AmountDayPlus_RUR = sum(INPUT_VALUE_RUR + INPUT_DIVIDENTS_RUR + INPUT_COUPONS_RUR),
+	@AmountDayPlus_RUR = sum(INPUT_VALUE_RUR),
 	@Sum_INPUT_VALUE_RUR = sum(INPUT_VALUE_RUR),
 	@Sum_OUTPUT_VALUE_RUR = sum(OUTPUT_VALUE_RUR),
 	@Sum_INPUT_COUPONS_RUR = sum(INPUT_COUPONS_RUR),
@@ -274,14 +274,13 @@ set @InvestResult =
 		-- 
 		SELECT --*
 			[Date],
-			[AmountDayPlus_RUR] = INPUT_VALUE_RUR + INPUT_DIVIDENTS_RUR + INPUT_COUPONS_RUR,
+			[AmountDayPlus_RUR] = INPUT_VALUE_RUR,
 			[AmountDayMinus_RUR] = OUTPUT_VALUE_RUR
 		FROM #ResInvAssets
 		where (
 			[Date] in (@StartDate, @EndDate) or
 			(
-				INPUT_VALUE_RUR <> 0 or OUTPUT_VALUE_RUR <> 0 or
-				INPUT_DIVIDENTS_RUR <> 0 or INPUT_COUPONS_RUR <> 0
+				INPUT_VALUE_RUR <> 0 or OUTPUT_VALUE_RUR <> 0
 			)
 		)
 		order by [Date]
@@ -347,7 +346,7 @@ select
 	ProfitValue = CAST(Round(@InvestResult,2) as Decimal(30,2)),
 	ProfitProcentValue = CAST(Round(@InvestResult/@ResutSum * 100,2) as Decimal(38,2)),
 	OpenDate = @DATE_OPEN,
-	LS_NUM = '2940000083',
+	LS_NUM = @NUM,
 	EndSumAmount = 99999.99,
 	FundName = @NUM,
 	InvestorName = @NUM,

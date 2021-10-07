@@ -379,9 +379,9 @@ and (OUTPUT_VALUE_RUR <> 0 or INPUT_VALUE_RUR <> 0 or INPUT_COUPONS_RUR <> 0 or 
 
 -- посчитать последний день обратно
 update a set 
-VALUE_RUR = VALUE_RUR, -- - DailyIncrement_RUR - DailyDecrement_RUR,
-VALUE_USD = VALUE_USD, -- - DailyIncrement_USD - DailyDecrement_USD,
-VALUE_EURO = VALUE_EURO, -- - DailyIncrement_EURO - DailyDecrement_EURO,
+VALUE_RUR = VALUE_RUR - INPUT_VALUE_RUR - OUTPUT_VALUE_RUR,
+VALUE_USD = VALUE_USD - INPUT_VALUE_USD - OUTPUT_VALUE_USD,
+VALUE_EURO = VALUE_EURO - INPUT_VALUE_EURO - OUTPUT_VALUE_EURO,
 
 -- DailyIncrement_RUR = 0, DailyIncrement_USD = 0,	DailyIncrement_EURO = 0,
 -- DailyDecrement_RUR = 0,	DailyDecrement_USD = 0,	DailyDecrement_EURO = 0,
@@ -414,7 +414,7 @@ where [Date] = @StartDate
 -- сумма всех выводов средств
 SELECT
 	@AmountDayMinus_RUR = sum(OUTPUT_VALUE_RUR), -- отрицательное значение
-	@AmountDayPlus_RUR = sum(INPUT_VALUE_RUR + INPUT_DIVIDENTS_RUR + INPUT_COUPONS_RUR),
+	@AmountDayPlus_RUR = sum(INPUT_VALUE_RUR),
 	@Sum_INPUT_VALUE_RUR = sum(INPUT_VALUE_RUR),
 	@Sum_OUTPUT_VALUE_RUR = sum(OUTPUT_VALUE_RUR),
 	@Sum_INPUT_COUPONS_RUR = sum(INPUT_COUPONS_RUR),
@@ -435,14 +435,13 @@ set @InvestResult =
 		-- 
 		SELECT
 			[Date],
-			[AmountDayPlus_RUR] = INPUT_VALUE_RUR + INPUT_DIVIDENTS_RUR + INPUT_COUPONS_RUR,
+			[AmountDayPlus_RUR] = INPUT_VALUE_RUR,
 			[AmountDayMinus_RUR] = OUTPUT_VALUE_RUR
 		FROM #ResInvAssets
 		where (
 			[Date] in (@StartDate, @EndDate) or
 			(
-				INPUT_VALUE_RUR <> 0 or OUTPUT_VALUE_RUR <> 0 or
-				INPUT_DIVIDENTS_RUR <> 0 or INPUT_COUPONS_RUR <> 0
+				INPUT_VALUE_RUR <> 0 or OUTPUT_VALUE_RUR <> 0
 			)
 		)
 		order by [Date]

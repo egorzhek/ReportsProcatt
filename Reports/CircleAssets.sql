@@ -3,9 +3,9 @@ Declare
     @Investor_Id Int = @InvestorIdSharp;
 --    set @Investor_Id = 2149652; set @EndDate = CONVERT(Date, '01.04.2018', 103);
 
-    set @EndDate = DATEADD(DAY, 1, @EndDate);
+    --set @EndDate = DATEADD(DAY, 1, @EndDate);
 
-    declare @Funds table ( FundId int);
+    declare @Funds table (FundId int);
     declare @Contracts table ( ContractId int);
 
     declare @Result table
@@ -18,21 +18,21 @@ Declare
     -- пифы на дату окончания
     insert into @Funds (FundId)
     select
-        Contract_Id
+        sd.FundId
     from
     (
         select
-            Contract_Id
-        From [dbo].[FundStructure]
-        where Investor_Id = @Investor_Id and [PortfolioDate] = @EndDate
+            FundId
+        From [dbo].[InvestorFundDate]
+        where Investor = @Investor_Id and [Date] = @EndDate
         union all
         select
-            Contract_Id
-        From [dbo].[FundStructure_Last]
-        where Investor_Id = @Investor_Id and [PortfolioDate] = @EndDate
+            FundId
+        From [dbo].[InvestorFundDateLast]
+        where Investor = @Investor_Id and [Date] = @EndDate
     ) as sd
-    left join FundNames as fn on sd.Contract_Id = fn.Id
-    group by Contract_Id;
+    --left join FundNames as fn on sd.FundId = fn.Id
+    group by sd.FundId;
 
     select
         top 1 @FundAllSum = AllSum
@@ -45,18 +45,19 @@ Declare
         from
         (
             select
-                fs.Contract_Id, fs.VALUE_RUR, fs.Investment_id, fs.CLASS
+                fs.FundId, VALUE_RUR = [dbo].f_Round(SumAmount * RATE, 2) , CLASS = 10
             from @Funds as f
-            join [dbo].[FundStructure] as fs with(nolock) on f.FundId = fs.Contract_Id
-            where fs.PortfolioDate = @EndDate
+            join [dbo].[InvestorFundDate] as fs with(nolock) on f.FundId = fs.FundId
+            where fs.Investor = @Investor_Id and fs.[Date] = @EndDate
             union all
             select
-                fs.Contract_Id, fs.VALUE_RUR, fs.Investment_id, fs.CLASS
+                fs.FundId, VALUE_RUR = [dbo].f_Round(SumAmount * RATE, 2) , CLASS = 10
             from @Funds as f
-            join [dbo].[FundStructure_Last] as fs with(nolock) on f.FundId = fs.Contract_Id
-            where fs.PortfolioDate = @EndDate
+            join [dbo].[InvestorFundDateLast] as fs with(nolock) on f.FundId = fs.FundId
+            where fs.Investor = @Investor_Id and fs.[Date] = @EndDate
         ) as res
-        join [dbo].[InvestmentIds] as Inv on res.Investment_id = Inv.Id
+        --join [dbo].[InvestmentIds] as Inv on res.Investment_id = Inv.Id
+		left join FundNames as fn on res.FundId = fn.Id
         join [dbo].[ClassCategories] as cs on res.CLASS = cs.ClassId
         join [dbo].[Categories] as c on cs.CategoryId = c.Id
     ) as res2;
@@ -73,12 +74,12 @@ Declare
         select
             ContractId
         from [dbo].[PortFolio_Daily] nolock
-        where InvestorId = @Investor_Id and [PortfolioDate] = @EndDate
+        where InvestorId = @Investor_Id and [PortfolioDate] = DATEADD(DAY, 1, @EndDate)
         union all
         select
             ContractId
         from [dbo].[PortFolio_Daily_Last] nolock
-        where InvestorId = @Investor_Id and [PortfolioDate] = @EndDate
+        where InvestorId = @Investor_Id and [PortfolioDate] = DATEADD(DAY, 1, @EndDate)
     ) as res
     group by ContractId;
 
@@ -102,13 +103,13 @@ Declare
                 fs.VALUE_RUR, fs.InvestmentId, fs.CLASS
             from @Contracts as f
             join [dbo].[PortFolio_Daily] as fs with(nolock) on f.ContractId = fs.ContractId
-            where [PortfolioDate] = @EndDate
+            where fs.InvestorId = @Investor_Id and [PortfolioDate] = DATEADD(DAY, 1, @EndDate)
             union all
             select
                 fs.VALUE_RUR, fs.InvestmentId, fs.CLASS
             from @Contracts as f
             join [dbo].[PortFolio_Daily_Last] as fs with(nolock) on f.ContractId = fs.ContractId
-            where [PortfolioDate] = @EndDate
+            where fs.InvestorId = @Investor_Id and [PortfolioDate] = DATEADD(DAY, 1, @EndDate)
         ) as res
         join [dbo].[InvestmentIds] as Inv on res.InvestmentId = Inv.Id
         join [dbo].[ClassCategories] as cs on res.CLASS = cs.ClassId
@@ -145,7 +146,7 @@ Declare
         else
         begin
             insert into @Result (CategoryName, VALUE_RUR, AllSum, CategoryId)
-            select N'‘онды', @FundAllSum, @AllSum, 5;
+            select N'Фонды', @FundAllSum, @AllSum, 5;
 
             update @Result
                 set Result = VALUE_RUR/AllSum

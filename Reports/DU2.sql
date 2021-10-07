@@ -2,7 +2,7 @@ Declare
     @Date Date = @DateToSharp, 
     @Contract_Id Int = @ContractIdSharp;
 
-    set @Date = DATEADD(DAY, 1, @Date);
+    --set @Date = DATEADD(DAY, 1, @Date);
 
 --Declare
 --    @Date Date = CONVERT(Date, '01.04.2019', 103),
