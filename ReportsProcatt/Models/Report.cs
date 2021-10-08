@@ -101,8 +101,8 @@ namespace ReportsProcatt.Models
             PIFsTotals.Ths = new List<ViewElementAttr>
             {
                 new ViewElementAttr{ColumnName = PIFsTotalColumns.PIFs, DisplayName = "ПИФЫ", SortOrder = 0},
-                new ViewElementAttr{ColumnName = PIFsTotalColumns.EndValue, DisplayName = $"АКТИВЫ НА {Dfrom.ToString("dd.MM.yyyy")}", SortOrder = 1 },
-                new ViewElementAttr{ColumnName = PIFsTotalColumns.StartValue, DisplayName = $"АКТИВЫ НА {Dto.ToString("dd.MM.yyyy")}", SortOrder = 2 },
+                new ViewElementAttr{ColumnName = PIFsTotalColumns.StartValue, DisplayName = $"АКТИВЫ НА {Dfrom.ToString("dd.MM.yyyy")}", SortOrder = 1 },
+                new ViewElementAttr{ColumnName = PIFsTotalColumns.EndValue, DisplayName = $"АКТИВЫ НА {Dto.ToString("dd.MM.yyyy")}", SortOrder = 2 },
                 new ViewElementAttr{ColumnName = PIFsTotalColumns.Result, DisplayName = $"РЕЗУЛЬТАТЫ* ЗА {Period}", SortOrder = 3 }
             };
             PIFsTotals.Ths.Where(t => t.ColumnName == PIFsTotalColumns.PIFs).First().AttrRow.Add("width", "520px");

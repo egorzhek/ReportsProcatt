@@ -74,12 +74,12 @@ Declare
         select
             ContractId
         from [dbo].[PortFolio_Daily] nolock
-        where InvestorId = @Investor_Id and [PortfolioDate] = DATEADD(DAY, 1, @EndDate)
+        where InvestorId = @Investor_Id and [PortfolioDate] =  @EndDate
         union all
         select
             ContractId
         from [dbo].[PortFolio_Daily_Last] nolock
-        where InvestorId = @Investor_Id and [PortfolioDate] = DATEADD(DAY, 1, @EndDate)
+        where InvestorId = @Investor_Id and [PortfolioDate] = @EndDate
     ) as res
     group by ContractId;
 
@@ -103,13 +103,13 @@ Declare
                 fs.VALUE_RUR, fs.InvestmentId, fs.CLASS
             from @Contracts as f
             join [dbo].[PortFolio_Daily] as fs with(nolock) on f.ContractId = fs.ContractId
-            where fs.InvestorId = @Investor_Id and [PortfolioDate] = DATEADD(DAY, 1, @EndDate)
+            where fs.InvestorId = @Investor_Id and [PortfolioDate] =  @EndDate
             union all
             select
                 fs.VALUE_RUR, fs.InvestmentId, fs.CLASS
             from @Contracts as f
             join [dbo].[PortFolio_Daily_Last] as fs with(nolock) on f.ContractId = fs.ContractId
-            where fs.InvestorId = @Investor_Id and [PortfolioDate] = DATEADD(DAY, 1, @EndDate)
+            where fs.InvestorId = @Investor_Id and [PortfolioDate] =  @EndDate
         ) as res
         join [dbo].[InvestmentIds] as Inv on res.InvestmentId = Inv.Id
         join [dbo].[ClassCategories] as cs on res.CLASS = cs.ClassId

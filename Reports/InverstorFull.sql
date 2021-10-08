@@ -231,9 +231,12 @@ FROM
 
 			VALUE_RUR =
 			case
-				when @Valuta = 'RUB' then a.VALUE_RUR
-				when @Valuta = 'USD' then a.VALUE_USD
-				when @Valuta = 'EUR' then a.VALUE_EURO
+				when @Valuta = 'RUB' and a.[Date] = @StartDate then a.VALUE_RUR 
+				when @Valuta = 'RUB' and a.[Date] > @StartDate then a.VALUE_RUR - a.[DailyIncrement_RUR] - a.[DailyDecrement_RUR]
+				when @Valuta = 'USD' and a.[Date] = @StartDate then a.VALUE_USD 
+				when @Valuta = 'USD' and a.[Date] > @StartDate then a.VALUE_USD - a.[DailyIncrement_USD] - a.[DailyDecrement_USD]
+				when @Valuta = 'EUR' and a.[Date] = @StartDate then a.VALUE_EURO 
+				when @Valuta = 'EUR' and a.[Date] > @StartDate then a.VALUE_EURO - a.[DailyIncrement_EURO] - a.[DailyDecrement_EURO]
 				else a.VALUE_RUR
 			end,
 			a.VALUE_USD,
@@ -297,9 +300,12 @@ FROM
 
 			VALUE_RUR =
 			case
-				when @Valuta = 'RUB' then a.VALUE_RUR
-				when @Valuta = 'USD' then a.VALUE_USD
-				when @Valuta = 'EUR' then a.VALUE_EURO
+				when @Valuta = 'RUB' and a.[Date] = @StartDate then a.VALUE_RUR 
+				when @Valuta = 'RUB' and a.[Date] > @StartDate then a.VALUE_RUR - a.[DailyIncrement_RUR] - a.[DailyDecrement_RUR]
+				when @Valuta = 'USD' and a.[Date] = @StartDate then a.VALUE_USD 
+				when @Valuta = 'USD' and a.[Date] > @StartDate then a.VALUE_USD - a.[DailyIncrement_USD] - a.[DailyDecrement_USD]
+				when @Valuta = 'EUR' and a.[Date] = @StartDate then a.VALUE_EURO 
+				when @Valuta = 'EUR' and a.[Date] > @StartDate then a.VALUE_EURO - a.[DailyIncrement_EURO] - a.[DailyDecrement_EURO]
 				else a.VALUE_RUR
 			end,
 			a.VALUE_USD,
