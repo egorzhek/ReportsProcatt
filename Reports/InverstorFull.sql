@@ -20,6 +20,8 @@ declare @MinDate date, @MaxDate date
 Declare @SItog numeric(30,10), @AmountDayMinus_RUR numeric(30,10), @Snach numeric(30,10), @AmountDayPlus_RUR numeric(30,10),
 @Sum_INPUT_VALUE_RUR  numeric(30,10),
 @Sum_OUTPUT_VALUE_RUR numeric(30,10), @Sum_OUTPUT_VALUE_RUR1 numeric(30,10), @Sum_OUTPUT_VALUE_RUR2 numeric(30,10),
+@Sum_INPUT_VALUE_RUR3  numeric(30,10),
+@Sum_OUTPUT_VALUE_RUR3 numeric(30,10), @Sum_OUTPUT_VALUE_RUR13 numeric(30,10), @Sum_OUTPUT_VALUE_RUR23 numeric(30,10),
 @Sum_INPUT_COUPONS_RUR numeric(30,10),
 @Sum_INPUT_DIVIDENTS_RUR numeric(30,10),
 @InvestResult numeric(30,10);
@@ -118,6 +120,12 @@ FROM
 	VALUE_RUR = sum(VALUE_RUR),
 	VALUE_USD = sum(VALUE_USD),
 	VALUE_EURO = sum(VALUE_EURO),
+	DailyIncrement_RUR = sum(DailyIncrement_RUR),
+	DailyIncrement_USD = sum(DailyIncrement_USD),
+	DailyIncrement_EURO = sum(DailyIncrement_EURO),
+	DailyDecrement_RUR = sum(DailyDecrement_RUR),
+	DailyDecrement_USD = sum(DailyDecrement_USD),
+	DailyDecrement_EURO = sum(DailyDecrement_EURO),
 	INPUT_VALUE_RUR = sum(INPUT_VALUE_RUR),
 	INPUT_VALUE_USD = sum(INPUT_VALUE_USD),
 	INPUT_VALUE_EURO = sum(INPUT_VALUE_EURO),
@@ -131,7 +139,8 @@ FROM
 	INPUT_COUPONS_USD = sum(INPUT_COUPONS_USD),
 	INPUT_COUPONS_EURO = sum(INPUT_COUPONS_EURO),
 	OUTPUT_VALUE_RUR1 = sum(OUTPUT_VALUE_RUR1),
-	OUTPUT_VALUE_RUR2 = sum(OUTPUT_VALUE_RUR2)
+	OUTPUT_VALUE_RUR2 = sum(OUTPUT_VALUE_RUR2),
+	ISPIF
 	from
 	(
 		select
@@ -139,6 +148,13 @@ FROM
 			ContractId = a.Investor,
 			a.[Date], a.USDRATE, EURORATE = a.EVRORATE, a.VALUE_RUR,
 			a.VALUE_USD, VALUE_EURO = a.VALUE_EVRO,
+
+			DailyIncrement_RUR = 0.000,
+			DailyIncrement_USD = 0.000,
+			DailyIncrement_EURO = 0.000,
+			DailyDecrement_RUR = 0.000,
+			DailyDecrement_USD = 0.000,
+			DailyDecrement_EURO = 0.000,
 
 			INPUT_VALUE_RUR =
 			case
@@ -174,7 +190,8 @@ FROM
 				when @Valuta = 'EUR' then a.AmountDayMinus_EVRO
 				else a.AmountDayMinus_RUR
 			end,
-			OUTPUT_VALUE_RUR2 = 0.000
+			OUTPUT_VALUE_RUR2 = 0.000,
+			ISPIF=1
 		from InvestorFundDate as a with(nolock)
 		join dbo.FundNames as b with(nolock) on a.FundId = b.Id and b.DATE_CLOSE >= @EndDate
 		where a.Investor = @InvestorId and a.[Date] >= @StartDate and a.[Date] <= @EndDate
@@ -184,6 +201,12 @@ FROM
 			ContractId = a.Investor,
 			a.[Date], a.USDRATE, EURORATE = a.EVRORATE, a.VALUE_RUR,
 			a.VALUE_USD, VALUE_EURO = a.VALUE_EVRO,
+			DailyIncrement_RUR = 0.000,
+			DailyIncrement_USD = 0.000,
+			DailyIncrement_EURO = 0.000,
+			DailyDecrement_RUR = 0.000,
+			DailyDecrement_USD = 0.000,
+			DailyDecrement_EURO = 0.000,
 
 			INPUT_VALUE_RUR =
 			case
@@ -219,7 +242,8 @@ FROM
 				when @Valuta = 'EUR' then a.AmountDayMinus_EVRO
 				else a.AmountDayMinus_RUR
 			end,
-			OUTPUT_VALUE_RUR2 = 0.000
+			OUTPUT_VALUE_RUR2 = 0.000,
+			ISPIF=1
 		from InvestorFundDateLast as a with(nolock)
 		join dbo.FundNames as b with(nolock) on a.FundId = b.Id and b.DATE_CLOSE >= @EndDate
 		where a.Investor = @InvestorId and a.[Date] >= @StartDate and a.[Date] <= @EndDate
@@ -231,16 +255,34 @@ FROM
 
 			VALUE_RUR =
 			case
-				when @Valuta = 'RUB' and a.[Date] = @StartDate then a.VALUE_RUR 
-				when @Valuta = 'RUB' and a.[Date] > @StartDate then a.VALUE_RUR - a.[DailyIncrement_RUR] - a.[DailyDecrement_RUR]
-				when @Valuta = 'USD' and a.[Date] = @StartDate then a.VALUE_USD 
-				when @Valuta = 'USD' and a.[Date] > @StartDate then a.VALUE_USD - a.[DailyIncrement_USD] - a.[DailyDecrement_USD]
-				when @Valuta = 'EUR' and a.[Date] = @StartDate then a.VALUE_EURO 
-				when @Valuta = 'EUR' and a.[Date] > @StartDate then a.VALUE_EURO - a.[DailyIncrement_EURO] - a.[DailyDecrement_EURO]
+				when @Valuta = 'RUB' then a.VALUE_RUR
+				when @Valuta = 'USD'  then a.VALUE_USD
+				when @Valuta = 'EUR'  then a.VALUE_EURO
 				else a.VALUE_RUR
 			end,
 			a.VALUE_USD,
 			a.VALUE_EURO,
+
+			DailyIncrement_RUR =
+				case
+                when @Valuta = 'RUB' then a.DailyIncrement_RUR
+                when @Valuta = 'USD' then a.DailyIncrement_USD
+                when @Valuta = 'EUR' then a.DailyIncrement_EURO
+                else a.DailyIncrement_RUR
+				end,
+                a.DailyIncrement_USD,
+				a.DailyIncrement_EURO,
+
+                DailyDecrement_RUR =
+				case
+                when @Valuta = 'RUB' then a.DailyDecrement_RUR
+                when @Valuta = 'USD' then a.DailyDecrement_USD
+                when @Valuta = 'EUR' then a.DailyDecrement_EURO
+                else a.DailyDecrement_RUR
+				end,
+                a.DailyDecrement_USD,
+				a.DailyDecrement_EURO,
+
 
 			INPUT_VALUE_RUR =
 			case
@@ -288,7 +330,8 @@ FROM
 				when @Valuta = 'USD' then a.OUTPUT_VALUE_USD
 				when @Valuta = 'EUR' then a.OUTPUT_VALUE_EURO
 				else a.OUTPUT_VALUE_RUR
-			end
+			end,
+			ISPIF=0
 		FROM [dbo].[Assets_Contracts] as a with(nolock)
 		join [dbo].[Assets_Info] as b with(nolock) on a.InvestorId = b.InvestorId and a.ContractId = b.ContractId and b.DATE_CLOSE >= @EndDate
 		where a.InvestorId = @InvestorId and a.[Date] >= @StartDate and a.[Date] <= @EndDate
@@ -300,16 +343,33 @@ FROM
 
 			VALUE_RUR =
 			case
-				when @Valuta = 'RUB' and a.[Date] = @StartDate then a.VALUE_RUR 
-				when @Valuta = 'RUB' and a.[Date] > @StartDate then a.VALUE_RUR - a.[DailyIncrement_RUR] - a.[DailyDecrement_RUR]
-				when @Valuta = 'USD' and a.[Date] = @StartDate then a.VALUE_USD 
-				when @Valuta = 'USD' and a.[Date] > @StartDate then a.VALUE_USD - a.[DailyIncrement_USD] - a.[DailyDecrement_USD]
-				when @Valuta = 'EUR' and a.[Date] = @StartDate then a.VALUE_EURO 
-				when @Valuta = 'EUR' and a.[Date] > @StartDate then a.VALUE_EURO - a.[DailyIncrement_EURO] - a.[DailyDecrement_EURO]
+				when @Valuta = 'RUB' then a.VALUE_RUR
+				when @Valuta = 'USD'  then a.VALUE_USD
+				when @Valuta = 'EUR'  then a.VALUE_EURO
 				else a.VALUE_RUR
 			end,
 			a.VALUE_USD,
 			a.VALUE_EURO,
+
+			DailyIncrement_RUR =
+				case
+                when @Valuta = 'RUB' then a.DailyIncrement_RUR
+                when @Valuta = 'USD' then a.DailyIncrement_USD
+                when @Valuta = 'EUR' then a.DailyIncrement_EURO
+                else a.DailyIncrement_RUR
+				end,
+                a.DailyIncrement_USD,
+				a.DailyIncrement_EURO,
+
+                DailyDecrement_RUR =
+				case
+                when @Valuta = 'RUB' then a.DailyDecrement_RUR
+                when @Valuta = 'USD' then a.DailyDecrement_USD
+                when @Valuta = 'EUR' then a.DailyDecrement_EURO
+                else a.DailyDecrement_RUR
+				end,
+                a.DailyDecrement_USD,
+				a.DailyDecrement_EURO,
 
 			INPUT_VALUE_RUR =
 			case
@@ -357,46 +417,63 @@ FROM
 				when @Valuta = 'USD' then a.OUTPUT_VALUE_USD
 				when @Valuta = 'EUR' then a.OUTPUT_VALUE_EURO
 				else a.OUTPUT_VALUE_RUR
-			end
+			end,
+			ISPIF=0
 		FROM [dbo].[Assets_ContractsLast] as a with(nolock)
 		join [dbo].[Assets_Info] as b with(nolock) on a.InvestorId = b.InvestorId and a.ContractId = b.ContractId and b.DATE_CLOSE >= @EndDate
 		where a.InvestorId = @InvestorId and a.[Date] >= @StartDate and a.[Date] <= @EndDate
 	)
 	as res
-	group by InvestorId, ContractId, [Date]
+	group by InvestorId, ContractId, [Date], [ISPIF]
 ) AS R
 
 
 
-
+-- сумма всех выводов средств
+SELECT
+	@Sum_INPUT_COUPONS_RUR = sum(INPUT_COUPONS_RUR),
+	@Sum_INPUT_DIVIDENTS_RUR = sum(INPUT_DIVIDENTS_RUR),
+	@Sum_INPUT_VALUE_RUR3  = sum(INPUT_VALUE_RUR),
+    @Sum_OUTPUT_VALUE_RUR3 = sum(OUTPUT_VALUE_RUR),
+	@Sum_OUTPUT_VALUE_RUR13 = sum(OUTPUT_VALUE_RUR1),
+	@Sum_OUTPUT_VALUE_RUR23 = sum(OUTPUT_VALUE_RUR2)
+FROM #ResInvAssets
 
 -----------------------------------------------
 -- преобразование на начальную и последнюю дату
 
 -- забыть вводы выводы на первую дату
 update #ResInvAssets set
-	--DailyIncrement_RUR = 0, DailyIncrement_USD = 0,	DailyIncrement_EURO = 0,
-	--DailyDecrement_RUR = 0,	DailyDecrement_USD = 0,	DailyDecrement_EURO = 0,
+	VALUE_RUR = CASE WHEN @StartDate=@MinDate THEN  VALUE_RUR
+						 ELSE VALUE_RUR - DailyIncrement_RUR - DailyDecrement_RUR
+						 END,
+		VALUE_USD = VALUE_USD - DailyIncrement_USD - DailyDecrement_USD,
+		VALUE_EURO = VALUE_EURO - DailyIncrement_EURO - DailyDecrement_EURO,
+
+		DailyIncrement_RUR = 0, DailyIncrement_USD = 0, DailyIncrement_EURO = 0,
+        DailyDecrement_RUR = 0, DailyDecrement_USD = 0, DailyDecrement_EURO = 0,
 	INPUT_DIVIDENTS_RUR = 0,INPUT_DIVIDENTS_USD = 0,INPUT_DIVIDENTS_EURO = 0,
 	INPUT_COUPONS_RUR = 0,  INPUT_COUPONS_USD = 0,  INPUT_COUPONS_EURO = 0,
 	INPUT_VALUE_RUR = 0, OUTPUT_VALUE_RUR = 0, OUTPUT_VALUE_RUR1 = 0, OUTPUT_VALUE_RUR2 = 0
 where [Date] = @StartDate
-and (OUTPUT_VALUE_RUR <> 0 or INPUT_VALUE_RUR <> 0 or INPUT_COUPONS_RUR <> 0 or INPUT_DIVIDENTS_RUR <> 0) -- вводы и выводы были в этот день
+and (DailyDecrement_RUR <> 0 or DailyIncrement_RUR <> 0 or OUTPUT_VALUE_RUR <> 0 or INPUT_VALUE_RUR <> 0 or INPUT_COUPONS_RUR <> 0 or INPUT_DIVIDENTS_RUR <> 0) -- вводы и выводы были в этот день
 
 -- посчитать последний день обратно
 update a set 
-VALUE_RUR = VALUE_RUR - INPUT_VALUE_RUR - OUTPUT_VALUE_RUR,
+VALUE_RUR = case when ISPIF=1 then VALUE_RUR - INPUT_VALUE_RUR - OUTPUT_VALUE_RUR
+				else VALUE_RUR - DailyIncrement_RUR - DailyDecrement_RUR
+				end,
 VALUE_USD = VALUE_USD - INPUT_VALUE_USD - OUTPUT_VALUE_USD,
 VALUE_EURO = VALUE_EURO - INPUT_VALUE_EURO - OUTPUT_VALUE_EURO,
 
--- DailyIncrement_RUR = 0, DailyIncrement_USD = 0,	DailyIncrement_EURO = 0,
--- DailyDecrement_RUR = 0,	DailyDecrement_USD = 0,	DailyDecrement_EURO = 0,
+ DailyIncrement_RUR = 0, DailyIncrement_USD = 0,	DailyIncrement_EURO = 0,
+ DailyDecrement_RUR = 0,	DailyDecrement_USD = 0,	DailyDecrement_EURO = 0,
 INPUT_DIVIDENTS_RUR = 0,INPUT_DIVIDENTS_USD = 0,INPUT_DIVIDENTS_EURO = 0,
 INPUT_COUPONS_RUR = 0,  INPUT_COUPONS_USD = 0,  INPUT_COUPONS_EURO = 0,
 INPUT_VALUE_RUR = 0, OUTPUT_VALUE_RUR = 0, OUTPUT_VALUE_RUR1 = 0, OUTPUT_VALUE_RUR2 = 0
 from #ResInvAssets as a
 where [Date] = @EndDate
-and (OUTPUT_VALUE_RUR <> 0 or INPUT_VALUE_RUR <> 0 or INPUT_COUPONS_RUR <> 0 or INPUT_DIVIDENTS_RUR <> 0) -- вводы и выводы были в этот день
+and (DailyDecrement_RUR <> 0 or DailyIncrement_RUR <> 0 or OUTPUT_VALUE_RUR <> 0 or INPUT_VALUE_RUR <> 0 or INPUT_COUPONS_RUR <> 0 or INPUT_DIVIDENTS_RUR <> 0) -- вводы и выводы были в этот день
 
 -- преобразование на начальную и последнюю дату
 -----------------------------------------------
@@ -423,8 +500,8 @@ SELECT
 	@AmountDayPlus_RUR = sum(INPUT_VALUE_RUR),
 	@Sum_INPUT_VALUE_RUR = sum(INPUT_VALUE_RUR),
 	@Sum_OUTPUT_VALUE_RUR = sum(OUTPUT_VALUE_RUR),
-	@Sum_INPUT_COUPONS_RUR = sum(INPUT_COUPONS_RUR),
-	@Sum_INPUT_DIVIDENTS_RUR = sum(INPUT_DIVIDENTS_RUR),
+	--@Sum_INPUT_COUPONS_RUR = sum(INPUT_COUPONS_RUR),
+	--@Sum_INPUT_DIVIDENTS_RUR = sum(INPUT_DIVIDENTS_RUR),
 	@Sum_OUTPUT_VALUE_RUR1 = sum(OUTPUT_VALUE_RUR1),
 	@Sum_OUTPUT_VALUE_RUR2 = sum(OUTPUT_VALUE_RUR2)
 FROM #ResInvAssets
@@ -565,12 +642,12 @@ order by 3;
 
 select
 	Snach = CAST(Round(@Snach,2) as Decimal(38,2)),
-	InVal = CAST(Round(@Sum_INPUT_VALUE_RUR,2) as Decimal(30,2)),
-	OutVal = CAST(Round(@Sum_OUTPUT_VALUE_RUR,2) as Decimal(30,2)),
+	InVal = CAST(Round(@Sum_INPUT_VALUE_RUR3,2) as Decimal(30,2)),
+	OutVal = CAST(Round(@Sum_OUTPUT_VALUE_RUR3,2) as Decimal(30,2)),
 	Dividents = CAST(Round(@Sum_INPUT_DIVIDENTS_RUR,2) as Decimal(30,2)),
 	Coupons = CAST(Round(@Sum_INPUT_COUPONS_RUR,2) as Decimal(30,2)),
-	OutVal1 = CAST(Round(@Sum_OUTPUT_VALUE_RUR1,2) as Decimal(30,2)),
-	OutVal2 = CAST(Round(@Sum_OUTPUT_VALUE_RUR2,2) as Decimal(30,2)),
+	OutVal1 = CAST(Round(@Sum_OUTPUT_VALUE_RUR13,2) as Decimal(30,2)),
+	OutVal2 = CAST(Round(@Sum_OUTPUT_VALUE_RUR23,2) as Decimal(30,2)),
 	Valuta = @Valuta
 
 

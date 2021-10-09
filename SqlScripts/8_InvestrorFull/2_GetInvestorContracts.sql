@@ -201,13 +201,19 @@ AS BEGIN
 
     -- забыть вводы выводы на первую дату
     update #ResInvAssets5 set
-        DailyIncrement_RUR = 0, DailyIncrement_USD = 0, DailyIncrement_EURO = 0,
+        VALUE_RUR = CASE WHEN @StartDate=@MinDate THEN  VALUE_RUR 
+						 ELSE VALUE_RUR - DailyIncrement_RUR - DailyDecrement_RUR
+						 END,
+		VALUE_USD = VALUE_USD - DailyIncrement_USD - DailyDecrement_USD,
+		VALUE_EURO = VALUE_EURO - DailyIncrement_EURO - DailyDecrement_EURO,
+		
+		DailyIncrement_RUR = 0, DailyIncrement_USD = 0, DailyIncrement_EURO = 0,
         DailyDecrement_RUR = 0, DailyDecrement_USD = 0, DailyDecrement_EURO = 0,
         INPUT_DIVIDENTS_RUR = 0,INPUT_DIVIDENTS_USD = 0,INPUT_DIVIDENTS_EURO = 0,
         INPUT_COUPONS_RUR = 0,  INPUT_COUPONS_USD = 0,  INPUT_COUPONS_EURO = 0,
         INPUT_VALUE_RUR = 0, OUTPUT_VALUE_RUR = 0
     where [Date] = @StartDate
-    and (OUTPUT_VALUE_RUR <> 0 or INPUT_VALUE_RUR <> 0 or INPUT_COUPONS_RUR <> 0 or INPUT_DIVIDENTS_RUR <> 0) -- вводы и выводы были в этот день
+    and (DailyDecrement_RUR <> 0 or DailyIncrement_RUR <> 0 or INPUT_COUPONS_RUR <> 0 or INPUT_DIVIDENTS_RUR <> 0) -- вводы и выводы были в этот день
 
     -- посчитать последний день обратно
     update a set 
@@ -222,7 +228,7 @@ AS BEGIN
     INPUT_VALUE_RUR = 0, OUTPUT_VALUE_RUR = 0
     from #ResInvAssets5 as a
     where [Date] = @EndDate
-    and (OUTPUT_VALUE_RUR <> 0 or INPUT_VALUE_RUR <> 0 or INPUT_COUPONS_RUR <> 0 or INPUT_DIVIDENTS_RUR <> 0) -- вводы и выводы были в этот день
+    and (DailyDecrement_RUR <> 0 or DailyIncrement_RUR <> 0 or INPUT_COUPONS_RUR <> 0 or INPUT_DIVIDENTS_RUR <> 0) -- вводы и выводы были в этот день
 
     -- преобразование на начальную и последнюю дату
     -----------------------------------------------
@@ -261,17 +267,19 @@ AS BEGIN
     declare @DateCur date, @AmountDayPlus_RURCur numeric(30,10), @AmountDayMinus_RURCur numeric(30,10), @LastDate date,
         @SumAmountDay_RUR numeric(30,10) = 0, @Counter Int = 0, @T Int, @SumT numeric(30,10) = 0, @ResutSum numeric(30,10) = 0
 
+
     declare obj_cur cursor local fast_forward for
         -- 
         SELECT --*
             [Date],
-            [AmountDayPlus_RUR] = INPUT_VALUE_RUR,
+            [AmountDayPlus_RUR] = INPUT_VALUE_RUR + INPUT_DIVIDENTS_RUR + INPUT_COUPONS_RUR,
             [AmountDayMinus_RUR] = OUTPUT_VALUE_RUR
         FROM #ResInvAssets5
         where (
             [Date] in (@StartDate, @EndDate) or
             (
-                INPUT_VALUE_RUR <> 0 or OUTPUT_VALUE_RUR <> 0
+                INPUT_VALUE_RUR <> 0 or OUTPUT_VALUE_RUR <> 0 or
+                INPUT_DIVIDENTS_RUR <> 0 or INPUT_COUPONS_RUR <> 0
             )
         )
         order by [Date]

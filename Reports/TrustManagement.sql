@@ -19,7 +19,9 @@ Declare @SItog numeric(30,10), @AmountDayMinus_RUR numeric(30,10), @Snach numeri
 @Sum_OUTPUT_VALUE_RUR numeric(30,10),
 @Sum_INPUT_COUPONS_RUR numeric(30,10),
 @Sum_INPUT_DIVIDENTS_RUR numeric(30,10),
-@InvestResult numeric(30,10);
+@InvestResult numeric(30,10),
+@Sum_INPUT_VALUE_RUR1 numeric(30,10),
+@Sum_OUTPUT_VALUE_RUR1 numeric(30,10);
 
 SELECT
 	@MinDate = min([Date]),
@@ -188,15 +190,27 @@ WHERE [Date] >= @StartDate and [Date] <= @EndDate
 -----------------------------------------------
 -- преобразование на начальную и последнюю дату
 
+SELECT
+	@Sum_INPUT_VALUE_RUR1 = sum(INPUT_VALUE_RUR),
+	@Sum_OUTPUT_VALUE_RUR1 = sum(OUTPUT_VALUE_RUR),
+	@Sum_INPUT_COUPONS_RUR = sum(INPUT_COUPONS_RUR),
+	@Sum_INPUT_DIVIDENTS_RUR = sum(INPUT_DIVIDENTS_RUR)
+FROM #ResInvAssets
 -- забыть вводы выводы на первую дату
 update #ResInvAssets set
+	VALUE_RUR = CASE WHEN @StartDate=@MinDate THEN  VALUE_RUR
+						 ELSE VALUE_RUR - DailyIncrement_RUR - DailyDecrement_RUR
+						 END,
+	VALUE_USD = VALUE_USD - DailyIncrement_USD - DailyDecrement_USD,
+	VALUE_EURO = VALUE_EURO - DailyIncrement_EURO - DailyDecrement_EURO,
+
 	DailyIncrement_RUR = 0, DailyIncrement_USD = 0,	DailyIncrement_EURO = 0,
 	DailyDecrement_RUR = 0,	DailyDecrement_USD = 0,	DailyDecrement_EURO = 0,
 	INPUT_DIVIDENTS_RUR = 0,INPUT_DIVIDENTS_USD = 0,INPUT_DIVIDENTS_EURO = 0,
 	INPUT_COUPONS_RUR = 0,  INPUT_COUPONS_USD = 0,  INPUT_COUPONS_EURO = 0,
 	INPUT_VALUE_RUR = 0, OUTPUT_VALUE_RUR = 0
 where [Date] = @StartDate
-and (OUTPUT_VALUE_RUR <> 0 or INPUT_VALUE_RUR <> 0 or INPUT_COUPONS_RUR <> 0 or INPUT_DIVIDENTS_RUR <> 0) -- вводы и выводы были в этот день
+and (DailyDecrement_RUR <> 0 or DailyIncrement_RUR <> 0 or INPUT_COUPONS_RUR <> 0 or INPUT_DIVIDENTS_RUR <> 0) -- вводы и выводы были в этот день
 
 -- посчитать последний день обратно
 update a set 
@@ -211,7 +225,7 @@ INPUT_COUPONS_RUR = 0,  INPUT_COUPONS_USD = 0,  INPUT_COUPONS_EURO = 0,
 INPUT_VALUE_RUR = 0, OUTPUT_VALUE_RUR = 0
 from #ResInvAssets as a
 where [Date] = @EndDate
-and (OUTPUT_VALUE_RUR <> 0 or INPUT_VALUE_RUR <> 0 or INPUT_COUPONS_RUR <> 0 or INPUT_DIVIDENTS_RUR <> 0) -- вводы и выводы были в этот день
+and (DailyDecrement_RUR <> 0 or DailyIncrement_RUR <> 0 or INPUT_COUPONS_RUR <> 0 or INPUT_DIVIDENTS_RUR <> 0) -- вводы и выводы были в этот день
 
 -- преобразование на начальную и последнюю дату
 -----------------------------------------------
@@ -241,9 +255,9 @@ SELECT
 	@AmountDayMinus_RUR = sum(OUTPUT_VALUE_RUR), -- отрицательное значение
 	@AmountDayPlus_RUR = sum(INPUT_VALUE_RUR),
 	@Sum_INPUT_VALUE_RUR = sum(INPUT_VALUE_RUR),
-	@Sum_OUTPUT_VALUE_RUR = sum(OUTPUT_VALUE_RUR),
-	@Sum_INPUT_COUPONS_RUR = sum(INPUT_COUPONS_RUR),
-	@Sum_INPUT_DIVIDENTS_RUR = sum(INPUT_DIVIDENTS_RUR)
+	@Sum_OUTPUT_VALUE_RUR = sum(OUTPUT_VALUE_RUR)
+	--@Sum_INPUT_COUPONS_RUR = sum(INPUT_COUPONS_RUR),
+	--@Sum_INPUT_DIVIDENTS_RUR = sum(INPUT_DIVIDENTS_RUR)
 FROM #ResInvAssets
 
 --select @SItog as '@SItog', @Snach as '@Snach', @OUTPUT_VALUE_RUR as '@OUTPUT_VALUE_RUR', @AmountDayPlus_RUR as '@AmountDayPlus_RUR'
@@ -274,13 +288,13 @@ set @InvestResult =
 		-- 
 		SELECT --*
 			[Date],
-			[AmountDayPlus_RUR] = INPUT_VALUE_RUR,
+			[AmountDayPlus_RUR] = INPUT_VALUE_RUR + INPUT_COUPONS_RUR + INPUT_DIVIDENTS_RUR,
 			[AmountDayMinus_RUR] = OUTPUT_VALUE_RUR
 		FROM #ResInvAssets
 		where (
 			[Date] in (@StartDate, @EndDate) or
 			(
-				INPUT_VALUE_RUR <> 0 or OUTPUT_VALUE_RUR <> 0
+				INPUT_VALUE_RUR <> 0 or OUTPUT_VALUE_RUR <> 0  or INPUT_DIVIDENTS_RUR <> 0 or INPUT_COUPONS_RUR <> 0
 			)
 		)
 		order by [Date]
@@ -321,16 +335,15 @@ set @InvestResult =
 	begin
 		set @ResutSum = @ResutSum/@SumT
 	end
-
-	--select
-	--@InvestResult as 'Результат инвестиций',
-	--@ResutSum as 'Средневзвешенная сумма вложенных средств',
-	--@InvestResult/@ResutSum * 100 as 'Доходность в %',
-	--@InvestResult as 'Доходность абсолютная',
-	--@StartDate as 'Дата начала',
-	--@EndDate as 'Дата завершения',
-	--@SumT as 'Количество дней'
-
+	/*
+	select
+	@InvestResult as 'Результат инвестиций', @ResutSum as 'Средневзвешенная сумма вложенных средств',
+	@InvestResult/@ResutSum * 100 as 'Доходность в %',
+    @InvestResult as 'Доходность абсолютная',
+	@StartDate as 'Дата начала',
+	@EndDate as 'Дата завершения',
+	@SumT as 'Количество дней'
+	*/
 Declare @DATE_OPEN date, @NUM Nvarchar(100);
 
 select
@@ -359,9 +372,9 @@ select
 
 select ActiveName = 'Активы на ' + FORMAT(@StartDate,'dd.MM.yyyy') , ActiveValue = CAST(Round(@Snach,2) as Decimal(38,2)), Sort = 1, Valuta = @Valuta
 union
-select 'Пополнения', CAST(Round(@Sum_INPUT_VALUE_RUR,2) as Decimal(30,2)), 2, Valuta = @Valuta
+select 'Пополнения', CAST(Round(@Sum_INPUT_VALUE_RUR1,2) as Decimal(30,2)), 2, Valuta = @Valuta
 union
-select 'Выводы', CAST(Round(@Sum_OUTPUT_VALUE_RUR,2) as Decimal(30,2)), 3, Valuta = @Valuta
+select 'Выводы', CAST(Round(@Sum_OUTPUT_VALUE_RUR1,2) as Decimal(30,2)), 3, Valuta = @Valuta
 union
 select 'Дивиденды', @Sum_INPUT_DIVIDENTS_RUR, 4, Valuta = @Valuta
 union
@@ -387,8 +400,8 @@ end
 
 
 select ActiveName = 'Активы на ' + FORMAT(@StartDate,'dd.MM.yyyy') , ActiveValue = CAST(Round(@Snach,2) as Decimal(38,2)),
-[InVal] = CAST(Round(@Sum_INPUT_VALUE_RUR,2) as Decimal(30,2)), 
-[OutVal] = CAST(Round(@Sum_OUTPUT_VALUE_RUR,2) as Decimal(30,2)), 
+[InVal] = CAST(Round(@Sum_INPUT_VALUE_RUR1,2) as Decimal(30,2)),
+[OutVal] = CAST(Round(@Sum_OUTPUT_VALUE_RUR1,2) as Decimal(30,2)),
 [Dividends] = @Sum_INPUT_DIVIDENTS_RUR, 
 [Coupons] = @Sum_INPUT_COUPONS_RUR,
 [Valuta] = @Valuta

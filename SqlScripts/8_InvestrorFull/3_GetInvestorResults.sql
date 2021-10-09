@@ -551,7 +551,9 @@ AS BEGIN
     @Sum_OUTPUT_VALUE_RUR numeric(30,10),
     @Sum_INPUT_COUPONS_RUR numeric(30,10),
     @Sum_INPUT_DIVIDENTS_RUR numeric(30,10),
-    @InvestResult numeric(30,10);
+    @InvestResult numeric(30,10),
+	@Sum_INPUT_VALUE_RUR1 numeric(30,10),
+	@Sum_OUTPUT_VALUE_RUR1 numeric(30,10);
 
     SELECT
         @MinDate = min([Date]),
@@ -594,14 +596,14 @@ AS BEGIN
 
 
     BEGIN TRY
-        DROP TABLE #ResInvAssets
+        DROP TABLE #ResInvAssets11
     END TRY
     BEGIN CATCH
     END CATCH;
 
 
     SELECT *
-    INTO #ResInvAssets
+    INTO #ResInvAssets11
     FROM
     (
         SELECT
@@ -611,6 +613,12 @@ AS BEGIN
         VALUE_RUR = sum(VALUE_RUR),
         VALUE_USD = sum(VALUE_USD),
         VALUE_EURO = sum(VALUE_EURO),
+		DailyIncrement_RUR = sum(DailyIncrement_RUR),
+		DailyIncrement_USD = sum(DailyIncrement_USD),
+		DailyIncrement_EURO = sum(DailyIncrement_EURO),
+		DailyDecrement_RUR = sum(DailyDecrement_RUR),
+		DailyDecrement_USD = sum(DailyDecrement_USD),
+		DailyDecrement_EURO = sum(DailyDecrement_EURO),
         INPUT_VALUE_RUR = sum(INPUT_VALUE_RUR),
         INPUT_VALUE_USD = sum(INPUT_VALUE_USD),
         INPUT_VALUE_EURO = sum(INPUT_VALUE_EURO),
@@ -625,49 +633,7 @@ AS BEGIN
         INPUT_COUPONS_EURO = sum(INPUT_COUPONS_EURO)
         from
         (
-            /*
-            select
-                InvestorId = Investor,
-                ContractId = Investor,
-                [Date], USDRATE, EURORATE = EVRORATE, VALUE_RUR,
-                VALUE_USD, VALUE_EURO = VALUE_EVRO,
-                INPUT_VALUE_RUR = AmountDayPlus_RUR,
-                INPUT_VALUE_USD = AmountDayPlus_USD,
-                INPUT_VALUE_EURO = AmountDayPlus_EVRO,
-                OUTPUT_VALUE_RUR = AmountDayMinus_RUR,
-                OUTPUT_VALUE_USD = AmountDayMinus_USD,
-                OUTPUT_VALUE_EURO = AmountDayMinus_EVRO,
-                INPUT_DIVIDENTS_RUR = 0.0000000000,
-                INPUT_DIVIDENTS_USD = 0.0000000000,
-                INPUT_DIVIDENTS_EURO = 0.0000000000,
-                INPUT_COUPONS_RUR = 0.0000000000,
-                INPUT_COUPONS_USD = 0.0000000000,
-                INPUT_COUPONS_EURO = 0.0000000000
-            from InvestorFundDate nolock
-            where Investor = @InvestorId and [Date] >= @StartDate and [Date] <= @EndDate
-            union all
-            select
-                InvestorId = Investor,
-                ContractId = Investor,
-                [Date], USDRATE, EURORATE = EVRORATE, VALUE_RUR,
-                VALUE_USD, VALUE_EURO = VALUE_EVRO,
-                INPUT_VALUE_RUR = AmountDayPlus_RUR,
-                INPUT_VALUE_USD = AmountDayPlus_USD,
-                INPUT_VALUE_EURO = AmountDayPlus_EVRO,
-                OUTPUT_VALUE_RUR = AmountDayMinus_RUR,
-                OUTPUT_VALUE_USD = AmountDayMinus_USD,
-                OUTPUT_VALUE_EURO = AmountDayMinus_EVRO,
-                INPUT_DIVIDENTS_RUR = 0.0000000000,
-                INPUT_DIVIDENTS_USD = 0.0000000000,
-                INPUT_DIVIDENTS_EURO = 0.0000000000,
-                INPUT_COUPONS_RUR = 0.0000000000,
-                INPUT_COUPONS_USD = 0.0000000000,
-                INPUT_COUPONS_EURO = 0.0000000000
-            from InvestorFundDateLast nolock
-            where Investor = @InvestorId and [Date] >= @StartDate and [Date] <= @EndDate
-            
-            union all
-            */
+           
             select
                 a.InvestorId,
                 ContractId = a.InvestorId,
@@ -675,13 +641,33 @@ AS BEGIN
 
                 VALUE_RUR =
                 case
-                    when @Valuta = 'RUB' then a.VALUE_RUR
-                    when @Valuta = 'USD' then a.VALUE_USD
-                    when @Valuta = 'EUR' then a.VALUE_EURO
-                    else a.VALUE_RUR
+                when @Valuta = 'RUB' then a.VALUE_RUR 
+				when @Valuta = 'USD' then a.VALUE_USD 
+				when @Valuta = 'EUR' then a.VALUE_EURO 
+				else a.VALUE_RUR
                 end,
                 a.VALUE_USD,
                 a.VALUE_EURO,
+
+				DailyIncrement_RUR =
+				case
+                when @Valuta = 'RUB' then a.DailyIncrement_RUR
+                when @Valuta = 'USD' then a.DailyIncrement_USD
+                when @Valuta = 'EUR' then a.DailyIncrement_EURO
+                else a.DailyIncrement_RUR
+				end,
+                a.DailyIncrement_USD, 
+				a.DailyIncrement_EURO,
+
+                DailyDecrement_RUR =
+				case
+                when @Valuta = 'RUB' then a.DailyDecrement_RUR
+                when @Valuta = 'USD' then a.DailyDecrement_USD
+                when @Valuta = 'EUR' then a.DailyDecrement_EURO
+                else a.DailyDecrement_RUR
+				end,
+                a.DailyDecrement_USD, 
+				a.DailyDecrement_EURO,
 
                 INPUT_VALUE_RUR =
                 case
@@ -734,13 +720,33 @@ AS BEGIN
 
                 VALUE_RUR =
                 case
-                    when @Valuta = 'RUB' then a.VALUE_RUR
-                    when @Valuta = 'USD' then a.VALUE_USD
-                    when @Valuta = 'EUR' then a.VALUE_EURO
-                    else a.VALUE_RUR
+                when @Valuta = 'RUB' then a.VALUE_RUR 
+				when @Valuta = 'USD' then a.VALUE_USD 
+				when @Valuta = 'EUR' then a.VALUE_EURO 
+				else a.VALUE_RUR
                 end,
                 a.VALUE_USD,
                 a.VALUE_EURO,
+								
+				DailyIncrement_RUR =
+				case
+                when @Valuta = 'RUB' then a.DailyIncrement_RUR
+                when @Valuta = 'USD' then a.DailyIncrement_USD
+                when @Valuta = 'EUR' then a.DailyIncrement_EURO
+                else a.DailyIncrement_RUR
+				end,
+                a.DailyIncrement_USD, 
+				a.DailyIncrement_EURO,
+
+                DailyDecrement_RUR =
+				case
+                when @Valuta = 'RUB' then a.DailyDecrement_RUR
+                when @Valuta = 'USD' then a.DailyDecrement_USD
+                when @Valuta = 'EUR' then a.DailyDecrement_EURO
+                else a.DailyDecrement_RUR
+				end,
+                a.DailyDecrement_USD, 
+				a.DailyDecrement_EURO,
 
                 INPUT_VALUE_RUR =
                 case
@@ -791,35 +797,46 @@ AS BEGIN
     ) AS R
 
 
-
+	SELECT
+        @Sum_INPUT_VALUE_RUR1 = sum(INPUT_VALUE_RUR),
+        @Sum_OUTPUT_VALUE_RUR1 = sum(OUTPUT_VALUE_RUR),
+        @Sum_INPUT_COUPONS_RUR = sum(INPUT_COUPONS_RUR),
+        @Sum_INPUT_DIVIDENTS_RUR = sum(INPUT_DIVIDENTS_RUR)
+    FROM #ResInvAssets11
 
     -----------------------------------------------
     -- преобразование на начальную и последнюю дату
 
     -- забыть вводы выводы на первую дату
-    update #ResInvAssets set
-        --DailyIncrement_RUR = 0, DailyIncrement_USD = 0,   DailyIncrement_EURO = 0,
-        --DailyDecrement_RUR = 0,   DailyDecrement_USD = 0, DailyDecrement_EURO = 0,
+    update #ResInvAssets11 set
+        VALUE_RUR = CASE WHEN @StartDate=@MinDate THEN  VALUE_RUR 
+						 ELSE VALUE_RUR - DailyIncrement_RUR - DailyDecrement_RUR
+						 END,
+		VALUE_USD = VALUE_USD - DailyIncrement_USD - DailyDecrement_USD,
+		VALUE_EURO = VALUE_EURO - DailyIncrement_EURO - DailyDecrement_EURO,
+		
+		DailyIncrement_RUR = 0, DailyIncrement_USD = 0, DailyIncrement_EURO = 0,
+        DailyDecrement_RUR = 0, DailyDecrement_USD = 0, DailyDecrement_EURO = 0,
         INPUT_DIVIDENTS_RUR = 0,INPUT_DIVIDENTS_USD = 0,INPUT_DIVIDENTS_EURO = 0,
         INPUT_COUPONS_RUR = 0,  INPUT_COUPONS_USD = 0,  INPUT_COUPONS_EURO = 0,
         INPUT_VALUE_RUR = 0, OUTPUT_VALUE_RUR = 0
     where [Date] = @StartDate
-    and (OUTPUT_VALUE_RUR <> 0 or INPUT_VALUE_RUR <> 0 or INPUT_COUPONS_RUR <> 0 or INPUT_DIVIDENTS_RUR <> 0) -- вводы и выводы были в этот день
+    and (DailyDecrement_RUR <> 0 or DailyIncrement_RUR <> 0 or INPUT_COUPONS_RUR <> 0 or INPUT_DIVIDENTS_RUR <> 0) -- вводы и выводы были в этот день
 
     -- посчитать последний день обратно
     update a set 
-    VALUE_RUR = VALUE_RUR - OUTPUT_VALUE_RUR,
-    VALUE_USD = VALUE_USD, -- - DailyIncrement_USD - DailyDecrement_USD,
-    VALUE_EURO = VALUE_EURO, -- - DailyIncrement_EURO - DailyDecrement_EURO,
+    VALUE_RUR = VALUE_RUR - DailyIncrement_RUR - DailyDecrement_RUR,
+    VALUE_USD = VALUE_USD - DailyIncrement_USD - DailyDecrement_USD,
+    VALUE_EURO = VALUE_EURO - DailyIncrement_EURO - DailyDecrement_EURO,
 
-    -- DailyIncrement_RUR = 0, DailyIncrement_USD = 0,  DailyIncrement_EURO = 0,
-    -- DailyDecrement_RUR = 0,  DailyDecrement_USD = 0, DailyDecrement_EURO = 0,
+    DailyIncrement_RUR = 0, DailyIncrement_USD = 0, DailyIncrement_EURO = 0,
+    DailyDecrement_RUR = 0, DailyDecrement_USD = 0, DailyDecrement_EURO = 0,
     INPUT_DIVIDENTS_RUR = 0,INPUT_DIVIDENTS_USD = 0,INPUT_DIVIDENTS_EURO = 0,
     INPUT_COUPONS_RUR = 0,  INPUT_COUPONS_USD = 0,  INPUT_COUPONS_EURO = 0,
     INPUT_VALUE_RUR = 0, OUTPUT_VALUE_RUR = 0
-    from #ResInvAssets as a
+    from #ResInvAssets11 as a
     where [Date] = @EndDate
-    and (OUTPUT_VALUE_RUR <> 0 or INPUT_VALUE_RUR <> 0 or INPUT_COUPONS_RUR <> 0 or INPUT_DIVIDENTS_RUR <> 0) -- вводы и выводы были в этот день
+    and (DailyDecrement_RUR <> 0 or DailyIncrement_RUR <> 0 or INPUT_COUPONS_RUR <> 0 or INPUT_DIVIDENTS_RUR <> 0) -- вводы и выводы были в этот день
 
 
     -- преобразование на начальную и последнюю дату
@@ -831,12 +848,12 @@ AS BEGIN
 
     SELECT
         @SItog = VALUE_RUR
-    FROM #ResInvAssets
+    FROM #ResInvAssets11
     where [Date] = @EndDate
 
     SELECT
         @Snach = VALUE_RUR
-    FROM #ResInvAssets
+    FROM #ResInvAssets11
     where [Date] = @StartDate
 
     declare @IsNoStart Int = 0;
@@ -850,12 +867,12 @@ AS BEGIN
     -- сумма всех выводов средств
     SELECT
         @AmountDayMinus_RUR = sum(OUTPUT_VALUE_RUR), -- отрицательное значение
-        @AmountDayPlus_RUR = sum(INPUT_VALUE_RUR + INPUT_DIVIDENTS_RUR + INPUT_COUPONS_RUR),
+        @AmountDayPlus_RUR = sum(INPUT_VALUE_RUR),-- + INPUT_DIVIDENTS_RUR + INPUT_COUPONS_RUR),
         @Sum_INPUT_VALUE_RUR = sum(INPUT_VALUE_RUR),
-        @Sum_OUTPUT_VALUE_RUR = sum(OUTPUT_VALUE_RUR),
-        @Sum_INPUT_COUPONS_RUR = sum(INPUT_COUPONS_RUR),
-        @Sum_INPUT_DIVIDENTS_RUR = sum(INPUT_DIVIDENTS_RUR)
-    FROM #ResInvAssets
+        @Sum_OUTPUT_VALUE_RUR = sum(OUTPUT_VALUE_RUR)
+        --@Sum_INPUT_COUPONS_RUR = sum(INPUT_COUPONS_RUR),
+        --@Sum_INPUT_DIVIDENTS_RUR = sum(INPUT_DIVIDENTS_RUR)
+    FROM #ResInvAssets11
 
     set @InvestResult =
     (@SItog - @AmountDayMinus_RUR) -- минус, потому что отрицательное значение
@@ -895,7 +912,7 @@ AS BEGIN
             [Date],
             [AmountDayPlus_RUR] = INPUT_VALUE_RUR + INPUT_DIVIDENTS_RUR + INPUT_COUPONS_RUR,
             [AmountDayMinus_RUR] = OUTPUT_VALUE_RUR
-        FROM #ResInvAssets
+        FROM #ResInvAssets11
         where (
             [Date] in (@StartDate, @EndDate) or
             (
@@ -977,8 +994,8 @@ AS BEGIN
         EndDate = FORMAT(@EndDate,'dd.MM.yyyy'),
         EndDateValue =  CAST(Round(@SItog,2) as Decimal(30,2)),
 
-        INPUT_VALUE = @Sum_INPUT_VALUE_RUR,
-        OUTPUT_VALUE = -@Sum_OUTPUT_VALUE_RUR,
+        INPUT_VALUE = @Sum_INPUT_VALUE_RUR1,
+        OUTPUT_VALUE = -@Sum_OUTPUT_VALUE_RUR1,
         INPUT_COUPONS = @Sum_INPUT_COUPONS_RUR,
         INPUT_DIVIDENTS = @Sum_INPUT_DIVIDENTS_RUR,
 
