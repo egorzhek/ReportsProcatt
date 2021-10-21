@@ -74,7 +74,7 @@ namespace ReportsProcatt.Controllers
         {
             var data = new Report(InvestorId, DateFrom, DateTo, Currency)
             {
-                rootStr = "file:///c:/Users/Света/source/Ingos/ReportsProcatt/ReportsProcatt/wwwroot"
+                rootStr = "file:///c:/Users/D/source/Ingos/ReportsProcatt/ReportsProcatt/wwwroot"
             };
 
             return await _generatePdf.GetPdf("Views/New/Index.cshtml", data);
@@ -125,6 +125,85 @@ namespace ReportsProcatt.Controllers
         )
         {
             return Json(new Report(InvestorId, DateFrom, DateTo, Currency));
+        }
+        [HttpGet]
+        [Route("Adaptive")]
+        public IActionResult Adaptive
+        (
+            [FromQuery] int? InvestorId,
+            [FromQuery] DateTime? DateFrom,
+            [FromQuery] DateTime? DateTo,
+            [FromQuery] string Currency
+        )
+        {
+            try
+            {
+                if (InvestorId == null)
+                    throw new Exception("InvestorId is null");
+
+                var data = new Report((int)InvestorId, DateFrom, DateTo, Currency)
+                {
+                    rootStr = "/app/wwwroot"
+                };
+
+                return View(data);
+            }
+            catch (Exception exception)
+            {
+                var messages = new List<string>();
+                do
+                {
+                    messages.Add(exception.Message);
+                    exception = exception.InnerException;
+                }
+                while (exception != null);
+                var message = string.Join(" - ", messages);
+
+                var stream = new MemoryStream();
+                var writer = new StreamWriter(stream);
+                writer.Write(message);
+                writer.Flush();
+                stream.Position = 0;
+                return File(stream, "application/json");
+            }
+        }
+        [HttpGet]
+        [Route("Adaptive_Test")]
+        public IActionResult Adaptive_Test
+        (
+            [FromQuery] int? InvestorId,
+            [FromQuery] DateTime? DateFrom,
+            [FromQuery] DateTime? DateTo,
+            [FromQuery] string Currency
+        )
+        {
+            try
+            {
+                if (InvestorId == null)
+                    throw new Exception("InvestorId is null");
+
+                var data = new Report((int)InvestorId, DateFrom, DateTo, Currency);
+
+                return View("Views/New/Adaptive.cshtml", data);
+            }
+            catch (Exception exception)
+            {
+                var messages = new List<string>();
+                do
+                {
+                    messages.Add(exception.Message);
+                    exception = exception.InnerException;
+                }
+                while (exception != null);
+                var message = string.Join(" - ", messages);
+
+                var stream = new MemoryStream();
+                var writer = new StreamWriter(stream);
+                writer.Write(message);
+                writer.Flush();
+                stream.Position = 0;
+                return File(stream, "application/json");
+            }
         }
     }
 }
