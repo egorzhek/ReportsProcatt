@@ -298,7 +298,7 @@ namespace ReportsProcatt.Models
             int i = 1;
             Assets = new CircleDiagram("MainAssetsCircle")
             {
-                LegendName = "Актиывы",
+                LegendName = "Активы",
                 MainText = $"{_circleAssetsDS.DecimalToStr(1, "AllSum", "#,##0")} {ReportCurrency.Char}",
                 Footer = $"{_circleAssetsDS.DecimalToStr(1, "CountRows", "#,##0")} АКТИВА(ов)",
                 Data = _circleAssetsDS.Tables[0].Rows.Cast<DataRow>().ToList()
@@ -401,7 +401,7 @@ namespace ReportsProcatt.Models
             int i = 1;
             Currencies = new CircleDiagram("MainCurrenciesCircle")
             {
-                LegendName = "Вылюта",
+                LegendName = "Валюта",
                 MainText = $"{_circleCurrenciesDS.DecimalToStr(1, "AllSum", "#,##0")} {ReportCurrency.Char}",
                 Data = _circleCurrenciesDS.Tables[0].Rows.Cast<DataRow>().ToList()
                     .OrderByDescending(r => r["Result"].ToDecimal())
