@@ -604,6 +604,20 @@ begin
 	set @FProcentValue = 0;
 end
 
+
+set @SItog = NULL;
+
+select
+	@SItog = sum(EndValue)
+from
+(
+	select EndValue from @FundReSult
+	union all
+	select EndValue from @ContractReSult
+) as fff
+
+if @SItog is null set @SItog = 0;
+
 select
 	ActiveDateToName = N'Сумма активов на дату окончания периода',
 	ActiveDateToValue =  CAST(Round(@SItog,2) as Decimal(30,2)),
