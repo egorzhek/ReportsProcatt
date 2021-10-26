@@ -9,8 +9,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
 
-    <link rel="stylesheet" href="@Model.rootStr/style-r.css">
+    <link rel="stylesheet" href="@Model.rootStr/css/style-r.css">
+    <script src="@Model.rootStr/js/moment.min.js"></script>
     <script src="@Model.rootStr/js/Chart.min.js"></script>
+    <script type="text/javascript">
+        var Charts = [];
+        (function (setLineDash) {
+            CanvasRenderingContext2D.prototype.setLineDash = function () {
+                if (!arguments[0].length) {
+                    arguments[0] = [1, 0];
+                }
+                // Now, call the original method
+                return setLineDash.apply(this, arguments);
+            };
+        })(CanvasRenderingContext2D.prototype.setLineDash);
+        Function.prototype.bind = Function.prototype.bind || function (thisp) {
+            var fn = this;
+            return function () {
+                return fn.apply(thisp, arguments);
+            };
+        };
+    </script>
 </head>
 <body>
     @*Шапка*@
