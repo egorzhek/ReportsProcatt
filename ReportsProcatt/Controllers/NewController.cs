@@ -77,7 +77,28 @@ namespace ReportsProcatt.Controllers
                 rootStr = "file:///c:/Users/D/source/Ingos/ReportsProcatt/ReportsProcatt/wwwroot"
             };
 
-            return await _generatePdf.GetPdf("Views/New/Index.cshtml", data);
+            try
+            {
+                return await _generatePdf.GetPdf("Views/New/Index.cshtml", data);
+            }
+            catch (Exception exception)
+            {
+                var messages = new List<string>();
+                do
+                {
+                    messages.Add(exception.Message);
+                    exception = exception.InnerException;
+                }
+                while (exception != null);
+                var message = string.Join(" - ", messages);
+
+                var stream = new MemoryStream();
+                var writer = new StreamWriter(stream);
+                writer.Write(message);
+                writer.Flush();
+                stream.Position = 0;
+                return File(stream, "application/json");
+            }
         }
         [HttpGet]
         public IActionResult Index
