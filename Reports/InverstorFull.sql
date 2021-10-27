@@ -15,7 +15,7 @@ DECLARE
 DECLARE
 	@CurrDate Date = isnull(@EndDate, GetDate());
 
-declare @MinDate date, @MaxDate date
+declare @MinDate date, @MaxDate date, @MinDate1 date, @MaxDate1 date
 
 Declare @SItog numeric(30,10), @AmountDayMinus_RUR numeric(30,10), @Snach numeric(30,10), @AmountDayPlus_RUR numeric(30,10),
 @Sum_INPUT_VALUE_RUR  numeric(30,10),
@@ -26,6 +26,8 @@ Declare @SItog numeric(30,10), @AmountDayMinus_RUR numeric(30,10), @Snach numeri
 @Sum_INPUT_DIVIDENTS_RUR numeric(30,10),
 @InvestResult numeric(30,10);
 
+
+-------Берем даты из ПИФов
 SELECT
 	@MinDate = min([Date]),
 	@MaxDate = max([Date])
@@ -40,7 +42,15 @@ FROM
 	FROM [dbo].[InvestorFundDateLast] as a with(nolock)
 	join [dbo].[FundNames] as b with(nolock) on a.FundId = b.Id
 	where a.Investor = @InvestorId and b.DATE_CLOSE >= @CurrDate
-	UNION
+) x
+
+
+-------Берем даты из ДУ
+SELECT
+	@MinDate1 = min([Date]),
+	@MaxDate1 = max([Date])
+FROM
+(
 	SELECT a.[Date]
 	FROM [dbo].[Assets_Contracts] as a with(nolock)
 	join [dbo].[Assets_Info] as b with(nolock) on a.InvestorId = b.InvestorId and a.ContractId = b.ContractId
@@ -52,6 +62,12 @@ FROM
 	where a.InvestorId = @InvestorId and b.DATE_CLOSE >= @CurrDate
 ) AS R
 
+----------------Новое условие ограничения даты----------
+if @MinDate1 < @MinDate set @MinDate=@MinDate1
+if @MaxDate1 < @MaxDate set @MaxDate=@MaxDate1
+--------------------------------------------------------
+
+
 if @StartDate is null set @StartDate = @MinDate;
 if @StartDate < @MinDate set @StartDate = @MinDate;
 if @StartDate > @MaxDate set @StartDate = @MinDate;
@@ -60,6 +76,9 @@ if @EndDate is null    set @EndDate = @MaxDate;
 if @EndDate > @MaxDate set @EndDate = @MaxDate;
 if @EndDate < @MinDate set @EndDate = @MaxDate;
 
+
+
+--select @StartDate,  @EndDate, @mindate, @MaxDate
 
 declare @FundReSult table
 (
@@ -483,12 +502,12 @@ and (DailyDecrement_RUR <> 0 or DailyIncrement_RUR <> 0 or OUTPUT_VALUE_RUR <> 0
 -- Итоговая оценка инвестиций
 
 SELECT
-	@SItog = VALUE_RUR
+	@SItog = sum(VALUE_RUR)
 FROM #ResInvAssets
 where [Date] = @EndDate
 
 SELECT
-	@Snach = VALUE_RUR
+	@Snach = sum(VALUE_RUR)
 FROM #ResInvAssets
 where [Date] = @StartDate
 
@@ -604,7 +623,7 @@ begin
 	set @FProcentValue = 0;
 end
 
-
+/*
 set @SItog = NULL;
 
 select
@@ -615,7 +634,7 @@ from
 	union all
 	select EndValue from @ContractReSult
 ) as fff
-
+*/
 if @SItog is null set @SItog = 0;
 
 select

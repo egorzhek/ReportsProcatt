@@ -19,7 +19,10 @@ Declare @SItog numeric(30,10), @AmountDayMinus_RUR numeric(30,10), @Snach numeri
 @InvestResult numeric(30,10), @AllPlus_RUR numeric(30,10), @AllMinus_RUR numeric(30,10), @EndSumAmount numeric(30,2),
 @FundName NVarchar(300), @InvestorName NVarchar(300);
 
-declare @MinDate date, @MaxDate date, @LS_NUM nvarchar(120);
+declare @MinDate date, @MaxDate date, @LS_NUM nvarchar(120), @MaxDate1 date;
+  
+DECLARE	@CurrDate Date = isnull(CONVERT(Date, @ToDateStr, 103), GetDate());
+
 
 SELECT
     @MinDate = min([Date]),
@@ -35,6 +38,28 @@ FROM
     FROM [dbo].[InvestorFundDateLast] NOLOCK
     WHERE Investor = @Investor and FundId = @FundId
 ) AS R
+
+-------Берем даты из ДУ для минимальной и максимальной дат
+SELECT
+	@MaxDate1 = max([Date])
+FROM
+(
+	SELECT a.[Date]
+	FROM [dbo].[Assets_Contracts] as a with(nolock)
+	join [dbo].[Assets_Info] as b with(nolock) on a.InvestorId = b.InvestorId and a.ContractId = b.ContractId
+	where a.InvestorId = @Investor and b.DATE_CLOSE >= @CurrDate
+	UNION
+	SELECT a.[Date]
+	FROM [dbo].[Assets_ContractsLast] as a with(nolock)
+	join [dbo].[Assets_Info] as b with(nolock) on a.InvestorId = b.InvestorId and a.ContractId = b.ContractId
+	where a.InvestorId = @Investor and b.DATE_CLOSE >= @CurrDate
+) AS R
+
+----------------Новое условие ограничения даты----------
+
+if @MaxDate1 < @MaxDate set @MaxDate=@MaxDate1
+--------------------------------------------------------
+
 
 if @StartDate is null set @StartDate = @MinDate;
 if @StartDate < @MinDate set @StartDate = @MinDate;

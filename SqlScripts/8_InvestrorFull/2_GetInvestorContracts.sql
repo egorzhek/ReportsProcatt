@@ -251,7 +251,7 @@ AS BEGIN
     -- сумма всех выводов средств
     SELECT
         @AmountDayMinus_RUR = sum(OUTPUT_VALUE_RUR), -- отрицательное значение
-        @AmountDayPlus_RUR = sum(INPUT_VALUE_RUR) + sum(INPUT_DIVIDENTS_RUR) + sum(INPUT_COUPONS_RUR),
+        @AmountDayPlus_RUR = sum(INPUT_VALUE_RUR),
         @Sum_INPUT_VALUE_RUR = sum(INPUT_VALUE_RUR),
         @Sum_OUTPUT_VALUE_RUR = sum(OUTPUT_VALUE_RUR),
         @Sum_INPUT_COUPONS_RUR = sum(INPUT_COUPONS_RUR),
