@@ -150,7 +150,7 @@ namespace ReportsProcatt.Content
             Task.WaitAll
             (
                 Task.Run(() =>InitTrustManagement(Currency, ContractId, InvestorId, DateFrom, DateTo)),
-                Task.Run(() => InitDU(ContractId, DateTo)),
+                Task.Run(() => InitDU(Currency, ContractId, DateTo)),
                 Task.Run(() =>InitDU2(ContractId, DateTo))
             );
         }
@@ -175,7 +175,7 @@ namespace ReportsProcatt.Content
                 }
             }
         }
-        private async Task InitDU(int ContractId, DateTime? DateTo)
+        private async Task InitDU(string Currency, int ContractId, DateTime? DateTo)
         {
             string queryString1 = File.ReadAllText(Path.Combine(_path, @"DU.sql"));
             using (SqlConnection connection = new SqlConnection(_cnnStr))
@@ -186,6 +186,7 @@ namespace ReportsProcatt.Content
 
                 command1.Parameters.AddWithValue("@DateToSharp", DateTo == null ? DBNull.Value : DateTo);
                 command1.Parameters.AddWithValue("@ContractIdSharp", ContractId);
+                command1.Parameters.AddWithValue("@ValutaSharp", Currency);
 
                 using (SqlDataAdapter sda = new SqlDataAdapter(command1))
                 {
