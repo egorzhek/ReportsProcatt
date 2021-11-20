@@ -48,29 +48,13 @@ Declare
         from
         (
             select
-                fs.FundId,
-				VALUE_RUR =
-				case
-					when @Valuta = 'RUB' then [dbo].f_Round(fs.SumAmount * fs.RATE, 2)
-					when @Valuta = 'USD' then [dbo].f_Round(fs.SumAmount * fs.RATE, 2) * (1.00000/fs.USDRATE)
-					when @Valuta = 'EUR' then [dbo].f_Round(fs.SumAmount * fs.RATE, 2) * (1.00000/fs.EVRORATE)
-					else [dbo].f_Round(SumAmount * RATE, 2)
-				end,
-				CLASS = 10
+                fs.FundId, VALUE_RUR = [dbo].f_Round(SumAmount * RATE, 2) , CLASS = 10
             from @Funds as f
             join [dbo].[InvestorFundDate] as fs with(nolock) on f.FundId = fs.FundId
             where fs.Investor = @Investor_Id and fs.[Date] = @EndDate
             union all
             select
-                fs.FundId,
-				VALUE_RUR =
-				case
-					when @Valuta = 'RUB' then [dbo].f_Round(fs.SumAmount * fs.RATE, 2)
-					when @Valuta = 'USD' then [dbo].f_Round(fs.SumAmount * fs.RATE, 2) * (1.00000/fs.USDRATE)
-					when @Valuta = 'EUR' then [dbo].f_Round(fs.SumAmount * fs.RATE, 2) * (1.00000/fs.EVRORATE)
-					else [dbo].f_Round(SumAmount * RATE, 2)
-				end,
-				CLASS = 10
+                fs.FundId, VALUE_RUR = [dbo].f_Round(SumAmount * RATE, 2) , CLASS = 10
             from @Funds as f
             join [dbo].[InvestorFundDateLast] as fs with(nolock) on f.FundId = fs.FundId
             where fs.Investor = @Investor_Id and fs.[Date] = @EndDate
@@ -119,68 +103,16 @@ Declare
         from
         (
             select
-                VALUE_RUR =
-				case
-					when @Valuta = 'RUB' then fs.VALUE_RUR
-					when @Valuta = 'USD' then fs.VALUE_RUR * (1.00000/rr.USDRATE)
-					when @Valuta = 'EUR' then fs.VALUE_RUR * (1.00000/rr.EURORATE)
-					else fs.VALUE_RUR
-				end,
-				fs.InvestmentId,
-				fs.CLASS
+                fs.VALUE_RUR, fs.InvestmentId, fs.CLASS
             from @Contracts as f
             join [dbo].[PortFolio_Daily] as fs with(nolock) on f.ContractId = fs.ContractId
-			outer apply
-			(
-				-- курс валют
-				select top 1
-					r.USDRATE, r.EURORATE
-				from
-				(
-					select top 1
-						ac.USDRATE, ac.EURORATE
-					from [dbo].[Assets_Contracts] as ac
-					where ac.[Date] = fs.[PortfolioDate]
-					union
-					select top 1
-						ac.USDRATE, ac.EURORATE
-					from [dbo].[Assets_ContractsLast] as ac
-					where ac.[Date] = fs.[PortfolioDate]
-				) as r
-			) as rr
-            where fs.InvestorId = @Investor_Id and fs.[PortfolioDate] =  @EndDate
+            where fs.InvestorId = @Investor_Id and [PortfolioDate] =  @EndDate
             union all
             select
-                VALUE_RUR =
-				case
-					when @Valuta = 'RUB' then fs.VALUE_RUR
-					when @Valuta = 'USD' then fs.VALUE_RUR * (1.00000/rr.USDRATE)
-					when @Valuta = 'EUR' then fs.VALUE_RUR * (1.00000/rr.EURORATE)
-					else fs.VALUE_RUR
-				end,
-				fs.InvestmentId,
-				fs.CLASS
+                fs.VALUE_RUR, fs.InvestmentId, fs.CLASS
             from @Contracts as f
             join [dbo].[PortFolio_Daily_Last] as fs with(nolock) on f.ContractId = fs.ContractId
-			outer apply
-			(
-				-- курс валют
-				select top 1
-					r.USDRATE, r.EURORATE
-				from
-				(
-					select top 1
-						ac.USDRATE, ac.EURORATE
-					from [dbo].[Assets_Contracts] as ac
-					where ac.[Date] = fs.[PortfolioDate]
-					union
-					select top 1
-						ac.USDRATE, ac.EURORATE
-					from [dbo].[Assets_ContractsLast] as ac
-					where ac.[Date] = fs.[PortfolioDate]
-				) as r
-			) as rr
-            where fs.InvestorId = @Investor_Id and fs.[PortfolioDate] =  @EndDate
+            where fs.InvestorId = @Investor_Id and [PortfolioDate] =  @EndDate
         ) as res
         join [dbo].[InvestmentIds] as Inv on res.InvestmentId = Inv.Id
         join [dbo].[ClassCategories] as cs on res.CLASS = cs.ClassId
@@ -237,5 +169,28 @@ Declare
 
     -- результаты
     select * from @Result;
+
+	declare @USDRATE numeric(38, 10), @EURORATE numeric(38, 10);
+
+	-- курс валют
+	select top 1
+		@USDRATE = r.USDRATE,
+		@EURORATE = r.EURORATE
+	from
+	(
+		select top 1
+			ac.USDRATE, ac.EURORATE
+		from [dbo].[Assets_Contracts] as ac
+		where ac.[Date] = @EndDate
+		union
+		select top 1
+			ac.USDRATE, ac.EURORATE
+		from [dbo].[Assets_ContractsLast] as ac
+		where ac.[Date] = @EndDate
+	) as r
+
+	--if @Valuta = 'RUB'
+	if @Valuta = 'USD' set @AllSum = @AllSum  * (1.00000/@USDRATE)
+	if @Valuta = 'EUR' set @AllSum = @AllSum  * (1.00000/@EURORATE)
 
     select CountRows = Count(1), AllSum = @AllSum from @Result;
