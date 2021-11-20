@@ -45,7 +45,7 @@ namespace ReportsProcatt.Content
             (
                 Task.Run(() => InitAssetsData(Currency, InvestorId, DateTo)),
                 Task.Run(() => InitCurrenciesData(Currency, InvestorId, DateTo)),
-                Task.Run(() => InitInstrumentsData(InvestorId, DateTo))
+                Task.Run(() => InitInstrumentsData(Currency, InvestorId, DateTo))
             );
         }
         private async Task InitFullData(string Currency, int InvestorId, DateTime? DateFrom, DateTime? DateTo)
@@ -110,7 +110,7 @@ namespace ReportsProcatt.Content
                 }
             }
         }
-        private async Task InitInstrumentsData(int InvestorId, DateTime? DateTo)
+        private async Task InitInstrumentsData(string Currency, int InvestorId, DateTime? DateTo)
         {
             string queryString1 = File.ReadAllText(Path.Combine(_path, @"CircleInstruments.sql"));
             using (SqlConnection connection = new SqlConnection(_cnnStr))
@@ -122,6 +122,7 @@ namespace ReportsProcatt.Content
 
                 command1.Parameters.AddWithValue("@DateToSharp", DateTo == null ? DBNull.Value : DateTo);
                 command1.Parameters.AddWithValue("@InvestorIdSharp", InvestorId);
+                command1.Parameters.AddWithValue("@ValutaSharp", Currency);
 
                 using (SqlDataAdapter sda = new SqlDataAdapter(command1))
                 {
