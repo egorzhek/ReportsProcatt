@@ -232,7 +232,7 @@ namespace ReportsProcatt.Content
             Task.WaitAll
             (
                 Task.Run(() => InitFundInfo(Currency, FundId, InvestorId, DateFrom, DateTo)),
-                Task.Run(() => InitPIF(FundId, DateTo)),
+                Task.Run(() => InitPIF(Currency, FundId, DateTo)),
                 Task.Run(() => InitPIF2(FundId, DateTo))
             );
         }
@@ -257,7 +257,7 @@ namespace ReportsProcatt.Content
                 }
             }
         }
-        private async Task InitPIF(int FundId, DateTime? DateTo)
+        private async Task InitPIF(string Currency, int FundId, DateTime? DateTo)
         {
             string queryString1 = File.ReadAllText(Path.Combine(_path, @"PIF.sql"));
             using (SqlConnection connection = new SqlConnection(_cnnStr))
@@ -268,6 +268,7 @@ namespace ReportsProcatt.Content
 
                 command1.Parameters.AddWithValue("@DateToSharp", DateTo == null ? DBNull.Value : DateTo);
                 command1.Parameters.AddWithValue("@FundIdSharp", FundId);
+                command1.Parameters.AddWithValue("@ValutaSharp", Currency);
 
                 using (SqlDataAdapter sda = new SqlDataAdapter(command1))
                 {
