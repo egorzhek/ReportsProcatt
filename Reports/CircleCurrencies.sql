@@ -1,6 +1,9 @@
 Declare
     @Date Date = @DateToSharp, 
-    @Investor_Id Int = @InvestorIdSharp;
+    @Investor_Id Int = @InvestorIdSharp,
+	@Valuta Nvarchar(10) = @ValutaSharp;
+
+	if @Valuta is null set @Valuta = 'RUB';
 
     --set @Date = DATEADD(DAY, 1, @Date);
 
@@ -147,5 +150,28 @@ update @Result set Result = VALUE_RUR/AllSum;
 
 -- Результаты
 select * from @Result;
+
+declare @USDRATE numeric(38, 10), @EURORATE numeric(38, 10);
+
+-- курс валют
+select top 1
+	@USDRATE = r.USDRATE,
+	@EURORATE = r.EURORATE
+from
+(
+	select top 1
+		ac.USDRATE, ac.EURORATE
+	from [dbo].[Assets_Contracts] as ac
+	where ac.[Date] = @Date
+	union
+	select top 1
+		ac.USDRATE, ac.EURORATE
+	from [dbo].[Assets_ContractsLast] as ac
+	where ac.[Date] = @Date
+) as r
+
+--if @Valuta = 'RUB'
+if @Valuta = 'USD' set @AllSum = @AllSum  * (1.00000/@USDRATE)
+if @Valuta = 'EUR' set @AllSum = @AllSum  * (1.00000/@EURORATE)
 
 select CountRows = Count(1), AllSum = @AllSum from @Result;
