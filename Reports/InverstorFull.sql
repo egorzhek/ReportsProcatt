@@ -120,6 +120,76 @@ EXEC [dbo].[GetInvestorContracts]
 		@EndDate = @EndDate,
 		@Valuta = @Valuta
 
+if exists
+(
+	select top 1 1
+	from @FundReSult
+)
+or exists
+(
+	select top 1 1
+	from @ContractReSult
+)
+begin
+	declare @FMinDate date, @FMaxDate date;
+
+	select
+		@FMinDate = min(MinDate),
+		@FMaxDate = max(MaxDate)
+	from
+	(
+		select
+			MinDate = min(dd.MinDate),
+			MaxDate = max(dd.MaxDate)
+		from @FundReSult as g
+		outer apply
+		(
+			SELECT
+				MinDate = min([Date]),
+				MaxDate = max([Date])
+			FROM
+			(
+				SELECT a.[Date]
+				FROM [dbo].[InvestorFundDate] as a with(nolock)
+				WHERE a.Investor = @InvestorId
+				and a.FundId = g.FundId and a.[Date] >= @StartDate and a.[Date] <= @EndDate
+				UNION
+				SELECT a.[Date]
+				FROM [dbo].[InvestorFundDateLast] as a with(nolock)
+				WHERE a.Investor = @InvestorId
+				and a.FundId = g.FundId and a.[Date] >= @StartDate and a.[Date] <= @EndDate
+			) AS R
+		) as dd
+		union all
+		select
+			MinDate = min(dd.MinDate),
+			MaxDate = max(dd.MaxDate)
+		from @ContractReSult as g
+		outer apply
+		(
+			SELECT
+				MinDate = min([Date]),
+				MaxDate = max([Date])
+			FROM
+			(
+				SELECT a.[Date]
+				FROM [dbo].[Assets_Contracts] as a with(nolock)
+				WHERE a.InvestorId = @InvestorId
+				and a.ContractId = g.ContractId and a.[Date] >= @StartDate and a.[Date] <= @EndDate
+				UNION
+				SELECT a.[Date]
+				FROM [dbo].[Assets_ContractsLast] as a with(nolock)
+				WHERE a.InvestorId = @InvestorId
+				and a.ContractId = g.ContractId and a.[Date] >= @StartDate and a.[Date] <= @EndDate
+			) AS R
+		) as dd
+	) as rew
+
+	-- переопределение дат - уменьшение диапазона
+	if @FMinDate > @StartDate set @StartDate = @FMinDate;
+	if @FMaxDate < @EndDate set @EndDate = @FMaxDate;
+end
+
 
 BEGIN TRY
 	DROP TABLE #ResInvAssets
