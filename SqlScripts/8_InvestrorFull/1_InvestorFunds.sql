@@ -51,11 +51,6 @@ AS BEGIN
     if @EndDate > @MaxDate set @EndDate = @MaxDate;
     if @EndDate < @MinDate set @EndDate = @MaxDate;
 
-    if @StartDate = @EndDate
-    begin
-        select [Error] = 'Даты равны'
-        return;
-    end
 
     BEGIN TRY
         DROP TABLE #ResInv
@@ -244,7 +239,7 @@ AS BEGIN
     close obj_cur
     deallocate obj_cur
     
-    set @ResutSum = @ResutSum/@SumT
+    if @SumT <> 0 set @ResutSum = @ResutSum/@SumT;
     
     select
         @EndSumAmount = SumAmount
