@@ -44,6 +44,10 @@ CONSTRAINT [PK_Assets_Contracts] PRIMARY KEY CLUSTERED
 )ON YEAR_Partition_Scheme ([Date])
 )
 GO
+CREATE NONCLUSTERED INDEX [IX_Assets_Contracts_Date]
+ON [dbo].[Assets_Contracts] ([Date])
+INCLUDE ([USDRATE],[EURORATE])
+GO
 CREATE TABLE [dbo].[Assets_ContractsLast]
 (
 	[InvestorId] [int] NOT NULL,
@@ -87,6 +91,10 @@ CONSTRAINT [PK_Assets_ContractsLast] PRIMARY KEY CLUSTERED
 	[Date] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_Assets_ContractsLast_Date]
+ON [dbo].[Assets_ContractsLast] ([Date])
+INCLUDE ([USDRATE],[EURORATE])
 GO
 CREATE TABLE [dbo].[Assets_Info]
 (
@@ -284,6 +292,9 @@ GO
 CREATE NONCLUSTERED INDEX [IX_PortFolio_Daily_CP]
 ON [dbo].[PortFolio_Daily] ([ContractId],[PortfolioDate])
 GO
+CREATE NONCLUSTERED INDEX [IX_PortFolio_Daily_IP]
+ON [dbo].[PortFolio_Daily] ([InvestorId],[PortfolioDate])
+GO
 CREATE TABLE [dbo].[PortFolio_Daily_Last]
 (
 	[InvestorId] [int] NOT NULL,
@@ -318,6 +329,9 @@ CONSTRAINT [PK_PortFolio_Daily_Last] PRIMARY KEY CLUSTERED
 GO
 CREATE NONCLUSTERED INDEX [IX_PortFolio_Daily_Last_CP]
 ON [dbo].[PortFolio_Daily_Last] ([ContractId],[PortfolioDate])
+GO
+CREATE NONCLUSTERED INDEX [IX_PortFolio_Daily_Last_IP]
+ON [dbo].[PortFolio_Daily_Last] ([InvestorId],[PortfolioDate])
 GO
 CREATE TABLE [dbo].[Categories]
 (
