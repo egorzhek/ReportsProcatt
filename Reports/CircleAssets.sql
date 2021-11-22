@@ -122,14 +122,12 @@ Declare
     group by CategoryName, AllSum, CategoryId;
 
     if @FundAllSum > 0
-    and exists
-    (
-        select top 1 1 from @Result
-    )
     begin
         select top 1
             @AllSum = AllSum
         from @Result
+
+		if @AllSum is null set @AllSum = @FundAllSum;
 
         if exists
         (
