@@ -165,8 +165,7 @@ Declare
         from @Result
     end
 
-    -- результаты
-    select * from @Result;
+
 
 	declare @USDRATE numeric(38, 10), @EURORATE numeric(38, 10);
 
@@ -186,6 +185,27 @@ Declare
 		from [dbo].[Assets_ContractsLast] as ac
 		where ac.[Date] = @EndDate
 	) as r
+
+	-- результаты
+    select
+		CategoryName,
+		VALUE_RUR =
+		case
+			when @Valuta = 'RUB' then VALUE_RUR
+			when @Valuta = 'USD' then VALUE_RUR * (1.00000/@USDRATE)
+			when @Valuta = 'EUR' then VALUE_RUR * (1.00000/@EURORATE)
+			else VALUE_RUR
+		end,
+		AllSum =
+		case
+			when @Valuta = 'RUB' then AllSum
+			when @Valuta = 'USD' then AllSum * (1.00000/@USDRATE)
+			when @Valuta = 'EUR' then AllSum * (1.00000/@EURORATE)
+			else AllSum
+		end,
+		Result,
+		CategoryId
+	from @Result;
 
 	--if @Valuta = 'RUB'
 	if @Valuta = 'USD' set @AllSum = @AllSum  * (1.00000/@USDRATE)
