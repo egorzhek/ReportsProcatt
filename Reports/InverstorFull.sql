@@ -15,7 +15,7 @@ DECLARE
 DECLARE
 	@CurrDate Date = isnull(@EndDate, GetDate());
 
-declare @MinDate date, @MaxDate date, @MinDate1 date, @MaxDate1 date
+declare @MinDate date, @MaxDate date, @MinDate1 date, @MaxDate1 date, @MinDate2 date, @MaxDate2 date
 
 Declare @SItog numeric(30,10), @AmountDayMinus_RUR numeric(30,10), @Snach numeric(30,10), @AmountDayPlus_RUR numeric(30,10),
 @Sum_INPUT_VALUE_RUR  numeric(30,10),
@@ -29,8 +29,8 @@ Declare @SItog numeric(30,10), @AmountDayMinus_RUR numeric(30,10), @Snach numeri
 
 -------Берем даты из ПИФов
 SELECT
-	@MinDate = min([Date]),
-	@MaxDate = max([Date])
+	@MinDate1 = min([Date]),
+	@MaxDate1 = max([Date])
 FROM
 (
 	SELECT a.[Date]
@@ -47,8 +47,8 @@ FROM
 
 -------Берем даты из ДУ
 SELECT
-	@MinDate1 = min([Date]),
-	@MaxDate1 = max([Date])
+	@MinDate2 = min([Date]),
+	@MaxDate2 = max([Date])
 FROM
 (
 	SELECT a.[Date]
@@ -63,10 +63,10 @@ FROM
 ) AS R
 
 ----------------Новое условие ограничения даты----------
-if @MinDate1 < @MinDate set @MinDate=@MinDate1
-if @MaxDate1 < @MaxDate set @MaxDate=@MaxDate1
---------------------------------------------------------
+if @MinDate2 is not null and @MinDate2 < @MinDate1 set @MinDate=@MinDate2 else set @MinDate=@MinDate1
+if @MaxDate2 is null select @MaxDate=@MaxDate1, @MinDate=@MinDate1 else set @MaxDate=@MaxDate2
 
+--------------------------------------------------------
 
 if @StartDate is null set @StartDate = @MinDate;
 if @StartDate < @MinDate set @StartDate = @MinDate;
@@ -190,7 +190,6 @@ begin
 	if @FMaxDate < @EndDate set @EndDate = @FMaxDate;
 end
 
-
 BEGIN TRY
 	DROP TABLE #ResInvAssets
 END TRY
@@ -235,7 +234,14 @@ FROM
 		select
 			InvestorId = a.Investor,
 			ContractId = a.Investor,
-			a.[Date], a.USDRATE, EURORATE = a.EVRORATE, a.VALUE_RUR,
+			a.[Date], a.USDRATE, EURORATE = a.EVRORATE,
+			VALUE_RUR =
+			case
+				when @Valuta = 'RUB' then a.VALUE_RUR
+				when @Valuta = 'USD' then a.VALUE_USD
+				when @Valuta = 'EUR' then a.VALUE_EVRO
+				else a.VALUE_RUR
+			end,
 			a.VALUE_USD, VALUE_EURO = a.VALUE_EVRO,
 
 			DailyIncrement_RUR = 0.000,
@@ -288,7 +294,14 @@ FROM
 		select
 			InvestorId = a.Investor,
 			ContractId = a.Investor,
-			a.[Date], a.USDRATE, EURORATE = a.EVRORATE, a.VALUE_RUR,
+			a.[Date], a.USDRATE, EURORATE = a.EVRORATE,
+			VALUE_RUR =
+			case
+				when @Valuta = 'RUB' then a.VALUE_RUR
+				when @Valuta = 'USD' then a.VALUE_USD
+				when @Valuta = 'EUR' then a.VALUE_EVRO
+				else a.VALUE_RUR
+			end,
 			a.VALUE_USD, VALUE_EURO = a.VALUE_EVRO,
 			DailyIncrement_RUR = 0.000,
 			DailyIncrement_USD = 0.000,

@@ -57,7 +57,7 @@ FROM
 
 ----------------Новое условие ограничения даты----------
 
-if @MaxDate1 < @MaxDate set @MaxDate=@MaxDate1
+if @MaxDate1 is not null and @MaxDate1 < @MaxDate set @MaxDate=@MaxDate1
 --------------------------------------------------------
 
 
