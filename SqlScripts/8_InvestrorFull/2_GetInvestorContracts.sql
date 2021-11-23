@@ -319,12 +319,15 @@ AS BEGIN
     begin
         set @ResutSum = @ResutSum/@SumT
     end
+
+	if @ResutSum = 0 set @ResutSum = NULL;
     
     SET @ProfitValue = @InvestResult;
     SET @ProfitProcentValue = @InvestResult/@ResutSum * 100.000;
     SET @BeginValue = @Snach;
     SET @EndValue = @SItog;
     SET @OutInvestResult = @InvestResult;
+	if @ResutSum is null set @ResutSum = 0;
     SET @OutResutSum = @ResutSum;
 
     BEGIN TRY

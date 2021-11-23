@@ -352,6 +352,8 @@ select
 from [dbo].[Assets_Info] NOLOCK
 where [InvestorId] = @InvestorId and [ContractId] = @ContractId;
 
+if @ResutSum = 0 set @ResutSum = NULL;
+
 select
 	ActiveDateToName = 'Активы на ' + FORMAT(@EndDate,'dd.MM.yyyy'),
 	ActiveDateToValue =  CAST(Round(@SItog,2) as Decimal(30,2)),
