@@ -453,7 +453,14 @@ select
 	[ToolName] = a.[ShareName],
 	[PriceType] = case when a.[Type] = 1 then 'Купоны' else 'Дивиденды' end,
 	[ContractName] = a.[ShareName],
-	[Price] = CAST(Round(a.[AmountPayments_RUR],2) as Decimal(30,2)),
+	[Price] =
+		--CAST(Round(a.[AmountPayments_RUR],2) as Decimal(30,2)),
+		case
+			when @Valuta = 'RUB' then CAST(Round(a.[AmountPayments_RUR],2) as Decimal(30,2))
+			when @Valuta = 'USD' then CAST(Round(a.[AmountPayments_USD],2) as Decimal(30,2))
+			when @Valuta = 'EUR' then CAST(Round(a.[AmountPayments_EURO],2) as Decimal(30,2))
+			else CAST(Round(a.[AmountPayments_RUR],2) as Decimal(30,2))
+		end,
 	a.[PaymentDateTime],
 	[RowPrice] = a.AmountPayments,
 	[RowValuta] = c.ShortName
@@ -468,7 +475,14 @@ select
 	[ToolName] = a.[ShareName],
 	[PriceType] = case when a.[Type] = 1 then 'Купоны' else 'Дивиденды' end,
 	[ContractName] = a.[ShareName],
-	[Price] = CAST(Round(a.[AmountPayments_RUR],2) as Decimal(30,2)),
+	[Price] =
+		--CAST(Round(a.[AmountPayments_RUR],2) as Decimal(30,2)),
+		case
+			when @Valuta = 'RUB' then CAST(Round(a.[AmountPayments_RUR],2) as Decimal(30,2))
+			when @Valuta = 'USD' then CAST(Round(a.[AmountPayments_USD],2) as Decimal(30,2))
+			when @Valuta = 'EUR' then CAST(Round(a.[AmountPayments_EURO],2) as Decimal(30,2))
+			else CAST(Round(a.[AmountPayments_RUR],2) as Decimal(30,2))
+		end,
 	a.[PaymentDateTime],
 	[RowPrice] = a.AmountPayments,
 	[RowValuta] = c.ShortName
