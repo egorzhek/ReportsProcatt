@@ -994,8 +994,10 @@ AS BEGIN
         EndDate = FORMAT(@EndDate,'dd.MM.yyyy'),
         EndDateValue =  CAST(Round(@SItog,2) as Decimal(30,2)),
 
-        INPUT_VALUE = @Sum_INPUT_VALUE_RUR1,
-        OUTPUT_VALUE = -@Sum_OUTPUT_VALUE_RUR1,
+        --INPUT_VALUE = @Sum_INPUT_VALUE_RUR1,
+		INPUT_VALUE = @Sum_INPUT_VALUE_RUR,
+        --OUTPUT_VALUE = -@Sum_OUTPUT_VALUE_RUR1,
+		OUTPUT_VALUE = @Sum_OUTPUT_VALUE_RUR,
         INPUT_COUPONS = @Sum_INPUT_COUPONS_RUR,
         INPUT_DIVIDENTS = @Sum_INPUT_DIVIDENTS_RUR,
 

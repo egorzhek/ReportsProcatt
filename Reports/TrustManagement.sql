@@ -374,9 +374,11 @@ select
 
 select ActiveName = 'Активы на ' + FORMAT(@StartDate,'dd.MM.yyyy') , ActiveValue = CAST(Round(@Snach,2) as Decimal(38,2)), Sort = 1, Valuta = @Valuta
 union
-select 'Пополнения', CAST(Round(@Sum_INPUT_VALUE_RUR1,2) as Decimal(30,2)), 2, Valuta = @Valuta
+--select 'Пополнения', CAST(Round(@Sum_INPUT_VALUE_RUR1,2) as Decimal(30,2)), 2, Valuta = @Valuta
+select 'Пополнения', CAST(Round(@Sum_INPUT_VALUE_RUR,2) as Decimal(30,2)), 2, Valuta = @Valuta
 union
-select 'Выводы', CAST(Round(@Sum_OUTPUT_VALUE_RUR1,2) as Decimal(30,2)), 3, Valuta = @Valuta
+--select 'Выводы', CAST(Round(@Sum_OUTPUT_VALUE_RUR1,2) as Decimal(30,2)), 3, Valuta = @Valuta
+select 'Выводы', CAST(Round(@Sum_OUTPUT_VALUE_RUR,2) as Decimal(30,2)), 3, Valuta = @Valuta
 union
 select 'Дивиденды', @Sum_INPUT_DIVIDENTS_RUR, 4, Valuta = @Valuta
 union
@@ -402,8 +404,10 @@ end
 
 
 select ActiveName = 'Активы на ' + FORMAT(@StartDate,'dd.MM.yyyy') , ActiveValue = CAST(Round(@Snach,2) as Decimal(38,2)),
-[InVal] = CAST(Round(@Sum_INPUT_VALUE_RUR1,2) as Decimal(30,2)),
-[OutVal] = CAST(Round(@Sum_OUTPUT_VALUE_RUR1,2) as Decimal(30,2)),
+--[InVal] = CAST(Round(@Sum_INPUT_VALUE_RUR1,2) as Decimal(30,2)),
+[InVal] = CAST(Round(@Sum_INPUT_VALUE_RUR,2) as Decimal(30,2)),
+--[OutVal] = CAST(Round(@Sum_OUTPUT_VALUE_RUR1,2) as Decimal(30,2)),
+[OutVal] = CAST(Round(@Sum_OUTPUT_VALUE_RUR,2) as Decimal(30,2)),
 [Dividends] = @Sum_INPUT_DIVIDENTS_RUR, 
 [Coupons] = @Sum_INPUT_COUPONS_RUR,
 [Valuta] = @Valuta

@@ -62,6 +62,11 @@ FROM
 	where a.InvestorId = @InvestorId and b.DATE_CLOSE >= @CurrDate
 ) AS R
 
+
+
+set @MinDate1 = COALESCE(@MinDate2, @MinDate1, @MinDate2);
+set @MaxDate1 = COALESCE(@MaxDate2, @MaxDate1, @MaxDate2);
+
 ----------------Новое условие ограничения даты----------
 if @MinDate2 is not null and @MinDate2 < @MinDate1 set @MinDate=@MinDate2 else set @MinDate=@MinDate1
 if @MaxDate2 is null select @MaxDate=@MaxDate1, @MinDate=@MinDate1 else set @MaxDate=@MaxDate2
@@ -530,7 +535,6 @@ FROM
 ) AS R
 
 
-
 -- сумма всех выводов средств
 SELECT
 	@Sum_INPUT_COUPONS_RUR = sum(INPUT_COUPONS_RUR),
@@ -758,12 +762,16 @@ order by 3;
 
 select
 	Snach = CAST(Round(@Snach,2) as Decimal(38,2)),
-	InVal = CAST(Round(@Sum_INPUT_VALUE_RUR3,2) as Decimal(30,2)),
-	OutVal = CAST(Round(@Sum_OUTPUT_VALUE_RUR3,2) as Decimal(30,2)),
+	--InVal = CAST(Round(@Sum_INPUT_VALUE_RUR3,2) as Decimal(30,2)),
+	InVal = CAST(Round(@Sum_INPUT_VALUE_RUR,2) as Decimal(30,2)),
+	--OutVal = CAST(Round(@Sum_OUTPUT_VALUE_RUR3,2) as Decimal(30,2)),
+	OutVal = CAST(Round(@Sum_OUTPUT_VALUE_RUR,2) as Decimal(30,2)),
 	Dividents = CAST(Round(@Sum_INPUT_DIVIDENTS_RUR,2) as Decimal(30,2)),
 	Coupons = CAST(Round(@Sum_INPUT_COUPONS_RUR,2) as Decimal(30,2)),
-	OutVal1 = CAST(Round(@Sum_OUTPUT_VALUE_RUR13,2) as Decimal(30,2)),
-	OutVal2 = CAST(Round(@Sum_OUTPUT_VALUE_RUR23,2) as Decimal(30,2)),
+	--OutVal1 = CAST(Round(@Sum_OUTPUT_VALUE_RUR13,2) as Decimal(30,2)),
+	OutVal1 = CAST(Round(@Sum_OUTPUT_VALUE_RUR1,2) as Decimal(30,2)),
+	--OutVal2 = CAST(Round(@Sum_OUTPUT_VALUE_RUR23,2) as Decimal(30,2)),
+	OutVal2 = CAST(Round(@Sum_OUTPUT_VALUE_RUR2,2) as Decimal(30,2)),
 	Valuta = @Valuta
 
 
