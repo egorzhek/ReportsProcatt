@@ -463,7 +463,8 @@ select
 		end,
 	a.[PaymentDateTime],
 	[RowPrice] = a.AmountPayments,
-	[RowValuta] = c.ShortName
+	[RowValuta] = @Valuta,
+	[Valuta] = c.ShortName
 from [dbo].[DIVIDENDS_AND_COUPONS_History] as a
 join dbo.Currencies as c on a.CurrencyId = c.Id
 where a.InvestorId = @InvestorId and a.ContractId = @ContractId
@@ -485,7 +486,8 @@ select
 		end,
 	a.[PaymentDateTime],
 	[RowPrice] = a.AmountPayments,
-	[RowValuta] = c.ShortName
+	[RowValuta] = @Valuta,
+	[Valuta] = c.ShortName
 from [dbo].[DIVIDENDS_AND_COUPONS_History_Last] as a
 join dbo.Currencies as c on a.CurrencyId = c.Id
 where a.InvestorId = @InvestorId and a.ContractId = @ContractId
