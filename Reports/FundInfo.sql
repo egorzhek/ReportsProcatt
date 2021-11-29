@@ -16,7 +16,7 @@ SET NOCOUNT ON;
 
 
 Declare @SItog numeric(30,10), @AmountDayMinus_RUR numeric(30,10), @Snach numeric(30,10), @AmountDayPlus_RUR numeric(30,10),
-@InvestResult numeric(30,10), @AllPlus_RUR numeric(30,10), @AllMinus_RUR numeric(30,10), @EndSumAmount numeric(30,2),
+@InvestResult numeric(30,10), @AllPlus_RUR numeric(30,10), @AllMinus_RUR numeric(30,10), @EndSumAmount numeric(30,7),
 @FundName NVarchar(300), @InvestorName NVarchar(300);
 
 declare @MinDate date, @MaxDate date, @LS_NUM nvarchar(120), @MaxDate1 date;
