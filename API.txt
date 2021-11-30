@@ -1,4 +1,4 @@
-Первое API. Инвестор, Дата От, Дата До
+﻿Первое API. Инвестор, Дата От, Дата До
 http://localhost:49183/Portfolio?Investor_Id=2149652&DateFrom=25.01.2020&DateTo=28.06.2021
 
 Отчёт по ПИФу
@@ -30,6 +30,8 @@ https://localhost:49279/new/report?InvestorId=2149652
 https://localhost:49279/new/report?InvestorId=2149652&DateFrom=2019-05-17
 https://localhost:49279/new/report?InvestorId=2149652&DateTo=2021-05-29
 https://localhost:49279/new/report?InvestorId=2149652&DateFrom=2019-05-17&DateTo=2021-05-29
+
+https://localhost:49279/new/Contract?InvestorId=2149652&ContractId=2257804
 
 Указание Валюты
  + &Currency=USD
