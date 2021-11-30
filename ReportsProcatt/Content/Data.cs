@@ -147,12 +147,31 @@ namespace ReportsProcatt.Content
             DataSet_TrustManagement = new DataSet();
             DataSet_DU = new DataSet();
             DataSet_DU2 = new DataSet();
-            Task.WaitAll
-            (
-                Task.Run(() =>InitTrustManagement(Currency, ContractId, InvestorId, DateFrom, DateTo)),
-                Task.Run(() => InitDU(Currency, ContractId, DateTo)),
-                Task.Run(() =>InitDU2(Currency, ContractId, DateTo))
-            );
+
+            if (DateTo == null)
+            {
+                Task.WaitAll
+                (
+                    Task.Run(() => InitTrustManagement(Currency, ContractId, InvestorId, DateFrom, DateTo))
+                );
+
+                DateTo = (DateTime)DataSet_TrustManagement.GetValue(DuTables.DuParams, DuParams.MaxDate);
+
+                Task.WaitAll
+                (
+                    Task.Run(() => InitDU(Currency, ContractId, DateTo)),
+                    Task.Run(() => InitDU2(Currency, ContractId, DateTo))
+                );
+            }
+            else
+            {
+                Task.WaitAll
+                (
+                    Task.Run(() => InitTrustManagement(Currency, ContractId, InvestorId, DateFrom, DateTo)),
+                    Task.Run(() => InitDU(Currency, ContractId, DateTo)),
+                    Task.Run(() => InitDU2(Currency, ContractId, DateTo))
+                );
+            }
         }
         private async Task InitTrustManagement(string Currency, int ContractId,int InvestorId, DateTime? DateFrom, DateTime? DateTo) 
         {
@@ -202,7 +221,7 @@ namespace ReportsProcatt.Content
                 SqlCommand command1 = new SqlCommand(queryString1, connection);
                 command1.CommandType = CommandType.Text;
                 command1.CommandTimeout = 600;
-
+                
                 command1.Parameters.AddWithValue("@DateToSharp", DateTo == null ? DBNull.Value : DateTo);
                 command1.Parameters.AddWithValue("@ContractIdSharp", ContractId);
                 command1.Parameters.AddWithValue("@ValutaSharp", Currency);

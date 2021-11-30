@@ -274,4 +274,10 @@ namespace ReportsProcatt.Models
         public const string FinRes = "FinRes";
         public const string FinResProcent = "FinResProcent";
     }
+    public class DuParams
+    {
+        public const string MinDate = "MinDate";
+        public const string MaxDate = "MaxDate";
+        public const string ContractName = "ContractName";
+    }
 }

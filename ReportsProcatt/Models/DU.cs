@@ -68,8 +68,8 @@ namespace ReportsProcatt.Models
         #endregion
         public DU(
             string aName,
-            DateTime aDFrom,
-            DateTime aDTo,
+            DateTime? aDFrom,
+            DateTime? aDTo,
             CurrencyClass aCurrency,
             int ContractId,
             int InvestorId,
@@ -77,11 +77,13 @@ namespace ReportsProcatt.Models
             string ReportPath)
         {
             Id = ContractId;
-            Name = aName;
-            Dfrom = aDFrom;
-            Dto = aDTo;
             Currency = aCurrency;
+
             _data = new SQLDataDU(Currency.Code, ContractId, InvestorId, aDFrom, aDTo, connectionString, ReportPath);
+
+            Dfrom = aDFrom ?? DateTime.Parse(_TrustManagementDS.GetValue(DuTables.DuParams, DuParams.MinDate).ToString());
+            Dto = aDTo ?? DateTime.Parse(_TrustManagementDS.GetValue(DuTables.DuParams, DuParams.MaxDate).ToString());
+            Name = aName ?? _TrustManagementDS.GetValue(DuTables.DuParams, DuParams.ContractName).ToString();
 
             DuHeader = new Headers
             {
@@ -996,6 +998,7 @@ namespace ReportsProcatt.Models
         public const int ClosedFunds = 20;
         public const int CurrentDerivatives = 21;
         public const int ClosedDerivatives = 22;
+        public const int DuParams = 25;
 
     }
 }

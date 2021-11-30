@@ -1554,7 +1554,10 @@ GROUP BY CategoryName,Investment,Symbol
 		left join [CacheDB].[dbo].[Currencies] as c with(nolock) on a.CUR_ID = c.Id
 		where isnull(a.IsActive,0) = 1
 
-
+SELECT 
+  [MinDate]       = @MinDate,
+  [MaxDate]       = @MaxDate,
+  [ContractName]  = (SELECT TOP 1 NUM FROM [Assets_Info] WHERE ContractId = @ContractId AND InvestorId = @InvestorId)
 
 
 BEGIN TRY

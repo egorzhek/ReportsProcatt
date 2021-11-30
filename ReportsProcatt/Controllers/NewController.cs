@@ -26,10 +26,10 @@ namespace ReportsProcatt.Controllers
         [Route("Report")]
         public async Task<IActionResult> Report
         (
-            [FromQuery] int? InvestorId,
-            [FromQuery] DateTime? DateFrom,
-            [FromQuery] DateTime? DateTo,
-            [FromQuery] string Currency
+            int? InvestorId,
+            DateTime? DateFrom,
+            DateTime? DateTo,
+            string Currency
         )
         {
             try
@@ -64,12 +64,52 @@ namespace ReportsProcatt.Controllers
             }
         }
         [HttpGet]
+        [Route("Contract")]
+        public IActionResult Contract
+        (
+            int? InvestorId,
+            int? ContractId,
+            DateTime? DateFrom,
+            DateTime? DateTo,
+            string Currency
+        )
+        {
+            try
+            {
+                if (InvestorId == null)
+                    throw new Exception("InvestorId is null");
+                
+                if (ContractId == null)
+                    throw new Exception("ContractId is null");
+
+                return View(new Contract((int)InvestorId, (int)ContractId, DateFrom, DateTo, Currency));
+            }
+            catch (Exception exception)
+            {
+                var messages = new List<string>();
+                do
+                {
+                    messages.Add(exception.Message);
+                    exception = exception.InnerException;
+                }
+                while (exception != null);
+                var message = string.Join(" - ", messages);
+
+                var stream = new MemoryStream();
+                var writer = new StreamWriter(stream);
+                writer.Write(message);
+                writer.Flush();
+                stream.Position = 0;
+                return File(stream, "application/json");
+            }
+        }
+        [HttpGet]
         public IActionResult Index
         (
-            [FromQuery] int? InvestorId,
-            [FromQuery] DateTime? DateFrom,
-            [FromQuery] DateTime? DateTo,
-            [FromQuery] string Currency
+            int? InvestorId,
+            DateTime? DateFrom,
+            DateTime? DateTo,
+            string Currency
         )
         {
             try
@@ -102,10 +142,10 @@ namespace ReportsProcatt.Controllers
         [Route("Api")]
         public JsonResult Api
         (
-            [FromQuery] int InvestorId,
-            [FromQuery] DateTime? DateFrom,
-            [FromQuery] DateTime? DateTo,
-            [FromQuery] string Currency
+            int InvestorId,
+            DateTime? DateFrom,
+            DateTime? DateTo,
+            string Currency
         )
         {
             return Json(new Report(InvestorId, DateFrom, DateTo, Currency));
@@ -114,10 +154,10 @@ namespace ReportsProcatt.Controllers
         [Route("Adaptive")]
         public IActionResult Adaptive
         (
-            [FromQuery] int? InvestorId,
-            [FromQuery] DateTime? DateFrom,
-            [FromQuery] DateTime? DateTo,
-            [FromQuery] string Currency
+            int? InvestorId,
+            DateTime? DateFrom,
+            DateTime? DateTo,
+            string Currency
         )
         {
             try
@@ -155,10 +195,10 @@ namespace ReportsProcatt.Controllers
         [Route("Adaptive_Test")]
         public IActionResult Adaptive_Test
         (
-            [FromQuery] int? InvestorId,
-            [FromQuery] DateTime? DateFrom,
-            [FromQuery] DateTime? DateTo,
-            [FromQuery] string Currency
+            int? InvestorId,
+            DateTime? DateFrom,
+            DateTime? DateTo,
+            string Currency
         )
         {
             try
