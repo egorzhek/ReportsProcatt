@@ -32,6 +32,7 @@ https://localhost:49279/new/report?InvestorId=2149652&DateTo=2021-05-29
 https://localhost:49279/new/report?InvestorId=2149652&DateFrom=2019-05-17&DateTo=2021-05-29
 
 https://localhost:49279/new/Contract?InvestorId=2149652&ContractId=2257804
+https://localhost:49279/new/Contract_Report?InvestorId=2149652&ContractId=2257804
 
 Указание Валюты
  + &Currency=USD
