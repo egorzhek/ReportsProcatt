@@ -1557,7 +1557,13 @@ GROUP BY CategoryName,Investment,Symbol
 SELECT 
   [MinDate]       = @MinDate,
   [MaxDate]       = @MaxDate,
-  [ContractName]  = (SELECT TOP 1 NUM FROM [Assets_Info] WHERE ContractId = @ContractId AND InvestorId = @InvestorId)
+  [ContractName]  = (
+	SELECT TOP 1
+		a.NUM + isnull(' ' + b.strategy,'')
+	FROM [dbo].[Assets_Info] as a
+	left join [dbo].[Assets_Strategy] as b on a.strategyguid = b.strategyguid
+	WHERE a.ContractId = @ContractId AND a.InvestorId = @InvestorId
+	)
 
 
 BEGIN TRY

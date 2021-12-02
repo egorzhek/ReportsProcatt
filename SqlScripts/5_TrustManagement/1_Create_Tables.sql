@@ -103,6 +103,8 @@ CREATE TABLE [dbo].[Assets_Info]
 	[DATE_OPEN] [date] NOT NULL,
 	[NUM] [NVarchar](100) NOT NULL,
 	[DATE_CLOSE] [date] NULL,
+	[strategyguid] [uniqueidentifier] NULL,
+	[laststrategyupdate] [datetime] NULL,
 CONSTRAINT [PK_Assets_Info] PRIMARY KEY CLUSTERED
 (
 	[InvestorId] ASC,
@@ -110,6 +112,16 @@ CONSTRAINT [PK_Assets_Info] PRIMARY KEY CLUSTERED
 	[DATE_OPEN] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
+GO
+CREATE UNIQUE NONCLUSTERED INDEX [IX_Assets_Info_NUM] ON [dbo].[Assets_Info]
+(
+	[NUM] ASC
+)
+GO
+CREATE NONCLUSTERED INDEX [IX_Assets_Info_strategyguid] ON [dbo].[Assets_Info]
+(
+	[strategyguid] ASC
+)
 GO
 CREATE TABLE [dbo].[DIVIDENDS_AND_COUPONS_History]
 (
