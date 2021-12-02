@@ -331,6 +331,8 @@
     </div>
 }
 
+@if (Model.GroupPositionData.Rows.Count > 0 || Model.DetailPositionData.Rows.Count > 0)
+{
 @*Текущие позиции по валютам*@
 <div class="keep-together">
     <table class="section block-heading">
@@ -359,7 +361,7 @@
     </table>
     @Html.Partial("_PartialCurrentAssetsPositions", Model)
 </div>
-
+}
 @if (Model.CurrentShares.Table.Rows.Count > 0)
 {
     <div class="keep-together">
