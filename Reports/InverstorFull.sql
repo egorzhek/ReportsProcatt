@@ -82,6 +82,30 @@ if @EndDate > @MaxDate set @EndDate = @MaxDate;
 if @EndDate < @MinDate set @EndDate = @MaxDate;
 
 
+declare @PortfolioDateMax Date
+
+select
+	@PortfolioDateMax = max(PortfolioDate)
+from
+(
+	select PortfolioDate = max(PortfolioDate)
+	from [dbo].[PortFolio_Daily] with(nolock)
+	where InvestorId = @InvestorId
+	union all
+	select PortfolioDate = max(PortfolioDate)
+	from [dbo].[PortFolio_Daily_Last] with(nolock)
+	where InvestorId = @InvestorId
+) as res
+
+if @PortfolioDateMax is not null
+begin
+	if @EndDate >= dateAdd(day, -1, @PortfolioDateMax)
+	begin
+		set @EndDate = dateAdd(day, -1, @PortfolioDateMax);
+	end
+end
+
+
 
 --select @StartDate,  @EndDate, @mindate, @MaxDate
 
@@ -939,6 +963,13 @@ IF OBJECT_ID('tempdb..#DivsNCouponsDetails') IS NOT NULL DROP TABLE #DivsNCoupon
 	from [dbo].[DIVIDENDS_AND_COUPONS_History] as a with(nolock)
 	join [dbo].[Assets_Info] as b with(nolock) on a.InvestorId = b.InvestorId and a.ContractId = b.ContractId and b.DATE_CLOSE >= @EndDate
 	join dbo.Currencies as c with(nolock) on a.CurrencyId = c.Id
+	and
+			case
+				when @Valuta = 'RUB' then a.AmountPayments_RUR
+				when @Valuta = 'USD' then a.AmountPayments_USD
+				when @Valuta = 'EUR' then a.AmountPayments_EURO
+				else a.AmountPayments_RUR
+			end > 0
 	where a.InvestorId = @InvestorId
 	and (@ContractId is null or (@ContractId is not null and a.ContractId = @ContractId))
 	and (@StartDate is null or (@StartDate is not null and a.PaymentDateTime >= @StartDate))
@@ -969,6 +1000,13 @@ IF OBJECT_ID('tempdb..#DivsNCouponsDetails') IS NOT NULL DROP TABLE #DivsNCoupon
 	and (@ContractId is null or (@ContractId is not null and a.ContractId = @ContractId))
 	and (@StartDate is null or (@StartDate is not null and a.PaymentDateTime >= @StartDate))
 	and (@EndDate is null or (@EndDate is not null and a.PaymentDateTime < dateadd(day,1,@EndDate)))
+	and
+			case
+				when @Valuta = 'RUB' then a.AmountPayments_RUR
+				when @Valuta = 'USD' then a.AmountPayments_USD
+				when @Valuta = 'EUR' then a.AmountPayments_EURO
+				else a.AmountPayments_RUR
+			end > 0
 	order by a.[PaymentDateTime];
 
     SELECT * FROM #DivsNCouponsDetails

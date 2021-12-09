@@ -69,6 +69,32 @@ if @EndDate is null    set @EndDate = @MaxDate;
 if @EndDate > @MaxDate set @EndDate = @MaxDate;
 if @EndDate < @MinDate set @EndDate = @MaxDate;
 
+
+declare @PortfolioDateMax Date
+
+select
+	@PortfolioDateMax = max(PortfolioDate)
+from
+(
+	select PortfolioDate = max(PortfolioDate)
+	from [dbo].[PortFolio_Daily] with(nolock)
+	where InvestorId = @Investor
+	union all
+	select PortfolioDate = max(PortfolioDate)
+	from [dbo].[PortFolio_Daily_Last] with(nolock)
+	where InvestorId = @Investor
+) as res
+
+if @PortfolioDateMax is not null
+begin
+	if @EndDate >= dateAdd(day, -1, @PortfolioDateMax)
+	begin
+		set @EndDate = dateAdd(day, -1, @PortfolioDateMax);
+	end
+end
+
+
+
 if @StartDate = @EndDate
 begin
     select [Error] = 'Даты равны'
@@ -312,10 +338,10 @@ set @AllMinus_RUR = @AmountDayMinus_RUR;
         B.[Order_NUM],
         B.[WALK],
         B.[TYPE],
-        [RATE_RUR] = FORMAT(B.[RATE_RUR], '0.##'),
-        [Amount] = FORMAT(B.[Amount], '0.##'),
-        [VALUE_RUR] = FORMAT(B.[VALUE_RUR], '0.##'),
-        [Fee_RUR] = FORMAT(B.[Fee_RUR], '0.##'),
+        [RATE_RUR] = Cast(B.[RATE_RUR] as decimal(30,2)),
+        [Amount] = Cast(B.[Amount] as decimal(30,7)),
+        [VALUE_RUR] = Cast(B.[VALUE_RUR] as decimal(30,2)),
+        [Fee_RUR] = Cast(B.[Fee_RUR] as decimal(30,2)),
         C.[OperName],
 		[Valuta] = 'RUB'
     FROM
