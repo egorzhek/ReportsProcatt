@@ -150,7 +150,7 @@ namespace ReportsProcatt.Controllers
                 return File(stream, "application/json");
             }
         }
-        public IActionResult Weba
+        public IActionResult Web
         (
             int? InvestorId,
             int? ProductId,
@@ -211,7 +211,7 @@ namespace ReportsProcatt.Controllers
         {
             return Json(new Report(InvestorId, DateFrom, DateTo, Currency));
         }
-        public IActionResult Adaptive
+        public IActionResult Weba
         (
             int? InvestorId,
             DateTime? DateFrom,
