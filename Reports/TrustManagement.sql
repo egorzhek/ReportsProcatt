@@ -45,6 +45,26 @@ if @EndDate is null    set @EndDate = @MaxDate;
 if @EndDate > @MaxDate set @EndDate = @MaxDate;
 if @EndDate < @MinDate set @EndDate = @MaxDate;
 
+declare @PortfolioDateMax Date
+
+select
+	@PortfolioDateMax = max(PortfolioDate)
+from
+(
+	select PortfolioDate = max(PortfolioDate)
+	from [dbo].[PortFolio_Daily] with(nolock)
+	where InvestorId = @InvestorId and ContractId = @ContractId
+	union all
+	select PortfolioDate = max(PortfolioDate)
+	from [dbo].[PortFolio_Daily_Last] with(nolock)
+	where InvestorId = @InvestorId and ContractId = @ContractId
+) as res
+
+if @EndDate >= dateAdd(day, -1, @PortfolioDateMax)
+begin
+	set @EndDate = dateAdd(day, -1, @PortfolioDateMax);
+end
+
 BEGIN TRY
 	DROP TABLE #ResInvAssets
 END TRY

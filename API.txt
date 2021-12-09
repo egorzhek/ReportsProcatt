@@ -1,38 +1,27 @@
-﻿Первое API. Инвестор, Дата От, Дата До
-http://localhost:49183/Portfolio?Investor_Id=2149652&DateFrom=25.01.2020&DateTo=28.06.2021
-
-Отчёт по ПИФу
-https://localhost:49183/FundInfo?InvestorId=16541&FundId=17578
-https://localhost:49183/FundInfo?InvestorId=16541&FundId=17578&DateFrom=01.01.2016
-https://localhost:49183/FundInfo?InvestorId=16541&FundId=17578&DateTo=20.12.2018
-https://localhost:49183/FundInfo?InvestorId=16541&FundId=17578&DateFrom=19.09.2003&DateTo=20.12.2018
+﻿Общий отчет по инвестору
+https://localhost:49279/report/web?InvestorId=2250624
+https://localhost:49279/report/web?InvestorId=2250624&DateFrom=19.09.2003
+https://localhost:49279/report/web?InvestorId=2250624&DateTo=20.12.2018
+https://localhost:49279/report/web?InvestorId=2250624&DateFrom=19.09.2003&DateTo=20.12.2018
 
 
-Информация по Стратегии ДУ
-https://localhost:49183/TrustManagement?InvestorId=2250624&ContractId=13320529
-https://localhost:49183/TrustManagement?InvestorId=17337&ContractId=17340&DateFrom=19.09.2003
-https://localhost:49183/TrustManagement?InvestorId=17337&ContractId=17340&DateTo=20.12.2018
-https://localhost:49183/TrustManagement?InvestorId=17337&ContractId=17340&DateFrom=19.09.2003&DateTo=20.12.2018
+Отдельные отчеты (указываем параметр типа продукта)
+Type=MF - ПИФ
+Type=TM - ДУ
 
-По инвестору
-https://localhost:49183/InverstorFull?InvestorId=2250624
-https://localhost:49183/InverstorFull?InvestorId=2250624&DateFrom=19.09.2003
-https://localhost:49183/InverstorFull?InvestorId=2250624&DateTo=20.12.2018
-https://localhost:49183/InverstorFull?InvestorId=2250624&DateFrom=19.09.2003&DateTo=20.12.2018
+https://localhost:49279/report/web?InvestorId=2149652&ProductId=17580&Type=MF
+https://localhost:49279/report/web?InvestorId=2149652&ProductId=17580&Type=MF&DateFrom=2021-05-29
+https://localhost:49279/report/web?InvestorId=2149652&ProductId=2257804&Type=MF&DateTo=2021-05-29
+https://localhost:49279/report/web?InvestorId=2149652&ProductId=17580&Type=MF&DateFrom=2019-05-17&DateTo=2021-05-29
+
+Отчет в другом формате
+/report/web? - web
+/report/pdf? - pdf
+/report/weba? - weba (адаптив)
 
 
-https://localhost:49279/new/?InvestorId=2149652
-https://localhost:49279/new/?InvestorId=2149652&DateFrom=2019-05-17
-https://localhost:49279/new/?InvestorId=2149652&DateTo=2021-05-29
-https://localhost:49279/new/?InvestorId=2149652&DateFrom=2019-05-17&DateTo=2021-05-29
-
-https://localhost:49279/new/report?InvestorId=2149652
-https://localhost:49279/new/report?InvestorId=2149652&DateFrom=2019-05-17
-https://localhost:49279/new/report?InvestorId=2149652&DateTo=2021-05-29
-https://localhost:49279/new/report?InvestorId=2149652&DateFrom=2019-05-17&DateTo=2021-05-29
-
-https://localhost:49279/new/Contract?InvestorId=2149652&ContractId=2257804
-https://localhost:49279/new/Contract_Report?InvestorId=2149652&ContractId=2257804
+https://localhost:49279/report/pdf?InvestorId=2250624&DateFrom=2019-05-17&DateTo=2021-05-29
+https://localhost:49279/report/weba?InvestorId=2250624&DateFrom=2019-05-17&DateTo=2021-05-29
 
 Указание Валюты
  + &Currency=USD
