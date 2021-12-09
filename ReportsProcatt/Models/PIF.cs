@@ -83,7 +83,7 @@ namespace ReportsProcatt.Models
                         {
                             var el = new CircleDiagram.DataClass
                             {
-                                lable = $"{r["CurrencyName"]}",
+                                lable = $"{r["CategoryName"]}",
                                 data = r["VALUE_RUR"].ToDecimal(),
                                 backgroundColor = CircleDiagramsColorCodes.MainCurrenciesCircle[i],
                                 borderColor = CircleDiagramsColorCodes.MainCurrenciesCircle[i],
