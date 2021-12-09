@@ -32,8 +32,8 @@ namespace ReportsProcatt.Models
         #endregion
         public PIF(
             string aName,
-            DateTime aDFrom,
-            DateTime aDTo,
+            DateTime? aDFrom,
+            DateTime? aDTo,
             CurrencyClass aCurrency,
             int FundId,
             int InvestorId,
@@ -41,11 +41,12 @@ namespace ReportsProcatt.Models
             string ReportPath)
         {
             Id = FundId;
-            Name = aName;
-            Dfrom = aDFrom;
-            Dto = aDTo;
             Currency = aCurrency;
             _data = new SQLDataPIF(Currency.Code, FundId, InvestorId, aDFrom, aDTo, connectionString, ReportPath);
+
+            Name = aName ?? _FundInfoDS.GetValue(PifTables.MainResultDT, "FundName").ToString();
+            Dfrom = aDFrom ?? DateTime.Parse(_FundInfoDS.GetValue(PifTables.MainResultDT, "MinDate").ToString());
+            Dto = aDTo ?? DateTime.Parse(_FundInfoDS.GetValue(PifTables.MainResultDT, "MaxDate").ToString());
 
             PifHeader = new Headers
             {
@@ -197,9 +198,7 @@ namespace ReportsProcatt.Models
             };
 
             PifOperationsHistory.Ths.Where(t => t.ColumnName == PifOperationsHistoryColumns.Wdate).First().AttrRow.Add("width", "170px");
-            PifOperationsHistory.Ths.Where(t => t.ColumnName == PifOperationsHistoryColumns.Btype).First().AttrRow.Add("width", "300px");
             PifOperationsHistory.Ths.Where(t => t.ColumnName == PifOperationsHistoryColumns.Rate_rur).First().AttrRow.Add("width", "130px");
-            PifOperationsHistory.Ths.Where(t => t.ColumnName == PifOperationsHistoryColumns.Amount).First().AttrRow.Add("width", "96px");
             PifOperationsHistory.Ths.Where(t => t.ColumnName == PifOperationsHistoryColumns.Value_rur).First().AttrRow.Add("width", "145px");
             PifOperationsHistory.Ths.Where(t => t.ColumnName == PifOperationsHistoryColumns.Fee_rur).First().AttrRow.Add("width", "117px");
 
@@ -210,9 +209,9 @@ namespace ReportsProcatt.Models
                 row[PifOperationsHistoryColumns.Wdate] = dr["W_Date"];
                 row[PifOperationsHistoryColumns.Btype] = dr["OperName"];
                 row[PifOperationsHistoryColumns.Instrument] = dr["Order_NUM"];
-                row[PifOperationsHistoryColumns.Rate_rur] = $"{dr["RATE_RUR"].DecimalToStr()} {dr["Valuta"]}";
-                row[PifOperationsHistoryColumns.Amount] = dr["Amount"].DecimalToStr();
-                row[PifOperationsHistoryColumns.Value_rur] = $"{dr["VALUE_RUR"].DecimalToStr()} {dr["Valuta"]}";
+                row[PifOperationsHistoryColumns.Rate_rur] = $"{dr["RATE_RUR"].DecimalToStr("#,##0.00")} {dr["Valuta"]}";
+                row[PifOperationsHistoryColumns.Amount] = dr["Amount"].DecimalToStr("#,##0.0000000");
+                row[PifOperationsHistoryColumns.Value_rur] = $"{dr["VALUE_RUR"].DecimalToStr("#,##0.00")} {dr["Valuta"]}";
                 row[PifOperationsHistoryColumns.Fee_rur] = dr["FEE_RUR"].DecimalToStr("#,##0.00");
                 PifOperationsHistory.Table.Rows.Add(row);
             }

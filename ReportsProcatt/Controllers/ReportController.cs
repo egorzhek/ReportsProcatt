@@ -11,38 +11,60 @@ using Wkhtmltopdf.NetCore;
 
 namespace ReportsProcatt.Controllers
 {
-    [Route("[controller]")]
-    [ApiController]
-    public class NewController : Controller
+    public class ReportController : Controller
     {
         readonly IGeneratePdf _generatePdf;
 
-        public NewController(IGeneratePdf generatePdf)
+        public ReportController(IGeneratePdf generatePdf)
         {
             _generatePdf = generatePdf;
         }
 
-        [HttpGet]
-        [Route("Report")]
-        public async Task<IActionResult> Report
+        public async Task<IActionResult> Pdf
         (
             int? InvestorId,
+            int? ProductId,
+            string Type,
             DateTime? DateFrom,
             DateTime? DateTo,
             string Currency
         )
         {
+
+            if (InvestorId == null)
+                throw new Exception($@"{(InvestorId == null ? "InvestorId is null;" : "")}");
+
+            if ((ProductId == null && !string.IsNullOrEmpty(Type))
+                || (ProductId != null && string.IsNullOrEmpty(Type))
+                || (!string.IsNullOrEmpty(Type) && !new string[] { "MF", "DU" }.Contains(Type)))
+                throw new Exception($@"{(ProductId == null ? "ProductId is null;" : "")}" +
+                                    $@"{((!string.IsNullOrEmpty(Type) && !new string[] { "", "" }.Contains(Type)) ?
+                                        "Type must be in [MF, DU];" : "")}");
             try
             {
-                if (InvestorId == null)
-                    throw new Exception("InvestorId is null");
-
-                var data = new Report((int)InvestorId, DateFrom, DateTo, Currency)
+                if (string.IsNullOrEmpty(Type))
                 {
-                    rootStr = "/app/wwwroot"
-                };
+                    var data = new Report((int)InvestorId, DateFrom, DateTo, Currency)
+                    { rootStr = "/app/wwwroot" };
 
-                return await _generatePdf.GetPdf("Views/New/Index.cshtml", data);
+                    return await _generatePdf.GetPdf("Views/Report/Index.cshtml", data);
+                }
+                else if (Type == "MF")
+                {
+                    var data = new Fund((int)InvestorId, (int)ProductId, DateFrom, DateTo, Currency)
+                    { rootStr = "/app/wwwroot" };
+
+                    return await _generatePdf.GetPdf("Views/Report/Fund.cshtml", data);
+                }
+                else if (Type == "MU")
+                {
+                    var data = new Contract((int)InvestorId, (int)ProductId, DateFrom, DateTo, Currency)
+                    { rootStr = "/app/wwwroot" };
+
+                    return await _generatePdf.GetPdf("Views/Report/Contract.cshtml", data);
+                }
+                else
+                    throw new Exception("Something goes wrong!");
             }
             catch (Exception exception)
             {
@@ -63,72 +85,51 @@ namespace ReportsProcatt.Controllers
                 return File(stream, "application/json");
             }
         }
-        [HttpGet]
-        [Route("Contract_Report")]
-        public async Task<IActionResult> Contract_Report
+        public async Task<IActionResult> Pdf_Win
         (
             int? InvestorId,
-            int? ContractId,
+            int? ProductId,
+            string Type,
             DateTime? DateFrom,
             DateTime? DateTo,
             string Currency
         )
         {
+            if (InvestorId == null)
+                throw new Exception($@"{(InvestorId == null ? "InvestorId is null;" : "")}");
+
+            if ((ProductId == null && !string.IsNullOrEmpty(Type))
+                || (ProductId != null && string.IsNullOrEmpty(Type))
+                || (!string.IsNullOrEmpty(Type) && !new string[] { "MF", "DU" }.Contains(Type)))
+                throw new Exception($@"{(ProductId == null ? "ProductId is null;" : "")}" +
+                                    $@"{((!string.IsNullOrEmpty(Type) && !new string[] { "", "" }.Contains(Type)) ?
+                                        "Type must be in [MF, DU];" : "")}");
             try
             {
-                if (InvestorId == null)
-                    throw new Exception("InvestorId is null");
-
-                if (ContractId == null)
-                    throw new Exception("ContractId is null");
-
-
-                var data = new Contract((int)InvestorId, (int)ContractId, DateFrom, DateTo, Currency)
+                if (string.IsNullOrEmpty(Type))
                 {
-                    rootStr = "/app/wwwroot"
-                };
+                    var data = new Report((int)InvestorId, DateFrom, DateTo, Currency)
+                    { rootStr = "file:///c:/Users/D/source/Ingos/ReportsProcatt/ReportsProcatt/wwwroot" };
 
-                return await _generatePdf.GetPdf("Views/New/Contract.cshtml", data);
-            }
-            catch (Exception exception)
-            {
-                var messages = new List<string>();
-                do
-                {
-                    messages.Add(exception.Message);
-                    exception = exception.InnerException;
+                    return await _generatePdf.GetPdf("Views/Report/Index.cshtml", data);
                 }
-                while (exception != null);
-                var message = string.Join(" - ", messages);
+                else if (Type == "MF")
+                {
+                    var data = new Fund((int)InvestorId, (int)ProductId, DateFrom, DateTo, Currency)
+                    { rootStr = "file:///c:/Users/D/source/Ingos/ReportsProcatt/ReportsProcatt/wwwroot" };
 
-                var stream = new MemoryStream();
-                var writer = new StreamWriter(stream);
-                writer.Write(message);
-                writer.Flush();
-                stream.Position = 0;
-                return File(stream, "application/json");
-            }
-        }
-        [HttpGet]
-        [Route("Contract")]
-        public IActionResult Contract
-        (
-            int? InvestorId,
-            int? ContractId,
-            DateTime? DateFrom,
-            DateTime? DateTo,
-            string Currency
-        )
-        {
-            try
-            {
-                if (InvestorId == null)
-                    throw new Exception("InvestorId is null");
+                    return await _generatePdf.GetPdf("Views/Report/Fund.cshtml", data);
+                }
+                else if (Type == "MU")
+                {
+                    var data = new Contract((int)InvestorId, (int)ProductId, DateFrom, DateTo, Currency)
+                    { rootStr = "file:///c:/Users/D/source/Ingos/ReportsProcatt/ReportsProcatt/wwwroot" };
+
+                    return await _generatePdf.GetPdf("Views/Report/Contract.cshtml", data);
+                }
+                else
+                    throw new Exception("Something goes wrong!");
                 
-                if (ContractId == null)
-                    throw new Exception("ContractId is null");
-
-                return View(new Contract((int)InvestorId, (int)ContractId, DateFrom, DateTo, Currency));
             }
             catch (Exception exception)
             {
@@ -149,10 +150,11 @@ namespace ReportsProcatt.Controllers
                 return File(stream, "application/json");
             }
         }
-        [HttpGet]
-        public IActionResult Index
+        public IActionResult Weba
         (
             int? InvestorId,
+            int? ProductId,
+            string Type,
             DateTime? DateFrom,
             DateTime? DateTo,
             string Currency
@@ -161,9 +163,24 @@ namespace ReportsProcatt.Controllers
             try
             {
                 if (InvestorId == null)
-                    throw new Exception("InvestorId is null");
+                    throw new Exception($@"{(InvestorId == null ? "InvestorId is null;" : "")}");
 
-                return View(new Report((int)InvestorId, DateFrom, DateTo, Currency));
+                if ((ProductId == null && !string.IsNullOrEmpty(Type))
+                    || (ProductId != null && string.IsNullOrEmpty(Type))
+                    || (!string.IsNullOrEmpty(Type) && !new string[]{ "MF", "DU" }.Contains(Type)))
+                    throw new Exception($@"{(ProductId == null ? "ProductId is null;" : "")}" +
+                                        $@"{((!string.IsNullOrEmpty(Type) && !new string[] { "", "" }.Contains(Type)) ? 
+                                            "Type must be in [MF, DU];":"")}" );
+
+                if (string.IsNullOrEmpty(Type))
+                    return View(new Report((int)InvestorId, DateFrom, DateTo, Currency));
+                else if (Type == "MF")
+                    return View("Fund", new Fund((int)InvestorId, (int)ProductId, DateFrom, DateTo, Currency));
+                else if (Type == "MU")
+                    return View("Contract", new Contract((int)InvestorId, (int)ProductId, DateFrom, DateTo, Currency));
+                else
+                    throw new Exception("Something goes wrong!");
+                
             }
             catch (Exception exception)
             {
@@ -184,8 +201,6 @@ namespace ReportsProcatt.Controllers
                 return File(stream, "application/json");
             }
         }
-        [HttpGet]
-        [Route("Api")]
         public JsonResult Api
         (
             int InvestorId,
@@ -196,8 +211,6 @@ namespace ReportsProcatt.Controllers
         {
             return Json(new Report(InvestorId, DateFrom, DateTo, Currency));
         }
-        [HttpGet]
-        [Route("Adaptive")]
         public IActionResult Adaptive
         (
             int? InvestorId,
@@ -237,8 +250,6 @@ namespace ReportsProcatt.Controllers
                 return File(stream, "application/json");
             }
         }
-        [HttpGet]
-        [Route("Adaptive_Test")]
         public IActionResult Adaptive_Test
         (
             int? InvestorId,
@@ -254,7 +265,7 @@ namespace ReportsProcatt.Controllers
 
                 var data = new Report((int)InvestorId, DateFrom, DateTo, Currency);
 
-                return View("Views/New/Adaptive.cshtml", data);
+                return View("Views/Report/Adaptive.cshtml", data);
             }
             catch (Exception exception)
             {

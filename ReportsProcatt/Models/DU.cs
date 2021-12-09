@@ -969,9 +969,9 @@ namespace ReportsProcatt.Models
                 row[DuOperationsHistoryColumns.Date] = ((DateTime)dr["Date"]).ToString("dd.MM.yyyy");
                 row[DuOperationsHistoryColumns.OperName] = dr["OperName"];
                 row[DuOperationsHistoryColumns.ToolName] = dr["ToolName"];
-                row[DuOperationsHistoryColumns.Price] = dr["Price"].DecimalToStr();
+                row[DuOperationsHistoryColumns.Price] = $"{dr["Price"].DecimalToStr()}{dr["RowValuta"]}";
                 row[DuOperationsHistoryColumns.PaperAmount] = dr["PaperAmount"].DecimalToStr();
-                row[DuOperationsHistoryColumns.Cost] = dr["RowCost"].DecimalToStr();
+                row[DuOperationsHistoryColumns.Cost] = $"{dr["RowCost"].DecimalToStr()}{dr["RowValuta"]}";
                 row[DuOperationsHistoryColumns.Fee] = dr["Fee"].DecimalToStr("#,##0.00");
                 DuOperationsHistory.Table.Rows.Add(row);
             }

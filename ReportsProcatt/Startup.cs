@@ -19,10 +19,7 @@ namespace ReportsProcatt
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllersWithViews(mvcOtions =>
-            {
-                mvcOtions.EnableEndpointRouting = false;
-            });
+            services.AddControllersWithViews();
             services.AddWkhtmltopdf();
             services.AddControllers().AddNewtonsoftJson();
         }
@@ -44,17 +41,17 @@ namespace ReportsProcatt
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
-            app.UseAuthorization();
-            
-            app.UseMvcWithDefaultRoute();
-            app.UseMvc(routes =>
-            {
-                routes.MapRoute(
-                    name: "default",
-                    template: "{controller}/{action}/{id?}",
-                    defaults: new { controller = "New", action = "Index" });
-            });
+            app.UseRouting();
 
+            app.UseAuthorization();
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllerRoute(
+                    name: "default",
+                    pattern: "{controller=Report}/{action=Index}/{id?}");
+            });
+          
         }
     }
 }

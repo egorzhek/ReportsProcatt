@@ -296,6 +296,8 @@
     </table>
 </div>
 }
+@if(Model.PifOperationsHistory.Table.Rows.Count > 0)
+{
 <div class="keep-together">
 
     <table class="section block-heading print-pt50">
@@ -323,3 +325,4 @@
 
     @Html.Partial("_PartialTableView", Model.PifOperationsHistory)
 </div>
+}

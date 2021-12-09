@@ -248,12 +248,31 @@ namespace ReportsProcatt.Content
             DataSet_FundInfo = new DataSet();
             DataSet_PIF = new DataSet();
             DataSet_PIF2 = new DataSet();
-            Task.WaitAll
-            (
-                Task.Run(() => InitFundInfo(Currency, FundId, InvestorId, DateFrom, DateTo)),
-                Task.Run(() => InitPIF(Currency, FundId, DateTo)),
-                Task.Run(() => InitPIF2(Currency, FundId, DateTo))
-            );
+
+            if (DateTo == null)
+            {
+                Task.WaitAll
+                (
+                    Task.Run(() => InitFundInfo(Currency, FundId, InvestorId, DateFrom, DateTo))
+                );
+
+                DateTo = (DateTime)DataSet_FundInfo.GetValue(PifTables.MainResultDT, "MaxDate");
+
+                Task.WaitAll
+                (
+                    Task.Run(() => InitPIF(Currency, FundId, DateTo)),
+                    Task.Run(() => InitPIF2(Currency, FundId, DateTo))
+                );
+            }
+            else
+            {
+                Task.WaitAll
+                (
+                    Task.Run(() => InitFundInfo(Currency, FundId, InvestorId, DateFrom, DateTo)),
+                    Task.Run(() => InitPIF(Currency, FundId, DateTo)),
+                    Task.Run(() => InitPIF2(Currency, FundId, DateTo))
+                );
+            }
         }
         private async Task InitFundInfo(string Currency, int FundId, int InvestorId, DateTime? DateFrom, DateTime? DateTo)
         {

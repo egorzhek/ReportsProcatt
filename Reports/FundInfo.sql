@@ -295,7 +295,9 @@ set @AllMinus_RUR = @AmountDayMinus_RUR;
     [EndSumAmount] = @EndSumAmount,
     [FundName] = @FundName,
     [InvestorName] = @InvestorName,
-	[Valuta] = @Valuta;
+	  [Valuta] = @Valuta,
+    [MinDate] = @StartDate,
+    [MaxDate] = @EndDate;
     
     select
         [ActiveName]  = 'Активы на ' + Replace(CONVERT(NVarchar(50), @StartDate, 103),'/','.'),

@@ -250,6 +250,7 @@ namespace ReportsProcatt.Models
         public const string PaperAmount = "PaperAmount";
         public const string Cost = "Cost";
         public const string Fee = "Fee";
+        public const string Valuta = "Valuta";
     }
 
     public class GrPosDtColumns
