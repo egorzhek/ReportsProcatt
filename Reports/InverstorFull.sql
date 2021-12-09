@@ -82,6 +82,30 @@ if @EndDate > @MaxDate set @EndDate = @MaxDate;
 if @EndDate < @MinDate set @EndDate = @MaxDate;
 
 
+declare @PortfolioDateMax Date
+
+select
+	@PortfolioDateMax = max(PortfolioDate)
+from
+(
+	select PortfolioDate = max(PortfolioDate)
+	from [dbo].[PortFolio_Daily] with(nolock)
+	where InvestorId = @InvestorId
+	union all
+	select PortfolioDate = max(PortfolioDate)
+	from [dbo].[PortFolio_Daily_Last] with(nolock)
+	where InvestorId = @InvestorId
+) as res
+
+if @PortfolioDateMax is not null
+begin
+	if @EndDate >= dateAdd(day, -1, @PortfolioDateMax)
+	begin
+		set @EndDate = dateAdd(day, -1, @PortfolioDateMax);
+	end
+end
+
+
 
 --select @StartDate,  @EndDate, @mindate, @MaxDate
 

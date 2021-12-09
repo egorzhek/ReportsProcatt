@@ -60,9 +60,12 @@ from
 	where InvestorId = @InvestorId and ContractId = @ContractId
 ) as res
 
-if @EndDate >= dateAdd(day, -1, @PortfolioDateMax)
+if @PortfolioDateMax is not null
 begin
-	set @EndDate = dateAdd(day, -1, @PortfolioDateMax);
+	if @EndDate >= dateAdd(day, -1, @PortfolioDateMax)
+	begin
+		set @EndDate = dateAdd(day, -1, @PortfolioDateMax);
+	end
 end
 
 BEGIN TRY
