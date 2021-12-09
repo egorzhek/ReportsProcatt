@@ -312,10 +312,10 @@ set @AllMinus_RUR = @AmountDayMinus_RUR;
         B.[Order_NUM],
         B.[WALK],
         B.[TYPE],
-        [RATE_RUR] = FORMAT(B.[RATE_RUR], '0.##'),
-        [Amount] = FORMAT(B.[Amount], '0.##'),
-        [VALUE_RUR] = FORMAT(B.[VALUE_RUR], '0.##'),
-        [Fee_RUR] = FORMAT(B.[Fee_RUR], '0.##'),
+        [RATE_RUR] = Cast(B.[RATE_RUR] as decimal(30,2)),
+        [Amount] = Cast(B.[Amount] as decimal(30,7)),
+        [VALUE_RUR] = Cast(B.[VALUE_RUR] as decimal(30,2)),
+        [Fee_RUR] = Cast(B.[Fee_RUR] as decimal(30,2)),
         C.[OperName],
 		[Valuta] = 'RUB'
     FROM
