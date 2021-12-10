@@ -14,8 +14,8 @@ namespace ReportsProcatt.Models
 
         public Fund(int InvestorId,int ContractId,DateTime? DateFrom,DateTime? DateTo,string CurrencyCode)
         {
-            ReportPath = @"c:\Users\D\source\Ingos\ReportsProcatt\Reports\";
-            connectionString = @"Data Source=(local);Encrypt=False;Initial Catalog=CacheDB;Integrated Security=True;User ID=DESKTOP-DOMSN08\D";
+            ReportPath = Environment.GetEnvironmentVariable("ReportPath");
+            connectionString = Program.GetReportSqlConnection(Path.Combine(ReportPath, "appsettings.json"));
             PIF = new PIF(null, DateFrom, DateTo, CurrencyClass.GetCurrency(CurrencyCode), ContractId, InvestorId, connectionString, ReportPath);
         }
     }
