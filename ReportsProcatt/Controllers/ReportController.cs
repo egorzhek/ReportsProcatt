@@ -39,7 +39,7 @@ namespace ReportsProcatt.Controllers
                 || (!string.IsNullOrEmpty(Type) && !new string[] { "MF", "DU" }.Contains(Type)))
                 throw new Exception($@"{(ProductId == null ? "ProductId is null;" : "")}" +
                                     $@"{((!string.IsNullOrEmpty(Type) && !new string[] { "", "" }.Contains(Type)) ?
-                                        "Type must be in [MF, DU];" : "")}");
+                                        "Type must be in [MF, TM];" : "")}");
             try
             {
                 if (string.IsNullOrEmpty(Type))
@@ -56,7 +56,7 @@ namespace ReportsProcatt.Controllers
 
                     return await _generatePdf.GetPdf("Views/Report/Fund.cshtml", data);
                 }
-                else if (Type == "MU")
+                else if (Type == "TM")
                 {
                     var data = new Contract((int)InvestorId, (int)ProductId, DateFrom, DateTo, Currency)
                     { rootStr = "/app/wwwroot" };
@@ -103,7 +103,7 @@ namespace ReportsProcatt.Controllers
                 || (!string.IsNullOrEmpty(Type) && !new string[] { "MF", "DU" }.Contains(Type)))
                 throw new Exception($@"{(ProductId == null ? "ProductId is null;" : "")}" +
                                     $@"{((!string.IsNullOrEmpty(Type) && !new string[] { "", "" }.Contains(Type)) ?
-                                        "Type must be in [MF, DU];" : "")}");
+                                        "Type must be in [MF, TM];" : "")}");
             try
             {
                 if (string.IsNullOrEmpty(Type))
@@ -120,7 +120,7 @@ namespace ReportsProcatt.Controllers
 
                     return await _generatePdf.GetPdf("Views/Report/Fund.cshtml", data);
                 }
-                else if (Type == "MU")
+                else if (Type == "TM")
                 {
                     var data = new Contract((int)InvestorId, (int)ProductId, DateFrom, DateTo, Currency)
                     { rootStr = "file:///c:/Users/D/source/Ingos/ReportsProcatt/ReportsProcatt/wwwroot" };
@@ -170,13 +170,13 @@ namespace ReportsProcatt.Controllers
                     || (!string.IsNullOrEmpty(Type) && !new string[]{ "MF", "DU" }.Contains(Type)))
                     throw new Exception($@"{(ProductId == null ? "ProductId is null;" : "")}" +
                                         $@"{((!string.IsNullOrEmpty(Type) && !new string[] { "", "" }.Contains(Type)) ? 
-                                            "Type must be in [MF, DU];":"")}" );
+                                            "Type must be in [MF, TM];":"")}" );
 
                 if (string.IsNullOrEmpty(Type))
                     return View(new Report((int)InvestorId, DateFrom, DateTo, Currency));
                 else if (Type == "MF")
                     return View("Fund", new Fund((int)InvestorId, (int)ProductId, DateFrom, DateTo, Currency));
-                else if (Type == "MU")
+                else if (Type == "TM")
                     return View("Contract", new Contract((int)InvestorId, (int)ProductId, DateFrom, DateTo, Currency));
                 else
                     throw new Exception("Something goes wrong!");

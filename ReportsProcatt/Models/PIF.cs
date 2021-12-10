@@ -209,9 +209,9 @@ namespace ReportsProcatt.Models
                 row[PifOperationsHistoryColumns.Wdate] = dr["W_Date"];
                 row[PifOperationsHistoryColumns.Btype] = dr["OperName"];
                 row[PifOperationsHistoryColumns.Instrument] = dr["Order_NUM"];
-                row[PifOperationsHistoryColumns.Rate_rur] = $"{dr["RATE_RUR"].DecimalToStr("#,##0.00")} {dr["Valuta"]}";
+                row[PifOperationsHistoryColumns.Rate_rur] = $"{(!string.IsNullOrEmpty(dr["RATE_RUR"]?.ToString()) ? $"{dr["RATE_RUR"].DecimalToStr("#,##0.00")} {dr["Valuta"]}" : "")}";
                 row[PifOperationsHistoryColumns.Amount] = dr["Amount"].DecimalToStr("#,##0.0000000");
-                row[PifOperationsHistoryColumns.Value_rur] = $"{dr["VALUE_RUR"].DecimalToStr("#,##0.00")} {dr["Valuta"]}";
+                row[PifOperationsHistoryColumns.Value_rur] = $"{(!string.IsNullOrEmpty(dr["VALUE_RUR"]?.ToString()) ? $"{dr["VALUE_RUR"].DecimalToStr("#,##0.00")} {dr["Valuta"]}" : "")}";
                 row[PifOperationsHistoryColumns.Fee_rur] = dr["FEE_RUR"].DecimalToStr("#,##0.00");
                 PifOperationsHistory.Table.Rows.Add(row);
             }
