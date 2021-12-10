@@ -36,7 +36,7 @@ namespace ReportsProcatt.Controllers
 
             if ((ProductId == null && !string.IsNullOrEmpty(Type))
                 || (ProductId != null && string.IsNullOrEmpty(Type))
-                || (!string.IsNullOrEmpty(Type) && !new string[] { "MF", "DU" }.Contains(Type)))
+                || (!string.IsNullOrEmpty(Type) && !new string[] { "MF", "TM" }.Contains(Type)))
                 throw new Exception($@"{(ProductId == null ? "ProductId is null;" : "")}" +
                                     $@"{((!string.IsNullOrEmpty(Type) && !new string[] { "", "" }.Contains(Type)) ?
                                         "Type must be in [MF, TM];" : "")}");
@@ -47,7 +47,7 @@ namespace ReportsProcatt.Controllers
                     var data = new Report((int)InvestorId, DateFrom, DateTo, Currency)
                     { rootStr = "/app/wwwroot" };
 
-                    return await _generatePdf.GetPdf("Views/Report/Index.cshtml", data);
+                    return await _generatePdf.GetPdf("Views/Report/Web.cshtml", data);
                 }
                 else if (Type == "MF")
                 {
@@ -100,7 +100,7 @@ namespace ReportsProcatt.Controllers
 
             if ((ProductId == null && !string.IsNullOrEmpty(Type))
                 || (ProductId != null && string.IsNullOrEmpty(Type))
-                || (!string.IsNullOrEmpty(Type) && !new string[] { "MF", "DU" }.Contains(Type)))
+                || (!string.IsNullOrEmpty(Type) && !new string[] { "MF", "TM" }.Contains(Type)))
                 throw new Exception($@"{(ProductId == null ? "ProductId is null;" : "")}" +
                                     $@"{((!string.IsNullOrEmpty(Type) && !new string[] { "", "" }.Contains(Type)) ?
                                         "Type must be in [MF, TM];" : "")}");
@@ -167,7 +167,7 @@ namespace ReportsProcatt.Controllers
 
                 if ((ProductId == null && !string.IsNullOrEmpty(Type))
                     || (ProductId != null && string.IsNullOrEmpty(Type))
-                    || (!string.IsNullOrEmpty(Type) && !new string[]{ "MF", "DU" }.Contains(Type)))
+                    || (!string.IsNullOrEmpty(Type) && !new string[]{ "MF", "TM" }.Contains(Type)))
                     throw new Exception($@"{(ProductId == null ? "ProductId is null;" : "")}" +
                                         $@"{((!string.IsNullOrEmpty(Type) && !new string[] { "", "" }.Contains(Type)) ? 
                                             "Type must be in [MF, TM];":"")}" );
