@@ -111,7 +111,7 @@ namespace ReportsProcatt.Controllers
                     var data = new Report((int)InvestorId, DateFrom, DateTo, Currency)
                     { rootStr = "file:///c:/Users/D/source/Ingos/ReportsProcatt/ReportsProcatt/wwwroot" };
 
-                    return await _generatePdf.GetPdf("Views/Report/Index.cshtml", data);
+                    return await _generatePdf.GetPdf("Views/Report/Web.cshtml", data);
                 }
                 else if (Type == "MF")
                 {

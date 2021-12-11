@@ -8,13 +8,17 @@
 
     <link rel="stylesheet" href="@Model.rootStr/css/style.css">
 
+    
+
 </head>
 <body>
     <img class="bg-slpash-1" src="@Model.rootStr/img/bg-splash-1.png">
     <img class="bg-slpash-2" src="@Model.rootStr/img/bg-splash-2.png">
     <img class="bg-slpash-3" src="@Model.rootStr/img/bg-splash-3.png">
-    <script src="@Model.rootStr/js/moment.min.js"></script>
+    @*<script src="@Model.rootStr/js/moment.min.js"></script>*@
     <script src="@Model.rootStr/js/Chart.min.js"></script>
+    <script src="@Model.rootStr/js/polyfill.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/7.0.0/polyfill.min.js"></script>
     <script type="text/javascript">
         var Charts = [];
         (function (setLineDash) {
