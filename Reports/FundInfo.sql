@@ -77,19 +77,21 @@ select
 from
 (
 	select PortfolioDate = max(PortfolioDate)
-	from [dbo].[PortFolio_Daily] with(nolock)
-	where InvestorId = @Investor
+	from [dbo].[PortFolio_Daily] pd with(nolock)
+	inner join Assets_Info ai on pd.ContractId=ai.ContractId and ai.DATE_CLOSE>=@EndDate
+	where pd.InvestorId = @Investor 
 	union all
 	select PortfolioDate = max(PortfolioDate)
-	from [dbo].[PortFolio_Daily_Last] with(nolock)
-	where InvestorId = @Investor
+	from [dbo].[PortFolio_Daily_Last] pdl with(nolock)
+	inner join Assets_Info ai on pdl.ContractId=ai.ContractId and ai.DATE_CLOSE>=@EndDate
+	where pdl.InvestorId = @Investor
 ) as res
 
 if @PortfolioDateMax is not null
 begin
-	if @EndDate >= dateAdd(day, -1, @PortfolioDateMax)
+	if @EndDate > @PortfolioDateMax
 	begin
-		set @EndDate = dateAdd(day, -1, @PortfolioDateMax);
+		set @EndDate = @PortfolioDateMax;
 	end
 end
 

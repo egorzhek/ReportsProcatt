@@ -52,19 +52,21 @@ select
 from
 (
 	select PortfolioDate = max(PortfolioDate)
-	from [dbo].[PortFolio_Daily] with(nolock)
-	where InvestorId = @InvestorId and ContractId = @ContractId
+	from [dbo].[PortFolio_Daily] pd with(nolock)
+	inner join Assets_Info ai on pd.ContractId=ai.ContractId and ai.DATE_CLOSE>=@EndDate
+	where pd.InvestorId = @InvestorId and pd.ContractId = @ContractId
 	union all
 	select PortfolioDate = max(PortfolioDate)
-	from [dbo].[PortFolio_Daily_Last] with(nolock)
-	where InvestorId = @InvestorId and ContractId = @ContractId
+	from [dbo].[PortFolio_Daily_Last] pdl with(nolock)
+	inner join Assets_Info ai on pdl.ContractId=ai.ContractId and ai.DATE_CLOSE>=@EndDate
+	where pdl.InvestorId = @InvestorId and pdl.ContractId = @ContractId
 ) as res
 
 if @PortfolioDateMax is not null
 begin
-	if @EndDate >= dateAdd(day, -1, @PortfolioDateMax)
+	if @EndDate > @PortfolioDateMax
 	begin
-		set @EndDate = dateAdd(day, -1, @PortfolioDateMax);
+		set @EndDate = @PortfolioDateMax;
 	end
 end
 
@@ -492,7 +494,7 @@ from [dbo].[DIVIDENDS_AND_COUPONS_History] as a
 join dbo.Currencies as c on a.CurrencyId = c.Id
 where a.InvestorId = @InvestorId and a.ContractId = @ContractId
 and (@StartDate is null or (@StartDate is not null and a.PaymentDateTime >= @StartDate))
-and (@EndDate is null or (@EndDate is not null and a.PaymentDateTime < dateadd(day,1,@EndDate)))
+and (@EndDate is null or (@EndDate is not null and a.PaymentDateTime < @EndDate))
 and case
 			when @Valuta = 'RUB' then a.[AmountPayments_RUR]
 			when @Valuta = 'USD' then a.[AmountPayments_USD]
@@ -521,7 +523,7 @@ from [dbo].[DIVIDENDS_AND_COUPONS_History_Last] as a
 join dbo.Currencies as c on a.CurrencyId = c.Id
 where a.InvestorId = @InvestorId and a.ContractId = @ContractId
 and (@StartDate is null or (@StartDate is not null and a.PaymentDateTime >= @StartDate))
-and (@EndDate is null or (@EndDate is not null and a.PaymentDateTime < dateadd(day,1,@EndDate)))
+and (@EndDate is null or (@EndDate is not null and a.PaymentDateTime < @EndDate))
 and case
 			when @Valuta = 'RUB' then a.[AmountPayments_RUR]
 			when @Valuta = 'USD' then a.[AmountPayments_USD]
@@ -546,7 +548,7 @@ from [dbo].[Operations_History_Contracts] as a
 join dbo.Currencies as c on a.Currency = c.Id
 where a.InvestorId = @InvestorId and a.ContractId = @ContractId
 and (@StartDate is null or (@StartDate is not null and a.[Date] >= @StartDate))
-and (@EndDate is null or (@EndDate is not null and a.[Date] < dateadd(day,1,@EndDate)))
+and (@EndDate is null or (@EndDate is not null and a.[Date] <@EndDate))
 union
 select
 	[Date] = a.[Date],
@@ -563,7 +565,7 @@ from [dbo].[Operations_History_Contracts_Last] as a
 join dbo.Currencies as c on a.Currency = c.Id
 where a.InvestorId = @InvestorId and a.ContractId = @ContractId
 and (@StartDate is null or (@StartDate is not null and a.[Date] >= @StartDate))
-and (@EndDate is null or (@EndDate is not null and a.[Date] < dateadd(day,1,@EndDate)))
+and (@EndDate is null or (@EndDate is not null and a.[Date] < @EndDate))
 order by [Date];
 
 
@@ -581,12 +583,12 @@ from
 	select * 
 	from [dbo].[PortFolio_Daily] with(nolock)
 	where InvestorId = @InvestorId and ContractId = @ContractId
-	and PortfolioDate = DateADD(day, 1, @EndDate)
+	and PortfolioDate =  @EndDate
 	union all
 	select * 
 	from [dbo].[PortFolio_Daily_Last] with(nolock)
 	where InvestorId = @InvestorId and ContractId = @ContractId
-	and PortfolioDate = DateADD(day, 1, @EndDate)
+	and PortfolioDate = @EndDate
 ) as r;
 
 
@@ -1208,12 +1210,12 @@ from
 	select * 
 	from [dbo].[POSITION_KEEPING] as a with(nolock)
 	where a.InvestorId = @InvestorId and a.ContractId = @ContractId
-	and Fifo_Date = DateADD(day, 1, @EndDate)
+	and Fifo_Date =  @EndDate
 	union all
 	select * 
 	from [dbo].[POSITION_KEEPING_Last] as a with(nolock)
 	where a.InvestorId = @InvestorId and a.ContractId = @ContractId
-	and Fifo_Date = DateADD(day, 1, @EndDate)
+	and Fifo_Date = @EndDate
 ) as r
 
 

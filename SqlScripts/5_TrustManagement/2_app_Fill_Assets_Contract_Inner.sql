@@ -3026,6 +3026,8 @@ AS BEGIN
 		@SourceMaxDate = max(WIRDATE)
 	from #Source;
 
+	set @SourceMaxDate = dateadd(day,1,@SourceMaxDate)
+
 	while @SourceMinDate <= @SourceMaxDate
 	begin
 		insert into #SDates ([WIRDATE]) values (@SourceMinDate);
@@ -3503,7 +3505,7 @@ AS BEGIN
 
 
     -- заполняем таблицу дат от минимальной до максимальной
-    WHILE @MinDate <= @MaxDate
+    WHILE @MinDate <= DATEADD(DAY,1,@MaxDate)
     BEGIN
         INSERT INTO @Dates ([Date]) VALUES (@MinDate);
 

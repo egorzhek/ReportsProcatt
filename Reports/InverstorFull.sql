@@ -89,19 +89,21 @@ select
 from
 (
 	select PortfolioDate = max(PortfolioDate)
-	from [dbo].[PortFolio_Daily] with(nolock)
-	where InvestorId = @InvestorId
+	from [dbo].[PortFolio_Daily] pd with(nolock)
+	inner join Assets_Info ai on pd.ContractId=ai.ContractId and ai.DATE_CLOSE>=@EndDate
+	where pd.InvestorId = @InvestorId 
 	union all
 	select PortfolioDate = max(PortfolioDate)
-	from [dbo].[PortFolio_Daily_Last] with(nolock)
-	where InvestorId = @InvestorId
+	from [dbo].[PortFolio_Daily_Last] pdl with(nolock)
+	inner join Assets_Info ai on pdl.ContractId=ai.ContractId and ai.DATE_CLOSE>=@EndDate
+	where pdl.InvestorId = @InvestorId
 ) as res
 
 if @PortfolioDateMax is not null
 begin
-	if @EndDate >= dateAdd(day, -1, @PortfolioDateMax)
+	if @EndDate > @PortfolioDateMax
 	begin
-		set @EndDate = dateAdd(day, -1, @PortfolioDateMax);
+		set @EndDate = @PortfolioDateMax;
 	end
 end
 
@@ -973,7 +975,7 @@ IF OBJECT_ID('tempdb..#DivsNCouponsDetails') IS NOT NULL DROP TABLE #DivsNCoupon
 	where a.InvestorId = @InvestorId
 	and (@ContractId is null or (@ContractId is not null and a.ContractId = @ContractId))
 	and (@StartDate is null or (@StartDate is not null and a.PaymentDateTime >= @StartDate))
-	and (@EndDate is null or (@EndDate is not null and a.PaymentDateTime < dateadd(day,1,@EndDate)))
+	and (@EndDate is null or (@EndDate is not null and a.PaymentDateTime < @EndDate))
 	union all
 	select
 		[Date] = a.[PaymentDateTime],
@@ -999,7 +1001,7 @@ IF OBJECT_ID('tempdb..#DivsNCouponsDetails') IS NOT NULL DROP TABLE #DivsNCoupon
 	where a.InvestorId = @InvestorId
 	and (@ContractId is null or (@ContractId is not null and a.ContractId = @ContractId))
 	and (@StartDate is null or (@StartDate is not null and a.PaymentDateTime >= @StartDate))
-	and (@EndDate is null or (@EndDate is not null and a.PaymentDateTime < dateadd(day,1,@EndDate)))
+	and (@EndDate is null or (@EndDate is not null and a.PaymentDateTime < @EndDate))
 	and
 			case
 				when @Valuta = 'RUB' then a.AmountPayments_RUR
