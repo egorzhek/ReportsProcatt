@@ -657,7 +657,7 @@ AS BEGIN
 		DELETE FROM @Dates;
 
 		-- заполняем таблицу дат
-		WHILE @Min1Date <= @Max1Date
+		WHILE @Min1Date <= DATEADD(day,1,@Max1Date)
 		BEGIN
 			INSERT INTO @Dates ([Date]) VALUES (@Min1Date);
 
