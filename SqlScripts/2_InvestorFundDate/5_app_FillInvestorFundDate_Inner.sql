@@ -783,17 +783,9 @@ AS BEGIN
 						GROUP BY D
 					) AS A
 					INNER JOIN #TempFund as B ON A.D = B.D and A.RowNumber = B.RowNumber
-					OUTER APPLY
+					CROSS APPLY
 					(
-						SELECT TOP 1
-							RT.[RATE]
-						FROM [BAL_DATA_STD].[dbo].[OD_VALUES_RATES] AS RT
-						WHERE RT.[VALUE_ID] = B.[FundId]
-						AND RT.[E_DATE] >= B.D and RT.[OFICDATE] < B.D
-						ORDER BY
-							case when DATEPART(YEAR,RT.[E_DATE]) = 9999 then 1 else 0 end ASC,
-							RT.[E_DATE] DESC,
-							RT.[OFICDATE] DESC
+						SELECT [RATE] = [BAL_DATA_STD].[dbo].[fu_Get_Fund_Rate](B.[FundId],B.D)
 					) AS VL
 					--  в долларах
 				
