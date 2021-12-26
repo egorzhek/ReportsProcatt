@@ -10,4 +10,6 @@ ReportsProcatt/.vs/ReportsProcatt
 ReportsProcatt/.vs/ReportsProcatt/config
 ReportsProcatt/.vs/ReportsProcatt/DesignTimeBuild
 ReportsProcatt/Properties
+JobProject/JobProject/obj
+JobProject/JobProject/bin
 *.suo
