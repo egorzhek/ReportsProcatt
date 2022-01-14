@@ -295,7 +295,7 @@ namespace ReportsProcatt.Models
                 new ViewElementAttr{ColumnName = DividedtsCouponsColumns.Price, DisplayName = "Сумма сделки", SortOrder = 5},
             };
 
-            DividedtsCoupons.Ths.Where(t => t.ColumnName == DividedtsCouponsColumns.ToolName).First().AttrRow.Add("width", "320px");
+            DividedtsCoupons.Ths.Where(t => t.ColumnName == DividedtsCouponsColumns.Date).First().AttrRow.Add("width", "200px");
             DividedtsCoupons.Ths.Where(t => t.ColumnName == DividedtsCouponsColumns.PriceType).First().AttrRow.Add("width", "150px");
             DividedtsCoupons.Ths.Where(t => t.ColumnName == DividedtsCouponsColumns.Price).First().AttrRow.Add("width", "150px");
 
@@ -694,10 +694,10 @@ namespace ReportsProcatt.Models
                 row[CurrentSharesColumns.IN_PRICE] = $"{dr["IN_PRICE"].DecimalToStr()} {dr["Valuta"]}";
                 row[CurrentSharesColumns.Amount] = dr["Amount"].DecimalToStr();
                 row[CurrentSharesColumns.In_Summa] = dr["In_Summa"].DecimalToStr();
-                row[CurrentSharesColumns.Today_Price] = dr["Today_Price"];
-                row[CurrentSharesColumns.Dividends] = dr["Dividends"];
-                row[CurrentSharesColumns.Value_NOM] = dr["Value_NOM"];
-                row[CurrentSharesColumns.FinRes] = $"{dr["FinRes"].DecimalToStr()}({dr["FinResProcent"].DecimalToStr("#0.00")}%)";
+                row[CurrentSharesColumns.Today_Price] = dr["Today_Price"].DecimalToStr("#,##0.00");
+                row[CurrentSharesColumns.Dividends] = dr["Dividends"].DecimalToStr("#,##0.00");
+                row[CurrentSharesColumns.Value_NOM] = dr["Value_NOM"].DecimalToStr("#,##0.00");
+                row[CurrentSharesColumns.FinRes] = $"{dr["FinRes"].DecimalToStr()} ({dr["FinResProcent"].DecimalToStr("#0.00")}%)";
                 CurrentShares.Table.Rows.Add(row);
             }
         }
