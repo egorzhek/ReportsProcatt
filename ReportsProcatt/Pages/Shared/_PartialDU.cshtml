@@ -1,5 +1,11 @@
 ﻿@using ReportsProcatt.Models
+@using Microsoft.AspNetCore.Mvc.Rendering
 @model ReportsProcatt.Models.DU
+@{
+    int count = 0;
+    int pageSize = 48;
+    int pageLimit = 40;
+}
 
 <div class="keep-together">
 
@@ -333,39 +339,41 @@
 
 @if (Model.GroupPositionData.Rows.Count > 0 || Model.DetailPositionData.Rows.Count > 0)
 {
-@*Текущие позиции по валютам*@
-<div class="keep-together">
-    <table class="section block-heading print-pt100">
-        <tbody>
-            <tr>
-                <td>
+    @*Текущие позиции по валютам*@
+    <div class="keep-together">
+        <table class="section block-heading print-pt100">
+            <tbody>
+                <tr>
+                    <td>
 
-                    <table class="section-wrapper">
-                        <tbody>
-                            <tr>
+                        <table class="section-wrapper">
+                            <tbody>
+                                <tr>
 
-                                <td class="left-td heading-td">
-                                    <span>Текущие позиции по валютам</span>
-                                </td>
+                                    <td class="left-td heading-td">
+                                        <span>Текущие позиции по валютам</span>
+                                    </td>
 
-                                <td class="right-td heading-td">
-                                </td>
+                                    <td class="right-td heading-td">
+                                    </td>
 
-                            </tr>
-                        </tbody>
-                    </table>
+                                </tr>
+                            </tbody>
+                        </table>
 
-                </td>
-            </tr>
-        </tbody>
-    </table>
-    @Html.Partial("_PartialCurrentAssetsPositions", Model)
-</div>
-<div style="page-break-before: always;"></div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        @Html.Partial("_PartialCurrentAssetsPositions", Model)
+    </div>
+    <div style="page-break-before: always;"></div>
 }
+
 @if (Model.CurrentShares.Table.Rows.Count > 0)
 {
-    <div class="keep-together">
+    count += 4 + Model.CurrentShares.Table.Rows.Count * 2;
+    <div class="print-pt100 keep-together">
         <table class="section block-heading">
             <tbody>
                 <tr>
@@ -393,11 +401,17 @@
         </table>
         @Html.Partial("_PartialTableView", Model.CurrentShares)
     </div>
+    @if (count % pageSize > pageLimit)
+    {
+        <div style="page-break-before: always;"></div>
+        count = 0;
+    }
 }
 
 @if (Model.CurrentBonds.Table.Rows.Count > 0)
 {
-    <div class="keep-together">
+    count += 5 + Model.CurrentBonds.Table.Rows.Count * 3;
+    <div class="print-pt100 keep-together">
         <table class="section block-heading">
             <tbody>
                 <tr>
@@ -425,10 +439,16 @@
         </table>
         @Html.Partial("_PartialTableView", Model.CurrentBonds)
     </div>
+    @if (count % pageSize > pageLimit)
+    {
+        <div style="page-break-before: always;"></div>
+        count = 0;
+    }
 }
 @if (Model.CurrentFunds.Table.Rows.Count > 0)
 {
-    <div class="keep-together">
+    count += 4 + Model.CurrentFunds.Table.Rows.Count * 2;
+    <div class="print-pt100 keep-together">
         <table class="section block-heading">
             <tbody>
                 <tr>
@@ -456,10 +476,16 @@
         </table>
         @Html.Partial("_PartialTableView", Model.CurrentFunds)
     </div>
+    @if (count % pageSize > pageLimit)
+    {
+        <div style="page-break-before: always;"></div>
+        count = 0;
+    }
 }
 @if (Model.CurrentBills.Table.Rows.Count > 0)
 {
-    <div class="keep-together">
+    count += 4 + Model.CurrentBills.Table.Rows.Count * 2;
+    <div class="print-pt100 keep-together">
         <table class="section block-heading">
             <tbody>
                 <tr>
@@ -487,10 +513,16 @@
         </table>
         @Html.Partial("_PartialTableView", Model.CurrentBills)
     </div>
+    @if (count % pageSize > pageLimit)
+    {
+        <div style="page-break-before: always;"></div>
+        count = 0;
+    }
 }
 @if (Model.CurrentDerivatives.Table.Rows.Count > 0)
 {
-    <div class="keep-together">
+    count += 4 + Model.CurrentDerivatives.Table.Rows.Count * 2;
+    <div class="print-pt100 keep-together">
         <table class="section block-heading">
             <tbody>
                 <tr>
@@ -518,10 +550,15 @@
         </table>
         @Html.Partial("_PartialTableView", Model.CurrentDerivatives)
     </div>
+    @if (count % pageSize > pageLimit)
+    {
+        <div style="page-break-before: always;"></div>
+        count = 0;
+    }
 }
 @if (Model.CurrentCash.Table.Rows.Count > 0)
 {
-    <div class="keep-together">
+    <div class="print-pt100 keep-together">
         <table class="section block-heading">
             <tbody>
                 <tr>
@@ -550,9 +587,12 @@
         @Html.Partial("_PartialTableView", Model.CurrentCash)
     </div>
 }
+@{ count = 0; }
+<div style="page-break-before: always;"></div>
+
 @if (Model.ClosedShares.Table.Rows.Count > 0)
 {
-    <div class="keep-together">
+    <div class="print-pt100 keep-together">
         <table class="section block-heading">
             <tbody>
                 <tr>
@@ -583,7 +623,7 @@
 }
 @if (Model.ClosedBonds.Table.Rows.Count > 0)
 {
-    <div class="keep-together">
+    <div class="print-pt100 keep-together">
         <table class="section block-heading">
             <tbody>
                 <tr>
@@ -614,7 +654,7 @@
 }
 @if (Model.ClosedFunds.Table.Rows.Count > 0)
 {
-    <div class="keep-together">
+    <div class="print-pt100 keep-together">
         <table class="section block-heading">
             <tbody>
                 <tr>
@@ -645,7 +685,7 @@
 }
 @if (Model.ClosedBills.Table.Rows.Count > 0)
 {
-    <div class="keep-together">
+    <div class="print-pt100 keep-together">
         <table class="section block-heading">
             <tbody>
                 <tr>
@@ -676,7 +716,7 @@
 }
 @if (Model.ClosedDerivatives.Table.Rows.Count > 0)
 {
-    <div class="keep-together">
+    <div class="print-pt100 keep-together">
         <table class="section block-heading">
             <tbody>
                 <tr>
@@ -707,7 +747,7 @@
 }
 @if (Model.ClosedCash.Table.Rows.Count > 0)
 {
-    <div class="keep-together">
+    <div class="print-pt100 keep-together">
         <table class="section block-heading">
             <tbody>
                 <tr>
@@ -805,7 +845,7 @@
 }
 @if (Model.DuOperationsHistory.Table.Rows.Count > 0)
 {
-    <div class="keep-together">
+    <div class="print-pt100 keep-together">
 
         <table class="section block-heading print-pt100">
             <tbody>
