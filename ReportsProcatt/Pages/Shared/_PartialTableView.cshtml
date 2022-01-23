@@ -11,7 +11,7 @@
 
                         <td class="info-table-wrap-td">
 
-                            <table class="info-table">
+                            <table class="info-table print-pb25">
                                 
                                 <tr class="heading-row">
                                     @foreach (var th in Model.Ths)
@@ -22,7 +22,7 @@
                                     }
                                 </tr>
 
-                                @foreach (DataRow tr in Model.Table.Rows)
+                                @foreach (DataRow tr in Model.Table.Rows.Cast<System.Data.DataRow>())
                                 {
                                 <tr class="body-row">
                                     @foreach (var th in Model.Ths)

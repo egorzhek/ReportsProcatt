@@ -299,7 +299,7 @@
 
 @if (Model.DividedtsCoupons.Table.Rows.Count > 0)
 {
-    <div class="keep-together">
+    <div class="print-pt100 keep-together">
 
         <table class="section block-heading print-pt50">
             <tbody>
@@ -335,7 +335,7 @@
 {
 @*Текущие позиции по валютам*@
 <div class="keep-together">
-    <table class="section block-heading">
+    <table class="section block-heading print-pt100">
         <tbody>
             <tr>
                 <td>
@@ -361,6 +361,7 @@
     </table>
     @Html.Partial("_PartialCurrentAssetsPositions", Model)
 </div>
+<div style="page-break-before: always;"></div>
 }
 @if (Model.CurrentShares.Table.Rows.Count > 0)
 {

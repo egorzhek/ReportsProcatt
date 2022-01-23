@@ -36,6 +36,12 @@
             };
         };
     </script>
+    <style type="text/css">
+        table { page-break-inside:auto }
+        tr    { page-break-inside:avoid; page-break-after:auto }
+        thead { display:table-header-group }
+        tfoot { display:table-footer-group }
+    </style>
     @*Шапка*@
     <table class="section header">
         <tr>
@@ -340,7 +346,7 @@
     </div>
 
     @*Детализация купонов и дивидендов*@
-    <div class="keep-together">
+    <div class="print-pt100 keep-together">
         <table class="section block-heading">
             <tr>
                 <td>
