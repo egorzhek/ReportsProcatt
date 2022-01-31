@@ -305,36 +305,34 @@
 
 @if (Model.DividedtsCoupons.Table.Rows.Count > 0)
 {
-    <div class="print-pt100 keep-together">
 
-        <table class="section block-heading print-pt50">
-            <tbody>
-                <tr>
-                    <td>
+    <table class="section block-heading print-pt50">
+        <tbody>
+            <tr>
+                <td>
 
-                        <table class="section-wrapper">
-                            <tbody>
-                                <tr>
+                    <table class="section-wrapper">
+                        <tbody>
+                            <tr>
 
-                                    <td class="left-td heading-td">
-                                        <span>Детализация купонов и дивидендов</span>
-                                    </td>
+                                <td class="left-td heading-td">
+                                    <span>Детализация купонов и дивидендов</span>
+                                </td>
 
-                                    <td class="right-td heading-td">
-                                    </td>
+                                <td class="right-td heading-td">
+                                </td>
 
-                                </tr>
-                            </tbody>
-                        </table>
+                            </tr>
+                        </tbody>
+                    </table>
 
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+                </td>
+            </tr>
+        </tbody>
+    </table>
 
-        @Html.Partial("_PartialTableView", Model.DividedtsCoupons)
+    @Html.Partial("_PartialTableView", Model.DividedtsCoupons)
 
-    </div>
 }
 
 @if (Model.GroupPositionData.Rows.Count > 0 || Model.DetailPositionData.Rows.Count > 0)

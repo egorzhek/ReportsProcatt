@@ -305,7 +305,7 @@ namespace ReportsProcatt.Models
                 row[DividedtsCouponsColumns.Date] = ((DateTime)dr["Date"]).ToString("dd.MM.yyyy");
                 row[DividedtsCouponsColumns.ToolName] = dr["ToolName"];
                 row[DividedtsCouponsColumns.PriceType] = dr["PriceType"];
-                row[DividedtsCouponsColumns.Price] = $"{dr["Price"].DecimalToStr()} {dr["RowValuta"]}"; //{dr["Valuta"]}";
+                row[DividedtsCouponsColumns.Price] = $"{dr["Price"].DecimalToStr("#,##0.00")} {dr["RowValuta"]}"; //{dr["Valuta"]}";
                 DividedtsCoupons.Table.Rows.Add(row);
             }
         }
@@ -391,14 +391,14 @@ namespace ReportsProcatt.Models
                 DataRow row = ClosedShares.Table.NewRow();
                 row[ClosedSharesColumns.IN_DATE] = ((DateTime)dr["IN_DATE"]).ToString("dd.MM.yyyy");
                 row[ClosedSharesColumns.Investment] = dr["Investment"];
-                row[ClosedSharesColumns.IN_PRICE] = $"{dr["IN_PRICE"].DecimalToStr()} {dr["Valuta"]}";
+                row[ClosedSharesColumns.IN_PRICE] = $"{dr["IN_PRICE"].DecimalToStr("#,##0.00")} {dr["Valuta"]}";
                 row[ClosedSharesColumns.Amount] = dr["Amount"].DecimalToStr();
-                row[ClosedSharesColumns.In_Summa] = dr["In_Summa"].DecimalToStr();
-                row[ClosedSharesColumns.Out_Price] = dr["OutPrice"].DecimalToStr();
-                row[ClosedSharesColumns.Dividends] = dr["Dividends"].DecimalToStr();
+                row[ClosedSharesColumns.In_Summa] = dr["In_Summa"].DecimalToStr("#,##0.00");
+                row[ClosedSharesColumns.Out_Price] = dr["OutPrice"].DecimalToStr("#,##0.00");
+                row[ClosedSharesColumns.Dividends] = dr["Dividends"].DecimalToStr("#,##0.00");
                 row[ClosedSharesColumns.Out_Date] = (dr["Out_Date"] as DateTime?)?.ToString("dd.MM.yyyy");
-                row[ClosedSharesColumns.Out_Summa] = dr["Out_Summa"].DecimalToStr();
-                row[ClosedSharesColumns.FinRes] = $"{dr["FinRes"].DecimalToStr()} ({dr["FinResProcent"].DecimalToStr("#0.00")}%)";
+                row[ClosedSharesColumns.Out_Summa] = dr["Out_Summa"].DecimalToStr("#,##0.00");
+                row[ClosedSharesColumns.FinRes] = $"{dr["FinRes"].DecimalToStr("#,##0.00")} ({dr["FinResProcent"].DecimalToStr("#,##0.00")}%)";
                 ClosedShares.Table.Rows.Add(row);
             }
         }
@@ -451,17 +451,17 @@ namespace ReportsProcatt.Models
                 row[ClosedBondsColumns.Investment] = dr["Investment"];
                 row[ClosedBondsColumns.Oblig_Date_end] = (dr["Oblig_Date_end"] as DateTime?)?.ToString("dd.MM.yyyy");
                 row[ClosedBondsColumns.Oferta_Date] = $"{(dr["Oferta_Date"] as DateTime?)?.ToString("dd.MM.yyyy")}{(!string.IsNullOrEmpty(dr["Oferta_Type"]?.ToString()) ? $"({dr["Oferta_Type"]})" : "")}";
-                row[ClosedBondsColumns.IN_PRICE] = $"{dr["IN_PRICE"].DecimalToStr()} {dr["Valuta"]}";
+                row[ClosedBondsColumns.IN_PRICE] = $"{dr["IN_PRICE"].DecimalToStr("#,##0.00")} {dr["Valuta"]}";
                 row[ClosedBondsColumns.Amount] = dr["Amount"].DecimalToStr();
-                row[ClosedBondsColumns.In_Summa] = dr["In_Summa"].DecimalToStr();
-                row[ClosedBondsColumns.UKD] = dr["UKD"].DecimalToStr();
-                row[ClosedBondsColumns.In_Summa_UKD] = (dr["In_Summa"].ToDecimal() + dr["UKD"].ToDecimal()).DecimalToStr();
-                row[ClosedBondsColumns.Out_Price] = dr["OutPrice"].DecimalToStr();
-                row[ClosedBondsColumns.NKD] = dr["NKD"].DecimalToStr();
-                row[ClosedBondsColumns.Amortizations] = $"{dr["Amortizations"].DecimalToStr()}{(!string.IsNullOrEmpty(dr["Coupons"]?.ToString()) ? $"({dr["Coupons"].DecimalToStr()})" : "")}";
+                row[ClosedBondsColumns.In_Summa] = dr["In_Summa"].DecimalToStr("#,##0.00");
+                row[ClosedBondsColumns.UKD] = dr["UKD"].DecimalToStr("#,##0.00");
+                row[ClosedBondsColumns.In_Summa_UKD] = (dr["In_Summa"].ToDecimal() + dr["UKD"].ToDecimal()).DecimalToStr("#,##0.00");
+                row[ClosedBondsColumns.Out_Price] = dr["OutPrice"].DecimalToStr("#,##0.00");
+                row[ClosedBondsColumns.NKD] = dr["NKD"].DecimalToStr("#,##0.00");
+                row[ClosedBondsColumns.Amortizations] = $"{dr["Amortizations"].DecimalToStr("#,##0.00")}{(!string.IsNullOrEmpty(dr["Coupons"]?.ToString()) ? $"({dr["Coupons"].DecimalToStr("#,##0.00")})" : "")}";
                 row[ClosedBondsColumns.Out_Date] = (dr["Out_Date"] as DateTime?)?.ToString("dd.MM.yyyy");
-                row[ClosedBondsColumns.Out_Summa] = dr["Out_Summa"].DecimalToStr();
-                row[ClosedBondsColumns.FinRes] = $"{dr["FinRes"].DecimalToStr()}({dr["FinResProcent"].DecimalToStr("#0.00")}%)";
+                row[ClosedBondsColumns.Out_Summa] = dr["Out_Summa"].DecimalToStr("#,##0.00");
+                row[ClosedBondsColumns.FinRes] = $"{dr["FinRes"].DecimalToStr("#,##0.00")}({dr["FinResProcent"].DecimalToStr("#,##0.00")}%)";
                 ClosedBonds.Table.Rows.Add(row);
             }
         }
@@ -497,13 +497,13 @@ namespace ReportsProcatt.Models
                 DataRow row = ClosedFunds.Table.NewRow();
                 row[ClosedFundsColumns.IN_DATE] = ((DateTime)dr["IN_DATE"]).ToString("dd.MM.yyyy");
                 row[ClosedFundsColumns.Investment] = dr["Investment"];
-                row[ClosedFundsColumns.IN_PRICE] = $"{dr["IN_PRICE"].DecimalToStr()} {dr["Valuta"]}";
+                row[ClosedFundsColumns.IN_PRICE] = $"{dr["IN_PRICE"].DecimalToStr("#,##0.00")} {dr["Valuta"]}";
                 row[ClosedFundsColumns.Amount] = dr["Amount"].DecimalToStr();
-                row[ClosedFundsColumns.In_Summa] = dr["In_Summa"].DecimalToStr();
-                row[ClosedFundsColumns.Out_Price] = dr["OutPrice"].DecimalToStr();
+                row[ClosedFundsColumns.In_Summa] = dr["In_Summa"].DecimalToStr("#,##0.00");
+                row[ClosedFundsColumns.Out_Price] = dr["OutPrice"].DecimalToStr("#,##0.00");
                 row[ClosedFundsColumns.Out_Date] = (dr["Out_Date"] as DateTime?)?.ToString("dd.MM.yyyy");
-                row[ClosedFundsColumns.Out_Summa] = dr["Out_Summa"].DecimalToStr();
-                row[ClosedFundsColumns.FinRes] = $"{dr["FinRes"].DecimalToStr()}({dr["FinResProcent"].DecimalToStr("#0.00")}%)";
+                row[ClosedFundsColumns.Out_Summa] = dr["Out_Summa"].DecimalToStr("#,##0.00");
+                row[ClosedFundsColumns.FinRes] = $"{dr["FinRes"].DecimalToStr("#,##0.00")}({dr["FinResProcent"].DecimalToStr("#,##0.00")}%)";
                 ClosedFunds.Table.Rows.Add(row);
             }
         }
@@ -541,14 +541,14 @@ namespace ReportsProcatt.Models
                 DataRow row = ClosedDerivatives.Table.NewRow();
                 row[ClosedDerivativesColumns.IN_DATE] = ((DateTime)dr["IN_DATE"]).ToString("dd.MM.yyyy");
                 row[ClosedDerivativesColumns.Investment] = dr["Investment"];
-                row[ClosedDerivativesColumns.IN_PRICE] = $"{dr["IN_PRICE"].DecimalToStr()} {dr["Valuta"]}";
+                row[ClosedDerivativesColumns.IN_PRICE] = $"{dr["IN_PRICE"].DecimalToStr("#,##0.00")} {dr["Valuta"]}";
                 row[ClosedDerivativesColumns.Amount] = dr["Amount"].DecimalToStr();
-                row[ClosedDerivativesColumns.In_Summa] = dr["In_Summa"].DecimalToStr();
-                row[ClosedDerivativesColumns.Out_Price] = dr["OutPrice"].DecimalToStr();
-                row[ClosedDerivativesColumns.Dividends] = dr["Dividends"].DecimalToStr();
+                row[ClosedDerivativesColumns.In_Summa] = dr["In_Summa"].DecimalToStr("#,##0.00");
+                row[ClosedDerivativesColumns.Out_Price] = dr["OutPrice"].DecimalToStr("#,##0.00");
+                row[ClosedDerivativesColumns.Dividends] = dr["Dividends"].DecimalToStr("#,##0.00");
                 row[ClosedDerivativesColumns.Out_Date] = (dr["Out_Date"] as DateTime?)?.ToString("dd.MM.yyyy");
-                row[ClosedDerivativesColumns.Out_Summa] = dr["Out_Summa"].DecimalToStr();
-                row[ClosedDerivativesColumns.FinRes] = $"{dr["FinRes"].DecimalToStr()} ({dr["FinResProcent"].DecimalToStr("#0.00")}%)";
+                row[ClosedDerivativesColumns.Out_Summa] = dr["Out_Summa"].DecimalToStr("#,##0.00");
+                row[ClosedDerivativesColumns.FinRes] = $"{dr["FinRes"].DecimalToStr("#,##0.00")} ({dr["FinResProcent"].DecimalToStr("#,##0.00")}%)";
                 ClosedDerivatives.Table.Rows.Add(row);
             }
         }
@@ -603,18 +603,18 @@ namespace ReportsProcatt.Models
                 row[ClosedBillsColumns.Investment] = dr["Investment"];
                 row[ClosedBillsColumns.Oblig_Date_end] = (dr["Oblig_Date_end"] as DateTime?)?.ToString("dd.MM.yyyy");
                 row[ClosedBillsColumns.Oferta_Date] = $"{(dr["Oferta_Date"] as DateTime?)?.ToString("dd.MM.yyyy")} ({dr["Oferta_Type"]})";
-                row[ClosedBillsColumns.IN_PRICE] = $"{dr["IN_PRICE"].DecimalToStr()} {dr["Valuta"]}";
+                row[ClosedBillsColumns.IN_PRICE] = $"{dr["IN_PRICE"].DecimalToStr("#,##0.00")} {dr["Valuta"]}";
                 row[ClosedBillsColumns.Amount] = dr["Amount"].DecimalToStr();
-                row[ClosedBillsColumns.In_Summa] = dr["In_Summa"].DecimalToStr();
-                row[ClosedBillsColumns.UKD] = dr["UKD"].DecimalToStr();
-                row[ClosedBillsColumns.In_Summa_UKD] = (dr["In_Summa"].ToDecimal() + dr["UKD"].ToDecimal()).DecimalToStr();
-                row[ClosedBillsColumns.Out_Price] = dr["OutPrice"].DecimalToStr();
-                row[ClosedBillsColumns.NKD] = dr["NKD"].DecimalToStr();
-                row[ClosedBillsColumns.Amortizations] = $"{dr["Amortizations"].DecimalToStr()} ({dr["Coupons"].DecimalToStr()})";
+                row[ClosedBillsColumns.In_Summa] = dr["In_Summa"].DecimalToStr("#,##0.00");
+                row[ClosedBillsColumns.UKD] = dr["UKD"].DecimalToStr("#,##0.00");
+                row[ClosedBillsColumns.In_Summa_UKD] = (dr["In_Summa"].ToDecimal() + dr["UKD"].ToDecimal()).DecimalToStr("#,##0.00");
+                row[ClosedBillsColumns.Out_Price] = dr["OutPrice"].DecimalToStr("#,##0.00");
+                row[ClosedBillsColumns.NKD] = dr["NKD"].DecimalToStr("#,##0.00");
+                row[ClosedBillsColumns.Amortizations] = $"{dr["Amortizations"].DecimalToStr("#,##0.00")} ({dr["Coupons"].DecimalToStr("#,##0.00")})";
                 row[ClosedBillsColumns.Out_Date] = (dr["Out_Date"] as DateTime?)?.ToString("dd.MM.yyyy");
-                row[ClosedBillsColumns.Out_Summa] = dr["Out_Summa"].DecimalToStr();
-                row[ClosedBillsColumns.FinRes] = dr["FinRes"].DecimalToStr();
-                row[ClosedBillsColumns.FinResProcent] = $"{dr["FinResProcent"].DecimalToStr("#0.00")}%";
+                row[ClosedBillsColumns.Out_Summa] = dr["Out_Summa"].DecimalToStr("#,##0.00");
+                row[ClosedBillsColumns.FinRes] = dr["FinRes"].DecimalToStr("#,##0.00");
+                row[ClosedBillsColumns.FinResProcent] = $"{dr["FinResProcent"].DecimalToStr("#,##0.00")}%";
                 ClosedBills.Table.Rows.Add(row);
             }
         }
@@ -650,13 +650,13 @@ namespace ReportsProcatt.Models
                 DataRow row = ClosedCash.Table.NewRow();
                 row[ClosedCashColumns.IN_DATE] = ((DateTime)dr["IN_DATE"]).ToString("dd.MM.yyyy");
                 row[ClosedCashColumns.Investment] = dr["Investment"];
-                row[ClosedCashColumns.IN_PRICE] = $"{dr["IN_PRICE"].DecimalToStr()} {dr["Valuta"]}";
+                row[ClosedCashColumns.IN_PRICE] = $"{dr["IN_PRICE"].DecimalToStr("#,##0.00")} {dr["Valuta"]}";
                 row[ClosedCashColumns.Amount] = dr["Amount"].DecimalToStr();
-                row[ClosedCashColumns.In_Summa] = dr["In_Summa"].DecimalToStr();
-                row[ClosedCashColumns.Out_Price] = dr["OutPrice"].DecimalToStr();
+                row[ClosedCashColumns.In_Summa] = dr["In_Summa"].DecimalToStr("#,##0.00");
+                row[ClosedCashColumns.Out_Price] = dr["OutPrice"].DecimalToStr("#,##0.00");
                 row[ClosedCashColumns.Out_Date] = (dr["Out_Date"] as DateTime?)?.ToString("dd.MM.yyyy");
-                row[ClosedCashColumns.Out_Summa] = dr["Out_Summa"].DecimalToStr();
-                row[ClosedCashColumns.FinRes] = $"{dr["FinRes"].DecimalToStr()}({dr["FinResProcent"].DecimalToStr("#0.00")}%)";
+                row[ClosedCashColumns.Out_Summa] = dr["Out_Summa"].DecimalToStr("#,##0.00");
+                row[ClosedCashColumns.FinRes] = $"{dr["FinRes"].DecimalToStr("#,##0.00")}({dr["FinResProcent"].DecimalToStr("#,##0.00")}%)";
                 ClosedCash.Table.Rows.Add(row);
             }
         }
@@ -691,13 +691,13 @@ namespace ReportsProcatt.Models
                 DataRow row = CurrentShares.Table.NewRow();
                 row[CurrentSharesColumns.IN_DATE] = ((DateTime)dr["IN_DATE"]).ToString("dd.MM.yyyy");
                 row[CurrentSharesColumns.Investment] = dr["Investment"];
-                row[CurrentSharesColumns.IN_PRICE] = $"{dr["IN_PRICE"].DecimalToStr()} {dr["Valuta"]}";
+                row[CurrentSharesColumns.IN_PRICE] = $"{dr["IN_PRICE"].DecimalToStr("#,##0.00")} {dr["Valuta"]}";
                 row[CurrentSharesColumns.Amount] = dr["Amount"].DecimalToStr();
-                row[CurrentSharesColumns.In_Summa] = dr["In_Summa"].DecimalToStr();
+                row[CurrentSharesColumns.In_Summa] = dr["In_Summa"].DecimalToStr("#,##0.00");
                 row[CurrentSharesColumns.Today_Price] = dr["Today_Price"].DecimalToStr("#,##0.00");
                 row[CurrentSharesColumns.Dividends] = dr["Dividends"].DecimalToStr("#,##0.00");
                 row[CurrentSharesColumns.Value_NOM] = dr["Value_NOM"].DecimalToStr("#,##0.00");
-                row[CurrentSharesColumns.FinRes] = $"{dr["FinRes"].DecimalToStr()} ({dr["FinResProcent"].DecimalToStr("#0.00")}%)";
+                row[CurrentSharesColumns.FinRes] = $"{dr["FinRes"].DecimalToStr("#,##0.00")} ({dr["FinResProcent"].DecimalToStr("#,##0.00")}%)";
                 CurrentShares.Table.Rows.Add(row);
             }
         }
@@ -745,16 +745,16 @@ namespace ReportsProcatt.Models
                 row[CurrentBondsColumns.Investment] = dr["Investment"];
                 row[CurrentBondsColumns.Oblig_Date_end] = (dr["Oblig_Date_end"] as DateTime?)?.ToString("dd.MM.yyyy");
                 row[CurrentBondsColumns.Oferta_Date] = $"{(dr["Oferta_Date"] as DateTime?)?.ToString("dd.MM.yyyy")}{(!string.IsNullOrEmpty(dr["Oferta_Type"]?.ToString()) ? $"({dr["Oferta_Type"]})" : "")}";
-                row[CurrentBondsColumns.IN_PRICE] = $"{dr["IN_PRICE"].DecimalToStr()} {dr["Valuta"]}";
+                row[CurrentBondsColumns.IN_PRICE] = $"{dr["IN_PRICE"].DecimalToStr("#,##0.00")} {dr["Valuta"]}";
                 row[CurrentBondsColumns.Amount] = dr["Amount"].DecimalToStr();
-                row[CurrentBondsColumns.In_Summa_UKD] = (dr["In_Summa"].ToDecimal() + dr["UKD"].ToDecimal()).DecimalToStr();
-                row[CurrentBondsColumns.UKD] = dr["UKD"].DecimalToStr();
-                row[CurrentBondsColumns.In_Summa] = dr["In_Summa"].DecimalToStr();
-                row[CurrentBondsColumns.Today_Price] = dr["Today_Price"].DecimalToStr();
-                row[CurrentBondsColumns.NKD] = dr["NKD"].DecimalToStr();
-                row[CurrentBondsColumns.Amortizations] = $"{dr["Amortizations"].DecimalToStr()}{(!string.IsNullOrEmpty(dr["Coupons"]?.ToString()) ? $"({dr["Coupons"].DecimalToStr()})" : "")}";
-                row[CurrentBondsColumns.Value_Nom] = dr["Value_Nom"].DecimalToStr();
-                row[CurrentBondsColumns.FinRes] = $"{dr["FinRes"].DecimalToStr()}({dr["FinResProcent"].DecimalToStr("#0.00")}%)";
+                row[CurrentBondsColumns.In_Summa_UKD] = (dr["In_Summa"].ToDecimal() + dr["UKD"].ToDecimal()).DecimalToStr("#,##0.00");
+                row[CurrentBondsColumns.UKD] = dr["UKD"].DecimalToStr("#,##0.00");
+                row[CurrentBondsColumns.In_Summa] = dr["In_Summa"].DecimalToStr("#,##0.00");
+                row[CurrentBondsColumns.Today_Price] = dr["Today_Price"].DecimalToStr("#,##0.00");
+                row[CurrentBondsColumns.NKD] = dr["NKD"].DecimalToStr("#,##0.00");
+                row[CurrentBondsColumns.Amortizations] = $"{dr["Amortizations"].DecimalToStr("#,##0.00")}{(!string.IsNullOrEmpty(dr["Coupons"]?.ToString()) ? $"({dr["Coupons"].DecimalToStr("#,##0.00")})" : "")}";
+                row[CurrentBondsColumns.Value_Nom] = dr["Value_Nom"].DecimalToStr("#,##0.00");
+                row[CurrentBondsColumns.FinRes] = $"{dr["FinRes"].DecimalToStr("#,##0.00")}({dr["FinResProcent"].DecimalToStr("#,##0.00")}%)";
                 CurrentBonds.Table.Rows.Add(row);
             }
         }
@@ -802,16 +802,16 @@ namespace ReportsProcatt.Models
                 row[CurrentBillsColumns.Investment] = dr["Investment"];
                 row[CurrentBillsColumns.Oblig_Date_end] = (dr["Oblig_Date_end"] as DateTime?)?.ToString("dd.MM.yyyy");
                 row[CurrentBillsColumns.Oferta_Date] = $"{(dr["Oferta_Date"] as DateTime?)?.ToString("dd.MM.yyyy")}{(!string.IsNullOrEmpty(dr["Oferta_Type"]?.ToString()) ? $"({dr["Oferta_Type"]})" : "")}";
-                row[CurrentBillsColumns.IN_PRICE] = $"{dr["IN_PRICE"].DecimalToStr()} {dr["Valuta"]}";
+                row[CurrentBillsColumns.IN_PRICE] = $"{dr["IN_PRICE"].DecimalToStr("#,##0.00")} {dr["Valuta"]}";
                 row[CurrentBillsColumns.Amount] = dr["Amount"].DecimalToStr();
-                row[CurrentBillsColumns.In_Summa_UKD] = (dr["In_Summa"].ToDecimal() + dr["UKD"].ToDecimal()).DecimalToStr();
-                row[CurrentBillsColumns.UKD] = dr["UKD"].DecimalToStr();
-                row[CurrentBillsColumns.In_Summa] = dr["In_Summa"].DecimalToStr();
-                row[CurrentBillsColumns.Today_Price] = dr["Today_Price"].DecimalToStr();
-                row[CurrentBillsColumns.NKD] = dr["NKD"].DecimalToStr();
-                row[CurrentBillsColumns.Amortizations] = $"{dr["Amortizations"].DecimalToStr()}{(!string.IsNullOrEmpty(dr["Coupons"]?.ToString()) ? $"({dr["Coupons"].DecimalToStr()})" : "")}";
-                row[CurrentBillsColumns.Value_Nom] = dr["Value_Nom"].DecimalToStr();
-                row[CurrentBillsColumns.FinRes] = $"{dr["FinRes"].DecimalToStr()}({dr["FinResProcent"].DecimalToStr("#0.00")}%)";
+                row[CurrentBillsColumns.In_Summa_UKD] = (dr["In_Summa"].ToDecimal() + dr["UKD"].ToDecimal()).DecimalToStr("#,##0.00");
+                row[CurrentBillsColumns.UKD] = dr["UKD"].DecimalToStr("#,##0.00");
+                row[CurrentBillsColumns.In_Summa] = dr["In_Summa"].DecimalToStr("#,##0.00");
+                row[CurrentBillsColumns.Today_Price] = dr["Today_Price"].DecimalToStr("#,##0.00");
+                row[CurrentBillsColumns.NKD] = dr["NKD"].DecimalToStr("#,##0.00");
+                row[CurrentBillsColumns.Amortizations] = $"{dr["Amortizations"].DecimalToStr("#,##0.00")}{(!string.IsNullOrEmpty(dr["Coupons"]?.ToString()) ? $"({dr["Coupons"].DecimalToStr("#,##0.00")})" : "")}";
+                row[CurrentBillsColumns.Value_Nom] = dr["Value_Nom"].DecimalToStr("#,##0.00");
+                row[CurrentBillsColumns.FinRes] = $"{dr["FinRes"].DecimalToStr("#,##0.00")}({dr["FinResProcent"].DecimalToStr("#,##0.00")}%)";
                 CurrentBills.Table.Rows.Add(row);
             }
         }
@@ -844,12 +844,12 @@ namespace ReportsProcatt.Models
                 DataRow row = CurrentCash.Table.NewRow();
                 row[CurrentCashColumns.IN_DATE] = ((DateTime)dr["IN_DATE"]).ToString("dd.MM.yyyy");
                 row[CurrentCashColumns.Investment] = dr["Investment"];
-                row[CurrentCashColumns.IN_PRICE] = $"{dr["IN_PRICE"].DecimalToStr()} {dr["Valuta"]}";
+                row[CurrentCashColumns.IN_PRICE] = $"{dr["IN_PRICE"].DecimalToStr("#,##0.00")} {dr["Valuta"]}";
                 row[CurrentCashColumns.Amount] = dr["Amount"].DecimalToStr();
-                row[CurrentCashColumns.In_Summa] = dr["In_Summa"].DecimalToStr();
-                row[CurrentCashColumns.Today_Price] = dr["Today_Price"].DecimalToStr();
-                row[CurrentCashColumns.Value_NOM] = dr["Value_NOM"].DecimalToStr();
-                row[CurrentCashColumns.FinRes] = $"{dr["FinRes"].DecimalToStr()}({dr["FinResProcent"].DecimalToStr("#0.00")}%)";
+                row[CurrentCashColumns.In_Summa] = dr["In_Summa"].DecimalToStr("#,##0.00");
+                row[CurrentCashColumns.Today_Price] = dr["Today_Price"].DecimalToStr("#,##0.00");
+                row[CurrentCashColumns.Value_NOM] = dr["Value_NOM"].DecimalToStr("#,##0.00");
+                row[CurrentCashColumns.FinRes] = $"{dr["FinRes"].DecimalToStr("#,##0.00")}({dr["FinResProcent"].DecimalToStr("#,##0.00")}%)";
                 CurrentCash.Table.Rows.Add(row);
             }
         }
@@ -882,12 +882,12 @@ namespace ReportsProcatt.Models
                 DataRow row = CurrentFunds.Table.NewRow();
                 row[CurrentFundsColumns.IN_DATE] = ((DateTime)dr["IN_DATE"]).ToString("dd.MM.yyyy");
                 row[CurrentFundsColumns.Investment] = dr["Investment"];
-                row[CurrentFundsColumns.IN_PRICE] = $"{dr["IN_PRICE"].DecimalToStr()} {dr["Valuta"]}";
+                row[CurrentFundsColumns.IN_PRICE] = $"{dr["IN_PRICE"].DecimalToStr("#,##0.00")} {dr["Valuta"]}";
                 row[CurrentFundsColumns.Amount] = dr["Amount"].DecimalToStr();
-                row[CurrentFundsColumns.In_Summa] = dr["In_Summa"].DecimalToStr();
-                row[CurrentFundsColumns.Today_Price] = dr["Today_Price"].DecimalToStr();
-                row[CurrentFundsColumns.Value_NOM] = dr["Value_NOM"].DecimalToStr();
-                row[CurrentFundsColumns.FinRes] = $"{dr["FinRes"].DecimalToStr()}({dr["FinResProcent"].DecimalToStr("#0.00")}%)";
+                row[CurrentFundsColumns.In_Summa] = dr["In_Summa"].DecimalToStr("#,##0.00");
+                row[CurrentFundsColumns.Today_Price] = dr["Today_Price"].DecimalToStr("#,##0.00");
+                row[CurrentFundsColumns.Value_NOM] = dr["Value_NOM"].DecimalToStr("#,##0.00");
+                row[CurrentFundsColumns.FinRes] = $"{dr["FinRes"].DecimalToStr("#,##0.00")}({dr["FinResProcent"].DecimalToStr("#,##0.00")}%)";
                 CurrentFunds.Table.Rows.Add(row);
             }
         }
@@ -922,13 +922,13 @@ namespace ReportsProcatt.Models
                 DataRow row = CurrentDerivatives.Table.NewRow();
                 row[CurrentDerivativesColumns.IN_DATE] = ((DateTime)dr["IN_DATE"]).ToString("dd.MM.yyyy");
                 row[CurrentDerivativesColumns.Investment] = dr["Investment"];
-                row[CurrentDerivativesColumns.IN_PRICE] = $"{dr["IN_PRICE"].DecimalToStr()} {dr["Valuta"]}";
+                row[CurrentDerivativesColumns.IN_PRICE] = $"{dr["IN_PRICE"].DecimalToStr("#,##0.00")} {dr["Valuta"]}";
                 row[CurrentDerivativesColumns.Amount] = dr["Amount"].DecimalToStr();
-                row[CurrentDerivativesColumns.In_Summa] = dr["In_Summa"].DecimalToStr();
+                row[CurrentDerivativesColumns.In_Summa] = dr["In_Summa"].DecimalToStr("#,##0.00");
                 row[CurrentDerivativesColumns.Today_Price] = dr["Today_Price"];
                 row[CurrentDerivativesColumns.Dividends] = dr["Dividends"];
                 row[CurrentDerivativesColumns.Value_NOM] = dr["Value_NOM"];
-                row[CurrentDerivativesColumns.FinRes] = $"{dr["FinRes"].DecimalToStr()}({dr["FinResProcent"].DecimalToStr("#0.00")}%)";
+                row[CurrentDerivativesColumns.FinRes] = $"{dr["FinRes"].DecimalToStr("#,##0.00")}({dr["FinResProcent"].DecimalToStr("#,##0.00")}%)";
                 CurrentDerivatives.Table.Rows.Add(row);
             }
         }
@@ -969,9 +969,9 @@ namespace ReportsProcatt.Models
                 row[DuOperationsHistoryColumns.Date] = ((DateTime)dr["Date"]).ToString("dd.MM.yyyy");
                 row[DuOperationsHistoryColumns.OperName] = dr["OperName"];
                 row[DuOperationsHistoryColumns.ToolName] = dr["ToolName"];
-                row[DuOperationsHistoryColumns.Price] = $"{(!string.IsNullOrEmpty(dr["Price"]?.ToString()) ? $"{dr["Price"].DecimalToStr()} {dr["RowValuta"]}" : "")}";
+                row[DuOperationsHistoryColumns.Price] = $"{(!string.IsNullOrEmpty(dr["Price"]?.ToString()) ? $"{dr["Price"].DecimalToStr("#,##0.00")} {dr["RowValuta"]}" : "")}";
                 row[DuOperationsHistoryColumns.PaperAmount] = dr["PaperAmount"].DecimalToStr();
-                row[DuOperationsHistoryColumns.Cost] = $"{(!string.IsNullOrEmpty(dr["RowCost"]?.ToString()) ? $"{dr["RowCost"].DecimalToStr()} {dr["RowValuta"]}" : "")}";
+                row[DuOperationsHistoryColumns.Cost] = $"{(!string.IsNullOrEmpty(dr["RowCost"]?.ToString()) ? $"{dr["RowCost"].DecimalToStr("#,##0.00")} {dr["RowValuta"]}" : "")}";
                 row[DuOperationsHistoryColumns.Fee] = dr["Fee"].DecimalToStr("#,##0.00");
                 DuOperationsHistory.Table.Rows.Add(row);
             }

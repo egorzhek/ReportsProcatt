@@ -120,6 +120,11 @@ textarea {
     overflow: auto
 }
 
+table { page-break-inside:auto }
+tr    { page-break-inside:avoid; page-break-after:auto }
+thead { display:table-header-group }
+tfoot { display:table-footer-group }
+
 [type="checkbox"], [type="radio"] {
     -webkit-box-sizing: border-box;
     box-sizing: border-box;
@@ -403,7 +408,7 @@ table {
     border-radius: 8px
 }
 
-.info-table td {
+.info-table td, .info-table th {
     padding: 5px 10px;
 }
 
@@ -868,27 +873,28 @@ table {
     box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.08), 0px 2px 4px rgba(0, 0, 0, 0.08);
     border-radius: 8px;
     width: 100%;
-    display: -webkit-box;
-    display: -ms-flexbox;
-    display: flex;
-    -webkit-box-orient: horizontal;
-    -webkit-box-direction: normal;
-    -ms-flex-direction: row;
-    flex-direction: row;
-    -webkit-box-align: start;
-    -ms-flex-align: start;
-    align-items: flex-start
+    display: block;
+    /*display: -webkit-box;*/
+    /*display: -ms-flexbox;*/
+    /*display: flex;*/
+    /*-webkit-box-orient: horizontal;*/
+    /*-webkit-box-direction: normal;*/
+    /*-ms-flex-direction: row;*/
+    /*flex-direction: row;*/
+    /*-webkit-box-align: start;*/
+    /*-ms-flex-align: start;*/
+    /*align-items: flex-start*/
 }
 
-.currency-position-section .details-wrap {
-    -webkit-box-orient: vertical;
-    -webkit-box-direction: normal;
-    -ms-flex-direction: column;
-    flex-direction: column;
-    -webkit-box-align: start;
-    -ms-flex-align: start;
-    align-items: flex-start
-}
+/*.currency-position-section .details-wrap {*/
+/*    -webkit-box-orient: vertical;*/
+/*    -webkit-box-direction: normal;*/
+/*    -ms-flex-direction: column;*/
+/*    flex-direction: column;*/
+/*    -webkit-box-align: start;*/
+/*    -ms-flex-align: start;*/
+/*    align-items: flex-start*/
+/*}*/
 
 .currency-position-section .details-wrap .currency-position-item:last-child {
     margin-bottom: 0
@@ -1023,6 +1029,43 @@ table {
     -ms-flex-align: center;
     align-items: center
 }
+
+.currency-position-item {
+    position: relative;
+    page-break-inside: avoid;
+    break-inside: avoid;
+}
+
+.currency-position-item li {
+    position: relative;
+    display: block;
+    page-break-inside: avoid;
+    break-inside: avoid;
+}
+
+.info-table {
+    border-collapse: separate;
+}
+
+.info-table * {
+    page-break-inside: avoid;
+}
+.info-table tr:last-child {
+    page-break-inside: avoid;
+    page-break-after: always;
+}
+
+@media print {
+    .currency-position-item-upper, .currency-position-item-lower {
+        page-break-inside: avoid !important;
+    }
+
+    .currency-position-item li ul li, .currency-position-item li ol li {
+        page-break-inside: avoid !important;
+    }
+}
+
+
 
 .currency-position-item .currency-position-item-lower span {
     font-weight: 600;
@@ -1250,6 +1293,10 @@ table {
 
     .print-pt50 {
         padding-top: 50px
+    }
+
+    .print-pt25 {
+        padding-top: 25px
     }
 
     .print-pt10 {

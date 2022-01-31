@@ -19,10 +19,13 @@
                                                       .Select(r => r[GrPosDtColumns.CategoryName])
                                                       .Distinct().ToList())
                                 {
-                                    <span class="currency-position-head">@cat</span>
+                                    
                                     <div class="currency-position-item">
+                                        <span class="currency-position-head">@cat</span>
+                                    
                                     @if (cat.Equals("Фонды")) { 
-                                        <ul>
+
+                                        <ol>
                                         @foreach (var instr in Model.GroupPositionData.AsEnumerable()
                                                                   .Where(r => r[GrPosDtColumns.CategoryName].Equals(cat))
                                                                   .ToList())
@@ -78,7 +81,7 @@
                                                 </div>
                                             </li>
                                         }
-                                        </ul>
+                                        </ol>
                                     }
                                     else
                                     {

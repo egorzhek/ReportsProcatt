@@ -232,7 +232,7 @@ namespace ReportsProcatt.Models
                 row[DivsNCouponsDetailsColumns.ToolName] = dr["ToolName"];
                 row[DivsNCouponsDetailsColumns.PriceType] = dr["PriceType"];
                 row[DivsNCouponsDetailsColumns.ContractName] = dr["ContractName"];
-                row[DivsNCouponsDetailsColumns.Price] = $"{dr["Price"].DecimalToStr()} {dr["Valuta"]}";
+                row[DivsNCouponsDetailsColumns.Price] = $"{dr["Price"].DecimalToStr("#,##0.00")} {dr["Valuta"]}";
                 DivsNCouponsDetails.Table.Rows.Add(row);
             }
         }
