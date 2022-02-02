@@ -415,7 +415,7 @@ namespace ReportsProcatt.Models
             ClosedBonds.Table.Columns.Add(ClosedBondsColumns.IN_PRICE);
             ClosedBonds.Table.Columns.Add(ClosedBondsColumns.Amount);
             ClosedBonds.Table.Columns.Add(ClosedBondsColumns.In_Summa);
-            ClosedBonds.Table.Columns.Add(ClosedBondsColumns.UKD);
+            //ClosedBonds.Table.Columns.Add(ClosedBondsColumns.UKD);
             ClosedBonds.Table.Columns.Add(ClosedBondsColumns.In_Summa_UKD);
             ClosedBonds.Table.Columns.Add(ClosedBondsColumns.Out_Price);
             ClosedBonds.Table.Columns.Add(ClosedBondsColumns.NKD);
@@ -433,7 +433,7 @@ namespace ReportsProcatt.Models
                 new ViewElementAttr{ColumnName = ClosedBondsColumns.IN_PRICE, DisplayName = "Цена 1 бумаги на дату покупки", SortOrder = 6},
                 new ViewElementAttr{ColumnName = ClosedBondsColumns.Amount, DisplayName = "Кол-во, шт", SortOrder = 7},
                 new ViewElementAttr{ColumnName = ClosedBondsColumns.In_Summa, DisplayName = "Сумма покупки без НКД", SortOrder = 8},
-                new ViewElementAttr{ColumnName = ClosedBondsColumns.UKD, DisplayName = "Уплаченный НКД", SortOrder = 9},
+                //new ViewElementAttr{ColumnName = ClosedBondsColumns.UKD, DisplayName = "Уплаченный НКД", SortOrder = 9},
                 new ViewElementAttr{ColumnName = ClosedBondsColumns.In_Summa_UKD, DisplayName = "Сумма покупки с НКД", SortOrder = 10},
                 new ViewElementAttr{ColumnName = ClosedBondsColumns.Out_Price, DisplayName = "Цена 1 бумаги на дату продажи", SortOrder = 11},
                 new ViewElementAttr{ColumnName = ClosedBondsColumns.NKD, DisplayName = "НКД", SortOrder = 12},
@@ -454,7 +454,7 @@ namespace ReportsProcatt.Models
                 row[ClosedBondsColumns.IN_PRICE] = $"{dr["IN_PRICE"].DecimalToStr("#,##0.00")} {dr["Valuta"]}";
                 row[ClosedBondsColumns.Amount] = dr["Amount"].DecimalToStr();
                 row[ClosedBondsColumns.In_Summa] = dr["In_Summa"].DecimalToStr("#,##0.00");
-                row[ClosedBondsColumns.UKD] = dr["UKD"].DecimalToStr("#,##0.00");
+                //row[ClosedBondsColumns.UKD] = dr["UKD"].DecimalToStr("#,##0.00");
                 row[ClosedBondsColumns.In_Summa_UKD] = (dr["In_Summa"].ToDecimal() + dr["UKD"].ToDecimal()).DecimalToStr("#,##0.00");
                 row[ClosedBondsColumns.Out_Price] = dr["OutPrice"].DecimalToStr("#,##0.00");
                 row[ClosedBondsColumns.NKD] = dr["NKD"].DecimalToStr("#,##0.00");
@@ -564,7 +564,7 @@ namespace ReportsProcatt.Models
             ClosedBills.Table.Columns.Add(ClosedBillsColumns.IN_PRICE);
             ClosedBills.Table.Columns.Add(ClosedBillsColumns.Amount);
             ClosedBills.Table.Columns.Add(ClosedBillsColumns.In_Summa);
-            ClosedBills.Table.Columns.Add(ClosedBillsColumns.UKD);
+            //ClosedBills.Table.Columns.Add(ClosedBillsColumns.UKD);
             ClosedBills.Table.Columns.Add(ClosedBillsColumns.In_Summa_UKD);
             ClosedBills.Table.Columns.Add(ClosedBillsColumns.Out_Price);
             ClosedBills.Table.Columns.Add(ClosedBillsColumns.NKD);
@@ -584,7 +584,7 @@ namespace ReportsProcatt.Models
                 new ViewElementAttr{ColumnName = ClosedBillsColumns.IN_PRICE, DisplayName = "Цена 1 бумаги на дату покупки", SortOrder = 6},
                 new ViewElementAttr{ColumnName = ClosedBillsColumns.Amount, DisplayName = "Кол-во, шт", SortOrder = 7},
                 new ViewElementAttr{ColumnName = ClosedBillsColumns.In_Summa, DisplayName = "Сумма покупки без НКД", SortOrder = 8},
-                new ViewElementAttr{ColumnName = ClosedBillsColumns.UKD, DisplayName = "Уплаченный НКД", SortOrder = 9},
+                //new ViewElementAttr{ColumnName = ClosedBillsColumns.UKD, DisplayName = "Уплаченный НКД", SortOrder = 9},
                 new ViewElementAttr{ColumnName = ClosedBillsColumns.In_Summa_UKD, DisplayName = "Сумма покупки с НКД", SortOrder = 10},
                 new ViewElementAttr{ColumnName = ClosedBillsColumns.Out_Price, DisplayName = "Цена 1 бумаги на дату продажи", SortOrder = 11},
                 new ViewElementAttr{ColumnName = ClosedBillsColumns.NKD, DisplayName = "НКД", SortOrder = 12},
@@ -606,7 +606,7 @@ namespace ReportsProcatt.Models
                 row[ClosedBillsColumns.IN_PRICE] = $"{dr["IN_PRICE"].DecimalToStr("#,##0.00")} {dr["Valuta"]}";
                 row[ClosedBillsColumns.Amount] = dr["Amount"].DecimalToStr();
                 row[ClosedBillsColumns.In_Summa] = dr["In_Summa"].DecimalToStr("#,##0.00");
-                row[ClosedBillsColumns.UKD] = dr["UKD"].DecimalToStr("#,##0.00");
+                //row[ClosedBillsColumns.UKD] = dr["UKD"].DecimalToStr("#,##0.00");
                 row[ClosedBillsColumns.In_Summa_UKD] = (dr["In_Summa"].ToDecimal() + dr["UKD"].ToDecimal()).DecimalToStr("#,##0.00");
                 row[ClosedBillsColumns.Out_Price] = dr["OutPrice"].DecimalToStr("#,##0.00");
                 row[ClosedBillsColumns.NKD] = dr["NKD"].DecimalToStr("#,##0.00");
@@ -712,7 +712,7 @@ namespace ReportsProcatt.Models
             CurrentBonds.Table.Columns.Add(CurrentBondsColumns.IN_PRICE);
             CurrentBonds.Table.Columns.Add(CurrentBondsColumns.Amount);
             CurrentBonds.Table.Columns.Add(CurrentBondsColumns.In_Summa_UKD);
-            CurrentBonds.Table.Columns.Add(CurrentBondsColumns.UKD);
+            //CurrentBonds.Table.Columns.Add(CurrentBondsColumns.UKD);
             CurrentBonds.Table.Columns.Add(CurrentBondsColumns.In_Summa);
             CurrentBonds.Table.Columns.Add(CurrentBondsColumns.Today_Price);
             CurrentBonds.Table.Columns.Add(CurrentBondsColumns.NKD);
@@ -729,7 +729,7 @@ namespace ReportsProcatt.Models
                 new ViewElementAttr{ColumnName = CurrentBondsColumns.IN_PRICE, DisplayName = "Цена 1 бумаги на дату покупки", SortOrder = 6},
                 new ViewElementAttr{ColumnName = CurrentBondsColumns.Amount, DisplayName = "Кол-во, шт", SortOrder = 7},
                 new ViewElementAttr{ColumnName = CurrentBondsColumns.In_Summa, DisplayName = "Сумма покупки без НКД", SortOrder = 8},
-                new ViewElementAttr{ColumnName = CurrentBondsColumns.UKD, DisplayName = "Уплаченный НКД", SortOrder = 9},
+                //new ViewElementAttr{ColumnName = CurrentBondsColumns.UKD, DisplayName = "Уплаченный НКД", SortOrder = 9},
                 new ViewElementAttr{ColumnName = CurrentBondsColumns.In_Summa_UKD, DisplayName = "Сумма покупки с НКД", SortOrder = 10},
                 new ViewElementAttr{ColumnName = CurrentBondsColumns.Today_Price, DisplayName = "Цена 1 бумаги на дату отчета", SortOrder = 11},
                 new ViewElementAttr{ColumnName = CurrentBondsColumns.NKD, DisplayName = "НКД", SortOrder = 12},
@@ -748,7 +748,7 @@ namespace ReportsProcatt.Models
                 row[CurrentBondsColumns.IN_PRICE] = $"{dr["IN_PRICE"].DecimalToStr("#,##0.00")} {dr["Valuta"]}";
                 row[CurrentBondsColumns.Amount] = dr["Amount"].DecimalToStr();
                 row[CurrentBondsColumns.In_Summa_UKD] = (dr["In_Summa"].ToDecimal() + dr["UKD"].ToDecimal()).DecimalToStr("#,##0.00");
-                row[CurrentBondsColumns.UKD] = dr["UKD"].DecimalToStr("#,##0.00");
+                //row[CurrentBondsColumns.UKD] = dr["UKD"].DecimalToStr("#,##0.00");
                 row[CurrentBondsColumns.In_Summa] = dr["In_Summa"].DecimalToStr("#,##0.00");
                 row[CurrentBondsColumns.Today_Price] = dr["Today_Price"].DecimalToStr("#,##0.00");
                 row[CurrentBondsColumns.NKD] = dr["NKD"].DecimalToStr("#,##0.00");
@@ -769,7 +769,7 @@ namespace ReportsProcatt.Models
             CurrentBills.Table.Columns.Add(CurrentBillsColumns.IN_PRICE);
             CurrentBills.Table.Columns.Add(CurrentBillsColumns.Amount);
             CurrentBills.Table.Columns.Add(CurrentBillsColumns.In_Summa_UKD);
-            CurrentBills.Table.Columns.Add(CurrentBillsColumns.UKD);
+            //CurrentBills.Table.Columns.Add(CurrentBillsColumns.UKD);
             CurrentBills.Table.Columns.Add(CurrentBillsColumns.In_Summa);
             CurrentBills.Table.Columns.Add(CurrentBillsColumns.Today_Price);
             CurrentBills.Table.Columns.Add(CurrentBillsColumns.NKD);
@@ -786,7 +786,7 @@ namespace ReportsProcatt.Models
                 new ViewElementAttr{ColumnName = CurrentBillsColumns.IN_PRICE, DisplayName = "Цена 1 бумаги на дату покупки", SortOrder = 6},
                 new ViewElementAttr{ColumnName = CurrentBillsColumns.Amount, DisplayName = "Кол-во, шт", SortOrder = 7},
                 new ViewElementAttr{ColumnName = CurrentBillsColumns.In_Summa, DisplayName = "Сумма покупки без НКД", SortOrder = 8},
-                new ViewElementAttr{ColumnName = CurrentBillsColumns.UKD, DisplayName = "Уплаченный НКД", SortOrder = 9},
+                //new ViewElementAttr{ColumnName = CurrentBillsColumns.UKD, DisplayName = "Уплаченный НКД", SortOrder = 9},
                 new ViewElementAttr{ColumnName = CurrentBillsColumns.In_Summa_UKD, DisplayName = "Сумма покупки с НКД", SortOrder = 10},
                 new ViewElementAttr{ColumnName = CurrentBillsColumns.Today_Price, DisplayName = "Цена 1 бумаги на дату отчета", SortOrder = 11},
                 new ViewElementAttr{ColumnName = CurrentBillsColumns.NKD, DisplayName = "НКД", SortOrder = 12},
@@ -805,7 +805,7 @@ namespace ReportsProcatt.Models
                 row[CurrentBillsColumns.IN_PRICE] = $"{dr["IN_PRICE"].DecimalToStr("#,##0.00")} {dr["Valuta"]}";
                 row[CurrentBillsColumns.Amount] = dr["Amount"].DecimalToStr();
                 row[CurrentBillsColumns.In_Summa_UKD] = (dr["In_Summa"].ToDecimal() + dr["UKD"].ToDecimal()).DecimalToStr("#,##0.00");
-                row[CurrentBillsColumns.UKD] = dr["UKD"].DecimalToStr("#,##0.00");
+                //row[CurrentBillsColumns.UKD] = dr["UKD"].DecimalToStr("#,##0.00");
                 row[CurrentBillsColumns.In_Summa] = dr["In_Summa"].DecimalToStr("#,##0.00");
                 row[CurrentBillsColumns.Today_Price] = dr["Today_Price"].DecimalToStr("#,##0.00");
                 row[CurrentBillsColumns.NKD] = dr["NKD"].DecimalToStr("#,##0.00");
