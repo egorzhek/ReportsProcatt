@@ -3657,7 +3657,7 @@ AS BEGIN
 			RT.[RATE]
 		FROM [BAL_DATA_STD].[dbo].[OD_VALUES_RATES] AS RT
 		WHERE RT.[VALUE_ID] = 2 -- доллары
-		AND RT.[E_DATE] >= B.[PaymentDateTime] and RT.[OFICDATE] < B.[PaymentDateTime]
+		AND RT.[E_DATE] >= cast(B.[PaymentDateTime] as date) and RT.[OFICDATE] < cast(B.[PaymentDateTime] as date)
 		ORDER BY
 			case when DATEPART(YEAR,RT.[E_DATE]) = 9999 then 1 else 0 end ASC,
 			RT.[E_DATE] DESC,
@@ -3670,7 +3670,7 @@ AS BEGIN
 			RT.[RATE]
 		FROM [BAL_DATA_STD].[dbo].[OD_VALUES_RATES] AS RT
 		WHERE RT.[VALUE_ID] = 5 -- евро
-		AND RT.[E_DATE] >= B.[PaymentDateTime] and RT.[OFICDATE] < B.[PaymentDateTime]
+		AND RT.[E_DATE] >= cast(B.[PaymentDateTime] as date) and RT.[OFICDATE] < cast(B.[PaymentDateTime] as date)
 		ORDER BY
 			case when DATEPART(YEAR,RT.[E_DATE]) = 9999 then 1 else 0 end ASC,
 			RT.[E_DATE] DESC,
