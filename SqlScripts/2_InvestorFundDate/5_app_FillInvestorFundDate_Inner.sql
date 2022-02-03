@@ -728,6 +728,7 @@ AS BEGIN
 					AND R.REG_2 = @FundId
 					AND R.REG_1 = @Investor
 					AND T.WIRING is not null
+					AND B2.ID <> 2841
 					AND B2.WALK > 0 -- проводка реализована.
 				 ) as Res
 				FULL JOIN
