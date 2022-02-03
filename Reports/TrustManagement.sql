@@ -1405,6 +1405,7 @@ from #POSITION_KEEPING_EndDate as a with(nolock)
 inner join #TrustTree as b with(nolock) on a.ShareId = b.VALUE_ID
 inner join [dbo].[InvestmentIds] as i with(nolock) on b.InvestmentId = i.Id
 left join [dbo].[Currencies] as c with(nolock) on a.CUR_ID = c.Id
+where a.IsActive = 1
 
 declare @CategoryId Int, @IsActive Int
 
