@@ -1396,7 +1396,7 @@ select
 	Child2Id = a.Id,
 	ChildId = b.InvestmentId,
 	Child2Name = i.Investment,
-	Price = CAST(Round(a.VALUE_NOM,2) as Decimal(30,2)),
+	Price = CAST(Round(a.VALUE_NOM + a.NKD,2) as Decimal(30,2)),
 	Valuta = c.ShortName,
 	Ammount = a.Amount,
 	a.FinRes,
