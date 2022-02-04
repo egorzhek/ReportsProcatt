@@ -485,4 +485,35 @@ namespace ReportsProcatt.Models
         public const int DivsNCouponsDetails = 8;
         public const int DivsNCouponsChart = 9;
     }
+    public sealed class Singleton
+    {
+        private Singleton()
+        {
+            // инициализировать новый экземпляр объекта
+        }
+
+        private static volatile Singleton singletonInstance;
+
+        private static readonly Object syncRoot = new Object();
+
+        public static Singleton GetInstance()
+        {
+            // создан ли объект
+            if (singletonInstance == null)
+            {
+                // нет, не создан
+                // только один поток может создать его
+                lock (syncRoot)
+                {
+                    // проверяем, не создал ли объект другой поток
+                    if (singletonInstance == null)
+                    {
+                        // нет не создал — создаём
+                        singletonInstance = new Singleton();
+                    }
+                }
+            }
+            return singletonInstance;
+        }
+    }
 }
