@@ -17,10 +17,6 @@ namespace ReportsProcatt.Controllers
 
         public ReportController(IGeneratePdf generatePdf)
         {
-            if(Environment.GetEnvironmentVariable("ReportPath") == null)
-            {
-                Environment.SetEnvironmentVariable("ReportPath", @"c:\Users\D\source\Ingos\ReportsProcatt\Reports\");
-            }
             _generatePdf = generatePdf;
         }
 
@@ -46,12 +42,6 @@ namespace ReportsProcatt.Controllers
                                         "Type must be in [MF, TM];" : "")}");
             try
             {
-                var options = new ConvertOptions
-                {
-                    HeaderHtml = "http://localhost/header.html",
-                    PageOrientation = Wkhtmltopdf.NetCore.Options.Orientation.Landscape
-                };
-
                 if (string.IsNullOrEmpty(Type))
                 {
                     var data = new Report((int)InvestorId, DateFrom, DateTo, Currency)
