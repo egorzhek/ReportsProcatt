@@ -60,13 +60,13 @@ from
     from
     (
 		select
-            CUR_ID = 1, VALUE_RUR = [dbo].f_Round(SumAmount * RATE, 2) , CLASS = 10
+            CUR_ID = 1, VALUE_RUR = [dbo].f_Round((SumAmount-AmountDay) * RATE, 2) , CLASS = 10
         from @Funds as f
         join [dbo].[InvestorFundDate] as fs with(nolock) on f.FundId = fs.FundId
         where fs.Investor = @Investor_Id and fs.[Date] = @Date
         union all
         select
-            CUR_ID = 1, VALUE_RUR = [dbo].f_Round(SumAmount * RATE, 2) , CLASS = 10
+            CUR_ID = 1, VALUE_RUR = [dbo].f_Round((SumAmount-AmountDay) * RATE, 2) , CLASS = 10
         from @Funds as f
         join [dbo].[InvestorFundDateLast] as fs with(nolock) on f.FundId = fs.FundId
         where fs.Investor = @Investor_Id and fs.[Date] = @Date
