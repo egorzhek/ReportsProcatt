@@ -351,12 +351,12 @@ set @AllMinus_RUR = @AmountDayMinus_RUR;
         SELECT * 
         FROM [dbo].[FundHistory] AS A WITH(NOLOCK)
         WHERE A.Investor = @Investor AND A.FundId = @FundId
-        AND [W_Date] >= @StartDate AND [W_Date] < DateAdd(DAY,1, @EndDate)
+        AND [W_Date] >= @StartDate AND [W_Date] < @EndDate
         UNION
         SELECT * 
         FROM [dbo].[FundHistoryLast] AS A WITH(NOLOCK)
         WHERE A.Investor = @Investor AND A.FundId = @FundId
-        AND [W_Date] >= @StartDate AND [W_Date] < DateAdd(DAY,1, @EndDate)
+        AND [W_Date] >= @StartDate AND [W_Date] < @EndDate
     ) AS B
     LEFT JOIN [dbo].[WalkTypes] AS C WITH(NOLOCK) ON B.WALK = C.WALK AND B.[TYPE] = C.[TYPE]
     ORDER BY B.[W_Date];
