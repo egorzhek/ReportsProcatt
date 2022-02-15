@@ -1114,7 +1114,8 @@ AS BEGIN
 	left join [BAL_DATA_STD].[dbo].OD_SHARES AS S WITH(NOLOCK) on S.ID=R.REG_2
 	left join [BAL_DATA_STD].[dbo].OD_SYS_TABS AS ST WITH(NOLOCK) on ST.CODE='SHARE_CLASS' and S.CLASS=ST.NUM 
 	left join [BAL_DATA_STD].[dbo].OD_VALUES AS N WITH(NOLOCK) on N.ID=R.VALUE_ID   /*S.NOM_VAL*/
-	left join [BAL_DATA_STD].[dbo].OD_TURNS AS T WITH(NOLOCK)  on T.REST = R.ID and T.WIRDATE >= @DateStart 
+	left join [BAL_DATA_STD].[dbo].OD_TURNS AS T WITH(NOLOCK)  on T.REST = R.ID and T.WIRDATE >= @DateStart
+		and T.WIRDATE<='01.01.9999'
 	where P.WHOS = 17284 and P.SYS_NAME = 'MONEY' and T.IS_PLAN = 'F'
 	group by B.NUM_S, R.REG_2, V.NAME, B.SYS_NAME, V.V_TYPE, S.CLASS, ST.NAME, N.ID, N.SYSNAME, R.ID, B.WALK, V.ISIN
 	having (sum( T.TYPE_ * T.AMOUNT_ )<>0 )
@@ -1122,33 +1123,16 @@ AS BEGIN
 	order by  B.WALK, V.NAME;
 	--option(loop join,force order)
 
-	-- Теперь самое интересное
-	declare @ApplId int = -NEXT VALUE FOR ApplCycle; --ид для идентификации выборки из временой таблицы (произвольный)
-
-	declare @practitionerId int
+	
+	declare @practitionerId int, @RsetId Int
 
 	select @practitionerId = min(ShareId) from @FinInstruments
 
 	while @practitionerId is not null
 	begin
-
-		-- Если есть записи во временной таблице удаляем их
-		delete from [BAL_DATA_STD].[dbo].TMP_FIFO_JOURNAL where Appl_ID = @ApplId
-		--print @practitionerId
-		-- Запрлняем журнал FIFO
-		-- используем встоенную функцию Fansy для расчета журнала FIFO
-		exec [BAL_DATA_STD].[dbo].PR_INS_FIFO_LIFO 
-			1,						-- Считаем FIFO
-			@ApplId,				-- ИД Идентификации
-			@DateStart,				-- Начало периода
-			@DateEnd,				-- Окончание периода
-			'MONEY',				-- План счетов
-			'ПОРТФЕЛЬ,ПОРТФЕЛЬ-2,РБП.ФИ.',	
-			NULL,NULL,
-			@practitionerId,		-- ИД бумаги
-			@ContractId,			-- ИД Договора
-			NULL,NULL,NULL;
-
+			select @RsetId = RsetId
+			from @FinInstruments
+			where ShareId = @practitionerId
 
 		
 			select top 1
@@ -1217,65 +1201,127 @@ AS BEGIN
 				null as Oblig_Date_end,
 				null as Oferta_Date,
 				null as Oferta_Type,
-				(case when OW.WIRDATE is null then '1' else '0' end) as IsActive,
-				@DateEnd as Fifo_Date,
-				(case when IW.TAG>0 then IW.TAG else J.IN_WIR end) as IN_WIR,
-				(case when A.VAL is not null then dbo.f_AsDate(A.VAL) when IW.TAG>0 then IIW.WIRDATE else IW.WIRDATE end) as IN_DATE,
-				dbo.f_concat( (case when IW.TAG>0 then dbo.f_concat3( dbo.f_concat3( '( конвертация из ', IIC.NAME, ' '), IID.NUM_DATE, ' )') else '' end),IC.NAME) as IC_NAME,
-				IL.NUM as IL_NUM,
-				IL.ID as IN_DOL,
-				IR.TRANS as IR_TRANS,
-				ROUND(J.AMOUNT,2) as AMOUNT,
-				J.IN_SUMMA, 
-				J.IN_EQ, 
-				J.IN_COMM, 
-				J.IN_PRICE, 
-				J.IN_PRICE_EQ,
-				null as IN_PRICE_UKD, --IN_PRICE + запрос в историю операцию
-				null as Today_PRICE, --добавить цену за бумагу на дату ФИФО из таблицы OD_VALUES_RATES
-				null as Value_NOM, --Today_PRICE * Amount
-				null as Dividends, ---Добавить алгоритм расчета дивов
-				null as UKD, --- Нужно слазить в таблицу с историей и найти на дату покупки сумму УКД, разделить на Amount из портфеля и умножить на Amount из FIFO.
-				null as NKD, --- Нужно в портфеле на дату найти Value_NOM для BAL_ACC = 2782 для заданного ShareId, разделить на Amount из портфеля и умножить на Amount из FIFO
-				null as Amortizations, ---Добавить алгоритм расчета амортизации
-				null as Coupons, ---Добавить алгоритм расчета купонов
-				J.OUT_WIR,
-				OW.WIRDATE as OUT_DATE,  
-				OD.ID as OD_ID,
-				OC.NAME as OC_NAME,
-				OL.NUM as OL_NUM,        
-				OL.ID as OUT_DOL,
-				case
-					when OC.NAME in ('Вывод ЦБ', 'Погашение ценной бумаги', 'Операция по сделке (движение ЦБ)' ) then OW.K_SUMMA / OW.K_AMOUNT
-					else O_R.PRICE
-					end as Out_Price,
-				case 
-					when OC.NAME in ('Вывод ЦБ', 'Погашение ценной бумаги', 'Операция по сделке (движение ЦБ)' ) then OW.K_SUMMA / OW.K_AMOUNT * ROUND(J.AMOUNT,2)
-					else O_R.PRICE * ROUND(J.AMOUNT,2)
-					end as OUT_SUMMA_F,
-				J.OUT_EQ as OUT_EQ_F
-			FROM [BAL_DATA_STD].[dbo].TMP_FIFO_JOURNAL AS J WITH(NOLOCK)
-			left join [BAL_DATA_STD].[dbo].OD_WIRING AS IW WITH(NOLOCK) on IW.ID = J.IN_WIR
-			left join [BAL_DATA_STD].[dbo].OD_DOLS   AS IL WITH(NOLOCK) on IL.ID = IW.DOL
-			left join [BAL_DATA_STD].[dbo].OD_STEPS  AS IE WITH(NOLOCK) on IE.ID = IW.O_STEP 
-			left join [BAL_DATA_STD].[dbo].OD_DOCS AS ID WITH(NOLOCK)    on ID.ID = (case when IL.DOC is null then IE.DOC else IL.DOC end)     /* процедура сбора информации по провдкам должна работать по вторичному документу ввода */
-			left join [BAL_DATA_STD].[dbo].OD_DOC_CATS AS IC WITH(NOLOCK) on IC.ID = ID.D_CAT
-			left join [BAL_DATA_STD].[dbo].D_B_REESTR  AS IR WITH(NOLOCK) on IR.DOL = IL.ID
-			left join [BAL_DATA_STD].[dbo].OP_FIELDS AS F WITH(NOLOCK) on F.OP = IC.ID and IC.SYS_NAME = 'OP_P_INPUT_SHARE' and F.AS_NAME = 'INPUT_DATE'
-			left join [BAL_DATA_STD].[dbo].D_OP_VAL AS A WITH(NOLOCK) on A.DESCR = F.ID and A.LINE = IL.ID
+			case
+				when datepart(YEAR, OW.WIRDATE) = 9999 then '1' 
+				when OW.WIRDATE > @DateEnd then '1' 
+			else
+				(case when OW.WIRDATE is null then '1' else '0' end)
+			end
+			as IsActive,
+			--(case when J.AMOUNT_T = J.AMOUNT_R then 0 when J.AMOUNT_T = 0 then 1 else 2 end) as IsActive,  /* это для ORDER-а */
+			@DateEnd as Fifo_Date,
+			(case when B.BASE_ID=115 then P.IN_WIR else P.FIRST_WIR end) as IN_WIR,      /* у TRI в правилах - партии по вводу ЦБ встают в стек по дате ввода, а не по дате признания */
+			(case when B.BASE_ID=115 then P.IN_DATE else P.FIRST_DATE end) as IN_DATE, /* а я дату признания менять не могу, т.к. полетят все дисконты */
+			
+			C.NAME --+' '+D.NUM_DATE
+				--+(case when L.ID is null then '' else ' стр.'+[BAL_DATA_STD].[dbo].f_IntToStr(L.NUM)end)
+				--+(case when R.TRANS is null then '' else ' биржевой код '+R.TRANS end) 
+				as IC_NAME, 
+			L.NUM as IL_NUM,
+			L.ID as IN_DOL,
+			R.TRANS as IR_TRANS,
+			ROUND(J.AMOUNT_T,2) as AMOUNT,
+			J.SUMMA_T as IN_SUMMA, -- ???? не уверен, что EXPENSE_T нужно
+			J.SUMMA_EQ_T as IN_EQ,
+			J.EXPENSE_T as IN_COMM,
+			P.PRICE as IN_PRICE,
+			P.PRICE_EQ as IN_PRICE_EQ,
+			null as IN_PRICE_UKD, --IN_PRICE + запрос в историю операцию
+			null as Today_PRICE, --добавить цену за бумагу на дату ФИФО из таблицы OD_VALUES_RATES
+			null as Value_NOM, --Today_PRICE * Amount
+			null as Dividends, ---Добавить алгоритм расчета дивов
+			null as UKD, --- Нужно слазить в таблицу с историей и найти на дату покупки сумму УКД, разделить на Amount из портфеля и умножить на Amount из FIFO.
+			null as NKD, --- Нужно в портфеле на дату найти Value_NOM для BAL_ACC = 2782 для заданного ShareId, разделить на Amount из портфеля и умножить на Amount из FIFO
+			null as Amortizations, ---Добавить алгоритм расчета амортизации
+			null as Coupons, ---Добавить алгоритм расчета купонов
+			case
+				when datepart(year, OW.WIRDATE) < 9999 then J.OUT_WIR
+				else NULL
+			end
+			as OUT_WIR,
+			OW.WIRDATE as OUT_DATE,
+			OD.ID as OD_ID,
+			OC.NAME as OC_NAME,
+			OL.NUM as OL_NUM,
+			OL.ID as OUT_DOL,
 
-			left join [BAL_DATA_STD].[dbo].OD_WIRING AS IIW WITH(NOLOCK) on IIW.ID = IW.TAG
-			left join [BAL_DATA_STD].[dbo].OD_STEPS AS IIE WITH(NOLOCK) on IIE.ID = IIW.O_STEP
-			left join [BAL_DATA_STD].[dbo].OD_DOCS AS IID WITH(NOLOCK) on IID.ID = IIE.DOC
-			left join [BAL_DATA_STD].[dbo].OD_DOC_CATS AS IIC WITH(NOLOCK) on IIC.ID = IID.D_CAT
+			
+			case
+				when OC.NAME in ('Вывод ЦБ', 'Погашение ценной бумаги', 'Операция по сделке (движение ЦБ)' ) then OW.K_SUMMA / OW.K_AMOUNT
+				else O_R.PRICE
+				end as Out_Price,
+			case 
+				when OC.NAME in ('Вывод ЦБ', 'Погашение ценной бумаги', 'Операция по сделке (движение ЦБ)' ) then OW.K_SUMMA / OW.K_AMOUNT * ROUND(J.AMOUNT_T,2)
+				else O_R.PRICE * ROUND(J.AMOUNT_T,2)
+				end as OUT_SUMMA_F,
+			
+			
+			 
+			case
+				when datepart(year, OW.WIRDATE) < 9999 then J.REV_EQ_T
+				else NULL
+			end
+			as OUT_EQ_F
+
+			/*
+			P.FIRST_WIR, P.FIRST_DATE, P.IN_WIR, P.IN_DATE, P.PRICE_EQ,
+			(case when J.AMOUNT_T > 0 then P.FIRST_DATE else NULL end) as V_IN_DATE, J.WIR, J.WIRDATE, 
+			
+			J.AMOUNT_T, J.AMOUNT_R, J.SUMMA_T, J.SUMMA_R, J.SUMMA_EQ_T, J.SUMMA_EQ_R, 
+			J.EXPENSE_T, J.EXPENSE_R, J.EXPENSE_EQ_T, J.EXPENSE_EQ_R, 
+			J.DIS_T, J.DIS_R, 
+			J.SUMMA_N_T, J.SUMMA_N_R, J.BONUS_T, J.BONUS_R,
+			J.UKD_T, J.UKD_R, J.SKD_T, J.SKD_R, J.NKD_T, J.NKD_R, J.PKD_T, J.PKD_R, J.KORR_T, J.KORR_R,
+			J.RESERV_T, J.RESERV_R,
+			J.REV_T, J.REV_R, J.REV_EQ_T,  J.REV_EQ_R, J.ESP, J.ESP_DATE, J.ESP_PRICE,
+
+			D.ID, 
+
+			FD.ID as F_ID, FC.NAME+' '+FD.NUM_DATE
+				+(case when FL.ID is null then '' else ' стр.'+[BAL_DATA_STD].[dbo].f_IntToStr(FL.NUM)end)
+				+(case when FR.TRANS is null then '' else ' биржевой код '+FR.TRANS end) as FIRST_DOC_NUM 
+			*/
+			--, J.*
+
+			FROM [BAL_DATA_STD].[dbo].PR_STACK_JOURNAL( @RsetId, @DateStart, @DateEnd )  J
+			left join [BAL_DATA_STD].[dbo].OD_PR_BASE_ID B on 1 = 1
+			left join [BAL_DATA_STD].[dbo].OD_PARTIES P on P.IN_WIR = J.IN_WIR and P.OUT_WIR = J.OUT_WIR
+
+			left join [BAL_DATA_STD].[dbo].OD_WIRING W on W.ID = J.WIR
+			left join [BAL_DATA_STD].[dbo].OD_STEPS S on S.ID = W.O_STEP
+			left join [BAL_DATA_STD].[dbo].OD_DOLS L on L.ID = W.DOL
+			left join [BAL_DATA_STD].[dbo].OD_DOCS D on D.ID = (case when L.DOC is null then S.DOC else L.DOC end)
+			left join [BAL_DATA_STD].[dbo].OD_DOC_CATS C on C.ID = D.D_CAT
+			left join [BAL_DATA_STD].[dbo].D_B_REESTR R on R.DOL = L.ID
+
+			left join [BAL_DATA_STD].[dbo].OD_WIRING FW on FW.ID = P.FIRST_WIR
+			left join [BAL_DATA_STD].[dbo].OD_STEPS FS on FS.ID = FW.O_STEP
+			left join [BAL_DATA_STD].[dbo].OD_DOLS FL on FL.ID = FW.DOL
+			left join [BAL_DATA_STD].[dbo].OD_DOCS FD on FD.ID = (case when FL.DOC is null then FS.DOC else FL.DOC end)
+			left join [BAL_DATA_STD].[dbo].OD_DOC_CATS FC on FC.ID = FD.D_CAT
+			left join [BAL_DATA_STD].[dbo].D_B_REESTR FR on FR.DOL = FL.ID
 
 			left join [BAL_DATA_STD].[dbo].OD_WIRING AS OW WITH(NOLOCK) on OW.ID = J.OUT_WIR
+					and datepart(YEAR, OW.WIRDATE) < 9999 
+					and
+					case
+						when datepart(YEAR, OW.WIRDATE) = 9999 then '1' 
+						when OW.WIRDATE > @DateEnd then '1' 
+					else
+						(case when OW.WIRDATE is null then '1' else '0' end)
+					end = '0'
+
+
+
+
 			left join [BAL_DATA_STD].[dbo].OD_STEPS AS OE WITH(NOLOCK)  on OE.ID = OW.O_STEP
 			left join [BAL_DATA_STD].[dbo].OD_DOLS AS OL WITH(NOLOCK)   on OL.ID = OW.DOL
 			left join [BAL_DATA_STD].[dbo].OD_DOCS AS OD WITH(NOLOCK)    on OD.ID = (case when OL.DOC is null then OE.DOC else OL.DOC end)
 			left join [BAL_DATA_STD].[dbo].OD_DOC_CATS AS OC WITH(NOLOCK) on OC.ID = OD.D_CAT
 			left join [BAL_DATA_STD].[dbo].D_B_REESTR AS O_R WITH(NOLOCK) on O_R.DOL = OL.ID
-			where J.APPL_ID = @ApplId and J.Amount > 0;
+
+			WHERE J.WIRDATE <> '01.01.9999' and J.AMOUNT_T > 0
+			option(loop join,force order);
 
 		select @practitionerId = min(ShareId) from @FinInstruments where ShareId > @practitionerId
 	end
@@ -4902,5 +4948,25 @@ AS BEGIN
     END TRY
     BEGIN CATCH
     END CATCH;
+END
+GO
+CREATE OR ALTER PROCEDURE [dbo].[app_Reload_POSITION_KEEPING]
+(
+	@InvestorId INT,
+	@ContractId INT
+)
+AS BEGIN
+	delete From [POSITION_KEEPING]
+	where InvestorId = @InvestorId and	ContractId = @ContractId
+
+	delete From [POSITION_KEEPING_Last]
+	where InvestorId = @InvestorId and	ContractId = @ContractId
+
+	delete From [dbo].[PortFolio_Daily_Before]
+	where InvestorId = @InvestorId and	ContractId = @ContractId
+	
+	EXEC [dbo].[app_FillPortFolio_Daily_Before]
+				@InvestorId = @InvestorId,
+				@ContractId = @ContractId;
 END
 GO
