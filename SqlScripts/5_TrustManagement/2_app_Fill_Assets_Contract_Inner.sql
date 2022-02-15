@@ -4970,3 +4970,42 @@ AS BEGIN
 				@ContractId = @ContractId;
 END
 GO
+CREATE OR ALTER PROCEDURE [dbo].[app_Reload_All_Keepings]
+(
+	@ParamINVESTOR Int = NULL -- инвестор, если NULL, то пересчёт будет по всем инвесторам
+)
+AS BEGIN
+	DECLARE @ContractId Int, @InvestorId Int, @ProcName NVarChar(Max) = OBJECT_NAME(@@PROCID), @Error NVarChar(Max)
+
+	declare obj_cur cursor local fast_forward for
+		SELECT
+			InvestorId, ContractId
+		FROM [dbo].[Assets_Info]
+		where DATE_CLOSE >= '2020-01-01' 
+		order by InvestorId desc, ContractId
+	open obj_cur
+	fetch next from obj_cur into
+		@InvestorId, @ContractId
+	while(@@fetch_status = 0)
+	begin
+		BEGIN TRY
+			EXEC [dbo].[app_Reload_POSITION_KEEPING]
+					@InvestorId = @InvestorId, 
+					@ContractId = @ContractId
+		END TRY
+		BEGIN CATCH
+			SET @Error = ERROR_MESSAGE();
+
+			-- ошибку в лог
+			INSERT INTO [dbo].[ProcessorErrors] ([Error], [ContractId])
+			SELECT @ProcName + ': ' + @Error, @ContractId;
+		END CATCH
+
+		fetch next from obj_cur into
+			@InvestorId, @ContractId
+	end
+
+	close obj_cur
+	deallocate obj_cur
+END
+GO
