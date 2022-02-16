@@ -367,7 +367,7 @@
     </div>
     <div style="page-break-before: always;"></div>
 }
-@*/*
+
 @if (Model.CurrentShares.Table.Rows.Count > 0)
 {
     count += 4 + Model.CurrentShares.Table.Rows.Count * 2;
@@ -743,7 +743,7 @@
         @Html.Partial("_PartialTableView", Model.ClosedDerivatives)
     </div>
 }
-*/*@
+
 @if (Model.ClosedCash.Table.Rows.Count > 0)
 {
     <div class="print-pt100 keep-together">
