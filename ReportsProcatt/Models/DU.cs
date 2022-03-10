@@ -24,7 +24,7 @@ namespace ReportsProcatt.Models
         public string Totals { get; set; }
         public string Dividends { get; set; }
         public string Coupons { get; set; }
-        public ChartDiaramnClass DividedtsCouponsChart { get; set; }
+        public ChartDiagramClass DividedtsCouponsChart { get; set; }
 
         //Детализация купонов и дивидендов
         public TableView DividedtsCoupons { get; set; }
@@ -246,17 +246,17 @@ namespace ReportsProcatt.Models
 
                 var cl = new CultureInfo("ru-RU", false);
 
-                DividedtsCouponsChart = new ChartDiaramnClass($"DividedtsCouponsChart_{Id}")
+                DividedtsCouponsChart = new ChartDiagramClass($"DividedtsCouponsChart_{Id}")
                 {
                     Lables = _TrustManagementDS.Tables[DuTables.DivsNCoupsChartDT].Rows.Cast<DataRow>().ToList()
                         .Select(r => ((DateTime)r["Date"]).ToCharString()).ToList(),
                     Type = "bar",
-                    DataSets = new List<ChartDiaramnClass.DataSetClass>()
+                    DataSets = new List<ChartDiagramClass.DataSetClass>()
                     {
-                        new ChartDiaramnClass.DataSetClass
+                        new ChartDiagramClass.DataSetClass
                         {
                             data = _TrustManagementDS.Tables[DuTables.DivsNCoupsChartDT].Rows.Cast<DataRow>().ToList()
-                                .Select(r => new ChartDiaramnClass.DataClass
+                                .Select(r => new ChartDiagramClass.DataClass
                                 {
                                     value = (r["Dividends"] as decimal?) ?? 0,
                                     borderColor = "#E9F3F8"
@@ -264,10 +264,10 @@ namespace ReportsProcatt.Models
                             backgroundColor = "#E9F3F8",
                             lable = "Дивиденды"
                         },
-                        new ChartDiaramnClass.DataSetClass
+                        new ChartDiagramClass.DataSetClass
                         {
                             data = _TrustManagementDS.Tables[DuTables.DivsNCoupsChartDT].Rows.Cast<DataRow>().ToList()
-                                .Select(r => new ChartDiaramnClass.DataClass
+                                .Select(r => new ChartDiagramClass.DataClass
                                 {
                                     value = (r["Coupons"] as decimal?) ?? 0,
                                     borderColor = "#09669A"

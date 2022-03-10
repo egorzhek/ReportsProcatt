@@ -1,4 +1,4 @@
-﻿@model ReportsProcatt.Models.ChartDiaramnClass
+﻿@model ReportsProcatt.Models.ChartDiagramClass
 @{ 
     int len = Model.DataSets[0].data.Max(t => Math.Abs(Math.Round(t.value))).ToString().Length;
     len = Math.Max(len, Model.DataSets[1].data.Max(t => Math.Abs(Math.Round(t.value))).ToString().Length);

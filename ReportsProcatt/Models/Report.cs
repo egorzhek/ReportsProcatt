@@ -26,7 +26,7 @@ namespace ReportsProcatt.Models
         public TableView DUsTotals { get; set; }
         public TableView AllAssets { get; set; }
         public TableView DivsNCoupons { get; set; }
-        public ChartDiaramnClass DivsNCouponsChart { get; set; }
+        public ChartDiagramClass DivsNCouponsChart { get; set; }
         public TableView DivsNCouponsDetails { get; set; }
         public CircleDiagram Assets { get; set; }
         public CircleDiagram Instruments { get; set; }
@@ -174,17 +174,17 @@ namespace ReportsProcatt.Models
         {
             var cl = new CultureInfo("ru-RU", false);
 
-            DivsNCouponsChart = new ChartDiaramnClass($"DivsNCoupons_main")
+            DivsNCouponsChart = new ChartDiagramClass($"DivsNCoupons_main")
             {
                 Lables = _invFullDS.Tables[InvestFullTables.DivsNCouponsChart].Rows.Cast<DataRow>().ToList()
                     .Select(r => ((DateTime)r["Date"]).ToCharString()).ToList(),
                 Type = "bar",
-                DataSets = new List<ChartDiaramnClass.DataSetClass>()
+                DataSets = new List<ChartDiagramClass.DataSetClass>()
                     {
-                        new ChartDiaramnClass.DataSetClass
+                        new ChartDiagramClass.DataSetClass
                         {
                             data = _invFullDS.Tables[InvestFullTables.DivsNCouponsChart].Rows.Cast<DataRow>().ToList()
-                                .Select(r => new ChartDiaramnClass.DataClass
+                                .Select(r => new ChartDiagramClass.DataClass
                                 {
                                     value = (r["Dividends"] as decimal?) ?? 0,
                                     borderColor = "#E9F3F8"
@@ -192,10 +192,10 @@ namespace ReportsProcatt.Models
                             backgroundColor = "#E9F3F8",
                             lable = "Дивиденды"
                         },
-                        new ChartDiaramnClass.DataSetClass
+                        new ChartDiagramClass.DataSetClass
                         {
                             data = _invFullDS.Tables[InvestFullTables.DivsNCouponsChart].Rows.Cast<DataRow>().ToList()
-                                .Select(r => new ChartDiaramnClass.DataClass
+                                .Select(r => new ChartDiagramClass.DataClass
                                 {
                                     value = (r["Coupons"] as decimal?) ?? 0,
                                     borderColor = "#09669A"

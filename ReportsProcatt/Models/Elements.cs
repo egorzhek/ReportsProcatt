@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ReportsProcatt.Models
 {
-    public class ChartDiaramnClass 
+    public class ChartDiagramClass 
     {
         public string ElementName { get; private set; }
         public string Type { get; set; }
@@ -23,7 +23,7 @@ namespace ReportsProcatt.Models
             public decimal value { get; set; }
             public string borderColor { get; set; }
         }
-        public ChartDiaramnClass(string aElementName)
+        public ChartDiagramClass(string aElementName)
         {
             ElementName = aElementName;
         }
@@ -94,10 +94,4 @@ namespace ReportsProcatt.Models
 
         };
     }
-
-    public static partial class Extentions
-    {
-        
-    }
-    
 }
