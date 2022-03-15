@@ -524,7 +524,7 @@ table {
     position: relative;
     width: 100%;
     padding: 0 32px;
-    height: 268px;
+    height: 134px;
     background: #FFFFFF;
     -webkit-box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.08), 0px 2px 4px rgba(0, 0, 0, 0.08);
     box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.08), 0px 2px 4px rgba(0, 0, 0, 0.08);
@@ -580,12 +580,8 @@ table {
     box-shadow: 0px 12px 24px rgba(0, 0, 0, 0.08)
 }
 
-.progression-item .progression-item-text {
-    position: absolute;
-    top: 22px;
-    left: 50%;
-    -webkit-transform: translateX(-50%);
-    transform: translateX(-50%);
+ .progression-item-text {
+    position: relative;
     padding: 8px;
     min-width: 83px;
     width: auto;
@@ -596,20 +592,7 @@ table {
     border-radius: 5px
 }
 
-.progression-item .progression-item-text:after {
-    content: '';
-    position: absolute;
-    left: 50%;
-    -webkit-transform: translateX(-50%);
-    transform: translateX(-50%);
-    height: 16px;
-    width: 2px;
-    top: -15px;
-    background-color: #E4E4E4;
-    z-index: -1
-}
-
-.progression-item .progression-item-text p {
+ .progression-item-text p {
     color: #B3B3B3;
     font-size: 12px;
     line-height: 12px;
@@ -620,7 +603,7 @@ table {
     color: rgba(0, 0, 0, 0.3)
 }
 
-.progression-item .progression-item-text span {
+ .progression-item-text span {
     display: block;
     width: 100%;
     color: #666666;
@@ -635,31 +618,6 @@ table {
 
 .progression-top {
     background: #D2E6EF
-}
-
-.progression-top .progression-item-text {
-    top: -80px;
-    background: #EBF6FA
-}
-
-.progression-top .progression-item-text:after {
-    top: auto;
-    bottom: -15px;
-    background: rgba(157, 208, 230, 0.2)
-}
-
-.progression-minus {
-    background: #EFC0C0;
-    -webkit-box-shadow: 0px 12px 24px rgba(0, 0, 0, 0.08);
-    box-shadow: 0px 12px 24px rgba(0, 0, 0, 0.08)
-}
-
-.progression-minus .progression-item-text {
-    background: rgba(230, 157, 157, 0.4)
-}
-
-.progression-minus .progression-item-text:after {
-    background: #EFC0C0
 }
 
 .second-assets-section {
