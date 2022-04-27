@@ -441,45 +441,66 @@ AS BEGIN
 			Amount, Value_Nom = dbo.f_Round(Value_RUR * (1/isnull(VB.RATE,1)), 2), Currency, Fee, PaperId
 		from
 		(
-			select distinct
-				z.INVESTOR as Investor,
-				z.DOC as ContractID,
-				dbo.f_Date(T.WIRDATE) as W_Date, -- Дата движения ДС (ЦБ)
-				-T.TYPE_ as Type, --Тип (1 - ввод, -1 - вывод)
-				w.NAME as T_Name,-- Наименование операции
-				sv.ISIN as ISIN, --ISIN ценной бумаги
-				sv.NAME as Investment, --Название инструмента
-				w.D_Summa / nullif(w.D_AMOUNT - w.K_AMOUNT,0) as Price, --Цена одной бумаги  -------------------------Высчитываем сумму в валюте номинала (по курсу) а потом делим на Amount 
-				w.D_AMOUNT - w.K_AMOUNT as Amount, --Количество бумаг
-				w.D_Summa as Value_Nom, -- Сумма сделки в валюте номинала -найти курс валюты и пересчитать из рублей
-				sh.NOM_VAL as Currency, --код валюты
-				0 as Fee, --Комиссия
-				dbo.f_Round(-T.EQ_ * T.TYPE_, 2) as Value_RUR, -- Сумма сделки в рублях
-				sv.ID as PaperId
-			FROM [BAL_DATA_STD].[dbo].D_B_CONTRACTS AS Z WITH(NOLOCK)
-			INNER JOIN [BAL_DATA_STD].[dbo].OD_ACC_PLANS AS P WITH(NOLOCK) on P.SYS_NAME = 'MONEY'
-			INNER JOIN [BAL_DATA_STD].[dbo].OD_BALANCES AS B WITH(NOLOCK) on B.ACC_PLAN = P.ID and B.SYS_NAME = 'ФОНД'
-			INNER JOIN [BAL_DATA_STD].[dbo].OD_RESTS AS R WITH(NOLOCK) on R.BAL_ACC = B.ID and R.REG_1 = Z.INVESTOR and R.REG_3 = Z.DOC
-			INNER JOIN [BAL_DATA_STD].[dbo].OD_TURNS AS T WITH(NOLOCK) on T.REST = R.ID and T.WIRDATE >= @StartDate and T.WIRDATE <= @EndDate
-			INNER JOIN [BAL_DATA_STD].[dbo].OD_WIRING AS W WITH(NOLOCK) on W.ID = T.WIRING
-			left join [BAL_DATA_STD].[dbo].OD_TURNS AS rt WITH(NOLOCK) on rt.WIRING = W.ID and rt.TYPE_ = -T.TYPE_
-			left join [BAL_DATA_STD].[dbo].OD_RESTS AS rr WITH(NOLOCK) on rr.ID = rt.REST
-			left join [BAL_DATA_STD].[dbo].OD_BALANCES AS rb WITH(NOLOCK) on rb.ID = rr.BAL_ACC
-			left join [BAL_DATA_STD].[dbo].OD_VALUES AS sv WITH(NOLOCK) on sv.ID = rr.REG_2
-			left join [BAL_DATA_STD].[dbo].OD_SHARES AS sh WITH(NOLOCK) on sh.ID = sv.ID
-			left join [BAL_DATA_STD].[dbo].OD_SYS_TABS AS sc WITH(NOLOCK) on sc.CODE = 'SHARE_CLASS' and sc.NUM = sh.CLASS
-			left join [BAL_DATA_STD].[dbo].OD_VALUES AS nv WITH(NOLOCK) on nv.ID = sh.NOM_VAL
-			INNER JOIN [BAL_DATA_STD].[dbo].OD_STEPS AS S WITH(NOLOCK) on S.ID = W.O_STEP
-			INNER JOIN [BAL_DATA_STD].[dbo].OD_DOCS AS D WITH(NOLOCK) on D.ID = S.DOC
-
-			left join [BAL_DATA_STD].[dbo].OD_DOLS AS DOL WITH(NOLOCK) on DOL.DOC = d.ID -- возьмем подвалы документов
-			left join [BAL_DATA_STD].[dbo].D_OP_VAL AS DV WITH(NOLOCK) on DV.DOC=D.ID and DV.DESCR in (1743,1766) and DV.LINE=DOL.ID -- узнаем коды валюты операции 
-			left join [BAL_DATA_STD].[dbo].OD_VALUES AS VO WITH(NOLOCK) on VO.ID = DV.VAL -- Получим код валюты
-			left join [BAL_DATA_STD].[dbo].D_OP_VAL AS DV1 WITH(NOLOCK) on DV1.DOC = D.Id and DV1.DESCR in (1746,1765) and DV1.LINE=DOL.ID -- получим сумму операции
-			INNER JOIN [BAL_DATA_STD].[dbo].D_OP_VAL AS DV2 WITH(NOLOCK) on DV2.DOC = D.Id and DV2.DESCR in (1742,1763,1759,1772) and DV2.LINE = DOL.ID and DV2.VAL = Z.DOC -- т.к. одним документом можно провести деньги по разным договорам, оставим только те операции, которые касаются конкретного портфеля.
+			select
+		R.REG_1 as Investor,
+		R.REG_3 as ContractID,
+		dbo.f_Date(w.WIRDATE) as W_Date, -- Дата движения ДС (ЦБ)
+		T.TYPE_ as Type, --Тип (1 - ввод, -1 - вывод)
+		w.NAME as T_Name,-- Наименование операции
+		V1.ISIN as ISIN, --ISIN ценной бумаги
+		V1.NAME as Investment, --Название инструмента
+			case 
+				when r1.OFICDATE is null --оценка если нет котировки
+				then (-1) * Nots.B_in
+							else  ( (case when r1.RATE3 = 0 then r1.rate else r1.RATE3 end)+(case when r1.NKD = 0 then nkd.NKD else r1.NKD end )) * t.VALUE_ * t.TYPE_ * isnull(r2.RATE,1)    --оценка если есть котировка
+			end / W.D_SUMMA as Price,
+		W.D_SUMMA * T.TYPE_ as Amount,
+		Round (
+			case 
+				when r1.OFICDATE is null --оценка если нет котировки
+				then (-1) * Nots.B_in
+							else  ( (case when r1.RATE3 = 0 then r1.rate else r1.RATE3 end)+(case when r1.NKD = 0 then nkd.NKD else r1.NKD end )) * t.VALUE_ * t.TYPE_ * isnull(r2.RATE,1)    --оценка если есть котировка
+			end, 2) * T.TYPE_ as Value_Nom,
+		sh.NOM_VAL as Currency, --код валюты
+		0 as Fee, --Комиссия
+		Round (
+			case 
+				when r1.OFICDATE is null --оценка если нет котировки
+				then (-1) * Nots.B_in
+							else  ( (case when r1.RATE3 = 0 then r1.rate else r1.RATE3 end)+(case when r1.NKD = 0 then nkd.NKD else r1.NKD end )) * t.VALUE_ * t.TYPE_ * isnull(r2.RATE,1)    --оценка если есть котировка
+			end  , 2) as Value_RUR, -- Сумма сделки в рублях
+		V1.ID as PaperId
+		from 
+			BAL_DATA_std.dbo.OD_RESTS as R
+			left join BAL_DATA_std.dbo.OD_TURNS as T with(readcommitted)	on T.REST = R.ID and T.IS_PLAN = 'F'
+			left join BAL_DATA_std.dbo.OD_WIRING as W						on W.ID = T.WIRING
+			left join BAL_DATA_std.dbo.OD_TURNS as T2 with(readcommitted)	on T2.WIRING = T.WIRING and T2.TYPE_ = -T.TYPE_
+			left join BAL_DATA_std.dbo.OD_STEPS as S						on S.ID = W.O_STEP
+			left join BAL_DATA_std.dbo.OD_DOCS as D							on D.ID = S.DOC
+			left join BAL_DATA_std.dbo.OD_DOC_CATS as C						on C.ID = D.D_CAT
+			left join BAL_DATA_std.dbo.OD_DOLS as L							on L.ID = W.DOL
+			left join BAL_DATA_std.dbo.OD_VALUES_RATES as R1				on r1.VALUE_ID = r.VALUE_ID and r1.MARKET = 140079 and r1.E_DATE > cast(T.WIRDATE as date)
+			left join BAL_DATA_std.dbo.OD_VALUES as V1						on v1.ID = r.VALUE_ID
+			left join BAL_DATA_std.dbo.OD_VALUES_RATES as R2				on r2.VALUE_ID = r1.RATE_VAL and r2.MARKET = 0 and R2.E_DATE > cast(T.WIRDATE as date) and R2.OFICDATE <= cast(T.WIRDATE as date)
+			left join BAL_DATA_std.dbo.OD_VALUES_RATES as R3				on r3.VALUE_ID = 1 and r3.MARKET = 0 and R3.E_DATE > cast(T.WIRDATE as date) and R3.OFICDATE <= cast(T.WIRDATE as date)
+			left join [BAL_DATA_STD].[dbo].OD_SHARES as sh WITH(NOLOCK)		on sh.ID = V1.ID
 			OUTER APPLY
 			(
-				SELECT TOP 1
+				select 
+					sum(WT.K_SUMMA * isnull(r28.RATE,1)) as B_in,
+					WT.DOL
+				from BAL_DATA_STD.dbo.OD_WIRING as WT 
+				left join BAL_DATA_STD.dbo.OD_RESTS as K_R ON K_R.ID = WT.K_REST 
+				left join BAL_DATA_std.dbo.OD_VALUES_RATES as R28 ON r28.VALUE_ID = K_R.VALUE_ID and r28.MARKET = 0 and R28.E_DATE > cast(WT.WIRDATE as date)  and R28.OFICDATE <= cast(WT.WIRDATE as date)
+				where WT.PLAN_ID = 95
+				and K_R.REG_3 = @ContractId
+				and WT.DOL = l.ID
+				group by WT.DOL
+			) as nots
+			CROSS APPLY BAL_DATA_std.[dbo].[FU_GET_NKD_FUNC] (r.VALUE_ID, r1.OFICDATE,1) as nkd
+			OUTER APPLY
+			(
+				SELECT TOP (1)
 					RT.[RATE]
 				FROM [BAL_DATA_STD].[dbo].[OD_VALUES_RATES] AS RT
 				WHERE RT.[VALUE_ID] = sh.NOM_VAL -- валюта
@@ -489,14 +510,12 @@ AS BEGIN
 					RT.[E_DATE] DESC,
 					RT.[OFICDATE] DESC
 			) AS VV
-			WHERE
-			T.IS_PLAN = 'F'
-			and W.ID is not null
-			and T.VALUE_ <> 0
-			and Z.DOC = @ContractId
-			and S.S_TYPE not in (1052 ,7612481)
-			and DV2.VAL is not null
-			and DV1.VAL is null
+		where R.BAL_ACC = 639
+			and R.REG_3 = @ContractId
+			and T.WIRING is not null
+			and c.ID in (630,627,768)
+			and isnull(r1.OFICDATE,0) <= cast(T.WIRDATE as date)
+			and cast(T.WIRDATE as date) >= @StartDate and cast(T.WIRDATE as date) < @EndDate
 		) as RR
 		OUTER APPLY
 		(
