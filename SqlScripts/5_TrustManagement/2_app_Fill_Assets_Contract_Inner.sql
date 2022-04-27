@@ -442,35 +442,35 @@ AS BEGIN
 		from
 		(
 			select
-		R.REG_1 as Investor,
-		R.REG_3 as ContractID,
-		dbo.f_Date(w.WIRDATE) as W_Date, -- Дата движения ДС (ЦБ)
-		T.TYPE_ as Type, --Тип (1 - ввод, -1 - вывод)
-		w.NAME as T_Name,-- Наименование операции
-		V1.ISIN as ISIN, --ISIN ценной бумаги
-		V1.NAME as Investment, --Название инструмента
-			case 
-				when r1.OFICDATE is null --оценка если нет котировки
-				then (-1) * Nots.B_in
-							else  ( (case when r1.RATE3 = 0 then r1.rate else r1.RATE3 end)+(case when r1.NKD = 0 then nkd.NKD else r1.NKD end )) * t.VALUE_ * t.TYPE_ * isnull(r2.RATE,1)    --оценка если есть котировка
-			end / W.D_SUMMA as Price,
-		W.D_SUMMA * T.TYPE_ as Amount,
-		Round (
-			case 
-				when r1.OFICDATE is null --оценка если нет котировки
-				then (-1) * Nots.B_in
-							else  ( (case when r1.RATE3 = 0 then r1.rate else r1.RATE3 end)+(case when r1.NKD = 0 then nkd.NKD else r1.NKD end )) * t.VALUE_ * t.TYPE_ * isnull(r2.RATE,1)    --оценка если есть котировка
-			end, 2) * T.TYPE_ as Value_Nom,
-		sh.NOM_VAL as Currency, --код валюты
-		0 as Fee, --Комиссия
-		Round (
-			case 
-				when r1.OFICDATE is null --оценка если нет котировки
-				then (-1) * Nots.B_in
-							else  ( (case when r1.RATE3 = 0 then r1.rate else r1.RATE3 end)+(case when r1.NKD = 0 then nkd.NKD else r1.NKD end )) * t.VALUE_ * t.TYPE_ * isnull(r2.RATE,1)    --оценка если есть котировка
-			end  , 2) as Value_RUR, -- Сумма сделки в рублях
-		V1.ID as PaperId
-		from 
+			R.REG_1 as Investor,
+			R.REG_3 as ContractID,
+			dbo.f_Date(w.WIRDATE) as W_Date, -- Дата движения ДС (ЦБ)
+			T.TYPE_ as Type, --Тип (1 - ввод, -1 - вывод)
+			w.NAME as T_Name,-- Наименование операции
+			V1.ISIN as ISIN, --ISIN ценной бумаги
+			V1.NAME as Investment, --Название инструмента
+				case 
+					when r1.OFICDATE is null --оценка если нет котировки
+					then (-1) * Nots.B_in
+								else  ( (case when r1.RATE3 = 0 then r1.rate else r1.RATE3 end)+(case when r1.NKD = 0 then nkd.NKD else r1.NKD end )) * t.VALUE_ * t.TYPE_ * isnull(r2.RATE,1)    --оценка если есть котировка
+				end / W.D_SUMMA as Price,
+			W.D_SUMMA * T.TYPE_ as Amount,
+			Round (
+				case 
+					when r1.OFICDATE is null --оценка если нет котировки
+					then (-1) * Nots.B_in
+								else  ( (case when r1.RATE3 = 0 then r1.rate else r1.RATE3 end)+(case when r1.NKD = 0 then nkd.NKD else r1.NKD end )) * t.VALUE_ * t.TYPE_ * isnull(r2.RATE,1)    --оценка если есть котировка
+				end, 2) * T.TYPE_ as Value_Nom,
+			sh.NOM_VAL as Currency, --код валюты
+			0 as Fee, --Комиссия
+			Round (
+				case 
+					when r1.OFICDATE is null --оценка если нет котировки
+					then (-1) * Nots.B_in
+								else  ( (case when r1.RATE3 = 0 then r1.rate else r1.RATE3 end)+(case when r1.NKD = 0 then nkd.NKD else r1.NKD end )) * t.VALUE_ * t.TYPE_ * isnull(r2.RATE,1)    --оценка если есть котировка
+				end  , 2) as Value_RUR, -- Сумма сделки в рублях
+			V1.ID as PaperId
+			from 
 			BAL_DATA_std.dbo.OD_RESTS as R
 			left join BAL_DATA_std.dbo.OD_TURNS as T with(readcommitted)	on T.REST = R.ID and T.IS_PLAN = 'F'
 			left join BAL_DATA_std.dbo.OD_WIRING as W						on W.ID = T.WIRING
@@ -510,7 +510,7 @@ AS BEGIN
 					RT.[E_DATE] DESC,
 					RT.[OFICDATE] DESC
 			) AS VV
-		where R.BAL_ACC = 639
+			where R.BAL_ACC = 639
 			and R.REG_3 = @ContractId
 			and T.WIRING is not null
 			and c.ID in (630,627,768)
