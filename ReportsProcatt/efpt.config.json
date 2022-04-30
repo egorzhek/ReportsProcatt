@@ -1,0 +1,107 @@
+﻿{
+   "CodeGenerationMode": 2,
+   "ContextClassName": "CachedbContext",
+   "ContextNamespace": null,
+   "DefaultDacpacSchema": null,
+   "FilterSchemas": false,
+   "IncludeConnectionString": false,
+   "ModelNamespace": null,
+   "OutputContextPath": null,
+   "OutputPath": "ModelDB",
+   "ProjectRootNamespace": "ReportsProcatt",
+   "Schemas": null,
+   "SelectedHandlebarsLanguage": 0,
+   "SelectedToBeGenerated": 0,
+   "Tables": [
+      {
+         "Name": "[dbo].[vAssets_Contracts]",
+         "ObjectType": 3
+      },
+      {
+         "Name": "[dbo].[vDIVIDENDS_AND_COUPONS_History]",
+         "ObjectType": 3
+      },
+      {
+         "Name": "[dbo].[vFundHistory]",
+         "ObjectType": 3
+      },
+      {
+         "Name": "[dbo].[vFundStructure]",
+         "ObjectType": 3
+      },
+      {
+         "Name": "[dbo].[vInvestorFundDate]",
+         "ObjectType": 3
+      },
+      {
+         "Name": "[dbo].[vOperations_History_Contracts]",
+         "ObjectType": 3
+      },
+      {
+         "Name": "[dbo].[vPortFolio_Daily]",
+         "ObjectType": 3
+      },
+      {
+         "Name": "[dbo].[vPOSITION_KEEPING]",
+         "ObjectType": 3
+      },
+      {
+         "Name": "[dbo].[CircleDiagrams]",
+         "ObjectType": 2
+      },
+      {
+         "Name": "[dbo].[ContractsData]",
+         "ObjectType": 2
+      },
+      {
+         "Name": "[dbo].[ContractsDataSum]",
+         "ObjectType": 2
+      },
+      {
+         "Name": "[dbo].[DivNCouponsDetails]",
+         "ObjectType": 2
+      },
+      {
+         "Name": "[dbo].[DivNCouponsGraph]",
+         "ObjectType": 2
+      },
+      {
+         "Name": "[dbo].[DuDivNCouponsGraph]",
+         "ObjectType": 2
+      },
+      {
+         "Name": "[dbo].[DuOperationHistory]",
+         "ObjectType": 2
+      },
+      {
+         "Name": "[dbo].[DuPositionGrouByElement]",
+         "ObjectType": 2
+      },
+      {
+         "Name": "[dbo].[DuPositions]",
+         "ObjectType": 2
+      },
+      {
+         "Name": "[dbo].[FundOperationHistory]",
+         "ObjectType": 2
+      }
+   ],
+   "UiHint": "DESKTOP-5UV8RM5.CacheDB",
+   "UseBoolPropertiesWithoutDefaultSql": false,
+   "UseDatabaseNames": false,
+   "UseDbContextSplitting": false,
+   "UseFluentApiOnly": true,
+   "UseHandleBars": false,
+   "UseHierarchyId": false,
+   "UseInflector": false,
+   "UseLegacyPluralizer": false,
+   "UseManyToManyEntity": false,
+   "UseNoConstructor": false,
+   "UseNoDefaultConstructor": false,
+   "UseNoNavigations": false,
+   "UseNoObjectFilter": false,
+   "UseNodaTime": false,
+   "UseNullableReferences": false,
+   "UseSchemaFolders": false,
+   "UseSpatial": false
+}
