@@ -21,7 +21,6 @@ namespace ReportsProcatt
         {
             services.AddControllersWithViews();
             services.AddWkhtmltopdf();
-            services.AddControllers().AddNewtonsoftJson();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
