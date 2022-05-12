@@ -517,10 +517,9 @@ SELECT
    ,A.ISIN
    ,A.Class
    ,A.CUR_ID
-   ,A.Oblig_Date_end
-   ,A.Oferta_Date
-   ,A.Oferta_Type
-   ,A.IsActive
+   ,Oblig_Date_end  = COALESCE(A.Oblig_Date_end,IIF(Datepart(YEAR, OBL.DEATHDATE) = 9999, NULL, OBL.DEATHDATE))
+   ,Oferta_Date     = COALESCE(A.Oferta_Date, OFE.B_DATE)
+   ,Oferta_Type     = COALESCE(A.Oferta_Type, CASE WHEN OFE.O_TYPE = 1 THEN 'Put' WHEN OFE.O_TYPE = 2 THEN 'Call' END)
    ,A.In_Wir
    ,A.In_Date
    ,A.Ic_NameId
@@ -551,12 +550,13 @@ SELECT
    ,A.Out_Summa
    ,A.Out_Eq
    ,A.RecordDate
-   ,IsArchive = ISNULL(A.IsArchive,0),
+   ,IsActive = ISNULL(A.IsActive,0),
 
     Currency = C.ShortName,
     B.InstrumentId,
     I.Investment,
     CC.CategoryId,
+    P.InvestmentId,
     
     FinRes = 
       IIF(A.IsActive = 0,
@@ -671,7 +671,7 @@ SELECT
           			isnull(a.In_Summa,0) + isnull(a.UKD,0)
           
           		else NULL
-          	end, 0))
+          	end, 0))*100
               
 FROM [vPOSITION_KEEPING] A
 OUTER APPLY
@@ -681,11 +681,14 @@ OUTER APPLY
       AND ContractId = @Contract_Id AND In_Wir = A.In_Wir
 )                       B
 JOIN [vPortFolio_Daily] P   ON A.ShareId = P.VALUE_ID AND P.PortfolioDate = @DateTo AND 
-                               A.InvestorId = P.InvestorId AND A.ContractId = P.ContractId
+                               A.InvestorId = P.InvestorId AND A.ContractId = P.ContractId AND
+                               P.BAL_ACC <> 2782
 JOIN [InvestmentIds]    I   ON P.InvestmentId = I.Id
 JOIN [ClassCategories]  CC  ON A.Class = CC.ClassId
 JOIN [Categories]       CG  ON CC.CategoryId = CG.Id
 LEFT JOIN [Currencies]  C   ON A.CUR_ID = C.Id
+LEFT JOIN [OBLIG_INFO]  OBL ON CG.CategoryName = 'Облигации' AND OBL.SELF_ID = A.ShareId
+LEFT JOIN [OBLIG_OFERTS]OFE ON CG.CategoryName = 'Облигации' AND OFE.SHARE = A.ShareId
 WHERE A.InvestorId = @Investor_Id AND A.Fifo_Date = @DateTo
   AND A.ContractId = @Contract_Id 
 GO
@@ -750,15 +753,15 @@ FR AS
 SELECT 
     R.VALUE_ID,
     c.CategoryName,
-  	ChildId     = cast(R.InvestmentId as BigInt),
-  	TypeId      = cast(c.id as BigInt),
-  	ChildName   = i.Investment,
-  	ValutaId    = cast(R.CUR_ID as BigInt),
-  	Valuta      = cr.ShortName,
-  	Price       = CAST(Round(R.[VALUE_NOM],2) as Decimal(30,2)),
-  	Ammount     = case when c.Id <> 4 then CAST(Round(R.[AMOUNT],2) as Decimal(30,2))  else NULL END,
-    FinRes      = FR.Income,
-    FinResPrcnt = FR.FinRes
+  	InvestmentId  = cast(R.InvestmentId as BigInt),
+  	TypeId        = cast(c.id as BigInt),
+  	ChildName     = i.Investment,
+  	ValutaId      = cast(R.CUR_ID as BigInt),
+  	Valuta        = cr.ShortName,
+  	Price         = CAST(Round(R.[VALUE_NOM],2) as Decimal(30,2)),
+  	Ammount       = case when c.Id <> 4 then CAST(Round(R.[AMOUNT],2) as Decimal(30,2))  else NULL END,
+    FinRes        = FR.Income,
+    FinResPrcnt   = FR.FinRes * 100
 FROM [vPortFolio_Daily] R
 LEFT JOIN               FR  ON FR.ShareId = R.VALUE_ID
 JOIN [ClassCategories]  CC  ON R.CLASS = CC.ClassId
