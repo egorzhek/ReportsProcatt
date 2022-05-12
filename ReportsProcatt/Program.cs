@@ -3,6 +3,7 @@ using Microsoft.Extensions.Hosting;
 using System;
 using Newtonsoft.Json.Linq;
 using Microsoft.EntityFrameworkCore;
+using System.IO;
 
 namespace ReportsProcatt
 {
@@ -58,8 +59,9 @@ namespace ReportsProcatt.ModelDB
         {
             if (!optionsBuilder.IsConfigured)
             {
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                optionsBuilder.UseSqlServer("Data Source=DESKTOP-5UV8RM5;Initial Catalog=CacheDB;Integrated Security=True");
+                var ReportPath = Environment.GetEnvironmentVariable("ReportPath");
+                var connectionString = Program.GetReportSqlConnection(Path.Combine(ReportPath, "appsettings.json"));
+                optionsBuilder.UseSqlServer(connectionString);
             }
         }
     }
