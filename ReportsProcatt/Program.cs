@@ -31,13 +31,13 @@ namespace ReportsProcatt
 
             string DataSource = parsed.SelectToken("SqlConnect.DataSource").Value<string>();
             string InitialCatalog = parsed.SelectToken("SqlConnect.InitialCatalog").Value<string>();
-            string UserID = parsed.SelectToken("SqlConnect.UserID").Value<string>();
-            string Password = parsed.SelectToken("SqlConnect.Password").Value<string>();
+            string UserID = parsed.SelectToken("SqlConnect.UserID")?.Value<string>();
+            string Password = parsed.SelectToken("SqlConnect.Password")?.Value<string>();
 
             connectionString += "Data Source=" + DataSource + ";";
             connectionString += "Initial Catalog=" + InitialCatalog + ";";
 
-            if (UserID.Length > 0)
+            if (UserID?.Length > 0)
             {
                 connectionString += "User ID=" + UserID + ";";
                 connectionString += "Password=" + Password + ";";

@@ -44,7 +44,7 @@ namespace ReportsProcatt.Models
         public Report(int aInvestorId, DateTime? aDateFrom, DateTime? aDateTo,string CurrencyCode)
         {
             Currency cur;
-
+            var a = Enum.TryParse(CurrencyCode, out cur);
             _mainService = new ContractsDataSumService(
                 new MainServiceParams
                 {
