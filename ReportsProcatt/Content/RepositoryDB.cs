@@ -36,12 +36,12 @@ namespace ReportsProcatt.Content
                         _db.DuPositionGrouByElement(vParams.InvestorId,vParams.ContractId,vParams.CurrencyCode.ToString(),vParams.DateTo).ToList())).Result;
             }
         }
-        public static List<object> GetDuPosition(DuPositionServiceParams vParams)
+        public static List<DuPositionsResult> GetDuPosition(DuPositionServiceParams vParams)
         {
             using (var _db = new CachedbContext())
             {
                 var query = _db.DuPositions(vParams.InvestorId,vParams.ContractId,vParams.DateFrom,vParams.DateTo,vParams.CurrencyCode.ToString())
-                               .Where(x => x.IsArchive == (vParams.PositionType == DuPositionType.Closed));
+                               .Where(x => x.IsActive == (vParams.PositionType == DuPositionType.Current));
 
                 switch (vParams.TableTypeName)
                 {
@@ -63,13 +63,15 @@ namespace ReportsProcatt.Content
                     case DuPositionAssetTableName.Cash:
                         query = query.Where(x => x.CategoryId == 4);
                         break;
+                    case DuPositionAssetTableName.All:
+                        break;
                     default:
                         throw new Exception("DuPositionAssetTableName unknown type");
                 }
 
-                var _cache = new Cache<List<object>>();
+                var _cache = new Cache<List<DuPositionsResult>>();
                 return _cache.Get(vParams, async () => await Task.Run(() =>
-                        query.Select(x => (object)x).ToList())).Result;
+                        query.Select(x => x).ToList())).Result;
             }
         }
 
@@ -79,7 +81,7 @@ namespace ReportsProcatt.Content
             {
                 var _cache = new Cache<List<DuOperationHistoryResult>>();
                 return _cache.Get(vParams, async () => await Task.Run(() =>
-                        _db.DuOperationHistory(vParams.InvestorId, vParams.ContractId, vParams.CurrencyCode.ToString(), null, null)
+                        _db.DuOperationHistory(vParams.InvestorId, vParams.ContractId, vParams.CurrencyCode.ToString(), vParams.DateFrom, vParams.DateTo)
                            .ToList())).Result;
             }
         }
@@ -90,7 +92,7 @@ namespace ReportsProcatt.Content
             {
                 var _cache = new Cache<List<FundOperationHistoryResult>>();
                 return _cache.Get(vParams, async () => await Task.Run(() =>
-                        _db.FundOperationHistory(vParams.InvestorId, vParams.FundId, vParams.CurrencyCode.ToString(), null, null)
+                        _db.FundOperationHistory(vParams.InvestorId, vParams.FundId, vParams.CurrencyCode.ToString(), vParams.DateFrom, vParams.DateTo)
                            .ToList())).Result;
             }
         }
@@ -111,7 +113,7 @@ namespace ReportsProcatt.Content
                 var _cache = new Cache<List<DivNCouponsDetailsResult>>();
 
                 return _cache.Get(vParams, async () => await Task.Run(() =>
-                        _db.DivNCouponsDetails(vParams.InvestorId, vParams.CurrencyCode.ToString(), null, null)
+                        _db.DivNCouponsDetails(vParams.InvestorId, vParams.CurrencyCode.ToString(), vParams.DateFrom, vParams.DateTo)
                            .ToList())).Result;
             }
         }

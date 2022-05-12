@@ -18,7 +18,8 @@ namespace ReportsProcatt.Controllers
         {
             if(Environment.GetEnvironmentVariable("ReportPath") == null)
             {
-                Environment.SetEnvironmentVariable("ReportPath", @"c:\Users\D\source\Ingos\ReportsProcatt\Reports\");
+                //C:\Users\Satamael\Desktop\new\ReportsProcatt\
+                Environment.SetEnvironmentVariable("ReportPath", @"..\Reports\");
             }
             _generatePdf = generatePdf;
         }
@@ -168,21 +169,21 @@ namespace ReportsProcatt.Controllers
                 if (string.IsNullOrEmpty(Type))
                 {
                     var data = new Report((int)InvestorId, DateFrom, DateTo, Currency)
-                    { rootStr = "file:///c:/Users/D/source/Ingos/ReportsProcatt/ReportsProcatt/wwwroot" };
+                    { rootStr = @"../ReportsProcatt/wwwroot" };
 
                     return await _generatePdf.GetPdf("Views/Report/Web.cshtml", data);
                 }
                 else if (Type == "MF")
                 {
                     var data = new Fund((int)InvestorId, (int)ProductId, DateFrom, DateTo, Currency)
-                    { rootStr = "file:///c:/Users/D/source/Ingos/ReportsProcatt/ReportsProcatt/wwwroot" };
+                    { rootStr = @"../ReportsProcatt/wwwroot" };
 
                     return await _generatePdf.GetPdf("Views/Report/Fund.cshtml", data);
                 }
                 else if (Type == "TM")
                 {
                     var data = new Contract((int)InvestorId, (int)ProductId, DateFrom, DateTo, Currency)
-                    { rootStr = "file:///c:/Users/D/source/Ingos/ReportsProcatt/ReportsProcatt/wwwroot" };
+                    { rootStr = @"../ReportsProcatt/wwwroot" };
 
                     return await _generatePdf.GetPdf("Views/Report/Contract.cshtml", data);
                 }

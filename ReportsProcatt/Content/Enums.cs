@@ -26,6 +26,7 @@
         Bills,
         Cash,
         Fund,
-        Derivatives
+        Derivatives,
+        All
     }
 }

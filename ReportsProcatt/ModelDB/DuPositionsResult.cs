@@ -18,7 +18,6 @@ namespace ReportsProcatt.ModelDB
         public DateTime? Oblig_Date_end { get; set; }
         public DateTime? Oferta_Date { get; set; }
         public string Oferta_Type { get; set; }
-        public bool? IsActive { get; set; }
         public int? In_Wir { get; set; }
         public DateTime? In_Date { get; set; }
         public long? Ic_NameId { get; set; }
@@ -49,11 +48,12 @@ namespace ReportsProcatt.ModelDB
         public decimal? Out_Summa { get; set; }
         public decimal? Out_Eq { get; set; }
         public DateTime? RecordDate { get; set; }
-        public bool IsArchive { get; set; }
+        public bool IsActive { get; set; }
         public string Currency { get; set; }
         public long? InstrumentId { get; set; }
         public string Investment { get; set; }
         public int CategoryId { get; set; }
+        public long? InvestmentId { get; set; }
         public decimal? FinRes { get; set; }
         public decimal? FinResProcent { get; set; }
     }

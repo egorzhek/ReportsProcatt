@@ -66,10 +66,6 @@
          "ObjectType": 2
       },
       {
-         "Name": "[dbo].[DuDivNCouponsGraph]",
-         "ObjectType": 2
-      },
-      {
          "Name": "[dbo].[DuOperationHistory]",
          "ObjectType": 2
       },

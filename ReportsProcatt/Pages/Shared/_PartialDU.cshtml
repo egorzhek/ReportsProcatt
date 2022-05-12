@@ -269,26 +269,28 @@
     </tbody>
 </table>
 
-<table class="section graph-section projected-payments-section">
-    <tr>
-        <td>
+@if (Model.DividedtsCouponsChart != null)
+{
+    <table class="section graph-section projected-payments-section">
+        <tr>
+            <td>
 
-            <table class="section-wrapper">
-                <tbody>
-                    <tr>
+                <table class="section-wrapper">
+                    <tbody>
+                        <tr>
 
-                        <td>
-                            @Html.Partial("_PartialChartDiagram", Model.DividedtsCouponsChart)
-                        </td>
+                            <td>
+                                @Html.Partial("_PartialChartDiagram", Model.DividedtsCouponsChart)
+                            </td>
 
-                    </tr>
-                </tbody>
-            </table>
+                        </tr>
+                    </tbody>
+                </table>
 
-        </td>
-    </tr>
-</table>
-
+            </td>
+        </tr>
+    </table>
+}
 
 @if (Model.DividedtsCoupons.Table.Rows.Count > 0)
 {

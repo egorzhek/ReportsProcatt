@@ -40,12 +40,6 @@ namespace ReportsProcatt.ModelDB
             return FromExpression(() => DivNCouponsGraph(InvestorId, Currency, DateFrom, DateTo));
         }
 
-        [DbFunction("DuDivNCouponsGraph", "dbo")]
-        public IQueryable<DuDivNCouponsGraphResult> DuDivNCouponsGraph(int? InvestorId, string Currency, DateTime? DateFrom, DateTime? DateTo)
-        {
-            return FromExpression(() => DuDivNCouponsGraph(InvestorId, Currency, DateFrom, DateTo));
-        }
-
         [DbFunction("DuOperationHistory", "dbo")]
         public IQueryable<DuOperationHistoryResult> DuOperationHistory(int? InvestorId, int? ContractId, string Currency, DateTime? DateFrom, DateTime? DateTo)
         {
@@ -77,7 +71,6 @@ namespace ReportsProcatt.ModelDB
             modelBuilder.Entity<ContractsDataSumResult>().HasNoKey();
             modelBuilder.Entity<DivNCouponsDetailsResult>().HasNoKey();
             modelBuilder.Entity<DivNCouponsGraphResult>().HasNoKey();
-            modelBuilder.Entity<DuDivNCouponsGraphResult>().HasNoKey();
             modelBuilder.Entity<DuOperationHistoryResult>().HasNoKey();
             modelBuilder.Entity<DuPositionGrouByElementResult>().HasNoKey();
             modelBuilder.Entity<DuPositionsResult>().HasNoKey();

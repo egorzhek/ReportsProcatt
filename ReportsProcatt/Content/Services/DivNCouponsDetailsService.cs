@@ -12,7 +12,7 @@ namespace ReportsProcatt.Content.Services
         {
             _data = RepositoryDB.GetDivNCouponsDetails(vParams);
         }
-        public List<DivNCouponsDetailsResult> Totals => _data.OrderBy(c => c.Date).ToList();
+        public List<DivNCouponsDetailsResult> Totals => _data.Where(c => c.INPUT_VALUE != 0).OrderBy(c => c.Date).ToList();
         public List<DivNCouponsDetailsResult> ContractDetails(int ContractId) => 
             _data.Where(c => c.ContractId == ContractId).OrderBy(c => c.Date).ToList();
     }

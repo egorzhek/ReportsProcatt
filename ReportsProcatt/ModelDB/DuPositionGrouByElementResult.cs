@@ -9,7 +9,7 @@ namespace ReportsProcatt.ModelDB
     {
         public int? VALUE_ID { get; set; }
         public string CategoryName { get; set; }
-        public long? ChildId { get; set; }
+        public long? InvestmentId { get; set; }
         public long? TypeId { get; set; }
         public string ChildName { get; set; }
         public long? ValutaId { get; set; }

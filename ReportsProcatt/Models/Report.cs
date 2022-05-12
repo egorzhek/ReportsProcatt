@@ -14,7 +14,7 @@ namespace ReportsProcatt.Models
 {
     public class Report
     {
-        #region Свойства
+        #region Public properties
         public string rootStr { get; set; }
         public int InvestorId { get; private set; }
         public string Period => $"{Dfrom.ToString("dd.MM.yyyy")} - {Dto.ToString("dd.MM.yyyy")}";
@@ -35,15 +35,10 @@ namespace ReportsProcatt.Models
         public List<PIF> PIFs { get; set; }
         public List<DU> DUs { get; set; }
         #endregion
-        #region Поля
-        private string connectionString;
-        private string ReportPath;
-
-        #endregion
         #region Services
         private ContractsDataSumService _mainService;
         private DivNCouponsChartDiagramsService _chartService;
-        private DivNCouponsDetailsService _detailsService;
+        private DivNCouponsDetailsService _divNCouponsDetailsService;
         private CircleDiagramsService _circleDiagramsService;
         #endregion
         public Report(int aInvestorId, DateTime? aDateFrom, DateTime? aDateTo,string CurrencyCode)
@@ -68,7 +63,7 @@ namespace ReportsProcatt.Models
                     InvestorId = aInvestorId
                 } );
 
-            _detailsService = new DivNCouponsDetailsService(
+            _divNCouponsDetailsService = new DivNCouponsDetailsService(
                 new DivNCouponsDetailsServiceParams
                 {
                     CurrencyCode = Enum.TryParse(CurrencyCode, out cur) ? cur : Currency.RUB,
@@ -85,9 +80,6 @@ namespace ReportsProcatt.Models
                     InvestorId = aInvestorId
                 });
 
-            ReportPath = Environment.GetEnvironmentVariable("ReportPath");
-            connectionString = Program.GetReportSqlConnection(Path.Combine(ReportPath, "appsettings.json"));
-            
             ReportCurrency = CurrencyClass.GetCurrency(CurrencyCode);
 
             InvestorId = aInvestorId;
@@ -260,7 +252,7 @@ namespace ReportsProcatt.Models
                 new ViewElementAttr{ColumnName = DivsNCouponsDetailsColumns.Price, DisplayName = "Сумма сделки", SortOrder = 5},
             };
 
-            _detailsService.Totals.ForEach(dr =>
+            _divNCouponsDetailsService.Totals.ForEach(dr =>
             {
                 DataRow row = DivsNCouponsDetails.Table.NewRow();
                 row[DivsNCouponsDetailsColumns.Date] = ((DateTime)dr.Date).ToString("dd.MM.yyyy");
@@ -320,7 +312,7 @@ namespace ReportsProcatt.Models
                 row[AllAssetsColumns.Product] = "ДУ";
                 row[AllAssetsColumns.BeginAssets] = dr.SNach.DecimalToStr();
                 row[AllAssetsColumns.InVal] = dr.InVal.DecimalToStr();
-                row[AllAssetsColumns.OutVal] = dr.OutVal_DU.ToDecimal();
+                row[AllAssetsColumns.OutVal] = dr.OutVal_DU.DecimalToStr();
                 row[AllAssetsColumns.Dividents] = dr.Dividends.DecimalToStr();
                 row[AllAssetsColumns.Coupons] = dr.Coupons.DecimalToStr();
                 row[AllAssetsColumns.Redemption] = "";
@@ -362,8 +354,7 @@ namespace ReportsProcatt.Models
 
             if (ChartData.Count > 7)
             {
-                decimal otherPerent = 100 -
-                    ChartData
+                decimal otherPerent = ChartData
                         .OrderByDescending(r => (double)r.Res)
                         .Skip(6)
                         .Sum(r => r.Res.ToDecimal());
@@ -415,15 +406,14 @@ namespace ReportsProcatt.Models
 
             if (ChartData.Count > 7)
             {
-                decimal otherPerent = 100 -
-                    ChartData
+                decimal otherPerent = ChartData
                         .OrderByDescending(r => (double)r.Res)
                         .Skip(6)
                         .Sum(r => r.Res.ToDecimal());
 
-                Assets.Data.RemoveAt(Assets.Data.Count - 1);
+                Instruments.Data.RemoveAt(Instruments.Data.Count - 1);
 
-                Assets.Data.Add(new CircleDiagram.DataClass
+                Instruments.Data.Add(new CircleDiagram.DataClass
                 {
                     lable = @$"Прочее",
                     data = ChartData
@@ -467,15 +457,14 @@ namespace ReportsProcatt.Models
 
             if (ChartData.Count > 7)
             {
-                decimal otherPerent = 100 -
-                    ChartData
+                decimal otherPerent = ChartData
                         .OrderByDescending(r => (double)r.Res)
                         .Skip(6)
                         .Sum(r => r.Res.ToDecimal());
 
-                Assets.Data.RemoveAt(Assets.Data.Count - 1);
+                Currencies.Data.RemoveAt(Currencies.Data.Count - 1);
 
-                Assets.Data.Add(new CircleDiagram.DataClass
+                Currencies.Data.Add(new CircleDiagram.DataClass
                 {
                     lable = @$"Прочее",
                     data = ChartData
@@ -497,7 +486,7 @@ namespace ReportsProcatt.Models
                 _mainService.PIFs
                 .Select(r => Task.Run(() =>
                 {
-                    PIFs.Add(new PIF(r.Name.ToString(), Dfrom, Dto, ReportCurrency, r.ContractId, InvestorId, connectionString, ReportPath));
+                    PIFs.Add(new PIF(r.Name.ToString(), Dfrom, Dto, ReportCurrency, r.ContractId, InvestorId));
                 })).ToArray()
             );
         }
@@ -509,22 +498,10 @@ namespace ReportsProcatt.Models
                 _mainService.DUs
                 .Select(r => Task.Run(() =>
                 {
-                    DUs.Add(new DU(r.Name.ToString(), Dfrom, Dto, ReportCurrency, r.ContractId, InvestorId, connectionString, ReportPath));
+                    DUs.Add(new DU(r.Name.ToString(), Dfrom, Dto, ReportCurrency, r.ContractId, InvestorId));
                 })).ToArray()
             );
         }
         #endregion
-    }
-    public class InvestFullTables
-    {
-        public const int MainResultDT = 0;
-        public const int MainDiagramDT = 1;
-        public const int FundsDt = 4;
-        public const int DUsDt = 5;
-        public const int FundsResultDt = 6;
-        public const int DUsResultDt = 7;
-        public const int DivsNCoupons = 7;
-        public const int DivsNCouponsDetails = 8;
-        public const int DivsNCouponsChart = 9;
     }
 }

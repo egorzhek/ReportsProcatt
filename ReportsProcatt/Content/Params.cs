@@ -154,4 +154,6 @@ namespace ReportsProcatt.Content
             return HashCode.Combine(base.GetHashCode(), InvestorId, DateFrom, DateTo, CurrencyCode, ContractId, TableTypeName, PositionType);
         }
     }
+
+   
 }
