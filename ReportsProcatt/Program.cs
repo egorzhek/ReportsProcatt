@@ -20,12 +20,18 @@ namespace ReportsProcatt
                 {
                     webBuilder.UseStartup<Startup>();
                 });
+    }
+}
+namespace ReportsProcatt.ModelDB
+{
 
+    public partial class CachedbContext : DbContext
+    {
         public static string GetReportSqlConnection(string FileName)
         {
             string connectionString = String.Empty;
 
-            string SettingsStr = System.IO.File.ReadAllText(FileName);
+            string SettingsStr = File.ReadAllText(FileName);
 
             var parsed = JObject.Parse(SettingsStr);
 
@@ -49,18 +55,12 @@ namespace ReportsProcatt
 
             return connectionString;
         }
-    }
-}
-namespace ReportsProcatt.ModelDB
-{
-    public partial class CachedbContext : DbContext
-    {
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
             {
                 var ReportPath = Environment.GetEnvironmentVariable("ReportPath");
-                var connectionString = Program.GetReportSqlConnection(Path.Combine(ReportPath, "appsettings.json"));
+                var connectionString = GetReportSqlConnection(Path.Combine(ReportPath, "appsettings.json"));
                 optionsBuilder.UseSqlServer(connectionString);
             }
         }
