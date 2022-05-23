@@ -148,20 +148,31 @@ CREATE OR ALTER FUNCTION ContractsDataSum
     @DateTo       DATE        = NULL
 )
 RETURNS TABLE AS RETURN
-WITH R AS 
+WITH D AS 
 (
-    SELECT * FROM dbo.ContractsData(@Investor_Id, @Currency, @DateFrom, @DateTo)
+    SELECT DISTINCT Date,
+        RowNum = DENSE_RANK() OVER (ORDER BY Date),
+        RowNumRev = DENSE_RANK() OVER (ORDER BY Date DESC)
+    FROM dbo.ContractsData(@Investor_Id, @Currency, @DateFrom, @DateTo)
 ),
-C AS 
+R AS 
+(
+    SELECT CD.*, D.RowNum, D.RowNumRev
+    FROM dbo.ContractsData(@Investor_Id, @Currency, @DateFrom, @DateTo) CD
+    LEFT JOIN D ON D.Date = CD.Date    
+),
+
+C AS --Данные по контрактам
 (
     SELECT *,
         T = DATEDIFF(DAY,Date,LEAD(Date)OVER (PARTITION BY ContractId ORDER BY Date)),
         S = SUM(IIF(D.RowNum = 1, D.VALUE_Sum ,(D.INPUT_VALUE_Sum + D.OUTPUT_VALUE_Sum))) 
               OVER (PARTITION BY ContractId ORDER BY D.Date RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)
-    FROM (
+    FROM 
+    (
         SELECT 
-          RowNum = ROW_NUMBER() OVER (PARTITION BY ContractId ORDER BY V.Date),
-          RowNumRev = ROW_NUMBER() OVER (PARTITION BY ContractId ORDER BY V.Date DESC),
+          V.RowNum,
+          V.RowNumRev,
           V.Date,
           V.ContractId,
           V.ISPIF,
@@ -177,7 +188,7 @@ C AS
         FROM 
         (
             SELECT 
-                Date,
+                Date, RowNum, RowNumRev, 
                 ContractId,
                 ISPIF,
                 LS_NUM,
@@ -190,22 +201,23 @@ C AS
                 INPUT_DIVIDENTS_Sum   = SUM(INPUT_DIVIDENTS),
                 SumAmount             = SUM(SumAmount)
             FROM R            
-            GROUP BY Date, ContractId, ISPIF, LS_NUM
+            GROUP BY Date, ContractId, ISPIF, LS_NUM, RowNum, RowNumRev
         ) V
     ) D
     WHERE (D.RowNum = 1 OR D.RowNumRev = 1) OR D.INPUT_VALUE_Sum <> 0 OR D.OUTPUT_VALUE_Sum <> 0
        OR D.INPUT_DIVIDENTS_Sum <> 0 OR D.INPUT_COUPONS_Sum <> 0
 ),
-G AS 
+G AS --Данные групповые по ПИФам и ДУ 
 (
     SELECT *,
         T = DATEDIFF(DAY,Date,LEAD(Date)OVER (PARTITION BY ISPIF ORDER BY Date)),
         S = SUM(IIF(D.RowNum = 1, D.VALUE_Sum ,(D.INPUT_VALUE_Sum + D.OUTPUT_VALUE_Sum))) 
               OVER (PARTITION BY ISPIF ORDER BY D.Date RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)
-    FROM (
+    FROM 
+    (
         SELECT 
-          RowNum = ROW_NUMBER() OVER (PARTITION BY ISPIF ORDER BY V.Date),
-          RowNumRev = ROW_NUMBER() OVER (PARTITION BY ISPIF ORDER BY V.Date DESC),
+          V.RowNum,
+          V.RowNumRev,
           V.Date,
           V.ISPIF,
           V.VALUE_Sum,
@@ -218,7 +230,7 @@ G AS
         FROM 
         (
             SELECT 
-                Date,
+                Date, RowNum, RowNumRev,
                 ISPIF,
                 VALUE_Sum             = SUM(VALUE),
                 INPUT_VALUE_Sum       = SUM(INPUT_VALUE),
@@ -228,13 +240,13 @@ G AS
                 INPUT_COUPONS_Sum     = SUM(INPUT_COUPONS),
                 INPUT_DIVIDENTS_Sum   = SUM(INPUT_DIVIDENTS)
             FROM R            
-            GROUP BY Date, ISPIF
+            GROUP BY Date, ISPIF, RowNum, RowNumRev
         ) V
     ) D
     WHERE (D.RowNum = 1 OR D.RowNumRev = 1) OR D.INPUT_VALUE_Sum <> 0 OR D.OUTPUT_VALUE_Sum <> 0
        OR D.INPUT_DIVIDENTS_Sum <> 0 OR D.INPUT_COUPONS_Sum <> 0
 ),
-P AS 
+P AS --Данные общие по портфелю
 (
     SELECT *,
         T = DATEDIFF(DAY,Date,LEAD(Date)OVER (ORDER BY Date)),
@@ -242,8 +254,8 @@ P AS
               OVER (ORDER BY D.Date RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)
     FROM (
         SELECT 
-          RowNum = ROW_NUMBER() OVER (ORDER BY V.Date),
-          RowNumRev = ROW_NUMBER() OVER (ORDER BY V.Date DESC),
+          V.RowNum,
+          V.RowNumRev,
           V.Date,
           V.VALUE_Sum,
           V.INPUT_VALUE_Sum,
@@ -255,7 +267,7 @@ P AS
         FROM 
         (
             SELECT 
-                Date,
+                Date, RowNum, RowNumRev,
                 VALUE_Sum         = SUM(VALUE),
                 INPUT_VALUE_Sum   = SUM(INPUT_VALUE),
                 OUTPUT_VALUE_Sum  = SUM(OUTPUT_VALUE),
@@ -264,7 +276,7 @@ P AS
                 INPUT_COUPONS_Sum     = SUM(INPUT_COUPONS),
                 INPUT_DIVIDENTS_Sum   = SUM(INPUT_DIVIDENTS)
             FROM R            
-            GROUP BY Date
+            GROUP BY Date, RowNum, RowNumRev
         ) V
     ) D
     WHERE (D.RowNum = 1 OR D.RowNumRev = 1) OR D.INPUT_VALUE_Sum <> 0 OR D.OUTPUT_VALUE_Sum <> 0
@@ -901,7 +913,7 @@ CREATE OR ALTER FUNCTION DivNCouponsDetails
 )
 RETURNS TABLE AS RETURN
 SELECT
-    GCD.ContractId,
+    GCD.InvestorId, GCD.ContractId, WIRING, TYPE_, PaymentDateTime, IsArchive,--PK
     ContractName = AI.NUM,
     PaymentType = case GCD.Type WHEN 1 THEN 'Купоны' ELSE 'Дивиденды' END, 
     GCD.ShareName,
@@ -917,6 +929,58 @@ LEFT JOIN Assets_Info               AI  ON GCD.InvestorId = AI.InvestorId AND GC
 WHERE GCD.InvestorId = @InvestorId
   AND (@DateFrom IS NULL OR GCD.PaymentDateTime >= @DateFrom)
   AND (@DateTo IS NULL  OR GCD.PaymentDateTime <= @DateTo)
+GO
+CREATE OR ALTER FUNCTION PortfolioDynamics 
+(
+    @InvestorId   INT,
+    @Currency     VARCHAR(3)  = NULL,    
+    @DateFrom     DATE        = NULL,
+    @DateTo       DATE        = NULL
 
+)
+RETURNS TABLE AS RETURN
+WITH c AS 
+(
+    SELECT * FROM ContractsData(@InvestorId,@Currency,@DateFrom,@DateTo )
+),
+cte AS 
+(
+    SELECT @DateTo Dt
 
+    UNION ALL
+
+    SELECT DATEADD(DAY,-100,cte.Dt) FROM cte
+    WHERE Dt > '2009-01-01'
+),
+Val AS 
+(
+    SELECT Dt
+          ,VALUE = SUM(c.VALUE)
+    FROM cte
+    LEFT JOIN c ON Date = Dt
+    GROUP BY Dt
+),
+Income AS
+(
+    SELECT 
+        req.Dt,
+        INPUT_VALUE = SUM(INPUT_VALUE), 
+        OUTPUT_VALUE = SUM(OUTPUT_VALUE), 
+        INPUT_DIVIDENTS = SUM(INPUT_DIVIDENTS), 
+        INPUT_COUPONS = SUM(INPUT_COUPONS)
+    FROM 
+    (
+        SELECT Dt,prevDt = DATEADD(DAY,-1,LAG(Dt) OVER (ORDER BY dt)) FROM cte
+    ) req
+    LEFT JOIN c ON Date BETWEEN DATEADD(DAY,-1,req.prevDt) AND Dt
+    GROUP BY req.Dt
+    
+)
+SELECT 
+    Date = v.Dt,
+    v.VALUE,
+    Income = LEAD( - ic.INPUT_VALUE - ic.OUTPUT_VALUE + ic.INPUT_DIVIDENTS + ic.INPUT_COUPONS) OVER (ORDER BY v.Dt)
+FROM  Val        v
+LEFT JOIN Income ic ON v.Dt = ic.Dt
+WHERE v.VALUE IS NOT NULL
 GO
