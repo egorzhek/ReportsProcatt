@@ -238,7 +238,7 @@ AS BEGIN
 		[WIRING],
 		[TYPE_],
 		[PaymentDateTime],
-		[Amount_RUR]
+		[Amount_RUR] = [Amount] * VV.RATE
 	From
 	(
 		select distinct
@@ -247,7 +247,9 @@ AS BEGIN
 			[WIRING]          = W.ID,  -- ID Проводки
 			[TYPE_]           = -T.TYPE_,
 			[PaymentDateTime] = T.WIRDATE, -- Дата движения ДС (ЦБ)
-			[Amount_RUR]      = dbo.f_Round(-T.EQ_ * T.TYPE_, 2) --,
+			[Amount] = dbo.f_Round(- cast(DV1.VAL as decimal(28,10)) * T.TYPE_, 2),
+			VO.ID as Currency, --код валюты
+			T.WIRDATE
 			--W.NAME
 		FROM [BAL_DATA_STD].[dbo].D_B_CONTRACTS      AS Z WITH(NOLOCK)
 		INNER JOIN [BAL_DATA_STD].[dbo].OD_ACC_PLANS AS P WITH(NOLOCK)    on P.SYS_NAME = 'MONEY'
@@ -269,7 +271,7 @@ AS BEGIN
 		INNER JOIN [BAL_DATA_STD].[dbo].OD_DOLS      AS DOL WITH(NOLOCK)  on DOL.DOC = d.ID -- возьмем подвалы документов
 		LEFT JOIN [BAL_DATA_STD].[dbo].D_OP_VAL      AS DV WITH(NOLOCK)   on DV.DOC = D.ID and DV.DESCR in (1743,1766) and DV.LINE = DOL.ID -- узнаем коды валюты операции 
 		LEFT JOIN [BAL_DATA_STD].[dbo].OD_VALUES     AS VO WITH(NOLOCK)   on VO.ID = DV.VAL -- Получим код валюты
-		LEFT JOIN [BAL_DATA_STD].[dbo].D_OP_VAL      AS DV1 WITH(NOLOCK)  on DV1.DOC = D.Id and DV1.DESCR in (1746,1765) and DV1.LINE = DOL.ID -- получим сумму операции
+		INNER JOIN [BAL_DATA_STD].[dbo].D_OP_VAL      AS DV1 WITH(NOLOCK)  on DV1.DOC = D.Id and DV1.DESCR in (1746,1765) and DV1.LINE = DOL.ID -- получим сумму операции
 		LEFT JOIN [BAL_DATA_STD].[dbo].D_OP_VAL      AS DV2 WITH(NOLOCK)  on DV2.DOC = D.Id and DV2.DESCR in (1742,1763,1759,1772) and DV2.LINE = DOL.ID and DV2.VAL = Z.DOC -- т.к. одним документом можно провести деньги по разным договорам, оставим только те операции, которые касаются конкретного портфеля.
 		WHERE
 		T.IS_PLAN = 'F'
@@ -280,7 +282,22 @@ AS BEGIN
 		and DV2.VAL is not null
 		and W.NAME <> 'Вывод ЦБ'
 	) as a
+	OUTER APPLY
+	(
+		SELECT TOP (1)
+			RT.[RATE]
+		FROM [BAL_DATA_STD].[dbo].[OD_VALUES_RATES] AS RT
+		WHERE RT.[VALUE_ID] = a.Currency -- валюта
+		AND RT.[E_DATE] >= cast(a.WIRDATE as date) and RT.[OFICDATE] < cast(a.WIRDATE as date)
+		ORDER BY
+			case when DATEPART(YEAR,RT.[E_DATE]) = 9999 then 1 else 0 end ASC,
+			RT.[E_DATE] DESC,
+			RT.[OFICDATE] DESC
+	) AS VV
+
 	UNION ALL
+
+
 	select
 		R.REG_1 as Investor,
 		R.REG_3 as ContractID,
