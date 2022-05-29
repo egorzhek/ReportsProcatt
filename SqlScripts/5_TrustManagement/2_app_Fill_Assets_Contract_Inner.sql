@@ -246,7 +246,7 @@ AS BEGIN
 			[ContractId]      = z.DOC,
 			[WIRING]          = W.ID,  -- ID Проводки
 			[TYPE_]           = -T.TYPE_,
-			[PaymentDateTime] = T.WIRDATE, -- Дата движения ДС (ЦБ)
+			[PaymentDateTime] = dbo.f_Date(T.WIRDATE), -- Дата движения ДС (ЦБ)
 			[Amount_RUR]      = dbo.f_Round(-T.EQ_ * T.TYPE_, 2) --,
 			--W.NAME
 		FROM [BAL_DATA_STD].[dbo].D_B_CONTRACTS      AS Z WITH(NOLOCK)
