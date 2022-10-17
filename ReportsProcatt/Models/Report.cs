@@ -8,18 +8,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
-using ReportsProcatt.Content.Services;
 
 namespace ReportsProcatt.Models
 {
     public class Report
     {
-        #region Public properties
+        #region Свойства
         public string rootStr { get; set; }
         public int InvestorId { get; private set; }
         public string Period => $"{Dfrom.ToString("dd.MM.yyyy")} - {Dto.ToString("dd.MM.yyyy")}";
-        public DateTime Dfrom => _mainService.DateFrom;
-        public DateTime Dto => _mainService.DateTo;
+        public DateTime Dfrom => (DateTime)_invFullDS.GetValue(InvestFullTables.MainResultDT, "StartDate");
+        public DateTime Dto => (DateTime)_invFullDS.GetValue(InvestFullTables.MainResultDT, "EndDate");
         public CurrencyClass ReportCurrency { get; set; }
         public Headers MainHeader { get; private set; }
         public Dictionary<string, string> MainDiagram { get; private set; }
@@ -35,60 +34,31 @@ namespace ReportsProcatt.Models
         public List<PIF> PIFs { get; set; }
         public List<DU> DUs { get; set; }
         #endregion
-        #region Services
-        private ContractsDataSumService _mainService;
-        private DivNCouponsChartDiagramsService _chartService;
-        private DivNCouponsDetailsService _divNCouponsDetailsService;
-        private CircleDiagramsService _circleDiagramsService;
+        #region Поля
+        private SQLData _data;
+        private DataSet _invFullDS => _data.DataSet_InvestorFull;
+        private DataSet _circleAssetsDS => _data.DataSet_CircleAssets;
+        private DataSet _circleCurrenciesDS => _data.DataSet_CircleCurrencies;
+        private DataSet _circleInstrumentsDS => _data.DataSet_CircleInstruments;
+        private string connectionString;
+        private string ReportPath;
+
         #endregion
         public Report(int aInvestorId, DateTime? aDateFrom, DateTime? aDateTo,string CurrencyCode)
         {
-            Currency cur;
-            var a = Enum.TryParse(CurrencyCode, out cur);
-            _mainService = new ContractsDataSumService(
-                new MainServiceParams
-                {
-                    CurrencyCode = Enum.TryParse(CurrencyCode, out cur) ? cur : Currency.RUB,
-                    DateFrom = aDateFrom,
-                    DateTo = aDateTo,
-                    InvestorId = aInvestorId
-                });
-
-            _chartService = new DivNCouponsChartDiagramsService( 
-                new DivNCouponsGraphServiceParams
-                {
-                    CurrencyCode = Enum.TryParse(CurrencyCode, out cur) ? cur : Currency.RUB,
-                    DateFrom = aDateFrom,
-                    DateTo = aDateTo,
-                    InvestorId = aInvestorId
-                } );
-
-            _divNCouponsDetailsService = new DivNCouponsDetailsService(
-                new DivNCouponsDetailsServiceParams
-                {
-                    CurrencyCode = Enum.TryParse(CurrencyCode, out cur) ? cur : Currency.RUB,
-                    DateFrom = aDateFrom,
-                    DateTo = aDateTo,
-                    InvestorId = aInvestorId
-                });
-
-            _circleDiagramsService = new CircleDiagramsService(
-                new CircleDiaramsServiceParams
-                {
-                    CurrencyCode = Enum.TryParse(CurrencyCode, out cur) ? cur : Currency.RUB,
-                    DateTo = aDateTo,
-                    InvestorId = aInvestorId
-                });
-
+            ReportPath = Environment.GetEnvironmentVariable("ReportPath");
+            connectionString = Program.GetReportSqlConnection(Path.Combine(ReportPath, "appsettings.json"));
+            
             ReportCurrency = CurrencyClass.GetCurrency(CurrencyCode);
 
             InvestorId = aInvestorId;
+            _data = new SQLData(ReportCurrency.Code ,aInvestorId, aDateFrom, aDateTo, connectionString, ReportPath);
 
             MainHeader = new Headers
             {
-                TotalSum = $"{_mainService.Totals.SItog.DecimalToStr()} {ReportCurrency.Char}",
-                ProfitSum = $"{_mainService.Totals.Income.DecimalToStr()} {ReportCurrency.Char}",
-                Return = $"{_mainService.Totals.Res.DecimalToStr("#0.00", aWithSign: true)}%"
+                TotalSum = $"{_invFullDS.DecimalToStr(InvestFullTables.MainResultDT, "ActiveDateToValue", "#,##0")} {ReportCurrency.Char}",
+                ProfitSum = $"{_invFullDS.DecimalToStr(InvestFullTables.MainResultDT, "ProfitValue", "#,##0")} {ReportCurrency.Char}",
+                Return = $"{_invFullDS.DecimalToStr(InvestFullTables.MainResultDT, "ProfitProcentValue","#0.00", aWithSign: true)}%"
             };
             InitMainDiagram();
             InitPIFsTotalTable();
@@ -107,13 +77,13 @@ namespace ReportsProcatt.Models
         public void InitMainDiagram()
         {
             MainDiagram = new Dictionary<string, string>();
-            MainDiagram.Add(MainDiagramParams.Begin, $"{_mainService.Totals.SNach.DecimalToStr()} {ReportCurrency.Char}");
-            MainDiagram.Add(MainDiagramParams.InVal, $"{_mainService.Totals.InVal.DecimalToStr(aWithSign: true)} {ReportCurrency.Char}");
-            MainDiagram.Add(MainDiagramParams.OutVal, $"{_mainService.Totals.OutVal_DU.DecimalToStr(aWithSign: true)} {ReportCurrency.Char}");
-            MainDiagram.Add(MainDiagramParams.Dividents, $"{_mainService.Totals.Dividends.DecimalToStr(aWithSign: true)} {ReportCurrency.Char}");
-            MainDiagram.Add(MainDiagramParams.Coupons, $"{_mainService.Totals.Coupons.DecimalToStr(aWithSign: true)} {ReportCurrency.Char}");
-            MainDiagram.Add(MainDiagramParams.OutVal1, $"{_mainService.Totals.OutVal_PIF.DecimalToStr(aWithSign: true)} {ReportCurrency.Char}");
-            MainDiagram.Add(MainDiagramParams.End, $"{_mainService.Totals.SItog.DecimalToStr()} {ReportCurrency.Char}");
+            MainDiagram.Add(MainDiagramParams.Begin, $"{_invFullDS.DecimalToStr(InvestFullTables.MainDiagramDT, "Snach", "#,##0")} {ReportCurrency.Char}");
+            MainDiagram.Add(MainDiagramParams.InVal, $"{_invFullDS.DecimalToStr(InvestFullTables.MainDiagramDT, "InVal", "#,##0", true)} {ReportCurrency.Char}");
+            MainDiagram.Add(MainDiagramParams.OutVal, $"{_invFullDS.DecimalToStr(InvestFullTables.MainDiagramDT, "OutVal2", "#,##0", true)} {ReportCurrency.Char}");
+            MainDiagram.Add(MainDiagramParams.Dividents, $"{_invFullDS.DecimalToStr(InvestFullTables.MainDiagramDT, "Dividents", "#,##0", true)} {ReportCurrency.Char}");
+            MainDiagram.Add(MainDiagramParams.Coupons, $"{_invFullDS.DecimalToStr(InvestFullTables.MainDiagramDT, "Coupons", "#,##0", true)} {ReportCurrency.Char}");
+            MainDiagram.Add(MainDiagramParams.OutVal1, $"{_invFullDS.DecimalToStr(InvestFullTables.MainDiagramDT, "OutVal1", "#,##0", true)} {ReportCurrency.Char}");
+            MainDiagram.Add(MainDiagramParams.End, $"{_invFullDS.DecimalToStr(InvestFullTables.MainResultDT, "ActiveDateToValue", "#,##0")} {ReportCurrency.Char}");
         }
         public void InitPIFsTotalTable()
         {
@@ -134,15 +104,15 @@ namespace ReportsProcatt.Models
             };
             PIFsTotals.Ths.Where(t => t.ColumnName == PIFsTotalColumns.PIFs).First().AttrRow.Add("width", "520px");
 
-            _mainService.PIFs.ForEach(p => 
+            foreach (DataRow dr in _invFullDS.Tables[InvestFullTables.FundsDt].Rows)
             {
                 DataRow row = PIFsTotals.Table.NewRow();
-                row[PIFsTotalColumns.PIFs] = p.Name;
-                row[PIFsTotalColumns.StartValue] = p.SNach.DecimalToStr();
-                row[PIFsTotalColumns.EndValue] = p.SItog.DecimalToStr();
-                row[PIFsTotalColumns.Result] = $"{p.Income.DecimalToStr()} {ReportCurrency.Code} ({p.Res.DecimalToStr("#,##0.00")}%)";
+                row[PIFsTotalColumns.PIFs] = dr["FundName"];
+                row[PIFsTotalColumns.StartValue] = dr["BeginValue"].DecimalToStr();
+                row[PIFsTotalColumns.EndValue] = dr["EndValue"].DecimalToStr();
+                row[PIFsTotalColumns.Result] = $"{dr["ProfitValue"].DecimalToStr()} {dr["Valuta"]} ({dr["ProfitProcentValue"].DecimalToStr("#,##0.00")}%)";
                 PIFsTotals.Table.Rows.Add(row);
-            });
+            }
         }
         public void InitDUsTotalTable()
         {
@@ -163,15 +133,15 @@ namespace ReportsProcatt.Models
             };
             DUsTotals.Ths.Where(t => t.ColumnName == DUsTotalColumns.DUs).First().AttrRow.Add("width", "520px");
 
-            _mainService.DUs.ForEach(f => 
+            foreach (DataRow dr in _invFullDS.Tables[InvestFullTables.DUsDt].Rows)
             {
                 DataRow row = DUsTotals.Table.NewRow();
-                row[DUsTotalColumns.DUs] = f.Name;
-                row[DUsTotalColumns.StartValue] = f.SNach.DecimalToStr();
-                row[DUsTotalColumns.EndValue] = f.SItog.DecimalToStr();
-                row[DUsTotalColumns.Result] = $"{f.Income.DecimalToStr()} {ReportCurrency.Code} ({f.Res.DecimalToStr("#,##0.00")}%)";
+                row[DUsTotalColumns.DUs] = dr["ContractName"];
+                row[DUsTotalColumns.StartValue] = dr["BeginValue"].DecimalToStr();
+                row[DUsTotalColumns.EndValue] = dr["EndValue"].DecimalToStr();
+                row[DUsTotalColumns.Result] = $"{dr["ProfitValue"].DecimalToStr()} {dr["Valuta"]} ({dr["ProfitProcentValue"].DecimalToStr("#,##0.00")}%)";
                 DUsTotals.Table.Rows.Add(row);
-            });
+            }
         }
         private void InitDivsNCoupons()
         {
@@ -190,12 +160,15 @@ namespace ReportsProcatt.Models
                 new ViewElementAttr{ColumnName = DivsNCouponsColumns.Summ, DisplayName = "Сумма", SortOrder = 4}
             };
 
-            DataRow row = DivsNCoupons.Table.NewRow(); 
-            row[DivsNCouponsColumns.NameObject] = "DU";
-            row[DivsNCouponsColumns.INPUT_DIVIDENTS] = $"{_mainService.DUsTotals.Dividends.DecimalToStr()} {ReportCurrency.Code}";
-            row[DivsNCouponsColumns.INPUT_COUPONS] = $"{_mainService.DUsTotals.Coupons.DecimalToStr()} {ReportCurrency.Code}";
-            row[DivsNCouponsColumns.Summ] = $"{(_mainService.DUsTotals.Dividends + _mainService.DUsTotals.Coupons).DecimalToStr()} {ReportCurrency.Code}";
-            DivsNCoupons.Table.Rows.Add(row);
+            foreach (DataRow dr in _invFullDS.Tables[InvestFullTables.DivsNCoupons].Rows)
+            {
+                DataRow row = DivsNCoupons.Table.NewRow(); 
+                row[DivsNCouponsColumns.NameObject] = dr["NameObject"];
+                row[DivsNCouponsColumns.INPUT_DIVIDENTS] = $"{dr["INPUT_DIVIDENTS"].DecimalToStr()} {dr["Valuta"]}";
+                row[DivsNCouponsColumns.INPUT_COUPONS] = $"{dr["INPUT_COUPONS"].DecimalToStr()} {dr["Valuta"]}";
+                row[DivsNCouponsColumns.Summ] = $"{(dr["INPUT_DIVIDENTS"].ToDecimal() + dr["INPUT_COUPONS"].ToDecimal()).DecimalToStr()} {dr["Valuta"]}";
+                DivsNCoupons.Table.Rows.Add(row);
+            }
         }
         private void InitDivsNCouponsChart()
         {
@@ -203,17 +176,17 @@ namespace ReportsProcatt.Models
 
             DivsNCouponsChart = new ChartDiagramClass($"DivsNCoupons_main")
             {
-                Lables = _chartService.DivsNCouponsChartTotals
-                    .Select(r => ((DateTime)r.Date).ToCharString()).ToList(),
+                Lables = _invFullDS.Tables[InvestFullTables.DivsNCouponsChart].Rows.Cast<DataRow>().ToList()
+                    .Select(r => ((DateTime)r["Date"]).ToCharString()).ToList(),
                 Type = "bar",
                 DataSets = new List<ChartDiagramClass.DataSetClass>()
                     {
                         new ChartDiagramClass.DataSetClass
                         {
-                            data = _chartService.DivsNCouponsChartTotals
+                            data = _invFullDS.Tables[InvestFullTables.DivsNCouponsChart].Rows.Cast<DataRow>().ToList()
                                 .Select(r => new ChartDiagramClass.DataClass
                                 {
-                                    value = r.Dividends ?? 0,
+                                    value = (r["Dividends"] as decimal?) ?? 0,
                                     borderColor = "#E9F3F8"
                                 }).ToList(),
                             backgroundColor = "#E9F3F8",
@@ -221,10 +194,10 @@ namespace ReportsProcatt.Models
                         },
                         new ChartDiagramClass.DataSetClass
                         {
-                            data = _chartService.DivsNCouponsChartTotals
+                            data = _invFullDS.Tables[InvestFullTables.DivsNCouponsChart].Rows.Cast<DataRow>().ToList()
                                 .Select(r => new ChartDiagramClass.DataClass
                                 {
-                                    value = r.Coupons ?? 0,
+                                    value = (r["Coupons"] as decimal?) ?? 0,
                                     borderColor = "#09669A"
                                 }).ToList(),
                             backgroundColor = "#09669A",
@@ -252,16 +225,16 @@ namespace ReportsProcatt.Models
                 new ViewElementAttr{ColumnName = DivsNCouponsDetailsColumns.Price, DisplayName = "Сумма сделки", SortOrder = 5},
             };
 
-            _divNCouponsDetailsService.Totals.ForEach(dr =>
+            foreach (DataRow dr in _invFullDS.Tables[InvestFullTables.DivsNCouponsDetails].Rows)
             {
-                DataRow row = DivsNCouponsDetails.Table.NewRow();
-                row[DivsNCouponsDetailsColumns.Date] = ((DateTime)dr.Date).ToString("dd.MM.yyyy");
-                row[DivsNCouponsDetailsColumns.ToolName] = dr.ShareName;
-                row[DivsNCouponsDetailsColumns.PriceType] = dr.PaymentType;
-                row[DivsNCouponsDetailsColumns.ContractName] = dr.ContractName;
-                row[DivsNCouponsDetailsColumns.Price] = $"{dr.INPUT_VALUE.DecimalToStr("#,##0.00")} {dr.Valuta}";
+                DataRow row = DivsNCouponsDetails.Table.NewRow(); 
+                row[DivsNCouponsDetailsColumns.Date] = ((DateTime)dr["Date"]).ToString("dd.MM.yyyy");
+                row[DivsNCouponsDetailsColumns.ToolName] = dr["ToolName"];
+                row[DivsNCouponsDetailsColumns.PriceType] = dr["PriceType"];
+                row[DivsNCouponsDetailsColumns.ContractName] = dr["ContractName"];
+                row[DivsNCouponsDetailsColumns.Price] = $"{dr["Price"].DecimalToStr("#,##0.00")} {dr["Valuta"]}";
                 DivsNCouponsDetails.Table.Rows.Add(row);
-            });
+            }
         }
         public void InitAllAssetsTable()
         {
@@ -290,60 +263,56 @@ namespace ReportsProcatt.Models
                 new ViewElementAttr{ColumnName = AllAssetsColumns.CurrencyProfit, DisplayName = "ДОХОД В ВАЛЮТЕ", SortOrder = 9},
             };
 
+            foreach (DataRow dr in _invFullDS.Tables[InvestFullTables.FundsResultDt].Rows)
             {
-                var dr = _mainService.PIFsTotals;
                 DataRow row = AllAssets.Table.NewRow();
-                row[AllAssetsColumns.Product] = "ПИФы";
-                row[AllAssetsColumns.BeginAssets] = dr.SNach.DecimalToStr();
-                row[AllAssetsColumns.InVal] = dr.InVal.DecimalToStr();
+                row[AllAssetsColumns.Product] = dr["NameObject"];
+                row[AllAssetsColumns.BeginAssets] = dr["StartDateValue"].DecimalToStr();
+                row[AllAssetsColumns.InVal] = dr["INPUT_VALUE"].DecimalToStr();
                 row[AllAssetsColumns.OutVal] = "";
-                row[AllAssetsColumns.Dividents] = "";
-                row[AllAssetsColumns.Coupons] = "";
-                row[AllAssetsColumns.Redemption] = dr.OutVal_PIF.DecimalToStr();
-                row[AllAssetsColumns.EndAssets] = dr.SItog.DecimalToStr();
-                row[AllAssetsColumns.CurrencyProfit] = $"{dr.Income.DecimalToStr()} {ReportCurrency.Code} " +
-                    $"({dr.Res.DecimalToStr("#,##0.00")}%)";
+                row[AllAssetsColumns.Dividents] = dr["INPUT_DIVIDENTS"].DecimalToStr();
+                row[AllAssetsColumns.Coupons] = dr["INPUT_COUPONS"].DecimalToStr();
+                row[AllAssetsColumns.Redemption] = dr["OUTPUT_VALUE"].DecimalToStr();
+                row[AllAssetsColumns.EndAssets] = dr["EndDateValue"].DecimalToStr();
+                row[AllAssetsColumns.CurrencyProfit] = $"{dr["ProfitValue"].DecimalToStr()} {dr["Valuta"]} ({dr["ProfitProcentValue"].DecimalToStr("#,##0.00")}%)";
                 AllAssets.Table.Rows.Add(row);
             }
 
+            foreach (DataRow dr in _invFullDS.Tables[InvestFullTables.DUsResultDt].Rows)
             {
-                var dr = _mainService.DUsTotals;
                 DataRow row = AllAssets.Table.NewRow();
-                row[AllAssetsColumns.Product] = "ДУ";
-                row[AllAssetsColumns.BeginAssets] = dr.SNach.DecimalToStr();
-                row[AllAssetsColumns.InVal] = dr.InVal.DecimalToStr();
-                row[AllAssetsColumns.OutVal] = dr.OutVal_DU.DecimalToStr();
-                row[AllAssetsColumns.Dividents] = dr.Dividends.DecimalToStr();
-                row[AllAssetsColumns.Coupons] = dr.Coupons.DecimalToStr();
+                row[AllAssetsColumns.Product] = dr["NameObject"];
+                row[AllAssetsColumns.BeginAssets] = dr["StartDateValue"].DecimalToStr();
+                row[AllAssetsColumns.InVal] = dr["INPUT_VALUE"].DecimalToStr();
+                row[AllAssetsColumns.OutVal] = dr["OUTPUT_VALUE"].DecimalToStr();
+                row[AllAssetsColumns.Dividents] = dr["INPUT_DIVIDENTS"].DecimalToStr();
+                row[AllAssetsColumns.Coupons] = dr["INPUT_COUPONS"].DecimalToStr();
                 row[AllAssetsColumns.Redemption] = "";
-                row[AllAssetsColumns.EndAssets] = dr.SItog.DecimalToStr();
-                row[AllAssetsColumns.CurrencyProfit] = $"{dr.Income.DecimalToStr()} {ReportCurrency.Code} " +
-                    $"({dr.Res.DecimalToStr("#,##0.00")}%)";
+                row[AllAssetsColumns.EndAssets] = dr["EndDateValue"].DecimalToStr();
+                row[AllAssetsColumns.CurrencyProfit] = $"{dr["ProfitValue"].DecimalToStr()} {dr["Valuta"]} ({dr["ProfitProcentValue"].DecimalToStr("#,##0.00")}%)";
                 AllAssets.Table.Rows.Add(row);
             }
         }
         public void InitAssets()
         {
             int i = 1;
-            var ChartData = _circleDiagramsService.TotalCategory;
-            string CatTypeName = "АКТИВА(ов)";
             Assets = new CircleDiagram("MainAssetsCircle")
             {
                 LegendName = "Активы",
-                MainText = $"{ChartData.Sum(c => c.VALUE_CUR ?? 0).DecimalToStr()} {ReportCurrency.Char}",
-                Footer = $"{ChartData.Count().DecimalToStr()} {CatTypeName}",
-                Data = ChartData
-                    .OrderByDescending(r => r.Res.ToDecimal())
+                MainText = $"{_circleAssetsDS.DecimalToStr(1, "AllSum", "#,##0")} {ReportCurrency.Char}",
+                Footer = $"{_circleAssetsDS.DecimalToStr(1, "CountRows", "#,##0")} АКТИВА(ов)",
+                Data = _circleAssetsDS.Tables[0].Rows.Cast<DataRow>().ToList()
+                    .OrderByDescending(r => r["Result"].ToDecimal().ToDecimal())
                     .Take(7)
                     .Select(r => 
                     {
                         var el = new CircleDiagram.DataClass
                         {
-                            lable = $"{r.CategoryName}",
-                            data = r.VALUE_CUR.ToDecimal(),
+                            lable = $"{r["CategoryName"]}",
+                            data = r["VALUE_RUR"].ToDecimal().ToDecimal(),
                             backgroundColor = CircleDiagramsColorCodes.MainAssetsCircle[i],
                             borderColor = CircleDiagramsColorCodes.MainAssetsCircle[i],
-                            result = $"{r.Res.DecimalToStr("#,##0.00")}%"
+                            result = $"{(r["Result"].ToDecimal().ToDecimal() * 100).DecimalToStr("#,##0.00")}%"
                         };
                         i++;
                         return el;
@@ -352,22 +321,23 @@ namespace ReportsProcatt.Models
                 
             };
 
-            if (ChartData.Count > 7)
+            if (_circleAssetsDS.Tables[0].Rows.Count > 7)
             {
-                decimal otherPerent = ChartData
-                        .OrderByDescending(r => (double)r.Res)
+                decimal otherPerent = 100 -
+                    _circleAssetsDS.Tables[0].Rows.Cast<DataRow>().ToList()
+                        .OrderByDescending(r => (double)r["Result"])
                         .Skip(6)
-                        .Sum(r => r.Res.ToDecimal());
+                        .Sum(r => r["Result"].ToDecimal().ToDecimal()) * 100;
 
                 Assets.Data.RemoveAt(Assets.Data.Count - 1);
 
                 Assets.Data.Add(new CircleDiagram.DataClass
                 {
                     lable = @$"Прочее",
-                    data = ChartData
-                        .OrderByDescending(r => r.Res)
+                    data = _circleAssetsDS.Tables[0].Rows.Cast<DataRow>().ToList()
+                        .OrderByDescending(r => r["Result"].ToDecimal().ToDecimal())
                         .Skip(6)
-                        .Sum(r => r.VALUE_CUR.ToDecimal()),
+                        .Sum(r => r["VALUE_RUR"].ToDecimal().ToDecimal()),
                     backgroundColor = CircleDiagramsColorCodes.MainAssetsCircle[7],
                     borderColor = CircleDiagramsColorCodes.MainAssetsCircle[7],
                     result = $"{otherPerent.DecimalToStr()}%"
@@ -377,25 +347,23 @@ namespace ReportsProcatt.Models
         public void InitInstruments()
         {
             int i = 1;
-            var ChartData = _circleDiagramsService.TotalAssets;
-            string CatTypeName = "инструментов";
             Instruments = new CircleDiagram("MainInstrumentsCircle")
             {
                 LegendName = "Инструменты",
-                MainText = $"{ChartData.Sum(c => c.VALUE_CUR ?? 0).DecimalToStr()} {ReportCurrency.Char}",
-                Footer = $"{ChartData.Count().DecimalToStr()} {CatTypeName}",
-                Data = ChartData
-                    .OrderByDescending(r => r.Res.ToDecimal())
+                MainText = $"{_circleInstrumentsDS.DecimalToStr(1, "AllSum", "#,##0")} {ReportCurrency.Char}",
+                Footer = $"{_circleInstrumentsDS.DecimalToStr(1, "CountRows", "#,##0")} инструментов",
+                Data = _circleInstrumentsDS.Tables[0].Rows.Cast<DataRow>().ToList()
+                    .OrderByDescending(r => r["Result"].ToDecimal().ToDecimal())
                     .Take(7)
                     .Select(r =>
                     {
                         var el = new CircleDiagram.DataClass
                         {
-                            lable = $"{r.CategoryName}",
-                            data = r.VALUE_CUR.ToDecimal(),
+                            lable = $"{r["Investment"]}",
+                            data = r["VALUE_RUR"].ToDecimal().ToDecimal(),
                             backgroundColor = CircleDiagramsColorCodes.MainInstrumentsCircle[i],
                             borderColor = CircleDiagramsColorCodes.MainInstrumentsCircle[i],
-                            result = $"{r.Res.DecimalToStr("#,##0.00")}%"
+                            result = $"{(r["Result"].ToDecimal().ToDecimal() * 100).DecimalToStr("#,##0.00")}%"
                         };
                         i++;
                         return el;
@@ -404,22 +372,23 @@ namespace ReportsProcatt.Models
 
             };
 
-            if (ChartData.Count > 7)
+            if (_circleInstrumentsDS.Tables[0].Rows.Count > 7)
             {
-                decimal otherPerent = ChartData
-                        .OrderByDescending(r => (double)r.Res)
+                decimal otherPerent = 100 -
+                    _circleInstrumentsDS.Tables[0].Rows.Cast<DataRow>().ToList()
+                        .OrderByDescending(r => r["Result"].ToDecimal().ToDecimal())
                         .Skip(6)
-                        .Sum(r => r.Res.ToDecimal());
+                        .Sum(r => r["Result"].ToDecimal().ToDecimal()) * 100;
 
                 Instruments.Data.RemoveAt(Instruments.Data.Count - 1);
 
                 Instruments.Data.Add(new CircleDiagram.DataClass
                 {
                     lable = @$"Прочее",
-                    data = ChartData
-                        .OrderByDescending(r => r.Res)
+                    data = _circleInstrumentsDS.Tables[0].Rows.Cast<DataRow>().ToList()
+                        .OrderByDescending(r => r["Result"].ToDecimal())
                         .Skip(6)
-                        .Sum(r => r.VALUE_CUR.ToDecimal()),
+                        .Sum(r => r["VALUE_RUR"].ToDecimal()),
                     backgroundColor = CircleDiagramsColorCodes.MainInstrumentsCircle[7],
                     borderColor = CircleDiagramsColorCodes.MainInstrumentsCircle[7],
                     result = $"{otherPerent.DecimalToStr()}%"
@@ -430,23 +399,22 @@ namespace ReportsProcatt.Models
         public void InitCurrencies()
         {
             int i = 1;
-            var ChartData = _circleDiagramsService.TotalCurrency;
             Currencies = new CircleDiagram("MainCurrenciesCircle")
             {
                 LegendName = "Валюта",
-                MainText = $"{ChartData.Sum(c => c.VALUE_CUR ?? 0).DecimalToStr()} {ReportCurrency.Char}",
-                Data = ChartData
-                    .OrderByDescending(r => r.Res.ToDecimal())
+                MainText = $"{_circleCurrenciesDS.DecimalToStr(1, "AllSum", "#,##0")} {ReportCurrency.Char}",
+                Data = _circleCurrenciesDS.Tables[0].Rows.Cast<DataRow>().ToList()
+                    .OrderByDescending(r => r["Result"].ToDecimal())
                     .Take(7)
                     .Select(r =>
                     {
                         var el = new CircleDiagram.DataClass
                         {
-                            lable = $"{r.CategoryName}",
-                            data = r.VALUE_CUR.ToDecimal(),
+                            lable = $"{r["CurrencyName"]}",
+                            data = r["VALUE_RUR"].ToDecimal(),
                             backgroundColor = CircleDiagramsColorCodes.MainCurrenciesCircle[i],
                             borderColor = CircleDiagramsColorCodes.MainCurrenciesCircle[i],
-                            result = $"{r.Res.DecimalToStr("#,##0.00")}%"
+                            result = $"{(r["Result"].ToDecimal() * 100).DecimalToStr("#,##0.00")}%"
                         };
                         i++;
                         return el;
@@ -455,22 +423,23 @@ namespace ReportsProcatt.Models
 
             };
 
-            if (ChartData.Count > 7)
+            if (_circleCurrenciesDS.Tables[0].Rows.Count > 7)
             {
-                decimal otherPerent = ChartData
-                        .OrderByDescending(r => (double)r.Res)
+                decimal otherPerent = 100 -
+                    _circleCurrenciesDS.Tables[0].Rows.Cast<DataRow>().ToList()
+                        .OrderByDescending(r => (double)r["Result"])
                         .Skip(6)
-                        .Sum(r => r.Res.ToDecimal());
+                        .Sum(r => r["Result"].ToDecimal()) * 100;
 
                 Currencies.Data.RemoveAt(Currencies.Data.Count - 1);
 
                 Currencies.Data.Add(new CircleDiagram.DataClass
                 {
                     lable = @$"Прочее",
-                    data = ChartData
-                        .OrderByDescending(r => r.Res)
+                    data = _circleCurrenciesDS.Tables[0].Rows.Cast<DataRow>().ToList()
+                        .OrderByDescending(r => r["Result"].ToDecimal())
                         .Skip(6)
-                        .Sum(r => r.VALUE_CUR.ToDecimal()),
+                        .Sum(r => r["VALUE_RUR"].ToDecimal()),
                     backgroundColor = CircleDiagramsColorCodes.MainCurrenciesCircle[7],
                     borderColor = CircleDiagramsColorCodes.MainCurrenciesCircle[7],
                     result = $"{otherPerent.DecimalToStr()}%"
@@ -483,10 +452,10 @@ namespace ReportsProcatt.Models
             PIFs = new List<PIF>();
             Task.WaitAll
             (
-                _mainService.PIFs
+                _invFullDS.Tables[InvestFullTables.FundsDt].Rows.Cast<DataRow>().ToList()
                 .Select(r => Task.Run(() =>
                 {
-                    PIFs.Add(new PIF(r.Name.ToString(), Dfrom, Dto, ReportCurrency, r.ContractId, InvestorId));
+                    PIFs.Add(new PIF(r["FundName"].ToString(), Dfrom, Dto, ReportCurrency, (int)r["FundId"], InvestorId, connectionString, ReportPath));
                 })).ToArray()
             );
         }
@@ -495,13 +464,25 @@ namespace ReportsProcatt.Models
             DUs = new List<DU>();
             Task.WaitAll
             (
-                _mainService.DUs
+                _invFullDS.Tables[InvestFullTables.DUsDt].Rows.Cast<DataRow>().ToList()
                 .Select(r => Task.Run(() =>
                 {
-                    DUs.Add(new DU(r.Name.ToString(), Dfrom, Dto, ReportCurrency, r.ContractId, InvestorId));
+                    DUs.Add(new DU(r["ContractName"].ToString(), Dfrom, Dto, ReportCurrency, (int)r["ContractId"], InvestorId, connectionString, ReportPath));
                 })).ToArray()
             );
         }
         #endregion
+    }
+    public class InvestFullTables
+    {
+        public const int MainResultDT = 0;
+        public const int MainDiagramDT = 1;
+        public const int FundsDt = 4;
+        public const int DUsDt = 5;
+        public const int FundsResultDt = 6;
+        public const int DUsResultDt = 7;
+        public const int DivsNCoupons = 7;
+        public const int DivsNCouponsDetails = 8;
+        public const int DivsNCouponsChart = 9;
     }
 }

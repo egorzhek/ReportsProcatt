@@ -5,7 +5,6 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
-using ReportsProcatt.Content.Services;
 
 namespace ReportsProcatt.Models
 {
@@ -15,75 +14,52 @@ namespace ReportsProcatt.Models
         public string Name { get; private set; }
         public string Period => $"{Dfrom.ToString("dd.MM.yyyy")} - {Dto.ToString("dd.MM.yyyy")}";
         public Headers PifHeader { get; set; }
-        public DateTime Dfrom => _dFrom;
-        public DateTime Dto => _dTo;
-        public CurrencyClass _Currency { get; set; }
+        public DateTime Dfrom { get; set; }
+        public DateTime Dto { get; set; }
+        public CurrencyClass Currency { get; set; }
         public Dictionary<string, string> Diagram { get; set; }
-        public string AccountNumber => _mainService.PIF(Id).LS_NUM;
-        public string OpenDate => _mainService.PIF(Id).DATE_OPEN.ToString();
-        public string Amount => $"{_mainService.PIF(Id).SumAmount} шт.";
+        public string AccountNumber => _FundInfoDS.GetValue(PifTables.MainResultDT, "LS_NUM").ToString();
+        public string OpenDate => ((DateTime)_FundInfoDS.GetValue(PifTables.MainResultDT, "OpenDate")).ToString("dd.MM.yyyy");
+        public string Amount => $"{_FundInfoDS.GetValue(PifTables.MainResultDT, "EndSumAmount")} шт.";
         public CircleDiagram AssetsStruct { get; set; }
         public CircleDiagram FundStruct { get; set; }
         public TableView PifOperationsHistory { get; set; }
-        #region Private Fields
-        private DateTime _dTo;
-        private DateTime _dFrom;
+        #region Поля
+        private SQLDataPIF _data;
+        private DataSet _FundInfoDS => _data.DataSet_FundInfo;
+        private DataSet _PifDS => _data.DataSet_PIF;
+        private DataSet _Pif2DS => _data.DataSet_PIF2;
         #endregion
-        #region Services
-        private ContractsDataSumService _mainService;
-        private CircleDiagramsService _circleDiagramsService;
-        private FundOperationHistoryService _fundOperationHistoryService;
-        #endregion
-        public PIF(string aName,DateTime? aDFrom,DateTime? aDTo,CurrencyClass aCurrency,int aFundId,int aInvestorId)
+        public PIF(
+            string aName,
+            DateTime? aDFrom,
+            DateTime? aDTo,
+            CurrencyClass aCurrency,
+            int FundId,
+            int InvestorId,
+            string connectionString,
+            string ReportPath)
         {
-            Id = aFundId;
-            _Currency = aCurrency;
-            Currency cur;
+            Id = FundId;
+            Currency = aCurrency;
+            _data = new SQLDataPIF(Currency.Code, FundId, InvestorId, aDFrom, aDTo, connectionString, ReportPath);
 
-            Name = aName ?? _mainService.PIF(aFundId).Name;
-            _dFrom = aDFrom ?? (DateTime)_mainService.PIF(aFundId).DATE_OPEN;
-            _dTo = aDTo ?? (DateTime)_mainService.PIF(aFundId).DATE_CLOSE;
+            Name = aName ?? _FundInfoDS.GetValue(PifTables.MainResultDT, "FundName").ToString();
+            Dfrom = aDFrom ?? DateTime.Parse(_FundInfoDS.GetValue(PifTables.MainResultDT, "MinDate").ToString());
+            Dto = aDTo ?? DateTime.Parse(_FundInfoDS.GetValue(PifTables.MainResultDT, "MaxDate").ToString());
 
-            _mainService = new ContractsDataSumService(
-                new MainServiceParams
-                {
-                    CurrencyCode = Enum.TryParse(aCurrency.Char, out cur) ? cur : Currency.RUB,
-                    DateFrom = aDFrom,
-                    DateTo = aDTo,
-                    InvestorId = aInvestorId
-                });
-
-            _circleDiagramsService = new CircleDiagramsService(
-                new CircleDiaramsServiceParams
-                {
-                    CurrencyCode = Enum.TryParse(aCurrency.Char, out cur) ? cur : Currency.RUB,
-                    DateTo = aDTo,
-                    InvestorId = aInvestorId
-                });
-            _fundOperationHistoryService = new FundOperationHistoryService(
-                new FundServiceParams
-                {
-                    FundId = aFundId,
-                    DateFrom = aDFrom,
-                    DateTo = aDTo,
-                    CurrencyCode = Enum.TryParse(aCurrency.Char, out cur) ? cur : Currency.RUB,
-                    InvestorId = aInvestorId
-                });
-            
             PifHeader = new Headers
             {
-                TotalSum = $"{_mainService.PIF(Id).SItog.DecimalToStr()} {aCurrency.Char}",
-                ProfitSum = $"{_mainService.PIF(Id).Income.DecimalToStr()} {aCurrency.Char}",
-                Return = $"{_mainService.PIF(Id).Res.DecimalToStr("#0.00", aWithSign: true)}%"
+                TotalSum = $"{_FundInfoDS.DecimalToStr(PifTables.MainResultDT, "ActiveDateToValue", "#,##0")} {Currency.Char}",
+                ProfitSum = $"{_FundInfoDS.DecimalToStr(PifTables.MainResultDT, "ProfitValue", "#,##0")} {Currency.Char}",
+                Return = $"{_FundInfoDS.DecimalToStr(PifTables.MainResultDT, "ProfitProcentValue", aWithSign: true)}%"
             };
-
-           
             Diagram = new Dictionary<string, string>
             {
-                { PifDiagramColumns.Begin, $"{_mainService.PIF(Id).SNach.DecimalToStr()} {aCurrency.Char}" },
-                { PifDiagramColumns.InVal, $"{_mainService.PIF(Id).InVal.DecimalToStr()} {aCurrency.Char}" },
-                { PifDiagramColumns.OutVal, $"{_mainService.PIF(Id).OutVal.DecimalToStr()} {aCurrency.Char}" },
-                { PifDiagramColumns.End, $"{_mainService.PIF(Id).SItog.DecimalToStr()} {aCurrency.Char}" }
+                { PifDiagramColumns.Begin, $"{_FundInfoDS.DecimalToStr(PifTables.DiagramDT, "ActiveValue", "#,##0")} {Currency.Char}" },
+                { PifDiagramColumns.InVal, $"{_FundInfoDS.DecimalToStr(PifTables.DiagramDT, "Пополнения", "#,##0")} {Currency.Char}" },
+                { PifDiagramColumns.OutVal, $"{_FundInfoDS.DecimalToStr(PifTables.DiagramDT, "Выводы", "#,##0")} {Currency.Char}" },
+                { PifDiagramColumns.End, $"{_FundInfoDS.DecimalToStr(PifTables.MainResultDT, "ActiveDateToValue", "#,##0")} {Currency.Char}" }
             };
             //InitAccountDetails();
             InitAssetsStruct();
@@ -92,29 +68,26 @@ namespace ReportsProcatt.Models
         }
         private void InitAssetsStruct()
         {
-            var PIF = _circleDiagramsService.Category(Id, true);
-            string TypeName = "АКТИВА(ов)";
-            if (PIF.Count>0)
+            if (_PifDS.Tables[0].Rows.Count > 0)
             {
                 int i = 1;
                 AssetsStruct = new CircleDiagram($"Fund_{Id}_AssetsStructCircle")
                 {
-                    
                     LegendName = "Активы",
-                    MainText = $"{PIF.Sum(c => c.VALUE_CUR ?? 0).DecimalToStr()} {_Currency.Char}",
-                    Footer = $"{PIF.Count().DecimalToStr()} {TypeName}",
-                    Data = PIF
-                    .OrderByDescending(r => r.Res.ToDecimal())
-                    .Take(7)
-                    .Select(r =>
-                    {
+                    MainText = $"{_PifDS.DecimalToStr(0, "AllSum", "#,##0")} {Currency.Char}",
+                    Footer = $"{_PifDS.Tables[0].Rows.Count} АКТИВА(ов)",
+                    Data = _PifDS.Tables[0].Rows.Cast<DataRow>().ToList()
+                        .OrderByDescending(r => r["Result"].ToDecimal())
+                        .Take(7)
+                        .Select(r =>
+                        {
                             var el = new CircleDiagram.DataClass
                             {
-                                lable = $"{r.CategoryName}",
-                                data = r.VALUE_CUR.ToDecimal(),
-                                backgroundColor = CircleDiagramsColorCodes.MainAssetsCircle[i],
-                                borderColor = CircleDiagramsColorCodes.MainAssetsCircle[i],
-                                result = $"{r.Res.DecimalToStr("#,##0.00")}%"
+                                lable = $"{r["CategoryName"]}",
+                                data = r["VALUE_RUR"].ToDecimal(),
+                                backgroundColor = CircleDiagramsColorCodes.MainCurrenciesCircle[i],
+                                borderColor = CircleDiagramsColorCodes.MainCurrenciesCircle[i],
+                                result = $"{(r["Result"].ToDecimal() * 100).DecimalToStr("#,##0.00")}%"
                             };
                             i++;
                             return el;
@@ -123,55 +96,52 @@ namespace ReportsProcatt.Models
 
                 };
 
-                if (PIF.Count > 7)
+                if (_PifDS.Tables[0].Rows.Count > 7)
                 {
-                    decimal otherPerent =
-                        PIF.
-                        OrderByDescending(r => (double)r.Res)
-                        .Skip(6)
-                        .Sum(r => r.Res.ToDecimal());
+                    decimal otherPerent = 100 -
+                        _PifDS.Tables[0].Rows.Cast<DataRow>().ToList()
+                            .OrderByDescending(r => (double)r["Result"])
+                            .Skip(6)
+                            .Sum(r => r["Result"].ToDecimal()) * 100;
 
                     AssetsStruct.Data.RemoveAt(AssetsStruct.Data.Count - 1);
 
                     AssetsStruct.Data.Add(new CircleDiagram.DataClass
                     {
                         lable = @$"Прочее",
-                        data = PIF
-                        .OrderByDescending(r => r.Res)
-                        .Skip(6)
-                        .Sum(r => r.VALUE_CUR.ToDecimal()),
+                        data = _PifDS.Tables[0].Rows.Cast<DataRow>().ToList()
+                            .OrderByDescending(r => r["Result"].ToDecimal())
+                            .Skip(6)
+                            .Sum(r => r["VALUE_RUR"].ToDecimal()),
                         backgroundColor = CircleDiagramsColorCodes.MainAssetsCircle[7],
                         borderColor = CircleDiagramsColorCodes.MainAssetsCircle[7],
-                        result = $"{otherPerent.DecimalToStr()}%"
-                       
+                        result = $"{otherPerent.DecimalToStr("#,##0")}%"
                     });
                 }
             }
         }
         private void InitFundStruct()
         {
-            var PIF2 = _circleDiagramsService.Assets(Id, true);
-            string CatTypeName = "инструментов";
-            if (PIF2.Count>0)
+            if (_Pif2DS.Tables[0].Rows.Count > 0)
             {
                 int i = 1;
                 FundStruct = new CircleDiagram($"Fund_{Id}_StructCircle")
                 {
                     LegendName = "Инструменты",
-                    MainText = $"{PIF2.Sum(c => c.VALUE_CUR ?? 0).DecimalToStr()} {_Currency.Char}",
-                    Footer = $"{PIF2.Count().DecimalToStr()} {CatTypeName}",
-                    Data = PIF2
-                    .OrderByDescending(r => r.Res.ToDecimal())
-                    .Take(7)
-                    .Select(r =>
-                    {
+                    MainText = $"{_Pif2DS.DecimalToStr(0, "AllSum", "#,##0")} {Currency.Char}",
+                    Footer = $"{_Pif2DS.Tables[0].Rows.Count} инструментов",
+                    Data = _Pif2DS.Tables[0].Rows.Cast<DataRow>().ToList()
+                        .OrderByDescending(r => r["Result"].ToDecimal())
+                        .Take(7)
+                        .Select(r =>
+                        {
                             var el = new CircleDiagram.DataClass
                             {
-                                lable = $"{r.CategoryName}",
-                                data = r.VALUE_CUR.ToDecimal(),
+                                lable = $"{r["Investment"]}",
+                                data = r["VALUE_RUR"].ToDecimal(),
                                 backgroundColor = CircleDiagramsColorCodes.MainInstrumentsCircle[i],
                                 borderColor = CircleDiagramsColorCodes.MainInstrumentsCircle[i],
-                                result = $"{r.Res.DecimalToStr("#,##0.00")}%"
+                                result = $"{(r["Result"].ToDecimal() * 100).DecimalToStr("#,##0.00")}%"
                             };
                             i++;
                             return el;
@@ -180,26 +150,26 @@ namespace ReportsProcatt.Models
 
                 };
 
-                if (PIF2.Count>7)
+                if (_Pif2DS.Tables[0].Rows.Count > 7)
                 {
-                    decimal otherPerent = 
-                       PIF2.
-                       OrderByDescending(r => (double)r.Res)
-                       .Skip(6)
-                       .Sum(r => r.Res.ToDecimal());
+                    decimal otherPerent = 100 -
+                        _Pif2DS.Tables[0].Rows.Cast<DataRow>().ToList()
+                            .OrderByDescending(r => r["Result"].ToDecimal())
+                            .Skip(6)
+                            .Sum(r => r["Result"].ToDecimal()) * 100;
 
                     FundStruct.Data.RemoveAt(FundStruct.Data.Count - 1);
 
                     FundStruct.Data.Add(new CircleDiagram.DataClass
                     {
                         lable = @$"Прочее",
-                        data = PIF2
-                        .OrderByDescending(r => r.Res)
-                        .Skip(6)
-                        .Sum(r => r.Res.ToDecimal()),
+                        data = _Pif2DS.Tables[0].Rows.Cast<DataRow>().ToList()
+                            .OrderByDescending(r => r["Result"].ToDecimal())
+                            .Skip(6)
+                            .Sum(r => r["VALUE_RUR"].ToDecimal()),
                         backgroundColor = CircleDiagramsColorCodes.MainInstrumentsCircle[7],
                         borderColor = CircleDiagramsColorCodes.MainInstrumentsCircle[7],
-                        result = $"{otherPerent.DecimalToStr()}%"
+                        result = $"{otherPerent.DecimalToStr("#,##0")}%"
                     });
                 }
             }
@@ -226,24 +196,32 @@ namespace ReportsProcatt.Models
                 new ViewElementAttr{ColumnName = PifOperationsHistoryColumns.Value_rur, DisplayName = "Сумма сделки", SortOrder = 6},
                 new ViewElementAttr{ColumnName = PifOperationsHistoryColumns.Fee_rur, DisplayName = "Комиссия (надбавка/скидка)", SortOrder = 7}
             };
+
             PifOperationsHistory.Ths.Where(t => t.ColumnName == PifOperationsHistoryColumns.Wdate).First().AttrRow.Add("width", "170px");
             PifOperationsHistory.Ths.Where(t => t.ColumnName == PifOperationsHistoryColumns.Rate_rur).First().AttrRow.Add("width", "130px");
             PifOperationsHistory.Ths.Where(t => t.ColumnName == PifOperationsHistoryColumns.Value_rur).First().AttrRow.Add("width", "145px");
             PifOperationsHistory.Ths.Where(t => t.ColumnName == PifOperationsHistoryColumns.Fee_rur).First().AttrRow.Add("width", "117px");
 
-            _fundOperationHistoryService.Operations.ForEach(t =>
+
+            foreach (DataRow dr in _FundInfoDS.Tables[PifTables.OperationsHistory].Rows)
             {
                 DataRow row = PifOperationsHistory.Table.NewRow();
-                row[PifOperationsHistoryColumns.Wdate] = t.W_Date;
-                row[PifOperationsHistoryColumns.Btype] = t.OperName;
-                row[PifOperationsHistoryColumns.Instrument] = t.Order_NUM;
-                row[PifOperationsHistoryColumns.Rate_rur] = $"{(!string.IsNullOrEmpty(t.RATE_RUR?.ToString()) ? $"{t.RATE_RUR.DecimalToStr("#,##0.00")} {t.Valuta}" : "")}";
-                row[PifOperationsHistoryColumns.Amount] = t.Amount.DecimalToStr("#,##0.0000000"); 
-                row[PifOperationsHistoryColumns.Value_rur] = $"{(!string.IsNullOrEmpty(t.VALUE_RUR?.ToString()) ? $"{t.VALUE_RUR.DecimalToStr("#,##0.00")} {t.Valuta}" : "")}";
-                row[PifOperationsHistoryColumns.Fee_rur] = t.Fee_RUR.DecimalToStr("#,##0.00");
+                row[PifOperationsHistoryColumns.Wdate] = dr["W_Date"];
+                row[PifOperationsHistoryColumns.Btype] = dr["OperName"];
+                row[PifOperationsHistoryColumns.Instrument] = dr["Order_NUM"];
+                row[PifOperationsHistoryColumns.Rate_rur] = $"{(!string.IsNullOrEmpty(dr["RATE_RUR"]?.ToString()) ? $"{dr["RATE_RUR"].DecimalToStr("#,##0.00")} {dr["Valuta"]}" : "")}";
+                row[PifOperationsHistoryColumns.Amount] = dr["Amount"].DecimalToStr("#,##0.0000000");
+                row[PifOperationsHistoryColumns.Value_rur] = $"{(!string.IsNullOrEmpty(dr["VALUE_RUR"]?.ToString()) ? $"{dr["VALUE_RUR"].DecimalToStr("#,##0.00")} {dr["Valuta"]}" : "")}";
+                row[PifOperationsHistoryColumns.Fee_rur] = dr["FEE_RUR"].DecimalToStr("#,##0.00");
                 PifOperationsHistory.Table.Rows.Add(row);
-            });
+            }
 
         }
+    }
+    public class PifTables
+    {
+        public const int MainResultDT = 0;
+        public const int DiagramDT = 1;
+        public const int OperationsHistory = 2;
     }
 }

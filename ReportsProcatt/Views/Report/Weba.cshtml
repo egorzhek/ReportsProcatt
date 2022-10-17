@@ -1,0 +1,673 @@
+﻿@using ReportsProcatt.Content;
+@using System.Data;
+@using ReportsProcatt.Models;
+@model ReportsProcatt.Models.Report
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <link rel="stylesheet" href="@Model.rootStr/css/style-r.css">
+    <script src="@Model.rootStr/js/moment.min.js"></script>
+    <script src="@Model.rootStr/js/Chart.min.js"></script>
+    <script type="text/javascript">
+        var Charts = [];
+        (function (setLineDash) {
+            CanvasRenderingContext2D.prototype.setLineDash = function () {
+                if (!arguments[0].length) {
+                    arguments[0] = [1, 0];
+                }
+                // Now, call the original method
+                return setLineDash.apply(this, arguments);
+            };
+        })(CanvasRenderingContext2D.prototype.setLineDash);
+        Function.prototype.bind = Function.prototype.bind || function (thisp) {
+            var fn = this;
+            return function () {
+                return fn.apply(thisp, arguments);
+            };
+        };
+    </script>
+</head>
+<body>
+    @*Шапка*@
+    <header class="section header">
+        <div class="section-wrapper">
+            <a href="/">
+                <img src="@Model.rootStr/img/logo.svg">
+            </a>
+            <span>ОТЧЕТ ПО ПОРТФЕЛЮ</span>
+        </div>
+    </header>
+    @*Основной блок*@
+    <div class="section assets-section">
+
+        <div class="section-wrapper">
+            <div class="assests-wrap">
+
+                <div class="left-assets">
+                    <div class="asset-block">
+                        <p>Сумма активов на дату окончания периода</p>
+
+                        <span>@Model.MainHeader.TotalSum</span>
+                    </div>
+
+                    <div class="second-asset-block">
+                        <p>Текущий финансовый результат</p>
+
+                        <span>@Model.MainHeader.ProfitSum</span>
+                    </div>
+
+                    <div class="second-asset-block">
+                        <p>Относительная доходность</p>
+
+                        <span>@Model.MainHeader.Return</span>
+                    </div>
+                </div>
+
+                <div class="second-asset-block asset-end-block">
+                    <p>Период</p>
+
+                    <span>@Model.Period</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*Основная диаграмма*@
+    <div class="section block-heading">
+        <div class="section-wrapper">
+
+            <span>Изменение активов за период</span>
+
+            <span>Валюта:  @Model.ReportCurrency.Code</span>
+
+        </div>
+    </div>
+    <div class="section graph-section">
+        <div class="section-wrapper">
+
+            <div class="progression-graph">
+
+                <div class="progression-wrap">
+                    <div class="hl"></div>
+
+                    <div class="progression-item">
+                        <div class="progression-item-text">
+                            <p>@MainDiagramParams.Begin</p>
+                            <span>@Model.MainDiagram[MainDiagramParams.Begin]</span>
+                        </div>
+                    </div>
+
+                    <div class="progression-item progression-top">
+                        <div class="progression-item-text">
+                            <p>@MainDiagramParams.InVal</p>
+                            <span>@Model.MainDiagram[MainDiagramParams.InVal]</span>
+                        </div>
+                    </div>
+
+                    <div class="progression-item">
+                        <div class="progression-item-text">
+                            <p>@MainDiagramParams.OutVal</p>
+                            <span>@Model.MainDiagram[MainDiagramParams.OutVal]</span>
+                        </div>
+                    </div>
+
+                    <div class="progression-item progression-top">
+                        <div class="progression-item-text">
+                            <p>@MainDiagramParams.Dividents</p>
+                            <span>@Model.MainDiagram[MainDiagramParams.Dividents]</span>
+                        </div>
+                    </div>
+
+                    <div class="progression-item progression-top">
+                        <div class="progression-item-text">
+                            <p>@MainDiagramParams.Coupons</p>
+                            <span>@Model.MainDiagram[MainDiagramParams.Coupons]</span>
+                        </div>
+                    </div>
+
+                    <div class="progression-item">
+                        <div class="progression-item-text">
+                            <p>@MainDiagramParams.OutVal1</p>
+                            <span>@Model.MainDiagram[MainDiagramParams.OutVal1]</span>
+                        </div>
+                    </div>
+
+                    <div class="progression-item">
+                        <div class="progression-item-text">
+                            <p>@MainDiagramParams.End</p>
+                            <span>@Model.MainDiagram[MainDiagramParams.End]</span>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div class="section text-block">
+
+        <div class="section-wrapper">
+
+            <div class="text-wrap">
+                <p>
+                    Указанная в настоящем Отчете информация не является исчерпывающей и подготовлена исключительно в
+                    информационных целях и носит ознакомительный характер; доходность по Вашему портфелю рассчитана
+                    индивидуально с учетом всех операций за выбранный период. <br>
+
+                    Подробную информацию о деятельности АО УК «Ингосстрах – Инвестиции» и паевых инвестиционных фондов,
+                    находящихся под ее управлением, включая тексты правил доверительного управления, всех изменений и
+                    дополнений к ним, а также сведения о местах приема заявок на приобретение, погашение и обмен
+                    инвестиционных паев Вы можете получить по адресу 115035, г. Москва, ул. Пятницкая, д. 12, стр. 2, по
+                    телефону: (495) 720-48-98, а также на официальном сайте АО УК «Ингосстрах – Инвестиции» в сети
+                    Интернет по адресу: <a href="https://www.ingosinvest.ru">www.ingosinvest.ru</a>. <br>
+                </p>
+            </div>
+
+        </div>
+    </div>
+
+    @*Фактические выплаты дивидендов и купонов*@
+    <div class="section block-heading print-pt50">
+        <div class="section-wrapper">
+
+            <span>Фактические и прогнозные выплаты до конца года</span>
+
+        </div>
+    </div>
+    <div class="section line-chart-section">
+
+        <div class="section-wrapper">
+            @Html.Partial("_PartialChartDiagram", Model.DivsNCouponsChart)
+        </div>
+    </div>
+
+    @*Детализация купонов и дивидендов*@
+    <div class="section block-heading print-pt50">
+        <div class="section-wrapper">
+            <span>Структура активов по портфелю</span>
+        </div>
+    </div>
+    <div class="section doughnut-section info-table-section">
+
+        <div class="section-wrapper">
+            <div class="canvas-wrap">
+
+                <div class="canvas-row">
+
+                    @Html.Partial("_PartialCircleDiagram", Model.Assets)
+
+                    @Html.Partial("_PartialCircleDiagram", Model.Instruments)
+
+                </div>
+
+
+                <div class="canvas-row">
+
+                    <div class="canvas-item">
+
+                        @Html.Partial("_PartialCircleDiagram", Model.Currencies)
+
+                    </div>
+
+                </div>
+
+
+            </div>
+        </div>
+
+    </div>
+
+    @foreach (var pif in Model.PIFs)
+    {
+        <div class="section block-heading print-pt50">
+
+            <img class="bg-slpash-3" src="@Model.rootStr/img/bg-splash-3.png">
+
+            <div class="section-wrapper">
+                <span>@pif.Name</span>
+            </div>
+        </div>
+        <div class="section assets-section">
+
+            <div class="section-wrapper">
+                <div class="assests-wrap">
+
+                    <div class="left-assets">
+                        <div class="asset-block">
+                            <p>Сумма активов на дату окончания периода</p>
+
+                            <span>@pif.PifHeader.TotalSum</span>
+                        </div>
+
+                        <div class="second-asset-block">
+                            <p>Сумма дохода</p>
+
+                            <span>@pif.PifHeader.ProfitSum</span>
+                        </div>
+
+                        <div class="second-asset-block">
+                            <p>Относительная доходность (1,5%)</p>
+
+                            <span>@pif.PifHeader.Return</span>
+                        </div>
+                    </div>
+
+                    <div class="second-asset-block asset-end-block">
+                        <p>Период</p>
+
+                        <span>@pif.Period</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="section no-heading-section graph-section">
+            <div class="section-wrapper">
+                <div class="progression-graph">
+
+                    <div class="progression-wrap">
+                        <div class="hl"></div>
+
+                        <div class="progression-item">
+                            <div class="progression-item-text">
+                                <p>@PifDiagramColumns.Begin</p>
+                                <span>@pif.Diagram[PifDiagramColumns.Begin]</span>
+                            </div>
+                        </div>
+
+                        <div class="progression-item progression-top">
+                            <div class="progression-item-text">
+                                <p>@PifDiagramColumns.InVal</p>
+                                <span>@pif.Diagram[PifDiagramColumns.InVal]</span>
+                            </div>
+                        </div>
+
+
+                        <div class="progression-item">
+                            <div class="progression-item-text">
+                                <p>@PifDiagramColumns.OutVal</p>
+                                <span>@pif.Diagram[PifDiagramColumns.OutVal]</span>
+                            </div>
+                        </div>
+
+                        <div class="progression-item">
+                            <div class="progression-item-text">
+                                <p>@PifDiagramColumns.End</p>
+                                <span>@pif.Diagram[PifDiagramColumns.End]</span>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div class="section block-heading">
+
+            <div class="section-wrapper">
+                <span>Детали счета</span>
+
+            </div>
+        </div>
+        <div class="section details-section">
+            <div class="section-wrapper">
+                <div class="details-container">
+
+                    <div class="details-wrap">
+                        <div class="detail-item">
+                            <span>Номер лицевого счета</span>
+                            <p>@pif.AccountNumber</p>
+                        </div>
+
+                        <div class="detail-item">
+                            <span>Дата открытия счета</span>
+                            <p>@pif.OpenDate</p>
+                        </div>
+
+                        <div class="detail-item">
+                            <span>Количество паев*</span>
+                            <p>@pif.Amount</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div class="section text-block">
+            <div class="section-wrapper">
+                <div class="text-wrap">
+                    <p> * Подробную информацию о деятельности АО УК «Ингосстрах – Инвестиции» и паевых инвестиционных фондов, находящихся под ее управлением, включая тексты правил доверительного управления, всех изменений и дополнений к ним, а также сведения о местах приема заявок на приобретение, погашение и обмен инвестиционных паев Вы можете получить по адресу 115035, г. Москва, ул. Пятницкая, д. 12, стр. 2, по телефону: (495) 720-48-98, а также на официальном сайте АО УК «Ингосстрах – Инвестиции» в сети Интернет по адресу: <a href="https://www.ingosinvest.ru">www.ingosinvest.ru</a>. <br></p>
+                </div>
+            </div>
+        </div>
+        @if (pif.AssetsStruct != null || pif.FundStruct != null)
+        {
+            <div class="section block-heading ">
+
+                <div class="section-wrapper">
+                    <span>Состав фонда</span>
+                </div>
+            </div>
+            <div class="section doughnut-section double-doughnut info-table-section">
+
+                <div class="section-wrapper">
+
+                    <div class="canvas-wrap">
+
+                        <div class="canvas-row">
+
+                            @if (pif.AssetsStruct != null)
+                            {
+                                @Html.Partial("_PartialCircleDiagram", pif.AssetsStruct)
+                            }
+
+                            @if (pif.FundStruct != null)
+                            {
+                                @Html.Partial("_PartialCircleDiagram", pif.FundStruct)
+                            }
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        }
+    }
+
+    @foreach (var du in Model.DUs)
+    {
+        <div class="section block-heading">
+            <div class="section-wrapper">
+                <span>@du.Name</span>
+            </div>
+        </div>
+        <div class="section assets-section second-assets-section">
+
+            <div class="section-wrapper">
+                <div class="assests-wrap">
+
+                    <div class="left-assets">
+                        <div class="asset-block">
+                            <p>Сумма активов на дату окончания периода</p>
+
+                            <span>@du.DuHeader.TotalSum</span>
+                        </div>
+
+                        <div class="second-asset-block">
+                            <p>Сумма дохода</p>
+
+                            <span>@du.DuHeader.ProfitSum</span>
+                        </div>
+
+                        <div class="second-asset-block">
+                            <p>Относительная доходность (1,5%)</p>
+
+                            <span>@du.DuHeader.Return</span>
+                        </div>
+                    </div>
+
+                    <div class="second-asset-block asset-end-block">
+                        <p>Период</p>
+
+                        <span>@du.Period</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="section graph-section no-heading-section">
+
+            <div class="section-wrapper">
+                <div class="progression-graph">
+
+                    <div class="progression-wrap">
+                        <div class="hl"></div>
+
+                        <div class="progression-item">
+                            <div class="progression-item-text">
+                                <p>@DuDiagramColumns.Begin</p>
+                                <span>@du.Diagram[DuDiagramColumns.Begin]</span>
+                            </div>
+                        </div>
+
+                        <div class="progression-item progression-top">
+                            <div class="progression-item-text">
+                                <p>@DuDiagramColumns.InVal</p>
+                                <span>@du.Diagram[DuDiagramColumns.InVal]</span>
+                            </div>
+                        </div>
+
+                        <div class="progression-item progression-top">
+                            <div class="progression-item-text">
+                                <p>@DuDiagramColumns.Dividents</p>
+                                <span>@du.Diagram[DuDiagramColumns.Dividents]</span>
+                            </div>
+                        </div>
+                        <div class="progression-item progression-top">
+                            <div class="progression-item-text">
+                                <p>@DuDiagramColumns.Coupons</p>
+                                <span>@du.Diagram[DuDiagramColumns.Coupons]</span>
+                            </div>
+                        </div>
+
+                        <div class="progression-item">
+                            <div class="progression-item-text">
+                                <p>@DuDiagramColumns.OutVal</p>
+                                <span>@du.Diagram[DuDiagramColumns.OutVal]</span>
+                            </div>
+                        </div>
+
+                        <div class="progression-item">
+                            <div class="progression-item-text">
+                                <p>@DuDiagramColumns.End</p>
+                                <span>@du.Diagram[DuDiagramColumns.End]</span>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div class="section block-heading coupon-heading">
+
+            <div class="section-wrapper">
+
+                <span>Дивиденды и купоны</span>
+
+
+                <div class="coupons-wrap">
+                    <div class="coupons-item">
+                        Всего – @du.Totals
+                    </div>
+
+                    <div class="coupons-item" style="color:#3E4E65">
+                        Дивиденды – @du.Dividends
+                    </div>
+
+                    <div class="coupons-item" style="color:#09669A">
+                        Купоны – @du.Coupons
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div class="section graph-section projected-payments-section">
+            <div class="section-wrapper">
+                @Html.Partial("_PartialChartDiagram", du.DividedtsCouponsChart)
+            </div>
+        </div>
+        <div class="section block-heading print-pt50">
+
+            <div class="section-wrapper">
+                <span>Информация по договору</span>
+            </div>
+
+        </div>
+        <div class="section details-section">
+            <div class="section-wrapper">
+
+                <div class="details-container">
+
+                    <div class="details-wrap">
+                        <div class="detail-item">
+                            <span>Номер договора </span>
+                            <p>@du.ContractNumber</p>
+                        </div>
+
+                        <div class="detail-item">
+                            <span>Дата открытия</span>
+                            <p>@du.OpenDate</p>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div class="section block-heading">
+            <div class="section-wrapper">
+                <span>Текущие позиции по валютам</span>
+            </div>
+        </div>
+        <div class="section currency-position-section">
+            <div class="section-wrapper">
+
+                <div class="details-container">
+
+                    <div class="details-wrap">
+                        @foreach (var cat in du.GroupPositionData.Rows.Cast<DataRow>()
+                                           .Select(r => r[GrPosDtColumns.CategoryName])
+                                           .Distinct().ToList())
+                        {
+                            <span class="currency-position-head">@cat</span>
+                            <div class="currency-position-item">
+
+                                <ol>
+                                    @foreach (var instr in du.GroupPositionData.AsEnumerable()
+                                                             .Where(r => r[GrPosDtColumns.CategoryName].Equals(cat))
+                                                             .ToList())
+                                    {
+                                        <li>
+                                            <div class="currency-position-item-content">
+
+                                                <div class="currency-position-item-upper">
+                                                    @Html.Raw($"{instr[GrPosDtColumns.ChildName]}")
+
+                                                    <span>@Html.Raw($"{instr[GrPosDtColumns.Price].DecimalToStr("#,##0.00")} {instr[GrPosDtColumns.Valuta]}")</span>
+                                                </div>
+
+                                                @if (!instr[GrPosDtColumns.CategoryName].Equals("Денежные средства"))
+                                                {
+                                                    <div class="currency-position-item-lower">
+                                                        <span>@Html.Raw($"{instr[GrPosDtColumns.Ammount].DecimalToStr()}") шт.</span>
+
+
+                                                        <span>@Html.Raw($"{instr[GrPosDtColumns.Result].DecimalToStr("#,##0.00", true)} {instr[GrPosDtColumns.Valuta]} ({instr[GrPosDtColumns.ResultProcent].DecimalToStr("#,##0.00", true)}%)")</span>
+                                                    </div>
+                                                }
+
+                                                @if (du.DetailPositionData.Rows.Cast<DataRow>()
+                                            .Any(r => r[DtlPosDtColumns.ChildId].Equals(instr[GrPosDtColumns.ChildId])))
+                                                {
+                                                    <ol>
+                                                        @foreach (var dt in du.DetailPositionData.Rows.Cast<DataRow>()
+                                                                    .Where(r => r[DtlPosDtColumns.ChildId].Equals(instr[GrPosDtColumns.ChildId]))
+                                                                    .ToList())
+                                                        {
+                                                            <li>
+                                                                <div class="currency-position-item-content">
+
+                                                                    <div class="currency-position-item-upper">
+                                                                        @dt[DtlPosDtColumns.Child2Name]
+
+                                                                        <span>@Html.Raw($"{dt[DtlPosDtColumns.Price].DecimalToStr("#,##0.00")} {dt[DtlPosDtColumns.Valuta]}")</span>
+                                                                    </div>
+
+                                                                    <div class="currency-position-item-lower">
+                                                                        <span>@Html.Raw($"{dt[DtlPosDtColumns.Ammount].DecimalToStr()}") шт.</span>
+
+
+                                                                        <span>@Html.Raw($"{dt[DtlPosDtColumns.FinRes].DecimalToStr("#,##0.00", true)} {dt[DtlPosDtColumns.Valuta]} ({dt[DtlPosDtColumns.FinResProcent].DecimalToStr("#,##0.00", true)}%)")</span>
+                                                                    </div>
+                                                                </div>
+                                                            </li>
+                                                        }
+                                                    </ol>
+                                                }
+
+                                            </div>
+                                        </li>
+                                    }
+                                </ol>
+
+                            </div>
+                        }
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="keep-together">
+
+            <img class="bg-slpash-last" src="@Model.rootStr/img/bg-splash-last.png">
+
+            <div class="section block-heading">
+                <div class="section-wrapper">
+                    <span>Состав договора</span>
+                </div>
+            </div>
+
+            <div class="section doughnut-section double-doughnut info-table-section">
+
+                <div class="section-wrapper">
+                    <div class="canvas-wrap">
+
+                        <div class="canvas-row">
+
+                            @if (du.AssetsStruct != null)
+                            {
+                                @Html.Partial("_PartialCircleDiagram", du.AssetsStruct)
+                            }
+
+                            @if (du.ContractStruct != null)
+                            {
+                                @Html.Partial("_PartialCircleDiagram", du.ContractStruct)
+                            }
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    }
+
+    <div class="section text-block">
+        <div class="section-wrapper">
+
+            <div class="bottom-text-wrap">
+                <p>
+                    Указанная в настоящем Отчете информация не является исчерпывающей и подготовлена исключительно в информационных целях и носит ознакомительный характер; доходность по Вашему портфелю рассчитана индивидуально с учетом всех операций за выбранный период. Относительная доходность за период рассчитывается, как инвестиционный доход за период, в валюте ожидаемой доходности деленный на средневзвешенную оценочную стоимость активов с начала отчетного периода, в валюте ожидаемой доходности.
+                    Подробную информацию о деятельности АО УК «Ингосстрах – Инвестиции» и паевых инвестиционных фондов, находящихся под ее управлением, включая тексты правил доверительного управления, всех изменений и дополнений к ним, а также сведения о местах приема заявок на приобретение, погашение и обмен инвестиционных паев Вы можете получить по адресу 115035, г. Москва, ул. Пятницкая, д. 12, стр. 2, по телефону: (495) 720-48-98, а также на официальном сайте АО УК «Ингосстрах – Инвестиции» в сети Интернет по адресу: www.ingosinvest.ru.
+                    Услуги по доверительному управлению оказываются Акционерным обществом Управляющая компания «Ингосстрах - Инвестиции». Лицензия профессионального участника рынка ценных бумаг на осуществление деятельности по управлению ценными бумагами № № 077-08203-001000 от 23.12.2004 выдана ФСФР России (без ограничения срока действия).
+                    Результаты инвестирования в прошлом не определяют и не являются гарантией доходности инвестирования в будущем. Стоимость активов может как увеличиваться, так и уменьшаться. До заключения договора необходимо внимательно ознакомиться с его условиями, в том числе с декларацией о рисках.
+                    Лицензия ФКЦБ России № 21-000-1-00020 от 25.08.1997 на осуществление деятельности по управлению инвестиционными фондами, паевыми инвестиционными фондами и негосударственными пенсионными фондами (без ограничения срока действия). Стоимость инвестиционных паев может увеличиваться и уменьшаться, результаты инвестирования в прошлом не определяют доходы в будущем, государство не гарантирует доходность инвестиций в паевые инвестиционные фонды. При приобретении (погашении) инвестиционных паев фондов может взиматься надбавка (скидка), которая уменьшает доходность инвестирования, информация о предусмотренных скидках (надбавках) содержится в правилах доверительного управления соответствующим фондом. Прежде чем приобрести инвестиционный пай паевого инвестиционного фонда, следует внимательно ознакомиться с правилами доверительного управления фондом. При определении прироста расчетной стоимости инвестиционного пая не учитываются надбавки к расчетной стоимости инвестиционных паев при их выдаче и скидки с расчетной стоимости инвестиционных паев при их погашении.
+                    Индикативные данные о стоимости финансовых инструментов в рамках договоров доверительного управления ценными бумагами, указанные в соответствии с доступными на момент запроса данными информационных систем представлены исключительно в информационно-справочных целях, не являются официальными данными (значениями), подлежащими предоставлению в рамках договора доверительного управления, и не могут свидетельствовать о результатах сделок и (или) оценочной стоимости представленных инструментов в соответствии с условиями договора. Официальные данные содержатся в Отчете о деятельности Управляющей компании за отчетный период и предоставляются клиенту в порядки и сроки, предусмотренные условиями договора доверительного управления.
+                </p>
+            </div>
+
+        </div>
+    </div>
+    <script type="text/javascript">
+        window.onload = function () {
+            for (i = 0; i < Charts.length; i++) {
+                Charts[i]();
+            }
+        };
+    </script>
+</body>
+</html>

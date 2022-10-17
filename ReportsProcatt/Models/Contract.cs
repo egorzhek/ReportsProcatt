@@ -9,9 +9,14 @@ namespace ReportsProcatt.Models
     {
         public DU DU { get; set; }
         public string rootStr { get; set; }
+        private string connectionString;
+        private string ReportPath;
+
         public Contract(int InvestorId,int ContractId,DateTime? DateFrom,DateTime? DateTo,string CurrencyCode)
         {
-            DU = new DU(null, DateFrom, DateTo, CurrencyClass.GetCurrency(CurrencyCode), ContractId, InvestorId);
+            ReportPath = Environment.GetEnvironmentVariable("ReportPath");
+            connectionString = Program.GetReportSqlConnection(Path.Combine(ReportPath, "appsettings.json"));
+            DU = new DU(null, DateFrom, DateTo, CurrencyClass.GetCurrency(CurrencyCode), ContractId, InvestorId, connectionString, ReportPath);
         }
     }
 }
